@@ -8,6 +8,7 @@
 
 import UIKit
 import Photos
+import CoreLocation
 
 
 class PhotoSelectorController: UICollectionViewController, UICollectionViewDelegateFlowLayout {
@@ -19,8 +20,7 @@ class PhotoSelectorController: UICollectionViewController, UICollectionViewDeleg
     var selectedImage: UIImage?
     var assets = [PHAsset]()
     var locations = [CLLocation]()
-    var lat  = ""
-    var long = ""
+    var selectedPhotoLocation: CLLocation?
     
     
     override func viewDidLoad() {
@@ -44,9 +44,12 @@ class PhotoSelectorController: UICollectionViewController, UICollectionViewDeleg
         
         self.selectedImage = images[indexPath.item]
         self.collectionView?.reloadData()
+        self.selectedPhotoLocation = locations[indexPath.item]
+        print(self.selectedPhotoLocation)
         
         let indexPath = IndexPath(item: 0, section: 0)
         collectionView.scrollToItem(at: indexPath, at: .bottom, animated: true)
+
         
     }
 
@@ -77,7 +80,12 @@ class PhotoSelectorController: UICollectionViewController, UICollectionViewDeleg
                 let options = PHImageRequestOptions()
                 options.isSynchronous = true
                 
-                var location = asset.location as? CLLocation
+                if let location = asset.location as? CLLocation {
+                        self.locations.append(location)
+                } else {
+                    var EmptyCLLocation = CLLocation(latitude: 0, longitude: 0)
+                    self.locations.append(EmptyCLLocation)
+                }
                 
                 
                 
@@ -88,7 +96,7 @@ class PhotoSelectorController: UICollectionViewController, UICollectionViewDeleg
                         
                         self.images.append(image)
                         self.assets.append(asset)
-                        self.locations.append(location!)
+
 
                         
                         
@@ -113,7 +121,6 @@ class PhotoSelectorController: UICollectionViewController, UICollectionViewDeleg
                 })
                 
             })
-            
             
         }
         
@@ -169,6 +176,8 @@ class PhotoSelectorController: UICollectionViewController, UICollectionViewDeleg
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: cellID, for: indexPath) as! PhotoSelectorCell
         
         cell.photoImageView.image = images[indexPath.item]
+
+
         
         return cell
     
@@ -216,6 +225,7 @@ class PhotoSelectorController: UICollectionViewController, UICollectionViewDeleg
         
         let sharePhotoController = SharePhotoController()
         sharePhotoController.selectedImage = header?.photoImageView.image
+        sharePhotoController.selectedLocation  = selectedPhotoLocation
         navigationController?.pushViewController(sharePhotoController, animated: true)
         
         

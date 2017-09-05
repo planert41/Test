@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import CoreLocation
 
 struct Post {
     
@@ -15,6 +16,7 @@ struct Post {
     let caption: String
     let creationDate: Date
     var id: String?
+    var gps: CLLocation?
     
     var hasLiked: Bool = false
     

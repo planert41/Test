@@ -8,6 +8,8 @@
 
 import UIKit
 import Firebase
+import CoreLocation
+import GeoFire
 
 
 class SharePhotoController: UIViewController {
@@ -18,7 +20,10 @@ class SharePhotoController: UIViewController {
             self.imageView.image = selectedImage
             
         }
+        
     }
+    
+    var selectedLocation: CLLocation?
     
     
     override func viewDidLoad() {
@@ -111,6 +116,23 @@ class SharePhotoController: UIViewController {
             }
         
         print("Successfully save post to DB")
+            
+// SAVE GEOFIRE LOCATION DATA
+            
+            let geofireRef = Database.database().reference().child("postlocations")
+            guard let geoFire = GeoFire(firebaseRef: geofireRef) else {return}
+            let postref = ref.key
+            print(postref)
+
+            geoFire.setLocation(self.selectedLocation, forKey: postref) { (error) in
+                if (error != nil) {
+                    print("An error occured: \(error)")
+                } else {
+                    print("Saved location successfully!")
+                }
+            }
+            
+            
             self.dismiss(animated: true, completion: nil)
             
 
