@@ -79,13 +79,23 @@ class PhotoSelectorController: UICollectionViewController, UICollectionViewDeleg
                 let targetSize = CGSize(width: 200, height: 200)
                 let options = PHImageRequestOptions()
                 options.isSynchronous = true
+                var location: CLLocation
+                
                 
                 if let location = asset.location as? CLLocation {
                         self.locations.append(location)
                 } else {
-                    var EmptyCLLocation = CLLocation(latitude: 0, longitude: 0)
-                    self.locations.append(EmptyCLLocation)
+                    location = CLLocation(latitude: 0, longitude: 0)
+                    self.locations.append(location)
+
                 }
+                
+                
+                if self.selectedPhotoLocation == nil {
+                    self.selectedPhotoLocation = self.locations.first
+                }
+                
+
                 
                 
                 
@@ -103,6 +113,7 @@ class PhotoSelectorController: UICollectionViewController, UICollectionViewDeleg
                         if self.selectedImage == nil {
                             self.selectedImage = image
                         }
+                        
                 
                     }
                     
@@ -225,7 +236,7 @@ class PhotoSelectorController: UICollectionViewController, UICollectionViewDeleg
         
         let sharePhotoController = SharePhotoController()
         sharePhotoController.selectedImage = header?.photoImageView.image
-        sharePhotoController.selectedLocation  = selectedPhotoLocation
+        sharePhotoController.selectedImageLocation  = selectedPhotoLocation
         navigationController?.pushViewController(sharePhotoController, animated: true)
         
         

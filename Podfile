@@ -12,9 +12,13 @@ pod 'Firebase/Auth’
 pod 'Firebase/Database’
 pod 'Firebase/Storage’
 pod 'FacebookCore'
-pod 'FacebookLogin'
-
+pod 'FacebookLogin’
+pod 'GooglePlaces'
+pod 'GooglePlacePicker'
+pod 'GoogleMaps'
+pod 'SwiftyJSON'
 pod 'GeoFire', :git => 'https://github.com/firebase/geofire-objc.git'
-
+pod 'SwiftLocation'
+pod 'Alamofire', '~> 4.4'
 
 end
