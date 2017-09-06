@@ -11,6 +11,7 @@ import Firebase
 import CoreData
 import FBSDKCoreKit
 import GooglePlaces
+import GoogleMaps
 
 
 @UIApplicationMain
@@ -26,7 +27,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         FirebaseApp.configure()
         
         GMSPlacesClient.provideAPIKey(googlePlacesApiKey)
-       // GMSServices.provideAPIKey(googlePlacesApiKey)
+        GMSServices.provideAPIKey(googlePlacesApiKey)
         
         window = UIWindow()
         window?.rootViewController = MainTabBarController()

@@ -40,23 +40,19 @@ class SharePhotoController: UIViewController, CLLocationManagerDelegate {
             let postLongitude:String! = String(format:"%.2f",(selectedImageLocation?.coordinate.longitude)!)
             var GPSLabelText:String?
             
-            if selectedImageLocation == nil {
+            if selectedImageLocation?.coordinate.latitude != 0 && selectedImageLocation?.coordinate.longitude != 0 {
                 GPSLabelText = "GPS (Lat,Long): " + " (" + postLatitude + "," + postLongitude + ")"
                 locationTextView.text =  GPSLabelText!
-                //locationAdressLabel.text == ""
+                //appleCurrentLocation(selectedImageLocation!)
+                googleReverseGPS(GPSLocation: selectedImageLocation!)
+                googleLocationSearch(GPSLocation: selectedImageLocation!)
                 
             } else {
-                GPSLabelText = " (GPS: " + postLatitude + "," + postLongitude + ")"
+                GPSLabelText = "No GPS Location"
                 locationTextView.text =  GPSLabelText!
-                //locationAdressLabel.text = SelectedLocationAdress
+                self.selectedImageAdress = ""
             
             }
-            
-            guard let selectedImageLocation = selectedImageLocation else {return}
-            
-            reverseGPS(selectedImageLocation)
-         
-            
             
         }
     }
@@ -218,12 +214,12 @@ class SharePhotoController: UIViewController, CLLocationManagerDelegate {
         return true
     }
     
-// GOOGLE PLACES QUERY
-    
+
+// APPLE PLACES QUERY
     
     let locationManager = CLLocationManager()
     
-    func reverseGPS(_ GPSLocation: CLLocation) {
+    func appleCurrentLocation(_ GPSLocation: CLLocation) {
         
         // Reverse GPS to get place adress
         
@@ -247,25 +243,159 @@ class SharePhotoController: UIViewController, CLLocationManagerDelegate {
                 print("Problem with the data received from geocoder")
             }
         })
+    }
+    
+    func displayLocationInfo(_ placemark: CLPlacemark?) {
+        if let containsPlacemark = placemark {
+            //stop updating location to save battery life
+            //locationManager.stopUpdatingLocation()
+            
+
+            let subThoroughfare = (containsPlacemark.subThoroughfare != nil) ? containsPlacemark.subThoroughfare : ""
+            let thoroughfare = (containsPlacemark.thoroughfare != nil) ? containsPlacemark.thoroughfare : ""
+            let locality = (containsPlacemark.locality != nil) ? containsPlacemark.locality : ""
+            let state = (containsPlacemark.administrativeArea != nil) ? containsPlacemark.administrativeArea : ""
+            let postalCode = (containsPlacemark.postalCode != nil) ? containsPlacemark.postalCode : ""
+
+            self.selectedImageAdress = subThoroughfare! + " " + thoroughfare! + ", " + locality! + ", " + state! + " " + postalCode!
+            print(containsPlacemark)
+            print(containsPlacemark.addressDictionary)
+            print(self.selectedImageAdress)
+            
+            
+        }
         
+    }
+    
+    
+    
+    
+    
+    
+    
+    
+    //            if let adressDictionaryValue = adressDictionary["FormattedAddressLines"] as! NSArray as? [String] {
+    //
+    //                var adress = adressDictionaryValue as NSArray as! [String]
+    
+    
+    
+    //                Optional([AnyHashable("Street"): 3465 W 6th St,
+    //                   AnyHashable("Country"): United States,
+    //                   AnyHashable("State"): CA, AnyHashable("PostCodeExtension"): 2567, AnyHashable("ZIP"): 90020, AnyHashable("SubThoroughfare"): 3465, AnyHashable("Name"): 3465 W 6th St, AnyHashable("Thoroughfare"): W 6th St, AnyHashable("SubAdministrativeArea"): Los Angeles, AnyHashable("FormattedAddressLines"): <__NSArrayM 0x60800024ced0>(
+    //                    3465 W 6th St,
+    //                    Los Angeles, CA  90020,
+    //                    United States
+    //                )
+    
+
+
+
+
+
+
+
+//            SelectedLocationName = containsPlacemark.name
+//            SelectedLocationAdress = nil
+//
+//            updateGPS()
+//
+// self.PlaceName.text = containsPlacemark.name
+
+//            Optional([AnyHashable("Street"): 90 Bell Rock Plz, AnyHashable("ZIP"): 86351, AnyHashable("Country"): United States, AnyHashable("SubThoroughfare"): 90, AnyHashable("State"): AZ, AnyHashable("Name"): Coconino National Forest, AnyHashable("SubAdministrativeArea"): Yavapai, AnyHashable("Thoroughfare"): Bell Rock Plz, AnyHashable("FormattedAddressLines"): <__NSArrayM 0x608000241440>(
+//                Coconino National Forest,
+//                90 Bell Rock Plz,
+//                Sedona, AZ  86351,
+//                United States
+//                )
+//                , AnyHashable("City"): Sedona, AnyHashable("CountryCode"): US, AnyHashable("PostCodeExtension"): 9040])
+
+
+/*
+ print(locality)
+ print(GPS)
+ print(containsPlacemark.areasOfInterest)
+ print(containsPlacemark.name)
+ print(containsPlacemark.thoroughfare)
+ print(containsPlacemark.subThoroughfare)
+ 
+ 
+ public var name: String? { get } // eg. Apple Inc.
+ public var thoroughfare: String? { get } // street name, eg. Infinite Loop
+ public var subThoroughfare: String? { get } // eg. 1
+ public var locality: String? { get } // city, eg. Cupertino
+ public var subLocality: String? { get } // neighborhood, common name, eg. Mission District
+ public var administrativeArea: String? { get } // state, eg. CA
+ public var subAdministrativeArea: String? { get } // county, eg. Santa Clara
+ public var postalCode: String? { get } // zip code, eg. 95014
+ public var ISOcountryCode: String? { get } // eg. US
+ public var country: String? { get } // eg. United States
+ public var inlandWater: String? { get } // eg. Lake Tahoe
+ public var ocean: String? { get } // eg. Pacific Ocean
+ public var areasOfInterest: [String]? { get } // eg. Golden Gate Park
+ */
+
+
+
+
+// GOOGLE PLACES QUERY
+    
+    func googleReverseGPS(GPSLocation: CLLocation){
+        let URL_Search = "https://maps.googleapis.com/maps/api/geocode/json?"
+        let API_iOSKey = GoogleAPIKey()
+        
+        let urlString = "\(URL_Search)latlng=\(GPSLocation.coordinate.latitude),\(GPSLocation.coordinate.longitude)&key=\(API_iOSKey)"
+        let url = URL(string: urlString)!
+        
+        //   https://maps.googleapis.com/maps/api/geocode/json?latlng=34.79,-111.76&key=AIzaSyD8fxaDv9iwEbvj-SSnI4ruV_htjQUie5s
+    
+        var temp = [String()]
+        var locationGPStemp = [CLLocation()]
+
+        
+        Alamofire.request(url).responseJSON { (response) -> Void in
+            
+            print(response)
+            
+            if let value  = response.result.value {
+                let json = JSON(value)
+                
+                if let results = json["results"].array {
+
+                    print("Google Map Results ",results[0]["formatted_address"])
+                    self.selectedImageAdress = results[0]["formatted_address"].string
+
+                        }
+                    }
+                }
+            }
+    
+    
+    
+    func googleLocationSearch(GPSLocation: CLLocation){
         
         let dataProvider = GoogleDataProvider()
         let searchRadius: Double = 100
         var searchedTypes = ["restaurant"]
         var searchTerm = "restaurant"
-        
-        dataProvider.fetchPlacesNearCoordinate(GPSLocation, radius:searchRadius, types: searchedTypes) { places in
-            for place: GooglePlace in places {
-                print(place.name)
-                
-                
-            }
-        }
+//
+//        dataProvider.fetchPlacesNearCoordinate(GPSLocation, radius:searchRadius, types: searchedTypes) { places in
+//            for place: GooglePlace in places {
+//                print(place)
+//
+//
+//            }
+//        }
         
         downloadRestaurantDetails(GPSLocation, searchRadius: searchRadius, searchType: searchTerm)
         
-        
     }
+    
+    var googlePlaceNames = [String()]
+    var googlePlaceIDs = [String()]
+    var googlePlaceAdresses = [String()]
+    var googlePlaceLocations = [CLLocation()]
+    
     
     func downloadRestaurantDetails(_ lat: CLLocation, searchRadius:Double, searchType: String ) {
         let URL_Search = "https://maps.googleapis.com/maps/api/place/search/json?"
@@ -278,16 +408,15 @@ class SharePhotoController: UIViewController, CLLocationManagerDelegate {
         
         // https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=41.9542116666667,-87.7055883333333&radius=100.0&rankby=distance&type=restaurant&key=AIzaSyBq2etZOLunPzzNt9rA52n3RKN-TKPLhec
         
-        var temp = [String()]
-        var locationGPStemp = [CLLocation()]
-//        SearchResults.removeAll()
-//        SearchLocations.removeAll()
-//        SearchLocationNames.removeAll()
-//        GooglePlacesID.removeAll()
-//        temp.removeAll()
+        self.googlePlaceNames.removeAll()
+        self.googlePlaceIDs.removeAll()
+        self.googlePlaceAdresses.removeAll()
+        self.googlePlaceLocations.removeAll()
+
         
         Alamofire.request(url).responseJSON { (response) -> Void in
             
+            print(response)
             
             if let value  = response.result.value {
                 let json = JSON(value)
@@ -297,94 +426,28 @@ class SharePhotoController: UIViewController, CLLocationManagerDelegate {
                         
                         //print(result)
                         if result["place_id"].string != nil {
-                            if let placeIDs = result["place_id"].string{
-                                if let names = result["name"].string{
+                            guard let placeID = result["place_id"].string else {return}
+                            guard let name = result["name"].string else {return}
+                            guard let locationAdress = result["vicinity"].string else {return}
+                            guard let postLatitude = result["geometry"]["location"]["lat"].double else {return}
+                            guard let postLongitude = result["geometry"]["location"]["lng"].double else {return}
+                                
+                            let locationGPStempcreate = CLLocation(latitude: postLatitude, longitude: postLongitude)
+                            
+                                    self.googlePlaceNames.append(name)
+                                    self.googlePlaceIDs.append(placeID)
+                                    self.googlePlaceAdresses.append(locationAdress)
+                                    self.googlePlaceLocations.append(locationGPStempcreate)
                                     
-                                    var locationGPStempcreate = CLLocation(latitude: result["geometry"]["location"]["lat"].double!, longitude: result["geometry"]["location"]["lng"].double!)
-                                    var locationAdress = result["vicinity"].string
                                     
-                                    
-//                                    GooglePlacesID[names] = placeIDs
-//                                    SearchResults.append(names)
-//                                    SearchLocations[names] = locationGPStempcreate
-//                                    SearchLocationNames[names] = locationAdress
-                                }
-                            }
+                            
+                        }
                         }
                     }
                 }
-                //   print(temp)
-                //   print(locationGPStemp)
-                //   SearchResults = temp
-                
-//                self.placesCollectionView.reloadData()
-                
-                
             }
-            
-            
         }
     }
     
-    func displayLocationInfo(_ placemark: CLPlacemark?) {
-        if let containsPlacemark = placemark {
-            //stop updating location to save battery life
-            locationManager.stopUpdatingLocation()
-            
-            let locality = (containsPlacemark.locality != nil) ? containsPlacemark.locality : ""
-            let postalCode = (containsPlacemark.postalCode != nil) ? containsPlacemark.postalCode : ""
-            let administrativeArea = (containsPlacemark.administrativeArea != nil) ? containsPlacemark.administrativeArea : ""
-            let country = (containsPlacemark.country != nil) ? containsPlacemark.country : ""
-            
-            
-            guard let adressDictionary = containsPlacemark.addressDictionary else {return}
-            print(containsPlacemark.addressDictionary)
-            let adress = adressDictionary["Street"] as! String
-            self.selectedImageAdress = adress
-//            SelectedLocationName = containsPlacemark.name
-//            SelectedLocationAdress = nil
-//            
-//            updateGPS()
-//            
-            // self.PlaceName.text = containsPlacemark.name
-            
-//            Optional([AnyHashable("Street"): 90 Bell Rock Plz, AnyHashable("ZIP"): 86351, AnyHashable("Country"): United States, AnyHashable("SubThoroughfare"): 90, AnyHashable("State"): AZ, AnyHashable("Name"): Coconino National Forest, AnyHashable("SubAdministrativeArea"): Yavapai, AnyHashable("Thoroughfare"): Bell Rock Plz, AnyHashable("FormattedAddressLines"): <__NSArrayM 0x608000241440>(
-//                Coconino National Forest,
-//                90 Bell Rock Plz,
-//                Sedona, AZ  86351,
-//                United States
-//                )
-//                , AnyHashable("City"): Sedona, AnyHashable("CountryCode"): US, AnyHashable("PostCodeExtension"): 9040])
-            
-            
-            /*
-             print(locality)
-             print(GPS)
-             print(containsPlacemark.areasOfInterest)
-             print(containsPlacemark.name)
-             print(containsPlacemark.thoroughfare)
-             print(containsPlacemark.subThoroughfare)
-             
-             
-             public var name: String? { get } // eg. Apple Inc.
-             public var thoroughfare: String? { get } // street name, eg. Infinite Loop
-             public var subThoroughfare: String? { get } // eg. 1
-             public var locality: String? { get } // city, eg. Cupertino
-             public var subLocality: String? { get } // neighborhood, common name, eg. Mission District
-             public var administrativeArea: String? { get } // state, eg. CA
-             public var subAdministrativeArea: String? { get } // county, eg. Santa Clara
-             public var postalCode: String? { get } // zip code, eg. 95014
-             public var ISOcountryCode: String? { get } // eg. US
-             public var country: String? { get } // eg. United States
-             public var inlandWater: String? { get } // eg. Lake Tahoe
-             public var ocean: String? { get } // eg. Pacific Ocean
-             public var areasOfInterest: [String]? { get } // eg. Golden Gate Park
-             */
-            
-            
-        }
-        
-    }
-    
-    
-}
+
+
