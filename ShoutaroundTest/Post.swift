@@ -16,7 +16,10 @@ struct Post {
     let caption: String
     let creationDate: Date
     var id: String?
-    var gps: CLLocation?
+    var locationGPS: CLLocation?
+    var locationName: String
+    var locationAdress: String
+    var locationGooglePlaceID: String?
     
     var hasLiked: Bool = false
     
@@ -32,6 +35,12 @@ struct Post {
         
         let secondsFrom1970 = dictionary["creationDate"] as? Double ?? 0
         self.creationDate = Date(timeIntervalSince1970: secondsFrom1970)
+        self.locationName = dictionary["locationName"] as? String ?? ""
+        self.locationAdress = dictionary["locationAdress"] as? String ?? ""
+        self.locationGooglePlaceID = dictionary["googlePlaceID"] as? String ?? ""
+    
     }
+    
+    
     
 }

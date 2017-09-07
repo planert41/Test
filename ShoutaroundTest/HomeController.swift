@@ -123,6 +123,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
                 var post = Post(user: user, dictionary: dictionary)
                 post.id = key
                 
+                
                 guard let uid = Auth.auth().currentUser?.uid else {return}
                 
                 Database.database().reference().child("likes").child(key).child(uid).observeSingleEvent(of: .value, with: { (snapshot) in

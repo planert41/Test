@@ -15,7 +15,12 @@ import SwiftyJSON
 import SwiftLocation
 import Alamofire
 
-class SharePhotoController: UIViewController, CLLocationManagerDelegate {
+class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout, UICollectionViewDelegate,UICollectionViewDataSource, CLLocationManagerDelegate {
+    
+    var selectedPostGooglePlaceID: String? = nil
+    var selectedPostLocation: CLLocation?
+    
+    
     
     var selectedImage: UIImage? {
         didSet{
@@ -46,6 +51,11 @@ class SharePhotoController: UIViewController, CLLocationManagerDelegate {
                 //appleCurrentLocation(selectedImageLocation!)
                 googleReverseGPS(GPSLocation: selectedImageLocation!)
                 googleLocationSearch(GPSLocation: selectedImageLocation!)
+                self.selectedPostLocation = selectedImageLocation
+                print(googlePlaceNames)
+                self.placesCollectionView.reloadData()
+
+
                 
             } else {
                 GPSLabelText = "No GPS Location"
@@ -57,6 +67,7 @@ class SharePhotoController: UIViewController, CLLocationManagerDelegate {
         }
     }
     
+    let cellID = "cellID"
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -65,7 +76,6 @@ class SharePhotoController: UIViewController, CLLocationManagerDelegate {
         navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Share", style: .plain, target: self, action: #selector(handleShare))
         
         setupNearbyLocations()
-        
         setupImageAndTextViews()
         
     }
@@ -99,6 +109,19 @@ class SharePhotoController: UIViewController, CLLocationManagerDelegate {
         return tv
     }()
     
+    let placesCollectionView: UICollectionView = {
+
+        let layout: UICollectionViewFlowLayout = UICollectionViewFlowLayout()
+        
+        layout.sectionInset = UIEdgeInsets(top: 20, left: 10, bottom: 10, right: 10)
+        layout.itemSize = CGSize(width: 40, height: 40)
+        let uploadLocationTagList = UploadLocationTagList()
+        let cv = UICollectionView(frame: .zero, collectionViewLayout: uploadLocationTagList)
+        
+
+        return cv
+    }()
+    
     
     fileprivate func setupImageAndTextViews() {
         let containerView = UIView()
@@ -117,15 +140,78 @@ class SharePhotoController: UIViewController, CLLocationManagerDelegate {
         LocationContainerView.backgroundColor = .yellow
         
         view.addSubview(LocationContainerView)
-        LocationContainerView.anchor(top: containerView.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 1, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 100)
+        LocationContainerView.anchor(top: containerView.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 1, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 150)
         
         view.addSubview(locationTextView)
         locationTextView.anchor(top: LocationContainerView.topAnchor, left: LocationContainerView.leftAnchor, bottom: nil, right: LocationContainerView.rightAnchor, paddingTop: 8, paddingLeft: 8, paddingBottom: 0, paddingRight: 8, width: 0, height: 40)
         
         view.addSubview(adressTextView)
         adressTextView.anchor(top: locationTextView.bottomAnchor, left: LocationContainerView.leftAnchor, bottom: nil, right: LocationContainerView.rightAnchor, paddingTop: 8, paddingLeft: 8, paddingBottom: 0, paddingRight: 8, width: 0, height: 40)
+        
+        placesCollectionView.frame = view.frame
+        placesCollectionView.backgroundColor = UIColor.white
+        view.addSubview(placesCollectionView)
+        placesCollectionView.anchor(top: adressTextView.bottomAnchor, left: LocationContainerView.leftAnchor, bottom: nil, right: LocationContainerView.rightAnchor, paddingTop: 8, paddingLeft: 8, paddingBottom: 0, paddingRight: 8, width: 0, height: 40)
+    
+        placesCollectionView.register(UploadLocationCell.self, forCellWithReuseIdentifier: cellID)
+        placesCollectionView.delegate = self
+        placesCollectionView.dataSource = self
+
+        
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        print(googlePlaceNames.count)
+        return googlePlaceNames.count
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: cellID, for: indexPath) as! UploadLocationCell
+
+        cell.uploadLocations.text = googlePlaceNames[indexPath.item]
+        return cell
+        
+        
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        
+        collectionView.cellForItem(at: indexPath)?.contentView.backgroundColor = UIColor.blue
+        self.locationTextView.text = self.googlePlaceNames[indexPath.item]
+        self.adressTextView.text = self.googlePlaceAdresses[indexPath.item]
+        self.selectedPostLocation = self.googlePlaceLocations[indexPath.item]
+        self.selectedPostGooglePlaceID = self.googlePlaceIDs[indexPath.item]
+        
+        print(self.locationTextView.text)
+        print(self.adressTextView.text)
+        print(self.selectedPostLocation)
+        print(self.selectedPostGooglePlaceID)
+        
     
     }
+    
+    func collectionView(_ collectionView: UICollectionView, didDeselectItemAt indexPath: IndexPath) {
+        collectionView.cellForItem(at: indexPath)?.contentView.backgroundColor = UIColor.white
+    }
+    
+    
+//    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+//        let width = (view.frame.width - 3)/4
+//        let height = view.frame.height
+//        
+//        return CGSize(width: 50, height: height)
+//    }
+//    
+//    
+//    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumInteritemSpacingForSectionAt section: Int) -> CGFloat {
+//        return 1
+//    }
+//    
+//    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat {
+//        return 1
+//    }
+    
 
     
     func setupNearbyLocations() {
@@ -140,6 +226,8 @@ class SharePhotoController: UIViewController, CLLocationManagerDelegate {
         guard let image = selectedImage else { return }
         guard let uploadData = UIImageJPEGRepresentation(image, 0.5) else {return}
         guard let caption = textView.text, caption.characters.count > 0 else {return}
+
+        
         
         
         navigationItem.rightBarButtonItem?.isEnabled = false
@@ -168,13 +256,17 @@ class SharePhotoController: UIViewController, CLLocationManagerDelegate {
         
         guard let postImage = selectedImage else {return}
         guard let caption = textView.text else {return}
+        let googlePlaceID = selectedPostGooglePlaceID ?? ""
+        guard let postLocationName = locationTextView.text else {return}
+        guard let postLocationAdress = adressTextView.text else {return}
+        
         
         guard let uid = Auth.auth().currentUser?.uid else {return}
         
         let userPostRef = Database.database().reference().child("posts").child(uid)
         let ref = userPostRef.childByAutoId()
         
-        let values = ["imageUrl": imageUrl, "caption": caption, "imageWidth": postImage.size.width, "imageHeight": postImage.size.height, "creationDate": Date().timeIntervalSince1970] as [String:Any]
+        let values = ["imageUrl": imageUrl, "caption": caption, "imageWidth": postImage.size.width, "imageHeight": postImage.size.height, "creationDate": Date().timeIntervalSince1970, "googlePlaceID": googlePlaceID, "locationName": postLocationName, "locationAdress": postLocationAdress] as [String:Any]
         ref.updateChildValues(values) { (err, ref) in
             if let err = err {
                 self.navigationItem.rightBarButtonItem?.isEnabled = true
@@ -191,7 +283,7 @@ class SharePhotoController: UIViewController, CLLocationManagerDelegate {
             let postref = ref.key
             print(postref)
 
-            geoFire.setLocation(self.selectedImageLocation, forKey: postref) { (error) in
+            geoFire.setLocation(self.selectedPostLocation, forKey: postref) { (error) in
                 if (error != nil) {
                     print("An error occured: \(error)")
                 } else {
@@ -258,9 +350,9 @@ class SharePhotoController: UIViewController, CLLocationManagerDelegate {
             let postalCode = (containsPlacemark.postalCode != nil) ? containsPlacemark.postalCode : ""
 
             self.selectedImageAdress = subThoroughfare! + " " + thoroughfare! + ", " + locality! + ", " + state! + " " + postalCode!
-            print(containsPlacemark)
-            print(containsPlacemark.addressDictionary)
-            print(self.selectedImageAdress)
+//            print(containsPlacemark)
+//            print(containsPlacemark.addressDictionary)
+//            print(self.selectedImageAdress)
             
             
         }
@@ -391,10 +483,17 @@ class SharePhotoController: UIViewController, CLLocationManagerDelegate {
         
     }
     
-    var googlePlaceNames = [String()]
-    var googlePlaceIDs = [String()]
-    var googlePlaceAdresses = [String()]
-    var googlePlaceLocations = [CLLocation()]
+    
+    var googlePlaceNames = [String?](){
+        didSet {
+            print(googlePlaceNames)
+            //self.placesCollectionView.reloadData()
+        }
+    }
+
+    var googlePlaceIDs = [String]()
+    var googlePlaceAdresses = [String]()
+    var googlePlaceLocations = [CLLocation]()
     
     
     func downloadRestaurantDetails(_ lat: CLLocation, searchRadius:Double, searchType: String ) {
@@ -416,7 +515,7 @@ class SharePhotoController: UIViewController, CLLocationManagerDelegate {
         
         Alamofire.request(url).responseJSON { (response) -> Void in
             
-            print(response)
+//            print(response)
             
             if let value  = response.result.value {
                 let json = JSON(value)
@@ -438,14 +537,14 @@ class SharePhotoController: UIViewController, CLLocationManagerDelegate {
                                     self.googlePlaceIDs.append(placeID)
                                     self.googlePlaceAdresses.append(locationAdress)
                                     self.googlePlaceLocations.append(locationGPStempcreate)
+                                    self.placesCollectionView.reloadData()
                                     
-                                    
-                            
-                        }
+                            }
                         }
                     }
                 }
             }
+        
         }
     }
     

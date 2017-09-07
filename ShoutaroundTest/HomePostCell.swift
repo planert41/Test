@@ -27,12 +27,12 @@ class HomePostCell: UICollectionViewCell {
                 
             photoImageView.loadImage(urlString: imageUrl)
             usernameLabel.text = post?.user.username
+            locationLabel.text = post?.locationAdress
 //      usernameLabel.text = "😀👌🇰🇷🍖🐷🍺"
             
             guard let profileImageUrl = post?.user.profileImageUrl else {return}
             
             userProfileImageView.loadImage(urlString: profileImageUrl)
-            
             captionLabel.text = post?.caption
             
             setupAttributedCaption()
@@ -89,6 +89,15 @@ class HomePostCell: UICollectionViewCell {
         label.font = UIFont.boldSystemFont(ofSize: 14)
         return label
     }()
+    
+    let locationLabel: UILabel = {
+        let label = UILabel()
+        label.text = "Location"
+        //        label.text = "😀👌🇰🇷🍖🐷🍺"
+        label.font = UIFont.boldSystemFont(ofSize: 14)
+        return label
+    }()
+    
     
     let optionsButton: UIButton = {
         let button = UIButton(type: .system)
@@ -176,6 +185,7 @@ class HomePostCell: UICollectionViewCell {
         addSubview(photoImageView)
         addSubview(userProfileImageView)
         addSubview(usernameLabel)
+        addSubview(locationLabel)
         addSubview(optionsButton)
 
 //        addSubview(EmojiLabel)
@@ -186,8 +196,13 @@ class HomePostCell: UICollectionViewCell {
         
         optionsButton.anchor(top: topAnchor, left: nil, bottom: photoImageView.topAnchor, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 44, height: 0)
         
-        usernameLabel.anchor(top: topAnchor, left: userProfileImageView.rightAnchor, bottom: photoImageView.topAnchor, right: optionsButton.leftAnchor, paddingTop: 0, paddingLeft: 8, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
+//        usernameLabel.anchor(top: topAnchor, left: userProfileImageView.rightAnchor, bottom: photoImageView.topAnchor, right: optionsButton.leftAnchor, paddingTop: 0, paddingLeft: 8, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
+        
+        usernameLabel.anchor(top: topAnchor, left: userProfileImageView.rightAnchor, bottom: nil, right: optionsButton.leftAnchor, paddingTop: 0, paddingLeft: 8, paddingBottom: 0, paddingRight: 0, width: 0, height: userProfileImageView.frame.height/2)
+        
 
+        locationLabel.anchor(top: usernameLabel.bottomAnchor, left: userProfileImageView.rightAnchor, bottom: photoImageView.topAnchor, right: optionsButton.leftAnchor, paddingTop: 0, paddingLeft: 8, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
+        
         
         userProfileImageView.anchor(top: topAnchor, left: leftAnchor, bottom: nil, right: nil, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 40, height: 40)
         userProfileImageView.layer.cornerRadius = 40/2

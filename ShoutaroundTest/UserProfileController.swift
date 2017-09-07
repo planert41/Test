@@ -34,8 +34,6 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
         super.viewDidLoad()
         collectionView?.backgroundColor = .white
         
-
-        
         collectionView?.register(UserProfileHeader.self, forSupplementaryViewOfKind: UICollectionElementKindSectionHeader, withReuseIdentifier: "headerId")
         
         collectionView?.register(UserProfilePhotoCell.self, forCellWithReuseIdentifier: cellId)

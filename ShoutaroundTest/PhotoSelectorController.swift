@@ -95,9 +95,6 @@ class PhotoSelectorController: UICollectionViewController, UICollectionViewDeleg
                     self.selectedPhotoLocation = self.locations.first
                 }
                 
-
-                
-                
                 
                 imageManager.requestImage(for: asset, targetSize: targetSize, contentMode: .aspectFit, options: options, resultHandler: { (image, info) in
  

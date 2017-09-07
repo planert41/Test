@@ -25,6 +25,8 @@
 		A562E51B1F53C1650095C7C1 /* PhotoSelectorCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = A562E51A1F53C1650095C7C1 /* PhotoSelectorCell.swift */; };
 		A562E51D1F53C67B0095C7C1 /* PhotoSelectorHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = A562E51C1F53C67B0095C7C1 /* PhotoSelectorHeader.swift */; };
 		A57A674B1F5E62F30063D400 /* Credentials.swift in Sources */ = {isa = PBXBuildFile; fileRef = A57A674A1F5E62F30063D400 /* Credentials.swift */; };
+		A57A674D1F5FA8190063D400 /* UploadLocationFlowLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = A57A674C1F5FA8190063D400 /* UploadLocationFlowLayout.swift */; };
+		A57A674F1F5FA8CC0063D400 /* UploadLocationCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = A57A674E1F5FA8CC0063D400 /* UploadLocationCell.swift */; };
 		A5C480D01F5DCB500096E003 /* FBSDKCoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A5C480CE1F5DCB500096E003 /* FBSDKCoreKit.framework */; };
 		A5C480D11F5DCB500096E003 /* FBSDKLoginKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A5C480CF1F5DCB500096E003 /* FBSDKLoginKit.framework */; };
 		A5C6450A1F54F68800C78244 /* SharePhotoController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5C645091F54F68800C78244 /* SharePhotoController.swift */; };
@@ -69,6 +71,8 @@
 		A562E51A1F53C1650095C7C1 /* PhotoSelectorCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PhotoSelectorCell.swift; sourceTree = "<group>"; };
 		A562E51C1F53C67B0095C7C1 /* PhotoSelectorHeader.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PhotoSelectorHeader.swift; sourceTree = "<group>"; };
 		A57A674A1F5E62F30063D400 /* Credentials.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Credentials.swift; sourceTree = "<group>"; };
+		A57A674C1F5FA8190063D400 /* UploadLocationFlowLayout.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UploadLocationFlowLayout.swift; sourceTree = "<group>"; };
+		A57A674E1F5FA8CC0063D400 /* UploadLocationCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UploadLocationCell.swift; sourceTree = "<group>"; };
 		A5C480CE1F5DCB500096E003 /* FBSDKCoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = FBSDKCoreKit.framework; path = "ShoutaroundTest/FacebookSDKs-iOS-4.26.0/FBSDKCoreKit.framework"; sourceTree = "<group>"; };
 		A5C480CF1F5DCB500096E003 /* FBSDKLoginKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = FBSDKLoginKit.framework; path = "ShoutaroundTest/FacebookSDKs-iOS-4.26.0/FBSDKLoginKit.framework"; sourceTree = "<group>"; };
 		A5C645091F54F68800C78244 /* SharePhotoController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SharePhotoController.swift; sourceTree = "<group>"; };
@@ -217,6 +221,8 @@
 				A562E51A1F53C1650095C7C1 /* PhotoSelectorCell.swift */,
 				A562E51C1F53C67B0095C7C1 /* PhotoSelectorHeader.swift */,
 				A5C645091F54F68800C78244 /* SharePhotoController.swift */,
+				A57A674C1F5FA8190063D400 /* UploadLocationFlowLayout.swift */,
+				A57A674E1F5FA8CC0063D400 /* UploadLocationCell.swift */,
 			);
 			name = AddPhoto;
 			sourceTree = "<group>";
@@ -391,6 +397,7 @@
 				A5C645281F5BB25100C78244 /* CustomAnimationDismisser.swift in Sources */,
 				A5C6452E1F5C481300C78244 /* Comment.swift in Sources */,
 				A51C13CD1F51C03100CEB740 /* UserProfileHeader.swift in Sources */,
+				A57A674F1F5FA8CC0063D400 /* UploadLocationCell.swift in Sources */,
 				A54E1D6D1F4E736B00C2AA77 /* SignUpController.swift in Sources */,
 				A5C6452A1F5BB84200C78244 /* CommentsController.swift in Sources */,
 				A53E7E171F5E46DB0011C1CA /* GooglePlaces.swift in Sources */,
@@ -399,6 +406,7 @@
 				A5C645221F5B5F2700C78244 /* CameraController.swift in Sources */,
 				A5C645111F56547300C78244 /* CustomImageView.swift in Sources */,
 				A5C6450D1F564A4C00C78244 /* Post.swift in Sources */,
+				A57A674D1F5FA8190063D400 /* UploadLocationFlowLayout.swift in Sources */,
 				A51C13C91F51B6FD00CEB740 /* UserProfileController.swift in Sources */,
 				A51C13C71F51B59900CEB740 /* MainTabBarController.swift in Sources */,
 				A5C6451D1F57AE5A00C78244 /* UserSearchController.swift in Sources */,
