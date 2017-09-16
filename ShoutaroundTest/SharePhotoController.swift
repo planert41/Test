@@ -67,7 +67,8 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         }
     }
     
-    let cellID = "cellID"
+    let locationCellID = "locationCellID"
+    let emojiCellID = "emojiCellID"
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -111,21 +112,49 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
     
     let placesCollectionView: UICollectionView = {
 
-        let layout: UICollectionViewFlowLayout = UICollectionViewFlowLayout()
-        
-        layout.sectionInset = UIEdgeInsets(top: 20, left: 10, bottom: 10, right: 10)
-        layout.itemSize = CGSize(width: 40, height: 40)
         let uploadLocationTagList = UploadLocationTagList()
         let cv = UICollectionView(frame: .zero, collectionViewLayout: uploadLocationTagList)
         
-
         return cv
     }()
     
+    let Emoji1CollectionView: UICollectionView = {
+        
+        let uploadEmojiList = UploadEmojiList()
+        let cv = UICollectionView(frame: .zero, collectionViewLayout: uploadEmojiList)
+        
+        return cv
+    }()
+    
+    let Emoji2CollectionView: UICollectionView = {
+        
+        let uploadEmojiList = UploadEmojiList()
+        let cv = UICollectionView(frame: .zero, collectionViewLayout: uploadEmojiList)
+        
+        return cv
+    }()
+    
+    let Emoji3CollectionView: UICollectionView = {
+        
+        let uploadEmojiList = UploadEmojiList()
+        let cv = UICollectionView(frame: .zero, collectionViewLayout: uploadEmojiList)
+        
+        return cv
+    }()
+    
+    let Emoji4CollectionView: UICollectionView = {
+        
+        let uploadEmojiList = UploadEmojiList()
+        let cv = UICollectionView(frame: .zero, collectionViewLayout: uploadEmojiList)
+        
+        return cv
+    }()
     
     fileprivate func setupImageAndTextViews() {
         let containerView = UIView()
         containerView.backgroundColor = .white
+
+// Photo and Caption Container View
         
         view.addSubview(containerView)
         containerView.anchor(top: topLayoutGuide.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 100)
@@ -135,6 +164,9 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         
         view.addSubview(textView)
         textView.anchor(top: containerView.topAnchor, left: imageView.rightAnchor, bottom: containerView.bottomAnchor, right: containerView.rightAnchor, paddingTop: 0, paddingLeft: 4, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
+        
+        
+// Location Container View
         
         let LocationContainerView = UIView()
         LocationContainerView.backgroundColor = .yellow
@@ -148,30 +180,121 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         view.addSubview(adressTextView)
         adressTextView.anchor(top: locationTextView.bottomAnchor, left: LocationContainerView.leftAnchor, bottom: nil, right: LocationContainerView.rightAnchor, paddingTop: 8, paddingLeft: 8, paddingBottom: 0, paddingRight: 8, width: 0, height: 40)
         
-        placesCollectionView.frame = view.frame
-        placesCollectionView.backgroundColor = UIColor.white
+//        placesCollectionView.frame = view.frame
+        
         view.addSubview(placesCollectionView)
         placesCollectionView.anchor(top: adressTextView.bottomAnchor, left: LocationContainerView.leftAnchor, bottom: nil, right: LocationContainerView.rightAnchor, paddingTop: 8, paddingLeft: 8, paddingBottom: 0, paddingRight: 8, width: 0, height: 40)
-    
-        placesCollectionView.register(UploadLocationCell.self, forCellWithReuseIdentifier: cellID)
+        placesCollectionView.backgroundColor = UIColor.white
+        placesCollectionView.register(UploadLocationCell.self, forCellWithReuseIdentifier: locationCellID)
         placesCollectionView.delegate = self
         placesCollectionView.dataSource = self
+        
+// Emoji Container View
+        
+        let EmojiContainerView = UIView()
+        EmojiContainerView.backgroundColor = .green
+        
+        view.addSubview(EmojiContainerView)
+        EmojiContainerView.anchor(top: LocationContainerView.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 1, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 200)
 
+        view.addSubview(Emoji1CollectionView)
+        Emoji1CollectionView.anchor(top: EmojiContainerView.topAnchor, left: EmojiContainerView.leftAnchor, bottom: nil, right: EmojiContainerView.rightAnchor, paddingTop: 8, paddingLeft: 8, paddingBottom: 0, paddingRight: 8, width: 0, height: EmojiSize.width+2)
+        Emoji1CollectionView.backgroundColor = UIColor.white
+        Emoji1CollectionView.register(UploadEmojiCell.self, forCellWithReuseIdentifier: emojiCellID)
+        Emoji1CollectionView.delegate = self
+        Emoji1CollectionView.dataSource = self
+        
+        view.addSubview(Emoji2CollectionView)
+        Emoji2CollectionView.anchor(top: Emoji1CollectionView.bottomAnchor, left: EmojiContainerView.leftAnchor, bottom: nil, right: EmojiContainerView.rightAnchor, paddingTop: 8, paddingLeft: 8, paddingBottom: 0, paddingRight: 8, width: 0, height: EmojiSize.width+2)
+        Emoji2CollectionView.backgroundColor = UIColor.white
+        Emoji2CollectionView.register(UploadEmojiCell.self, forCellWithReuseIdentifier: emojiCellID)
+        Emoji2CollectionView.delegate = self
+        Emoji2CollectionView.dataSource = self
+        
+        view.addSubview(Emoji3CollectionView)
+        Emoji3CollectionView.anchor(top: Emoji2CollectionView.bottomAnchor, left: EmojiContainerView.leftAnchor, bottom: nil, right: EmojiContainerView.rightAnchor, paddingTop: 8, paddingLeft: 8, paddingBottom: 0, paddingRight: 8, width: 0, height: EmojiSize.width+2)
+        Emoji3CollectionView.backgroundColor = UIColor.white
+        Emoji3CollectionView.register(UploadEmojiCell.self, forCellWithReuseIdentifier: emojiCellID)
+        Emoji3CollectionView.delegate = self
+        Emoji3CollectionView.dataSource = self
+        
+        view.addSubview(Emoji4CollectionView)
+        Emoji4CollectionView.anchor(top: Emoji3CollectionView.bottomAnchor, left: EmojiContainerView.leftAnchor, bottom: nil, right: EmojiContainerView.rightAnchor, paddingTop: 8, paddingLeft: 8, paddingBottom: 0, paddingRight: 8, width: 0, height: EmojiSize.width+2)
+        Emoji4CollectionView.backgroundColor = UIColor.white
+        Emoji4CollectionView.register(UploadEmojiCell.self, forCellWithReuseIdentifier: emojiCellID)
+        Emoji4CollectionView.delegate = self
+        Emoji4CollectionView.dataSource = self
         
     }
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        print(googlePlaceNames.count)
-        return googlePlaceNames.count
+        
+        if collectionView == placesCollectionView {
+            return googlePlaceNames.count }
+        
+        else if (collectionView == Emoji1CollectionView || collectionView == Emoji2CollectionView || collectionView == Emoji3CollectionView || collectionView == Emoji4CollectionView ){
+            
+            var rowindex = 0
+            
+            if collectionView == Emoji1CollectionView {
+                rowindex = 0}
+            else if collectionView == Emoji2CollectionView {
+                rowindex = 1
+            } else if collectionView == Emoji3CollectionView {
+                rowindex = 2
+            } else if collectionView == Emoji4CollectionView {
+                rowindex = 3
+            }
+            
+            return EmoticonArray[rowindex].count
+        }
+        
+        else {return 0}
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
 
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: cellID, for: indexPath) as! UploadLocationCell
-
+        if collectionView == placesCollectionView {
+        
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: locationCellID, for: indexPath) as! UploadLocationCell
         cell.uploadLocations.text = googlePlaceNames[indexPath.item]
         return cell
+        }
         
+            if (collectionView == Emoji1CollectionView || collectionView == Emoji2CollectionView || collectionView == Emoji3CollectionView || collectionView == Emoji4CollectionView ){
+            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: emojiCellID, for: indexPath) as! UploadEmojiCell
+            
+            var rowindex = 0
+            
+            if collectionView == Emoji1CollectionView {
+                rowindex = 0}
+             else if collectionView == Emoji2CollectionView {
+                rowindex = 1
+            } else if collectionView == Emoji3CollectionView {
+                rowindex = 2
+            } else if collectionView == Emoji4CollectionView {
+                rowindex = 3
+            }
+
+                
+            
+            
+            cell.uploadEmojis.text = EmoticonArray[rowindex][(indexPath as IndexPath).row]
+//                cell.uploadEmojis.text = "T"
+          //  cell.uploadEmojis.adjustsFontSizeToFitWidth = true
+
+            return cell
+            
+        }
+        
+        else {
+
+            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: emojiCellID, for: indexPath) as! UploadEmojiCell
+            cell.uploadEmojis.text = EmoticonArray[0][(indexPath as IndexPath).row]
+            return cell
+            
+            
+        }
         
     }
     
@@ -190,6 +313,8 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         
     
     }
+    
+    
     
     func collectionView(_ collectionView: UICollectionView, didDeselectItemAt indexPath: IndexPath) {
         collectionView.cellForItem(at: indexPath)?.contentView.backgroundColor = UIColor.white
