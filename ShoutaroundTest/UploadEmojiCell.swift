@@ -15,8 +15,8 @@ class UploadEmojiCell: UICollectionViewCell {
         
         let iv = UILabel()
         iv.backgroundColor = .clear
-        iv.font = iv.font.withSize(EmojiSize.width-10)
-        iv.textAlignment = NSTextAlignment.center
+        iv.font = iv.font.withSize(EmojiSize.width * 0.8)
+
         
         return iv
         

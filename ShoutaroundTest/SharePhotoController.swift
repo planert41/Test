@@ -194,36 +194,32 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         let EmojiContainerView = UIView()
         EmojiContainerView.backgroundColor = .green
         
-        view.addSubview(EmojiContainerView)
-        EmojiContainerView.anchor(top: LocationContainerView.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 1, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 200)
 
+        
+        view.addSubview(EmojiContainerView)
+        EmojiContainerView.anchor(top: LocationContainerView.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 1, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: (EmojiSize.width + 2) * 4)
+        
         view.addSubview(Emoji1CollectionView)
-        Emoji1CollectionView.anchor(top: EmojiContainerView.topAnchor, left: EmojiContainerView.leftAnchor, bottom: nil, right: EmojiContainerView.rightAnchor, paddingTop: 8, paddingLeft: 8, paddingBottom: 0, paddingRight: 8, width: 0, height: EmojiSize.width+2)
-        Emoji1CollectionView.backgroundColor = UIColor.white
-        Emoji1CollectionView.register(UploadEmojiCell.self, forCellWithReuseIdentifier: emojiCellID)
-        Emoji1CollectionView.delegate = self
-        Emoji1CollectionView.dataSource = self
-        
         view.addSubview(Emoji2CollectionView)
-        Emoji2CollectionView.anchor(top: Emoji1CollectionView.bottomAnchor, left: EmojiContainerView.leftAnchor, bottom: nil, right: EmojiContainerView.rightAnchor, paddingTop: 8, paddingLeft: 8, paddingBottom: 0, paddingRight: 8, width: 0, height: EmojiSize.width+2)
-        Emoji2CollectionView.backgroundColor = UIColor.white
-        Emoji2CollectionView.register(UploadEmojiCell.self, forCellWithReuseIdentifier: emojiCellID)
-        Emoji2CollectionView.delegate = self
-        Emoji2CollectionView.dataSource = self
-        
         view.addSubview(Emoji3CollectionView)
-        Emoji3CollectionView.anchor(top: Emoji2CollectionView.bottomAnchor, left: EmojiContainerView.leftAnchor, bottom: nil, right: EmojiContainerView.rightAnchor, paddingTop: 8, paddingLeft: 8, paddingBottom: 0, paddingRight: 8, width: 0, height: EmojiSize.width+2)
-        Emoji3CollectionView.backgroundColor = UIColor.white
-        Emoji3CollectionView.register(UploadEmojiCell.self, forCellWithReuseIdentifier: emojiCellID)
-        Emoji3CollectionView.delegate = self
-        Emoji3CollectionView.dataSource = self
-        
         view.addSubview(Emoji4CollectionView)
-        Emoji4CollectionView.anchor(top: Emoji3CollectionView.bottomAnchor, left: EmojiContainerView.leftAnchor, bottom: nil, right: EmojiContainerView.rightAnchor, paddingTop: 8, paddingLeft: 8, paddingBottom: 0, paddingRight: 8, width: 0, height: EmojiSize.width+2)
-        Emoji4CollectionView.backgroundColor = UIColor.white
-        Emoji4CollectionView.register(UploadEmojiCell.self, forCellWithReuseIdentifier: emojiCellID)
-        Emoji4CollectionView.delegate = self
-        Emoji4CollectionView.dataSource = self
+        
+        var emoticonViews: Array<UICollectionView>?
+        emoticonViews = [Emoji1CollectionView, Emoji2CollectionView, Emoji3CollectionView, Emoji4CollectionView]
+        
+        for (index,views) in emoticonViews!.enumerated() {
+            
+            if index == 0 {
+                views.anchor(top: EmojiContainerView.topAnchor, left: EmojiContainerView.leftAnchor, bottom: nil, right: EmojiContainerView.rightAnchor, paddingTop: 0, paddingLeft: 8, paddingBottom: 0, paddingRight: 8, width: 0, height: EmojiSize.width+2)
+            } else {
+                views.anchor(top: emoticonViews![index-1].bottomAnchor, left: EmojiContainerView.leftAnchor, bottom: nil, right: EmojiContainerView.rightAnchor, paddingTop: 0, paddingLeft: 8, paddingBottom: 0, paddingRight: 8, width: 0, height: EmojiSize.width+2)
+            }
+            views.backgroundColor = UIColor.white
+            views.register(UploadEmojiCell.self, forCellWithReuseIdentifier: emojiCellID)
+            views.delegate = self
+            views.dataSource = self
+            
+        }
         
     }
     
