@@ -106,5 +106,11 @@ extension Date {
     }
 }
 
+extension Dictionary where Value: Equatable {
+    func key(forValue value: Value) -> Key? {
+        return first { $0.1 == value }?.0
+    }
+}
+
 
 

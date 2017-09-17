@@ -15,7 +15,7 @@ import SwiftyJSON
 import SwiftLocation
 import Alamofire
 
-class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout, UICollectionViewDelegate,UICollectionViewDataSource, CLLocationManagerDelegate {
+class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout, UICollectionViewDelegate,UICollectionViewDataSource, CLLocationManagerDelegate, UITextViewDelegate {
     
     
     let locationCellID = "locationCellID"
@@ -48,14 +48,19 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
     var selectedEmojis: String = "" {
         
         didSet{
-            self.emojiLabel.text = selectedEmojis
+            self.emojiTextView.text = selectedEmojis
             
             if selectedEmojis.characters.count > 0 {
                 self.emojiCancelButton.alpha = 1
+                self.emojiTextView.alpha = 1
             } else {
                 self.emojiCancelButton.alpha = 0
+                self.emojiTextView.alpha = 0.25
+                self.resetEmojiTextView()
             }
         
+            
+            print(selectedEmojis)
             
             for views in emojiViews! {
                 views.reloadData()
@@ -140,14 +145,14 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
     }()
     
     
-    let textView: UITextView = {
+    let captionTextView: UITextView = {
         let tv = UITextView()
         tv.font = UIFont.systemFont(ofSize: 14)
         return tv
     }()
     
-    let emojiLabel: UILabel = {
-        let tv = UILabel()
+    let emojiTextView: UITextView = {
+        let tv = UITextView()
         tv.font = UIFont.systemFont(ofSize: 20)
         tv.textAlignment = NSTextAlignment.right
         
@@ -172,7 +177,7 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
     
     func cancelEmoji(){
         
-        emojiLabel.text = nil
+        emojiTextView.text = nil
         self.resetSelectedEmojis()
         
     }
@@ -294,14 +299,17 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         
         view.addSubview(emojiCancelButton)
         emojiCancelButton.anchor(top: nil, left: nil, bottom: containerView.bottomAnchor, right: containerView.rightAnchor, paddingTop: 4, paddingLeft: 0, paddingBottom: 5, paddingRight: 5, width: 10, height: 10)
-        emojiCancelButton.centerYAnchor.constraint(equalTo: emojiLabel.centerYAnchor)
+        emojiCancelButton.centerYAnchor.constraint(equalTo: emojiTextView.centerYAnchor)
         emojiCancelButton.alpha = 0
         
-        view.addSubview(emojiLabel)
-        emojiLabel.anchor(top: nil, left: imageView.rightAnchor, bottom: containerView.bottomAnchor, right: emojiCancelButton.leftAnchor, paddingTop: 0, paddingLeft: 4, paddingBottom: 0, paddingRight: 0, width: 0, height: 30)
+        view.addSubview(emojiTextView)
+        emojiTextView.anchor(top: nil, left: imageView.rightAnchor, bottom: containerView.bottomAnchor, right: emojiCancelButton.leftAnchor, paddingTop: 0, paddingLeft: 4, paddingBottom: 0, paddingRight: 0, width: 0, height: 30)
+        emojiTextView.delegate  = self
         
-        view.addSubview(textView)
-        textView.anchor(top: containerView.topAnchor, left: imageView.rightAnchor, bottom: emojiLabel.topAnchor, right: containerView.rightAnchor, paddingTop: 0, paddingLeft: 4, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
+        view.addSubview(captionTextView)
+        captionTextView.anchor(top: containerView.topAnchor, left: imageView.rightAnchor, bottom: emojiTextView.topAnchor, right: containerView.rightAnchor, paddingTop: 0, paddingLeft: 4, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
+        captionTextView.delegate = self
+        
         
         
 // Location Container View
@@ -370,7 +378,158 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
             
         }
         
+        resetCaptionTextView()
+        resetEmojiTextView()
+        
     }
+    
+// Detect Emojis in textview
+    
+//    func textFieldDidChange(_ textField: UITextField) {
+//     
+//        let strLast5 =  textView.text.characters.substring(from: min(0,textView.text.characters.count - 5))
+//        
+//        textView.text.substring(from: 5)
+//        
+//        print(strLast5)
+//        
+//        
+//    }
+    
+    func textView(_ textView: UITextView, shouldChangeTextIn range: NSRange, replacementText text: String) -> Bool {
+
+        let char = text.cString(using: String.Encoding.utf8)!
+        let isBackSpace = strcmp(char, "\\b")
+        
+        
+        if text == "\n"  // Recognizes enter key in keyboard
+        {
+            textView.resignFirstResponder()
+            return false
+        }
+        
+        if textView == emojiTextView {
+            
+            if (isBackSpace == -92){
+                return true
+            }
+            
+           if (text.isSingleEmoji)
+           {
+            self.emojiCheck(text)
+            
+            return false
+           }
+           
+           else {
+            return false
+            }
+            
+        }
+        
+        
+        if textView == captionTextView {
+    
+            if text.isSingleEmoji == true {
+                if selectedEmojis.contains(text){
+                    // Do nothing if user types emoji that is already included in selected emoji label
+                } else {
+                    self.emojiCheck(text)
+                }
+            }
+        
+        // Detect Backspace = isBackSpace == -92
+        
+            else if (text == " ") {
+                let words = textView.text!.components(separatedBy: " ")
+                var lastWord = words[words.endIndex - 1]
+                var emojiLookup = EmojiDictionary.key(forValue: lastWord.lowercased())
+                self.emojiCheck(emojiLookup)
+            }
+            return true
+            
+            }
+        
+        else { return false }
+    }
+    
+    
+
+    
+    
+    func textViewDidBeginEditing(_ textView: UITextView) {
+        
+        if textView == captionTextView {
+            
+            if textView.text == "Caption Here" {
+                textView.text = nil
+            }
+            
+            textView.textColor = UIColor.black
+        }
+        
+        if textView == emojiTextView {
+            if  emojiTextView.text == "😍🐮🍔🇺🇸🔥"{
+                textView.text = nil
+                
+                
+                // Alpha Handled through Check Emoji
+            }
+
+        }
+    }
+    
+//    func textViewDidChange(_ textView: UITextView) {
+//        if textView == captionTextView {
+//            
+//            if textView.text == "Caption Here" {
+//                textView.text = nil
+//            }
+//            
+//            textView.textColor = UIColor.black
+//        }
+//        
+//        if textView == emojiTextView {
+//            if  emojiTextView.text == "😍🐮🍔🇺🇸🔥"{
+//                textView.text = nil
+//            }
+//
+//        }
+//    }
+    
+    func textViewDidEndEditing(_ textView: UITextView) {
+        if textView == captionTextView {
+            
+            if textView.text.isEmpty {
+                self.resetCaptionTextView()
+            }
+        }
+        
+        if textView == emojiTextView {
+            
+            // To handle backspaces
+            self.selectedEmojis = textView.text
+            if textView.text.isEmpty {
+                self.resetEmojiTextView()
+            }
+        }
+        
+    }
+    
+    
+    
+    
+    func resetCaptionTextView() {
+        self.captionTextView.text = "Caption Here"
+        self.captionTextView.textColor = UIColor.lightGray
+        
+    }
+    
+    func resetEmojiTextView() {
+        self.emojiTextView.text = "😍🐮🍔🇺🇸🔥"
+        self.emojiTextView.alpha = 0.25
+    }
+    
     
     func emojiCheck(_ emoji: String?){
     
@@ -525,7 +684,7 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         
         guard let image = selectedImage else { return }
         guard let uploadData = UIImageJPEGRepresentation(image, 0.5) else {return}
-        guard let caption = textView.text, caption.characters.count > 0 else {return}
+        guard let caption = captionTextView.text, caption.characters.count > 0 else {return}
 
         
         
@@ -555,7 +714,7 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
     fileprivate func saveToDatabaseWithImageURL(imageUrl: String) {
         
         guard let postImage = selectedImage else {return}
-        guard let caption = textView.text else {return}
+        guard let caption = captionTextView.text else {return}
         let googlePlaceID = selectedPostGooglePlaceID ?? ""
         guard let postLocationName = locationNameLabel.text else {return}
         guard let postLocationAdress = locationAdressLabel.text else {return}

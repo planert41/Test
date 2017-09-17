@@ -99,6 +99,7 @@ var Emote3Display: [String] = Emote3Init
 var Emote4Display: [String] = Emote4Init
 
 
+
 var EmoticonArray: [[String]] = EmoteInits
 
 //var EmoticonArray: [[String]] = [Emote1Display, Emote2Display, Emote3Display, Emote4Display]
@@ -106,9 +107,7 @@ var EmoticonArray: [[String]] = EmoteInits
 
 var extras = "🐮🐔🐷🐙🍅🍠🐣🐌🐛🎭🎯🍳☝️⭐️⚠️🍖🍛🍴🍛🎃🎓💍🎈🎆🏆🎪🎮🔍🚽🗿🎮♨️♻️💊👌🔒"
 
-var EmoticonDictionary:[String:String] =
-    
-    [
+var EmojiDictionary: [String:String] =     [
         "💯":"best",
         "😍":"amazing",
         "😋":"good",
@@ -174,6 +173,7 @@ var EmoticonDictionary:[String:String] =
         "🍄":"mushroom",
         "🌰":"nuts",
         "🍚":"rice"]
+
 
 
 
