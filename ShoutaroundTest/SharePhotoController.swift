@@ -20,7 +20,14 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
     var selectedPostGooglePlaceID: String? = nil
     var selectedPostLocation: CLLocation?
     var emojiViews: Array<UICollectionView>?
+    let maxEmojis = 5
     
+    
+    var selectedEmojis: String? {
+        didSet{
+            self.emojiLabel.text = selectedEmojis
+        }
+    }
     
     
     var selectedImage: UIImage? {
@@ -99,6 +106,43 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         return tv
     }()
     
+    let emojiLabel: UILabel = {
+        let tv = UILabel()
+        tv.font = UIFont.systemFont(ofSize: 20)
+        tv.textAlignment = NSTextAlignment.right
+        
+        return tv
+    }()
+    
+    let emojiCancelButton: UIButton = {
+        
+        let button = UIButton(type: .system)
+        button.setImage(#imageLiteral(resourceName: "cancel_shadow").withRenderingMode(.alwaysOriginal), for: .normal)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        
+        button.backgroundColor = UIColor.blue
+        button.layer.cornerRadius = 0.5 * button.bounds.size.width
+        button.layer.masksToBounds  = true
+        button.clipsToBounds = true
+        
+        button.addTarget(self, action: #selector(cancelEmoji), for: .touchUpInside)
+        return button
+        
+    } ()
+    
+    func cancelEmoji(){
+        
+        emojiLabel.text = nil
+        self.emojiCancelButton.alpha = 0
+     //   self.ResetSelectedEmojis()
+     //   print(selectedEmojiIndexPath)
+        
+        for views in emojiViews! {
+            views.reloadData()
+        }
+        
+    }
+    
     let locationTextView: UITextView = {
         let tv = UITextView()
         tv.font = UIFont.systemFont(ofSize: 14)
@@ -167,8 +211,16 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         view.addSubview(imageView)
         imageView.anchor(top: containerView.topAnchor, left: containerView.leftAnchor, bottom: containerView.bottomAnchor, right: nil, paddingTop: 8, paddingLeft: 8, paddingBottom: 8, paddingRight: 0, width: 84, height: 0)
         
+        view.addSubview(emojiCancelButton)
+        emojiCancelButton.anchor(top: nil, left: nil, bottom: containerView.bottomAnchor, right: containerView.rightAnchor, paddingTop: 4, paddingLeft: 0, paddingBottom: 5, paddingRight: 5, width: 10, height: 10)
+        emojiCancelButton.alpha = 0
+        emojiCancelButton.centerYAnchor.constraint(equalTo: emojiLabel.centerYAnchor)
+        
+        view.addSubview(emojiLabel)
+        emojiLabel.anchor(top: nil, left: imageView.rightAnchor, bottom: containerView.bottomAnchor, right: emojiCancelButton.leftAnchor, paddingTop: 0, paddingLeft: 4, paddingBottom: 0, paddingRight: 0, width: 0, height: 30)
+        
         view.addSubview(textView)
-        textView.anchor(top: containerView.topAnchor, left: imageView.rightAnchor, bottom: containerView.bottomAnchor, right: containerView.rightAnchor, paddingTop: 0, paddingLeft: 4, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
+        textView.anchor(top: containerView.topAnchor, left: imageView.rightAnchor, bottom: emojiLabel.topAnchor, right: containerView.rightAnchor, paddingTop: 0, paddingLeft: 4, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
         
         
 // Location Container View
@@ -185,7 +237,6 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         view.addSubview(adressTextView)
         adressTextView.anchor(top: locationTextView.bottomAnchor, left: LocationContainerView.leftAnchor, bottom: nil, right: LocationContainerView.rightAnchor, paddingTop: 8, paddingLeft: 8, paddingBottom: 0, paddingRight: 8, width: 0, height: 40)
         
-//        placesCollectionView.frame = view.frame
         
         view.addSubview(placesCollectionView)
         placesCollectionView.anchor(top: adressTextView.bottomAnchor, left: LocationContainerView.leftAnchor, bottom: nil, right: LocationContainerView.rightAnchor, paddingTop: 8, paddingLeft: 8, paddingBottom: 0, paddingRight: 8, width: 0, height: 40)
@@ -228,6 +279,41 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         }
         
     }
+    
+    func emojiCheck(_ emoji: String?){
+    
+
+        // Check if selected Emojis already have emoji
+        
+        guard let emoji = emoji else {return}
+        var selectedEmojis = self.selectedEmojis
+        
+        if emoji.containsOnlyEmoji == false {
+            return
+        }
+      
+        else if selectedEmojis == nil {
+            selectedEmojis = emoji
+            self.selectedEmojis = selectedEmojis
+        }
+        
+        else if (selectedEmojis?.characters.count)! > self.maxEmojis {
+            return
+        }
+            
+        else if (selectedEmojis?.contains(emoji))! {
+            return
+        }
+        
+         else if emoji.containsOnlyEmoji {
+            selectedEmojis = emoji
+            self.selectedEmojis = self.selectedEmojis! + selectedEmojis!
+        }
+        
+
+        
+    }
+    
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         
@@ -276,7 +362,11 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         
         if emojiViews!.contains(collectionView) {
 
-            collectionView.cellForItem(at: indexPath)?.contentView.backgroundColor = UIColor.blue
+            let cell = collectionView.cellForItem(at: indexPath) as! UploadEmojiCell
+            cell.contentView.backgroundColor = UIColor.blue
+            self.emojiCheck(cell.uploadEmojis.text)
+            self.emojiCancelButton.alpha = 1
+            print(self.selectedEmojis)
             
         }
         

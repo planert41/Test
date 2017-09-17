@@ -31,6 +31,7 @@
 		A57A674D1F5FA8190063D400 /* UploadLocationFlowLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = A57A674C1F5FA8190063D400 /* UploadLocationFlowLayout.swift */; };
 		A57A674F1F5FA8CC0063D400 /* UploadLocationCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = A57A674E1F5FA8CC0063D400 /* UploadLocationCell.swift */; };
 		A58477A61F6DBFDA007DE06C /* Emoji.swift in Sources */ = {isa = PBXBuildFile; fileRef = A58477A51F6DBFDA007DE06C /* Emoji.swift */; };
+		A58477A81F6EB720007DE06C /* EmojiExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = A58477A71F6EB720007DE06C /* EmojiExtensions.swift */; };
 		A5C480D01F5DCB500096E003 /* FBSDKCoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A5C480CE1F5DCB500096E003 /* FBSDKCoreKit.framework */; };
 		A5C480D11F5DCB500096E003 /* FBSDKLoginKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A5C480CF1F5DCB500096E003 /* FBSDKLoginKit.framework */; };
 		A5C6450A1F54F68800C78244 /* SharePhotoController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5C645091F54F68800C78244 /* SharePhotoController.swift */; };
@@ -81,6 +82,7 @@
 		A57A674C1F5FA8190063D400 /* UploadLocationFlowLayout.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UploadLocationFlowLayout.swift; sourceTree = "<group>"; };
 		A57A674E1F5FA8CC0063D400 /* UploadLocationCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UploadLocationCell.swift; sourceTree = "<group>"; };
 		A58477A51F6DBFDA007DE06C /* Emoji.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Emoji.swift; sourceTree = "<group>"; };
+		A58477A71F6EB720007DE06C /* EmojiExtensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EmojiExtensions.swift; sourceTree = "<group>"; };
 		A5C480CE1F5DCB500096E003 /* FBSDKCoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = FBSDKCoreKit.framework; path = "ShoutaroundTest/FacebookSDKs-iOS-4.26.0/FBSDKCoreKit.framework"; sourceTree = "<group>"; };
 		A5C480CF1F5DCB500096E003 /* FBSDKLoginKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = FBSDKLoginKit.framework; path = "ShoutaroundTest/FacebookSDKs-iOS-4.26.0/FBSDKLoginKit.framework"; sourceTree = "<group>"; };
 		A5C645091F54F68800C78244 /* SharePhotoController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SharePhotoController.swift; sourceTree = "<group>"; };
@@ -147,6 +149,7 @@
 				A51C13C21F4FBF2F00CEB740 /* Extensions.swift */,
 				A5C645101F56547300C78244 /* CustomImageView.swift */,
 				A5C645191F57AB0000C78244 /* Firebase.swift */,
+				A58477A71F6EB720007DE06C /* EmojiExtensions.swift */,
 			);
 			name = Utils;
 			sourceTree = "<group>";
@@ -420,6 +423,7 @@
 				A57A674F1F5FA8CC0063D400 /* UploadLocationCell.swift in Sources */,
 				A54E1D6D1F4E736B00C2AA77 /* SignUpController.swift in Sources */,
 				A5C6452A1F5BB84200C78244 /* CommentsController.swift in Sources */,
+				A58477A81F6EB720007DE06C /* EmojiExtensions.swift in Sources */,
 				A53E7E171F5E46DB0011C1CA /* GooglePlaces.swift in Sources */,
 				A5C6451A1F57AB0000C78244 /* Firebase.swift in Sources */,
 				A562E5191F539C040095C7C1 /* PhotoSelectorController.swift in Sources */,
