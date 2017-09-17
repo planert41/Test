@@ -86,10 +86,12 @@ var Emote4Init: [String] = [
 
 var EmoteInits:[[String]] = [Emote1Init, Emote2Init, Emote3Init, Emote4Init]
 
-var Emote1Selected: [String] = []
-var Emote2Selected: [String] = []
-var Emote3Selected: [String] = []
-var Emote4Selected: [String] = []
+//var Emote1Selected: [String] = []
+//var Emote2Selected: [String] = []
+//var Emote3Selected: [String] = []
+//var Emote4Selected: [String] = []
+//var EmoticonSelectedArray: [[String]] = [Emote1Selected, Emote2Selected, Emote3Selected, Emote4Selected]
+
 
 var Emote1Display: [String] = Emote1Init
 var Emote2Display: [String] = Emote2Init
@@ -98,9 +100,8 @@ var Emote4Display: [String] = Emote4Init
 
 
 var EmoticonArray: [[String]] = EmoteInits
+
 //var EmoticonArray: [[String]] = [Emote1Display, Emote2Display, Emote3Display, Emote4Display]
-
-
 
 
 var extras = "🐮🐔🐷🐙🍅🍠🐣🐌🐛🎭🎯🍳☝️⭐️⚠️🍖🍛🍴🍛🎃🎓💍🎈🎆🏆🎪🎮🔍🚽🗿🎮♨️♻️💊👌🔒"

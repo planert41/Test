@@ -22,6 +22,9 @@ class PhotoSelectorController: UICollectionViewController, UICollectionViewDeleg
     var locations = [CLLocation]()
     var selectedPhotoLocation: CLLocation?
     
+
+    
+    
     
     override func viewDidLoad() {
         super.viewDidLoad()

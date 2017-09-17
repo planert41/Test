@@ -14,6 +14,7 @@ struct Post {
     let imageUrl: String
     let user: User
     let caption: String
+    let emoji: String
     let creationDate: Date
     var id: String?
     var locationGPS: CLLocation?
@@ -32,12 +33,14 @@ struct Post {
         // ?? "" gives default value
         self.imageUrl = dictionary["imageUrl"] as? String ?? ""
         self.caption = dictionary["caption"] as? String ?? ""
+        self.emoji = dictionary["caption"] as? String ?? ""
         
         let secondsFrom1970 = dictionary["creationDate"] as? Double ?? 0
         self.creationDate = Date(timeIntervalSince1970: secondsFrom1970)
         self.locationName = dictionary["locationName"] as? String ?? ""
         self.locationAdress = dictionary["locationAdress"] as? String ?? ""
         self.locationGooglePlaceID = dictionary["googlePlaceID"] as? String ?? ""
+
     
     }
     

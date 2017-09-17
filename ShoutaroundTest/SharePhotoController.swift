@@ -19,6 +19,7 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
     
     var selectedPostGooglePlaceID: String? = nil
     var selectedPostLocation: CLLocation?
+    var emojiViews: Array<UICollectionView>?
     
     
     
@@ -122,6 +123,7 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         
         let uploadEmojiList = UploadEmojiList()
         let cv = UICollectionView(frame: .zero, collectionViewLayout: uploadEmojiList)
+        cv.tag = 0
         
         return cv
     }()
@@ -130,6 +132,7 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         
         let uploadEmojiList = UploadEmojiList()
         let cv = UICollectionView(frame: .zero, collectionViewLayout: uploadEmojiList)
+        cv.tag = 1
         
         return cv
     }()
@@ -138,6 +141,7 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         
         let uploadEmojiList = UploadEmojiList()
         let cv = UICollectionView(frame: .zero, collectionViewLayout: uploadEmojiList)
+        cv.tag = 2
         
         return cv
     }()
@@ -146,6 +150,7 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         
         let uploadEmojiList = UploadEmojiList()
         let cv = UICollectionView(frame: .zero, collectionViewLayout: uploadEmojiList)
+        cv.tag = 3
         
         return cv
     }()
@@ -204,20 +209,21 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         view.addSubview(Emoji3CollectionView)
         view.addSubview(Emoji4CollectionView)
         
-        var emoticonViews: Array<UICollectionView>?
-        emoticonViews = [Emoji1CollectionView, Emoji2CollectionView, Emoji3CollectionView, Emoji4CollectionView]
+
+        emojiViews = [Emoji1CollectionView, Emoji2CollectionView, Emoji3CollectionView, Emoji4CollectionView]
         
-        for (index,views) in emoticonViews!.enumerated() {
+        for (index,views) in emojiViews!.enumerated() {
             
             if index == 0 {
                 views.anchor(top: EmojiContainerView.topAnchor, left: EmojiContainerView.leftAnchor, bottom: nil, right: EmojiContainerView.rightAnchor, paddingTop: 0, paddingLeft: 8, paddingBottom: 0, paddingRight: 8, width: 0, height: EmojiSize.width+2)
             } else {
-                views.anchor(top: emoticonViews![index-1].bottomAnchor, left: EmojiContainerView.leftAnchor, bottom: nil, right: EmojiContainerView.rightAnchor, paddingTop: 0, paddingLeft: 8, paddingBottom: 0, paddingRight: 8, width: 0, height: EmojiSize.width+2)
+                views.anchor(top: emojiViews![index-1].bottomAnchor, left: EmojiContainerView.leftAnchor, bottom: nil, right: EmojiContainerView.rightAnchor, paddingTop: 0, paddingLeft: 8, paddingBottom: 0, paddingRight: 8, width: 0, height: EmojiSize.width+2)
             }
             views.backgroundColor = UIColor.white
             views.register(UploadEmojiCell.self, forCellWithReuseIdentifier: emojiCellID)
             views.delegate = self
             views.dataSource = self
+            views.allowsMultipleSelection = true
             
         }
         
@@ -228,21 +234,9 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         if collectionView == placesCollectionView {
             return googlePlaceNames.count }
         
-        else if (collectionView == Emoji1CollectionView || collectionView == Emoji2CollectionView || collectionView == Emoji3CollectionView || collectionView == Emoji4CollectionView ){
+        else if emojiViews!.contains(collectionView) {
             
-            var rowindex = 0
-            
-            if collectionView == Emoji1CollectionView {
-                rowindex = 0}
-            else if collectionView == Emoji2CollectionView {
-                rowindex = 1
-            } else if collectionView == Emoji3CollectionView {
-                rowindex = 2
-            } else if collectionView == Emoji4CollectionView {
-                rowindex = 3
-            }
-            
-            return EmoticonArray[rowindex].count
+            return EmoticonArray[collectionView.tag].count
         }
         
         else {return 0}
@@ -257,27 +251,10 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         return cell
         }
         
-            if (collectionView == Emoji1CollectionView || collectionView == Emoji2CollectionView || collectionView == Emoji3CollectionView || collectionView == Emoji4CollectionView ){
+            if emojiViews!.contains(collectionView){
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: emojiCellID, for: indexPath) as! UploadEmojiCell
             
-            var rowindex = 0
-            
-            if collectionView == Emoji1CollectionView {
-                rowindex = 0}
-             else if collectionView == Emoji2CollectionView {
-                rowindex = 1
-            } else if collectionView == Emoji3CollectionView {
-                rowindex = 2
-            } else if collectionView == Emoji4CollectionView {
-                rowindex = 3
-            }
-
-                
-            
-            
-            cell.uploadEmojis.text = EmoticonArray[rowindex][(indexPath as IndexPath).row]
-//                cell.uploadEmojis.text = "T"
-          //  cell.uploadEmojis.adjustsFontSizeToFitWidth = true
+                cell.uploadEmojis.text = EmoticonArray[collectionView.tag][(indexPath as IndexPath).row]
 
             return cell
             
@@ -296,6 +273,15 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         
+        
+        if emojiViews!.contains(collectionView) {
+
+            collectionView.cellForItem(at: indexPath)?.contentView.backgroundColor = UIColor.blue
+            
+        }
+        
+        else if collectionView == placesCollectionView {
+        
         collectionView.cellForItem(at: indexPath)?.contentView.backgroundColor = UIColor.blue
         self.locationTextView.text = self.googlePlaceNames[indexPath.item]
         self.adressTextView.text = self.googlePlaceAdresses[indexPath.item]
@@ -307,6 +293,7 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         print(self.selectedPostLocation)
         print(self.selectedPostGooglePlaceID)
         
+        }
     
     }
     
