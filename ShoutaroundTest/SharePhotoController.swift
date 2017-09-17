@@ -17,14 +17,17 @@ import Alamofire
 
 class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout, UICollectionViewDelegate,UICollectionViewDataSource, CLLocationManagerDelegate {
     
+    
+    let locationCellID = "locationCellID"
+    let emojiCellID = "emojiCellID"
+    
+    var selectedPostLocation: CLLocation? = nil
+    
     var selectedPostGooglePlaceID: String? = nil
-    var selectedPostLocation: CLLocation?
+    var selectedGoogleLocationIndex: Int? = nil
+    
     var emojiViews: Array<UICollectionView>?
     let maxEmojis = 5
-    
-    var initSelectedImageGPS: String?
-    var initSelectedImageAdress: String?
-    
     
     var selectedEmojis: String = "" {
         
@@ -44,16 +47,23 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         }
     }
     
-
-    var selectedImageAdress:String?{
+    
+    var selectedImageLocationName:String?{
         didSet {
-            adressTextView.text = selectedImageAdress
+            locationNameTextView.text = selectedImageLocationName
         }
     }
     
+    
+    var selectedImageLocationAdress:String?{
+        didSet {
+            locationAdressTextView.text = selectedImageLocationAdress
+        }
+    }
+
+    
     var selectedImageLocation:CLLocation?{
 
-        
         didSet {
 
             let postLatitude:String! = String(format:"%.2f",(selectedImageLocation?.coordinate.latitude)!)
@@ -61,32 +71,29 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
             var GPSLabelText:String?
             
             if selectedImageLocation?.coordinate.latitude != 0 && selectedImageLocation?.coordinate.longitude != 0 {
-                GPSLabelText = "GPS: " + " (" + postLatitude + "," + postLongitude + ")"
-                locationTextView.text =  GPSLabelText!
-                //appleCurrentLocation(selectedImageLocation!)
+                
+                self.selectedImageLocationName = "GPS: " + " (" + postLatitude + "," + postLongitude + ")"
+                self.selectedPostLocation = selectedImageLocation
                 
                 googleReverseGPS(GPSLocation: selectedImageLocation!)
                 googleLocationSearch(GPSLocation: selectedImageLocation!)
                 
-                self.selectedPostLocation = selectedImageLocation
-                print(googlePlaceNames)
+                //appleCurrentLocation(selectedImageLocation!)
+                
+                // Default Location is selectedImageLocation
+                
                 self.placesCollectionView.reloadData()
 
-
-                
             } else {
                 GPSLabelText = "No GPS Location"
-                locationTextView.text =  GPSLabelText!
-                self.selectedImageAdress = ""
-            
+                locationNameTextView.text =  GPSLabelText!
+                self.selectedImageLocationAdress = ""
+                
+                // No Geofire Data is saved if location is empty
             }
-            
         }
     }
-    
-    let locationCellID = "locationCellID"
-    let emojiCellID = "emojiCellID"
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = UIColor.rgb(red: 240, green: 240, blue: 240)
@@ -153,7 +160,7 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         self.selectedEmojis = ""
     }
     
-    let locationTextView: UITextView = {
+    let locationNameTextView: UITextView = {
         let tv = UITextView()
         tv.font = UIFont.systemFont(ofSize: 14)
         return tv
@@ -168,7 +175,7 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         return tv
     }()
     
-    let adressTextView: UITextView = {
+    let locationAdressTextView: UITextView = {
         let tv = UITextView()
         tv.font = UIFont.systemFont(ofSize: 14)
         return tv
@@ -263,19 +270,19 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         locationIcon.anchor(top: LocationContainerView.topAnchor, left: LocationContainerView.leftAnchor, bottom: nil, right: nil, paddingTop: 8, paddingLeft: 8, paddingBottom: 0, paddingRight: 8, width: 40, height: 40)
         locationIcon.adjustsFontSizeToFitWidth = true
         
-        view.addSubview(locationTextView)
-        locationTextView.anchor(top: LocationContainerView.topAnchor, left: locationIcon.rightAnchor, bottom: nil, right: LocationContainerView.rightAnchor, paddingTop: 8, paddingLeft: 8, paddingBottom: 0, paddingRight: 8, width: 0, height: 40)
+        view.addSubview(locationNameTextView)
+        locationNameTextView.anchor(top: LocationContainerView.topAnchor, left: locationIcon.rightAnchor, bottom: nil, right: LocationContainerView.rightAnchor, paddingTop: 8, paddingLeft: 8, paddingBottom: 0, paddingRight: 8, width: 0, height: 40)
         
         view.addSubview(adressIcon)
         adressIcon.anchor(top: locationIcon.bottomAnchor, left: LocationContainerView.leftAnchor, bottom: nil, right: nil, paddingTop: 8, paddingLeft: 8, paddingBottom: 0, paddingRight: 8, width: 40, height: 40)
         adressIcon.adjustsFontSizeToFitWidth = true
         
-        view.addSubview(adressTextView)
-        adressTextView.anchor(top: locationTextView.bottomAnchor, left: adressIcon.rightAnchor, bottom: nil, right: LocationContainerView.rightAnchor, paddingTop: 8, paddingLeft: 8, paddingBottom: 0, paddingRight: 8, width: 0, height: 40)
+        view.addSubview(locationAdressTextView)
+        locationAdressTextView.anchor(top: locationNameTextView.bottomAnchor, left: adressIcon.rightAnchor, bottom: nil, right: LocationContainerView.rightAnchor, paddingTop: 8, paddingLeft: 8, paddingBottom: 0, paddingRight: 8, width: 0, height: 40)
         
         
         view.addSubview(placesCollectionView)
-        placesCollectionView.anchor(top: adressTextView.bottomAnchor, left: LocationContainerView.leftAnchor, bottom: nil, right: LocationContainerView.rightAnchor, paddingTop: 8, paddingLeft: 8, paddingBottom: 0, paddingRight: 8, width: 0, height: 40)
+        placesCollectionView.anchor(top: locationAdressTextView.bottomAnchor, left: LocationContainerView.leftAnchor, bottom: nil, right: LocationContainerView.rightAnchor, paddingTop: 8, paddingLeft: 8, paddingBottom: 0, paddingRight: 8, width: 0, height: 40)
         placesCollectionView.backgroundColor = UIColor.white
         placesCollectionView.register(UploadLocationCell.self, forCellWithReuseIdentifier: locationCellID)
         placesCollectionView.delegate = self
@@ -367,7 +374,14 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         if collectionView == placesCollectionView {
         
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: locationCellID, for: indexPath) as! UploadLocationCell
+            
             cell.uploadLocations.text = googlePlaceNames[indexPath.item]
+            if self.selectedPostLocation == self.googlePlaceLocations[indexPath.item] {
+                cell.backgroundColor = UIColor.gray
+            } else {
+                cell.backgroundColor = UIColor.white
+            }
+            
             return cell
         }
         
@@ -410,17 +424,33 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         }
         
         else if collectionView == placesCollectionView {
+
+            
+            
+            if self.selectedPostLocation == self.googlePlaceLocations[indexPath.item] {
+
+                self.selectedPostLocation = self.selectedImageLocation
+                self.locationNameTextView.text = self.selectedImageLocationName
+                self.locationAdressTextView.text = self.selectedImageLocationAdress
+                self.selectedPostGooglePlaceID = nil
+                self.selectedGoogleLocationIndex = nil
+                
+            } else {
+            
+                self.selectedPostLocation = self.googlePlaceLocations[indexPath.item]
+                self.locationNameTextView.text = self.googlePlaceNames[indexPath.item]
+                self.locationAdressTextView.text = self.googlePlaceAdresses[indexPath.item]
+                self.selectedPostGooglePlaceID = self.googlePlaceIDs[indexPath.item]
+                self.selectedGoogleLocationIndex = indexPath.item
         
-        collectionView.cellForItem(at: indexPath)?.contentView.backgroundColor = UIColor.blue
-        self.locationTextView.text = self.googlePlaceNames[indexPath.item]
-        self.adressTextView.text = self.googlePlaceAdresses[indexPath.item]
-        self.selectedPostLocation = self.googlePlaceLocations[indexPath.item]
-        self.selectedPostGooglePlaceID = self.googlePlaceIDs[indexPath.item]
-        
-        print(self.locationTextView.text)
-        print(self.adressTextView.text)
-        print(self.selectedPostLocation)
-        print(self.selectedPostGooglePlaceID)
+                print(self.googlePlaceLocations[indexPath.item])
+                print(self.googlePlaceAdresses[indexPath.item])
+                print(self.selectedPostLocation)
+                print(self.selectedPostGooglePlaceID)
+            
+            }
+            
+            collectionView.reloadData()
         
         }
     
@@ -478,8 +508,8 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         guard let postImage = selectedImage else {return}
         guard let caption = textView.text else {return}
         let googlePlaceID = selectedPostGooglePlaceID ?? ""
-        guard let postLocationName = locationTextView.text else {return}
-        guard let postLocationAdress = adressTextView.text else {return}
+        guard let postLocationName = locationNameTextView.text else {return}
+        guard let postLocationAdress = locationAdressTextView.text else {return}
         
         
         guard let uid = Auth.auth().currentUser?.uid else {return}
@@ -570,7 +600,7 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
             let state = (containsPlacemark.administrativeArea != nil) ? containsPlacemark.administrativeArea : ""
             let postalCode = (containsPlacemark.postalCode != nil) ? containsPlacemark.postalCode : ""
 
-            self.selectedImageAdress = subThoroughfare! + " " + thoroughfare! + ", " + locality! + ", " + state! + " " + postalCode!
+            self.selectedImageLocationAdress = subThoroughfare! + " " + thoroughfare! + ", " + locality! + ", " + state! + " " + postalCode!
             
         }
         
@@ -593,15 +623,15 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         
         Alamofire.request(url).responseJSON { (response) -> Void in
             
-            print(response)
+ //           print(response)
             
             if let value  = response.result.value {
                 let json = JSON(value)
                 
                 if let results = json["results"].array {
 
-                    print("Google Map Results ",results[0]["formatted_address"])
-                    self.selectedImageAdress = results[0]["formatted_address"].string
+   //                 print("Google Map Results ",results[0]["formatted_address"])
+                    self.selectedImageLocationAdress = results[0]["formatted_address"].string
 
                         }
                     }
@@ -624,8 +654,6 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
     
     var googlePlaceNames = [String?](){
         didSet {
-            print(googlePlaceNames)
-            //self.placesCollectionView.reloadData()
         }
     }
 
@@ -640,6 +668,8 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         
         let urlString = "\(URL_Search)location=\(lat.coordinate.latitude),\(lat.coordinate.longitude)&rankby=distance&type=\(searchType)&key=\(API_iOSKey)"
         let url = URL(string: urlString)!
+        
+        print(urlString)
         
         //   https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=-33.8670,151.1957&radius=500&types=food&name=cruise&key=YOUR_API_KEY
         
@@ -661,7 +691,6 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
                 if let results = json["results"].array {
                     for result in results {
                         
-                        //print(result)
                         if result["place_id"].string != nil {
                             guard let placeID = result["place_id"].string else {return}
                             guard let name = result["name"].string else {return}

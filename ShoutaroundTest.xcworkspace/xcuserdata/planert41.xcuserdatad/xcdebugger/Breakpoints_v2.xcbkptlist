@@ -42,11 +42,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ShoutaroundTest/SharePhotoController.swift"
-            timestampString = "527358238.106754"
+            timestampString = "527364936.984834"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "913"
-            endingLineNumber = "913">
+            startingLineNumber = "944"
+            endingLineNumber = "944">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -56,11 +56,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ShoutaroundTest/SharePhotoController.swift"
-            timestampString = "527358238.106754"
+            timestampString = "527364936.984834"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "859"
-            endingLineNumber = "859">
+            startingLineNumber = "890"
+            endingLineNumber = "890">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -70,11 +70,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ShoutaroundTest/SharePhotoController.swift"
-            timestampString = "527358238.106754"
+            timestampString = "527364936.984834"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "893"
-            endingLineNumber = "893">
+            startingLineNumber = "924"
+            endingLineNumber = "924">
             <Locations>
                <Location
                   shouldBeEnabled = "No"
@@ -116,11 +116,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ShoutaroundTest/SharePhotoController.swift"
-            timestampString = "527358238.106754"
+            timestampString = "527364936.984834"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "895"
-            endingLineNumber = "895">
+            startingLineNumber = "926"
+            endingLineNumber = "926">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -130,11 +130,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ShoutaroundTest/SharePhotoController.swift"
-            timestampString = "527358238.106754"
+            timestampString = "527364936.984834"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "883"
-            endingLineNumber = "883">
+            startingLineNumber = "914"
+            endingLineNumber = "914">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -144,11 +144,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ShoutaroundTest/SharePhotoController.swift"
-            timestampString = "527358238.106754"
+            timestampString = "527364936.984834"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "659"
-            endingLineNumber = "659"
+            startingLineNumber = "691"
+            endingLineNumber = "691"
             landmarkName = "downloadRestaurantDetails(_:searchRadius:searchType:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -160,11 +160,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ShoutaroundTest/SharePhotoController.swift"
-            timestampString = "527358238.106754"
+            timestampString = "527364936.984834"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "911"
-            endingLineNumber = "911">
+            startingLineNumber = "942"
+            endingLineNumber = "942">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -174,11 +174,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ShoutaroundTest/SharePhotoController.swift"
-            timestampString = "527358238.106754"
+            timestampString = "527364936.984834"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "916"
-            endingLineNumber = "916">
+            startingLineNumber = "947"
+            endingLineNumber = "947">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -188,11 +188,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ShoutaroundTest/SharePhotoController.swift"
-            timestampString = "526363071.318589"
+            timestampString = "527363712.153773"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "18"
-            endingLineNumber = "18"
+            startingLineNumber = "19"
+            endingLineNumber = "19"
             landmarkName = "SharePhotoController"
             landmarkType = "3">
             <Locations>
@@ -281,11 +281,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ShoutaroundTest/SharePhotoController.swift"
-            timestampString = "527357836.827616"
+            timestampString = "527364323.487715"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "77"
-            endingLineNumber = "77"
+            startingLineNumber = "89"
+            endingLineNumber = "89"
             landmarkName = "selectedImageLocation"
             landmarkType = "24">
          </BreakpointContent>
@@ -297,11 +297,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ShoutaroundTest/SharePhotoController.swift"
-            timestampString = "527358238.106754"
+            timestampString = "527364936.984834"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "566"
-            endingLineNumber = "566"
+            startingLineNumber = "598"
+            endingLineNumber = "598"
             landmarkName = "displayLocationInfo(_:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -313,11 +313,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ShoutaroundTest/SharePhotoController.swift"
-            timestampString = "527357836.827616"
+            timestampString = "527364323.487715"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "75"
-            endingLineNumber = "75"
+            startingLineNumber = "87"
+            endingLineNumber = "87"
             landmarkName = "selectedImageLocation"
             landmarkType = "24">
          </BreakpointContent>
@@ -329,11 +329,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ShoutaroundTest/SharePhotoController.swift"
-            timestampString = "526443541.375566"
+            timestampString = "527363712.153773"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "20"
-            endingLineNumber = "20"
+            startingLineNumber = "26"
+            endingLineNumber = "26"
             landmarkName = "SharePhotoController"
             landmarkType = "3">
             <Locations>
@@ -407,11 +407,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ShoutaroundTest/SharePhotoController.swift"
-            timestampString = "527358238.106754"
+            timestampString = "527364936.984834"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "586"
-            endingLineNumber = "586"
+            startingLineNumber = "618"
+            endingLineNumber = "618"
             landmarkName = "googleReverseGPS(GPSLocation:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -439,11 +439,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ShoutaroundTest/SharePhotoController.swift"
-            timestampString = "527358238.106754"
+            timestampString = "527364323.487715"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "385"
-            endingLineNumber = "385"
+            startingLineNumber = "401"
+            endingLineNumber = "401"
             landmarkName = "collectionView(_:cellForItemAt:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -455,11 +455,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ShoutaroundTest/SharePhotoController.swift"
-            timestampString = "527358238.106754"
+            timestampString = "527364936.984834"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "475"
-            endingLineNumber = "475"
+            startingLineNumber = "507"
+            endingLineNumber = "507"
             landmarkName = "saveToDatabaseWithImageURL(imageUrl:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -471,11 +471,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ShoutaroundTest/SharePhotoController.swift"
-            timestampString = "527358238.106754"
+            timestampString = "527364936.984834"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "473"
-            endingLineNumber = "473"
+            startingLineNumber = "505"
+            endingLineNumber = "505"
             landmarkName = "SharePhotoController"
             landmarkType = "3">
          </BreakpointContent>
@@ -487,11 +487,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ShoutaroundTest/SharePhotoController.swift"
-            timestampString = "527358238.106754"
+            timestampString = "527364936.984834"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "484"
-            endingLineNumber = "484"
+            startingLineNumber = "516"
+            endingLineNumber = "516"
             landmarkName = "saveToDatabaseWithImageURL(imageUrl:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -503,11 +503,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ShoutaroundTest/SharePhotoController.swift"
-            timestampString = "527358238.106754"
+            timestampString = "527364323.487715"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "174"
-            endingLineNumber = "174"
+            startingLineNumber = "183"
+            endingLineNumber = "183"
             landmarkName = "SharePhotoController"
             landmarkType = "3">
          </BreakpointContent>
@@ -519,11 +519,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ShoutaroundTest/SharePhotoController.swift"
-            timestampString = "527358238.106754"
+            timestampString = "527364323.487715"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "211"
-            endingLineNumber = "211"
+            startingLineNumber = "220"
+            endingLineNumber = "220"
             landmarkName = "Emoji3CollectionView"
             landmarkType = "24">
          </BreakpointContent>
@@ -535,11 +535,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ShoutaroundTest/SharePhotoController.swift"
-            timestampString = "527358238.106754"
+            timestampString = "527364936.984834"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "536"
-            endingLineNumber = "536"
+            startingLineNumber = "568"
+            endingLineNumber = "568"
             landmarkName = "appleCurrentLocation(_:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -551,11 +551,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ShoutaroundTest/SharePhotoController.swift"
-            timestampString = "527358238.106754"
+            timestampString = "527364323.487715"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "339"
-            endingLineNumber = "339"
+            startingLineNumber = "348"
+            endingLineNumber = "348"
             landmarkName = "emojiCheck(_:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -567,11 +567,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ShoutaroundTest/SharePhotoController.swift"
-            timestampString = "527358238.106754"
+            timestampString = "527364323.487715"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "324"
-            endingLineNumber = "324"
+            startingLineNumber = "333"
+            endingLineNumber = "333"
             landmarkName = "emojiCheck(_:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -583,7 +583,23 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ShoutaroundTest/SharePhotoController.swift"
-            timestampString = "527358238.106754"
+            timestampString = "527364323.487715"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "347"
+            endingLineNumber = "347"
+            landmarkName = "emojiCheck(_:)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "ShoutaroundTest/SharePhotoController.swift"
+            timestampString = "527364323.487715"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "338"
@@ -599,11 +615,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ShoutaroundTest/SharePhotoController.swift"
-            timestampString = "527358238.106754"
+            timestampString = "527364323.487715"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "329"
-            endingLineNumber = "329"
+            startingLineNumber = "334"
+            endingLineNumber = "334"
             landmarkName = "emojiCheck(_:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -615,11 +631,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ShoutaroundTest/SharePhotoController.swift"
-            timestampString = "527358238.106754"
+            timestampString = "527364323.487715"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "325"
-            endingLineNumber = "325"
+            startingLineNumber = "354"
+            endingLineNumber = "354"
             landmarkName = "emojiCheck(_:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -631,28 +647,28 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ShoutaroundTest/SharePhotoController.swift"
-            timestampString = "527358238.106754"
+            timestampString = "527364936.984834"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "345"
-            endingLineNumber = "345"
-            landmarkName = "emojiCheck(_:)"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "ShoutaroundTest/SharePhotoController.swift"
-            timestampString = "527358238.106754"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "440"
-            endingLineNumber = "440"
+            startingLineNumber = "472"
+            endingLineNumber = "472"
             landmarkName = "collectionView(_:didDeselectItemAt:)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "ShoutaroundTest/SharePhotoController.swift"
+            timestampString = "527364936.984834"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "705"
+            endingLineNumber = "705"
+            landmarkName = "downloadRestaurantDetails(_:searchRadius:searchType:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
