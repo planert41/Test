@@ -23,9 +23,14 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
     let maxEmojis = 5
     
     
-    var selectedEmojis: String? {
+    var selectedEmojis: String = "" {
+        
         didSet{
             self.emojiLabel.text = selectedEmojis
+            
+            for views in emojiViews! {
+                views.reloadData()
+            }
         }
     }
     
@@ -134,13 +139,12 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         
         emojiLabel.text = nil
         self.emojiCancelButton.alpha = 0
-     //   self.ResetSelectedEmojis()
-     //   print(selectedEmojiIndexPath)
+        self.resetSelectedEmojis()
         
-        for views in emojiViews! {
-            views.reloadData()
-        }
-        
+    }
+    
+    func resetSelectedEmojis(){
+        self.selectedEmojis = ""
     }
     
     let locationTextView: UITextView = {
@@ -296,19 +300,17 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
             selectedEmojis = emoji
             self.selectedEmojis = selectedEmojis
         }
-        
-        else if (selectedEmojis?.characters.count)! > self.maxEmojis {
-            return
-        }
             
-        else if (selectedEmojis?.contains(emoji))! {
-            return
+        else if (selectedEmojis.contains(emoji)) {
+            self.selectedEmojis = selectedEmojis.replacingOccurrences(of: emoji, with: "")
         }
         
-         else if emoji.containsOnlyEmoji {
+         else if emoji.containsOnlyEmoji && (selectedEmojis.characters.count) < self.maxEmojis {
             selectedEmojis = emoji
-            self.selectedEmojis = self.selectedEmojis! + selectedEmojis!
+            self.selectedEmojis = self.selectedEmojis + selectedEmojis
         }
+        
+        print(self.selectedEmojis)
         
 
         
@@ -341,6 +343,12 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: emojiCellID, for: indexPath) as! UploadEmojiCell
             
                 cell.uploadEmojis.text = EmoticonArray[collectionView.tag][(indexPath as IndexPath).row]
+                
+                if self.selectedEmojis.contains(cell.uploadEmojis.text!){
+                    cell.backgroundColor = UIColor.gray
+                } else {
+                    cell.backgroundColor = UIColor.white
+                }
 
             return cell
             
@@ -363,10 +371,9 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         if emojiViews!.contains(collectionView) {
 
             let cell = collectionView.cellForItem(at: indexPath) as! UploadEmojiCell
-            cell.contentView.backgroundColor = UIColor.blue
+           // cell.contentView.backgroundColor = UIColor.blue
             self.emojiCheck(cell.uploadEmojis.text)
             self.emojiCancelButton.alpha = 1
-            print(self.selectedEmojis)
             
         }
         
