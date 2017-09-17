@@ -22,6 +22,9 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
     var emojiViews: Array<UICollectionView>?
     let maxEmojis = 5
     
+    var initSelectedImageGPS: String?
+    var initSelectedImageAdress: String?
+    
     
     var selectedEmojis: String = "" {
         
@@ -37,11 +40,8 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
     
     var selectedImage: UIImage? {
         didSet{
-            
             self.imageView.image = selectedImage
-            
         }
-        
     }
     
 
@@ -50,8 +50,10 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
             adressTextView.text = selectedImageAdress
         }
     }
-
+    
     var selectedImageLocation:CLLocation?{
+
+        
         didSet {
 
             let postLatitude:String! = String(format:"%.2f",(selectedImageLocation?.coordinate.latitude)!)
@@ -59,11 +61,13 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
             var GPSLabelText:String?
             
             if selectedImageLocation?.coordinate.latitude != 0 && selectedImageLocation?.coordinate.longitude != 0 {
-                GPSLabelText = "GPS (Lat,Long): " + " (" + postLatitude + "," + postLongitude + ")"
+                GPSLabelText = "GPS: " + " (" + postLatitude + "," + postLongitude + ")"
                 locationTextView.text =  GPSLabelText!
                 //appleCurrentLocation(selectedImageLocation!)
+                
                 googleReverseGPS(GPSLocation: selectedImageLocation!)
                 googleLocationSearch(GPSLocation: selectedImageLocation!)
+                
                 self.selectedPostLocation = selectedImageLocation
                 print(googlePlaceNames)
                 self.placesCollectionView.reloadData()
@@ -89,7 +93,6 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
 
         navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Share", style: .plain, target: self, action: #selector(handleShare))
         
-        setupNearbyLocations()
         setupImageAndTextViews()
         
     }
@@ -125,7 +128,7 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         button.setImage(#imageLiteral(resourceName: "cancel_shadow").withRenderingMode(.alwaysOriginal), for: .normal)
         button.translatesAutoresizingMaskIntoConstraints = false
         
-        button.backgroundColor = UIColor.blue
+        button.backgroundColor = UIColor.gray
         button.layer.cornerRadius = 0.5 * button.bounds.size.width
         button.layer.masksToBounds  = true
         button.clipsToBounds = true
@@ -134,6 +137,9 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         return button
         
     } ()
+    
+    
+    
     
     func cancelEmoji(){
         
@@ -153,9 +159,27 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         return tv
     }()
     
+    let locationIcon: UILabel = {
+        let tv = UILabel()
+        tv.font = UIFont.systemFont(ofSize: 30)
+        tv.text = "📍"
+        tv.textAlignment = NSTextAlignment.center
+        tv.backgroundColor = UIColor.white
+        return tv
+    }()
+    
     let adressTextView: UITextView = {
         let tv = UITextView()
         tv.font = UIFont.systemFont(ofSize: 14)
+        return tv
+    }()
+    
+    let adressIcon: UILabel = {
+        let tv = UILabel()
+        tv.font = UIFont.systemFont(ofSize: 30)
+        tv.text = "📮"
+        tv.textAlignment = NSTextAlignment.center
+        tv.backgroundColor = UIColor.white
         return tv
     }()
     
@@ -235,11 +259,19 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         view.addSubview(LocationContainerView)
         LocationContainerView.anchor(top: containerView.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 1, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 150)
         
+        view.addSubview(locationIcon)
+        locationIcon.anchor(top: LocationContainerView.topAnchor, left: LocationContainerView.leftAnchor, bottom: nil, right: nil, paddingTop: 8, paddingLeft: 8, paddingBottom: 0, paddingRight: 8, width: 40, height: 40)
+        locationIcon.adjustsFontSizeToFitWidth = true
+        
         view.addSubview(locationTextView)
-        locationTextView.anchor(top: LocationContainerView.topAnchor, left: LocationContainerView.leftAnchor, bottom: nil, right: LocationContainerView.rightAnchor, paddingTop: 8, paddingLeft: 8, paddingBottom: 0, paddingRight: 8, width: 0, height: 40)
+        locationTextView.anchor(top: LocationContainerView.topAnchor, left: locationIcon.rightAnchor, bottom: nil, right: LocationContainerView.rightAnchor, paddingTop: 8, paddingLeft: 8, paddingBottom: 0, paddingRight: 8, width: 0, height: 40)
+        
+        view.addSubview(adressIcon)
+        adressIcon.anchor(top: locationIcon.bottomAnchor, left: LocationContainerView.leftAnchor, bottom: nil, right: nil, paddingTop: 8, paddingLeft: 8, paddingBottom: 0, paddingRight: 8, width: 40, height: 40)
+        adressIcon.adjustsFontSizeToFitWidth = true
         
         view.addSubview(adressTextView)
-        adressTextView.anchor(top: locationTextView.bottomAnchor, left: LocationContainerView.leftAnchor, bottom: nil, right: LocationContainerView.rightAnchor, paddingTop: 8, paddingLeft: 8, paddingBottom: 0, paddingRight: 8, width: 0, height: 40)
+        adressTextView.anchor(top: locationTextView.bottomAnchor, left: adressIcon.rightAnchor, bottom: nil, right: LocationContainerView.rightAnchor, paddingTop: 8, paddingLeft: 8, paddingBottom: 0, paddingRight: 8, width: 0, height: 40)
         
         
         view.addSubview(placesCollectionView)
@@ -334,12 +366,12 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
 
         if collectionView == placesCollectionView {
         
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: locationCellID, for: indexPath) as! UploadLocationCell
-        cell.uploadLocations.text = googlePlaceNames[indexPath.item]
-        return cell
+            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: locationCellID, for: indexPath) as! UploadLocationCell
+            cell.uploadLocations.text = googlePlaceNames[indexPath.item]
+            return cell
         }
         
-            if emojiViews!.contains(collectionView){
+        if emojiViews!.contains(collectionView){
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: emojiCellID, for: indexPath) as! UploadEmojiCell
             
                 cell.uploadEmojis.text = EmoticonArray[collectionView.tag][(indexPath as IndexPath).row]
@@ -395,34 +427,18 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
     }
     
     
+
     
     func collectionView(_ collectionView: UICollectionView, didDeselectItemAt indexPath: IndexPath) {
-        collectionView.cellForItem(at: indexPath)?.contentView.backgroundColor = UIColor.white
-    }
-    
-    
-//    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-//        let width = (view.frame.width - 3)/4
-//        let height = view.frame.height
-//        
-//        return CGSize(width: 50, height: height)
-//    }
-//    
-//    
-//    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumInteritemSpacingForSectionAt section: Int) -> CGFloat {
-//        return 1
-//    }
-//    
-//    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat {
-//        return 1
-//    }
-    
-
-    
-    func setupNearbyLocations() {
         
-
         
+        if collectionView == placesCollectionView {
+            
+            collectionView.cellForItem(at: indexPath)?.contentView.backgroundColor = UIColor.white
+            
+        }
+        
+// Deselect Doesn't work for emojis since scells are constantly being reloaded and hence selection is restarted
         
     }
     
@@ -555,85 +571,10 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
             let postalCode = (containsPlacemark.postalCode != nil) ? containsPlacemark.postalCode : ""
 
             self.selectedImageAdress = subThoroughfare! + " " + thoroughfare! + ", " + locality! + ", " + state! + " " + postalCode!
-//            print(containsPlacemark)
-//            print(containsPlacemark.addressDictionary)
-//            print(self.selectedImageAdress)
-            
             
         }
         
     }
-    
-    
-    
-    
-    
-    
-    
-    
-    //            if let adressDictionaryValue = adressDictionary["FormattedAddressLines"] as! NSArray as? [String] {
-    //
-    //                var adress = adressDictionaryValue as NSArray as! [String]
-    
-    
-    
-    //                Optional([AnyHashable("Street"): 3465 W 6th St,
-    //                   AnyHashable("Country"): United States,
-    //                   AnyHashable("State"): CA, AnyHashable("PostCodeExtension"): 2567, AnyHashable("ZIP"): 90020, AnyHashable("SubThoroughfare"): 3465, AnyHashable("Name"): 3465 W 6th St, AnyHashable("Thoroughfare"): W 6th St, AnyHashable("SubAdministrativeArea"): Los Angeles, AnyHashable("FormattedAddressLines"): <__NSArrayM 0x60800024ced0>(
-    //                    3465 W 6th St,
-    //                    Los Angeles, CA  90020,
-    //                    United States
-    //                )
-    
-
-
-
-
-
-
-
-//            SelectedLocationName = containsPlacemark.name
-//            SelectedLocationAdress = nil
-//
-//            updateGPS()
-//
-// self.PlaceName.text = containsPlacemark.name
-
-//            Optional([AnyHashable("Street"): 90 Bell Rock Plz, AnyHashable("ZIP"): 86351, AnyHashable("Country"): United States, AnyHashable("SubThoroughfare"): 90, AnyHashable("State"): AZ, AnyHashable("Name"): Coconino National Forest, AnyHashable("SubAdministrativeArea"): Yavapai, AnyHashable("Thoroughfare"): Bell Rock Plz, AnyHashable("FormattedAddressLines"): <__NSArrayM 0x608000241440>(
-//                Coconino National Forest,
-//                90 Bell Rock Plz,
-//                Sedona, AZ  86351,
-//                United States
-//                )
-//                , AnyHashable("City"): Sedona, AnyHashable("CountryCode"): US, AnyHashable("PostCodeExtension"): 9040])
-
-
-/*
- print(locality)
- print(GPS)
- print(containsPlacemark.areasOfInterest)
- print(containsPlacemark.name)
- print(containsPlacemark.thoroughfare)
- print(containsPlacemark.subThoroughfare)
- 
- 
- public var name: String? { get } // eg. Apple Inc.
- public var thoroughfare: String? { get } // street name, eg. Infinite Loop
- public var subThoroughfare: String? { get } // eg. 1
- public var locality: String? { get } // city, eg. Cupertino
- public var subLocality: String? { get } // neighborhood, common name, eg. Mission District
- public var administrativeArea: String? { get } // state, eg. CA
- public var subAdministrativeArea: String? { get } // county, eg. Santa Clara
- public var postalCode: String? { get } // zip code, eg. 95014
- public var ISOcountryCode: String? { get } // eg. US
- public var country: String? { get } // eg. United States
- public var inlandWater: String? { get } // eg. Lake Tahoe
- public var ocean: String? { get } // eg. Pacific Ocean
- public var areasOfInterest: [String]? { get } // eg. Golden Gate Park
- */
-
-
-
 
 // GOOGLE PLACES QUERY
     
@@ -675,14 +616,6 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         let searchRadius: Double = 100
         var searchedTypes = ["restaurant"]
         var searchTerm = "restaurant"
-//
-//        dataProvider.fetchPlacesNearCoordinate(GPSLocation, radius:searchRadius, types: searchedTypes) { places in
-//            for place: GooglePlace in places {
-//                print(place)
-//
-//
-//            }
-//        }
         
         downloadRestaurantDetails(GPSLocation, searchRadius: searchRadius, searchType: searchTerm)
         
@@ -752,6 +685,64 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         
         }
     }
-    
+
+
+
+
+
+//            if let adressDictionaryValue = adressDictionary["FormattedAddressLines"] as! NSArray as? [String] {
+//
+//                var adress = adressDictionaryValue as NSArray as! [String]
+
+
+
+//                Optional([AnyHashable("Street"): 3465 W 6th St,
+//                   AnyHashable("Country"): United States,
+//                   AnyHashable("State"): CA, AnyHashable("PostCodeExtension"): 2567, AnyHashable("ZIP"): 90020, AnyHashable("SubThoroughfare"): 3465, AnyHashable("Name"): 3465 W 6th St, AnyHashable("Thoroughfare"): W 6th St, AnyHashable("SubAdministrativeArea"): Los Angeles, AnyHashable("FormattedAddressLines"): <__NSArrayM 0x60800024ced0>(
+//                    3465 W 6th St,
+//                    Los Angeles, CA  90020,
+//                    United States
+//                )
+
+//            SelectedLocationName = containsPlacemark.name
+//            SelectedLocationAdress = nil
+//
+//            updateGPS()
+//
+// self.PlaceName.text = containsPlacemark.name
+
+//            Optional([AnyHashable("Street"): 90 Bell Rock Plz, AnyHashable("ZIP"): 86351, AnyHashable("Country"): United States, AnyHashable("SubThoroughfare"): 90, AnyHashable("State"): AZ, AnyHashable("Name"): Coconino National Forest, AnyHashable("SubAdministrativeArea"): Yavapai, AnyHashable("Thoroughfare"): Bell Rock Plz, AnyHashable("FormattedAddressLines"): <__NSArrayM 0x608000241440>(
+//                Coconino National Forest,
+//                90 Bell Rock Plz,
+//                Sedona, AZ  86351,
+//                United States
+//                )
+//                , AnyHashable("City"): Sedona, AnyHashable("CountryCode"): US, AnyHashable("PostCodeExtension"): 9040])
+
+
+/*
+ print(locality)
+ print(GPS)
+ print(containsPlacemark.areasOfInterest)
+ print(containsPlacemark.name)
+ print(containsPlacemark.thoroughfare)
+ print(containsPlacemark.subThoroughfare)
+ 
+ 
+ public var name: String? { get } // eg. Apple Inc.
+ public var thoroughfare: String? { get } // street name, eg. Infinite Loop
+ public var subThoroughfare: String? { get } // eg. 1
+ public var locality: String? { get } // city, eg. Cupertino
+ public var subLocality: String? { get } // neighborhood, common name, eg. Mission District
+ public var administrativeArea: String? { get } // state, eg. CA
+ public var subAdministrativeArea: String? { get } // county, eg. Santa Clara
+ public var postalCode: String? { get } // zip code, eg. 95014
+ public var ISOcountryCode: String? { get } // eg. US
+ public var country: String? { get } // eg. United States
+ public var inlandWater: String? { get } // eg. Lake Tahoe
+ public var ocean: String? { get } // eg. Pacific Ocean
+ public var areasOfInterest: [String]? { get } // eg. Golden Gate Park
+ */
+
 
 
