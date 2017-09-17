@@ -33,7 +33,7 @@ struct Post {
         // ?? "" gives default value
         self.imageUrl = dictionary["imageUrl"] as? String ?? ""
         self.caption = dictionary["caption"] as? String ?? ""
-        self.emoji = dictionary["caption"] as? String ?? ""
+        self.emoji = dictionary["emoji"] as? String ?? ""
         
         let secondsFrom1970 = dictionary["creationDate"] as? Double ?? 0
         self.creationDate = Date(timeIntervalSince1970: secondsFrom1970)

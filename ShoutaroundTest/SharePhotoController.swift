@@ -20,6 +20,8 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
     
     let locationCellID = "locationCellID"
     let emojiCellID = "emojiCellID"
+    let captionDefault = "Insert Caption Here"
+    let emojiDefault = "😍🐮🍔🇺🇸🔥"
     
     var selectedPostLocation: CLLocation? = nil {
         
@@ -461,7 +463,7 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         
         if textView == captionTextView {
             
-            if textView.text == "Caption Here" {
+            if textView.text == captionDefault {
                 textView.text = nil
             }
             
@@ -469,7 +471,7 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         }
         
         if textView == emojiTextView {
-            if  emojiTextView.text == "😍🐮🍔🇺🇸🔥"{
+            if  emojiTextView.text == emojiDefault{
                 textView.text = nil
                 
                 
@@ -520,13 +522,13 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
     
     
     func resetCaptionTextView() {
-        self.captionTextView.text = "Caption Here"
+        self.captionTextView.text = captionDefault
         self.captionTextView.textColor = UIColor.lightGray
         
     }
     
     func resetEmojiTextView() {
-        self.emojiTextView.text = "😍🐮🍔🇺🇸🔥"
+        self.emojiTextView.text = emojiDefault
         self.emojiTextView.alpha = 0.25
     }
     
@@ -714,10 +716,15 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
     fileprivate func saveToDatabaseWithImageURL(imageUrl: String) {
         
         guard let postImage = selectedImage else {return}
-        guard let caption = captionTextView.text else {return}
+        var caption = captionTextView.text
+            if caption == captionDefault {
+                caption = ""
+            }
+        let selectedPostEmoji = selectedEmojis
         let googlePlaceID = selectedPostGooglePlaceID ?? ""
         guard let postLocationName = locationNameLabel.text else {return}
         guard let postLocationAdress = locationAdressLabel.text else {return}
+        
         
         
         guard let uid = Auth.auth().currentUser?.uid else {return}
@@ -725,7 +732,7 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         let userPostRef = Database.database().reference().child("posts").child(uid)
         let ref = userPostRef.childByAutoId()
         
-        let values = ["imageUrl": imageUrl, "caption": caption, "imageWidth": postImage.size.width, "imageHeight": postImage.size.height, "creationDate": Date().timeIntervalSince1970, "googlePlaceID": googlePlaceID, "locationName": postLocationName, "locationAdress": postLocationAdress] as [String:Any]
+        let values = ["imageUrl": imageUrl, "caption": caption, "emoji": selectedPostEmoji, "imageWidth": postImage.size.width, "imageHeight": postImage.size.height, "creationDate": Date().timeIntervalSince1970, "googlePlaceID": googlePlaceID, "locationName": postLocationName, "locationAdress": postLocationAdress] as [String:Any]
         ref.updateChildValues(values) { (err, ref) in
             if let err = err {
                 self.navigationItem.rightBarButtonItem?.isEnabled = true

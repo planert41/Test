@@ -28,7 +28,8 @@ class HomePostCell: UICollectionViewCell {
             photoImageView.loadImage(urlString: imageUrl)
             usernameLabel.text = post?.user.username
             locationLabel.text = post?.locationAdress
-//      usernameLabel.text = "😀👌🇰🇷🍖🐷🍺"
+            emojiLabel.text = post?.emoji
+
             
             guard let profileImageUrl = post?.user.profileImageUrl else {return}
             
@@ -82,6 +83,16 @@ class HomePostCell: UICollectionViewCell {
         
     }()
     
+    let emojiLabel: UILabel = {
+        let label = UILabel()
+        label.text = "Emojis"
+        label.font = UIFont.boldSystemFont(ofSize: 20)
+        label.textAlignment = NSTextAlignment.right
+        label.backgroundColor = UIColor.yellow
+        return label
+        
+    }()
+    
     let usernameLabel: UILabel = {
         let label = UILabel()
         label.text = "Username"
@@ -94,7 +105,8 @@ class HomePostCell: UICollectionViewCell {
         let label = UILabel()
         label.text = "Location"
         //        label.text = "😀👌🇰🇷🍖🐷🍺"
-        label.font = UIFont.boldSystemFont(ofSize: 14)
+        label.font = UIFont.boldSystemFont(ofSize: 12)
+        label.textColor = UIColor.darkGray
         return label
     }()
     
@@ -186,22 +198,28 @@ class HomePostCell: UICollectionViewCell {
         addSubview(userProfileImageView)
         addSubview(usernameLabel)
         addSubview(locationLabel)
-        addSubview(optionsButton)
+//
+        addSubview(emojiLabel)
+
 
 //        addSubview(EmojiLabel)
 //        EmojiLabel.anchor(top: userProfileImageView.bottomAnchor, left: leftAnchor, bottom: nil, right: nil, paddingTop: 0, paddingLeft: 8, paddingBottom: 0, paddingRight: 0, width: 0, height: 40)
 //        
-        
-        
-        
-        optionsButton.anchor(top: topAnchor, left: nil, bottom: photoImageView.topAnchor, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 44, height: 0)
+//        addSubview(optionsButton)
+//        optionsButton.anchor(top: topAnchor, left: nil, bottom: photoImageView.topAnchor, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 44, height: 0)
         
 //        usernameLabel.anchor(top: topAnchor, left: userProfileImageView.rightAnchor, bottom: photoImageView.topAnchor, right: optionsButton.leftAnchor, paddingTop: 0, paddingLeft: 8, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
         
-        usernameLabel.anchor(top: topAnchor, left: userProfileImageView.rightAnchor, bottom: nil, right: optionsButton.leftAnchor, paddingTop: 0, paddingLeft: 8, paddingBottom: 0, paddingRight: 0, width: 0, height: userProfileImageView.frame.height/2)
+        
+//        let targetSize = CGSize(width: self.frame.width, height: 1000)
+//        let estimatedSize = emojiLabel.systemLayoutSizeFitting(targetSize)
+        
+        emojiLabel.anchor(top: topAnchor, left: nil, bottom: photoImageView.topAnchor, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 140, height: 0)
+        
+        usernameLabel.anchor(top: topAnchor, left: userProfileImageView.rightAnchor, bottom: nil, right: emojiLabel.leftAnchor, paddingTop: 0, paddingLeft: 8, paddingBottom: 0, paddingRight: 0, width: 0, height: userProfileImageView.frame.height/2)
         
 
-        locationLabel.anchor(top: usernameLabel.bottomAnchor, left: userProfileImageView.rightAnchor, bottom: photoImageView.topAnchor, right: optionsButton.leftAnchor, paddingTop: 0, paddingLeft: 8, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
+        locationLabel.anchor(top: usernameLabel.bottomAnchor, left: userProfileImageView.rightAnchor, bottom: photoImageView.topAnchor, right: emojiLabel.leftAnchor, paddingTop: 0, paddingLeft: 8, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
         
         
         userProfileImageView.anchor(top: topAnchor, left: leftAnchor, bottom: nil, right: nil, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 40, height: 40)
@@ -209,6 +227,8 @@ class HomePostCell: UICollectionViewCell {
         
         photoImageView.anchor(top: userProfileImageView.bottomAnchor, left: leftAnchor, bottom: nil, right: rightAnchor, paddingTop: 8, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
         photoImageView.heightAnchor.constraint(equalTo: widthAnchor, multiplier: 1).isActive = true
+        
+
         
         setupActionButtons()
         
