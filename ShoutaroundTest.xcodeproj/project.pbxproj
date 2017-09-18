@@ -85,6 +85,7 @@
 		A58477A51F6DBFDA007DE06C /* Emoji.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Emoji.swift; sourceTree = "<group>"; };
 		A58477A71F6EB720007DE06C /* EmojiExtensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EmojiExtensions.swift; sourceTree = "<group>"; };
 		A58477A91F6EFFD7007DE06C /* LocationLabels.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LocationLabels.swift; sourceTree = "<group>"; };
+		A5BFBB651F6F647100F36AF8 /* ShoutaroundTest-CBridgingHeader.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "ShoutaroundTest-CBridgingHeader.h"; sourceTree = "<group>"; };
 		A5C480CE1F5DCB500096E003 /* FBSDKCoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = FBSDKCoreKit.framework; path = "ShoutaroundTest/FacebookSDKs-iOS-4.26.0/FBSDKCoreKit.framework"; sourceTree = "<group>"; };
 		A5C480CF1F5DCB500096E003 /* FBSDKLoginKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = FBSDKLoginKit.framework; path = "ShoutaroundTest/FacebookSDKs-iOS-4.26.0/FBSDKLoginKit.framework"; sourceTree = "<group>"; };
 		A5C645091F54F68800C78244 /* SharePhotoController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SharePhotoController.swift; sourceTree = "<group>"; };
@@ -215,6 +216,7 @@
 				A54E1D761F4E736B00C2AA77 /* LaunchScreen.storyboard */,
 				A54E1D791F4E736B00C2AA77 /* Info.plist */,
 				A54E1D711F4E736B00C2AA77 /* InstagramFirebase.xcdatamodeld */,
+				A5BFBB651F6F647100F36AF8 /* ShoutaroundTest-CBridgingHeader.h */,
 			);
 			path = ShoutaroundTest;
 			sourceTree = "<group>";

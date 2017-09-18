@@ -7,10 +7,12 @@
 //
 
 import UIKit
+import mailgun
 
 
 protocol HomePostCellDelegate {
     func didTapComment(post:Post)
+    func didSendMessage(post:Post)
     func didLike(for cell: HomePostCell)
 }
 
@@ -153,13 +155,22 @@ class HomePostCell: UICollectionViewCell {
 
 // Send Message
     
-    let sendMessageButton: UIButton = {
+    lazy var sendMessageButton: UIButton = {
         let button = UIButton(type: .system)
         button.setImage(#imageLiteral(resourceName: "send2").withRenderingMode(.alwaysOriginal), for: .normal)
+        button.addTarget(self, action: #selector(handleMessage), for: .touchUpInside)
         return button
     
     }()
 
+    
+    func handleMessage(){
+        guard let post = post else {return}
+        delegate?.didSendMessage(post: post)
+    }
+    
+
+    
 // Bookmark
     
     let bookmarkButton: UIButton = {
