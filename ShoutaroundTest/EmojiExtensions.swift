@@ -19,6 +19,7 @@ extension UnicodeScalar {
         0x2600...0x26FF,   // Misc symbols
         0x2700...0x27BF,   // Dingbats
         0xFE00...0xFE0F,   // Variation Selectors
+        0x1F1E6...0x1F1FF, // Flags
         0x1F900...0x1F9FF,  // Supplemental Symbols and Pictographs
         65024...65039, // Variation selector
         8400...8447: // Combining Diacritical Marks for Symbols

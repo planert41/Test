@@ -66,6 +66,7 @@ class UserSearchController: UICollectionViewController, UICollectionViewDelegate
     
     var filteredUsers = [User]()
     var users = [User]()
+    
     fileprivate func fetchUsers() {
         
         let ref = Database.database().reference().child("users")

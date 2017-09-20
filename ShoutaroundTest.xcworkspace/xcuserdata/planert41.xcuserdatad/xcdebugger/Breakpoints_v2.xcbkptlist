@@ -684,7 +684,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "15"
             endingLineNumber = "15"
-            landmarkName = "drawTextInRect(_:)"
+            landmarkName = "drawText(in:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -773,11 +773,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ShoutaroundTest/HomeController.swift"
-            timestampString = "527397186.15081"
+            timestampString = "527568795.448114"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "231"
-            endingLineNumber = "231"
+            startingLineNumber = "413"
+            endingLineNumber = "413"
             landmarkName = "didSendMessage(post:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -789,13 +789,248 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ShoutaroundTest/HomeController.swift"
-            timestampString = "527398341.277265"
+            timestampString = "527568795.448114"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "239"
-            endingLineNumber = "239"
+            startingLineNumber = "421"
+            endingLineNumber = "421"
             landmarkName = "didSendMessage(post:)"
             landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "ShoutaroundTest/HomeController.swift"
+            timestampString = "527568795.448114"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "256"
+            endingLineNumber = "256"
+            landmarkName = "nearbyPost()"
+            landmarkType = "7">
+            <Locations>
+               <Location
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "ShoutaroundTest.HomeController.(nearbyPost () -&gt; ()).(closure #1)"
+                  moduleName = "ShoutaroundTest"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/planert41/Code/ShoutaroundTest/ShoutaroundTest/HomeController.swift"
+                  timestampString = "527483528.242339"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "102"
+                  endingLineNumber = "102"
+                  offsetFromSymbolStart = "423">
+               </Location>
+               <Location
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "ShoutaroundTest.HomeController.(nearbyPost () -&gt; ()).(closure #1).(closure #1)"
+                  moduleName = "ShoutaroundTest"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/planert41/Code/ShoutaroundTest/ShoutaroundTest/HomeController.swift"
+                  timestampString = "527483528.244939"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "103"
+                  endingLineNumber = "103"
+                  offsetFromSymbolStart = "827">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "ShoutaroundTest/HomeController.swift"
+            timestampString = "527568795.448114"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "248"
+            endingLineNumber = "248"
+            landmarkName = "nearbyPost()"
+            landmarkType = "7">
+            <Locations>
+               <Location
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "ShoutaroundTest.HomeController.nearbyPost () -&gt; ()"
+                  moduleName = "ShoutaroundTest"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/planert41/Code/ShoutaroundTest/ShoutaroundTest/HomeController.swift"
+                  timestampString = "527483495.228791"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "97"
+                  endingLineNumber = "97"
+                  offsetFromSymbolStart = "368">
+               </Location>
+               <Location
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "ShoutaroundTest.HomeController.(nearbyPost () -&gt; ()).(closure #1)"
+                  moduleName = "ShoutaroundTest"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/planert41/Code/ShoutaroundTest/ShoutaroundTest/HomeController.swift"
+                  timestampString = "527483495.231999"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "97"
+                  endingLineNumber = "97"
+                  offsetFromSymbolStart = "81">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "ShoutaroundTest/HomeController.swift"
+            timestampString = "527568795.448114"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "257"
+            endingLineNumber = "257"
+            landmarkName = "nearbyPost()"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "ShoutaroundTest/HomeController.swift"
+            timestampString = "527555690.592272"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "14"
+            endingLineNumber = "14"
+            landmarkName = "HomeController"
+            landmarkType = "3">
+            <Locations>
+               <Location
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "ShoutaroundTest.HomeController.__deallocating_deinit"
+                  moduleName = "ShoutaroundTest"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/planert41/Code/ShoutaroundTest/ShoutaroundTest/HomeController.swift"
+                  timestampString = "527556531.442422"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "0"
+                  endingLineNumber = "0"
+                  offsetFromSymbolStart = "4">
+               </Location>
+               <Location
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "ShoutaroundTest.HomeController.init (collectionViewLayout : __ObjC.UICollectionViewLayout) -&gt; ShoutaroundTest.HomeController"
+                  moduleName = "ShoutaroundTest"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/planert41/Code/ShoutaroundTest/ShoutaroundTest/HomeController.swift"
+                  timestampString = "527556531.445756"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "16"
+                  endingLineNumber = "16"
+                  offsetFromSymbolStart = "35">
+               </Location>
+               <Location
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "ShoutaroundTest.HomeController.__allocating_init (collectionViewLayout : __ObjC.UICollectionViewLayout) -&gt; ShoutaroundTest.HomeController"
+                  moduleName = "ShoutaroundTest"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/planert41/Code/ShoutaroundTest/ShoutaroundTest/HomeController.swift"
+                  timestampString = "527556531.44889"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "0"
+                  endingLineNumber = "0"
+                  offsetFromSymbolStart = "4">
+               </Location>
+               <Location
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "ShoutaroundTest.HomeController.init (nibName : Swift.Optional&lt;Swift.String&gt;, bundle : Swift.Optional&lt;__ObjC.Bundle&gt;) -&gt; ShoutaroundTest.HomeController"
+                  moduleName = "ShoutaroundTest"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/planert41/Code/ShoutaroundTest/ShoutaroundTest/HomeController.swift"
+                  timestampString = "527556531.452083"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "16"
+                  endingLineNumber = "16"
+                  offsetFromSymbolStart = "81">
+               </Location>
+               <Location
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "ShoutaroundTest.HomeController.__allocating_init (nibName : Swift.Optional&lt;Swift.String&gt;, bundle : Swift.Optional&lt;__ObjC.Bundle&gt;) -&gt; ShoutaroundTest.HomeController"
+                  moduleName = "ShoutaroundTest"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/planert41/Code/ShoutaroundTest/ShoutaroundTest/HomeController.swift"
+                  timestampString = "527556531.454933"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "0"
+                  endingLineNumber = "0"
+                  offsetFromSymbolStart = "23">
+               </Location>
+               <Location
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "ShoutaroundTest.HomeController.__allocating_init (coder : __ObjC.NSCoder) -&gt; Swift.Optional&lt;ShoutaroundTest.HomeController&gt;"
+                  moduleName = "ShoutaroundTest"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/planert41/Code/ShoutaroundTest/ShoutaroundTest/HomeController.swift"
+                  timestampString = "527556531.457951"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "0"
+                  endingLineNumber = "0"
+                  offsetFromSymbolStart = "4">
+               </Location>
+               <Location
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "ShoutaroundTest.HomeController.init (coder : __ObjC.NSCoder) -&gt; Swift.Optional&lt;ShoutaroundTest.HomeController&gt;"
+                  moduleName = "ShoutaroundTest"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/planert41/Code/ShoutaroundTest/ShoutaroundTest/HomeController.swift"
+                  timestampString = "527556531.460875"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "16"
+                  endingLineNumber = "16"
+                  offsetFromSymbolStart = "35">
+               </Location>
+            </Locations>
          </BreakpointContent>
       </BreakpointProxy>
    </Breakpoints>
