@@ -20,5 +20,10 @@ pod 'SwiftyJSON'
 pod 'GeoFire', :git => 'https://github.com/firebase/geofire-objc.git'
 pod 'SwiftLocation'
 pod 'Alamofire', '~> 4.4'
+pod 'mailgun', '~> 1.0.3'
+pod ‘Dropper’
+pod ‘DropDown'
+pod 'AZDropdownMenu' 
+
 
 end

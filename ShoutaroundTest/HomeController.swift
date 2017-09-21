@@ -10,13 +10,16 @@ import UIKit
 import Firebase
 import mailgun
 import GeoFire
+import CoreGraphics
 
-class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLayout, HomePostCellDelegate, UISearchBarDelegate {
+class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLayout, HomePostCellDelegate, UISearchBarDelegate, UIPickerViewDelegate, UIPickerViewDataSource  {
     
     let cellId = "cellId"
-    
+    let geoPickerData = ["ALL","500", "1000", "2500", "5000"]
     var allPosts = [Post]()
     var filteredPosts = [Post]()
+
+
 
     lazy var filterBar: UIView = {
         let sb = UIView()
@@ -39,17 +42,55 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         let button = UIButton(type: .system)
         button.setTitle("1000 m", for: .normal)
         button.addTarget(self, action: #selector(filterRange), for: .touchUpInside)
-        button.backgroundColor = .clear
+        button.backgroundColor = .white
         button.layer.cornerRadius = 5
         button.layer.borderWidth = 1
         button.layer.borderColor = UIColor.black.cgColor
         return button
     }()
     
-    func filterRange() {
-        print("test")
+
+        lazy var dummyTextView: UITextView = {
+            let button = UITextView()
+            button.text = "1000"
+            button.backgroundColor = .blue
+            button.layer.cornerRadius = 5
+            button.layer.borderWidth = 1
+            button.layer.borderColor = UIColor.black.cgColor
+            return button
+        }()
+ 
+
+    func CGRectMake(_ x: CGFloat, _ y: CGFloat, _ width: CGFloat, _ height: CGFloat) -> CGRect {
+        return CGRect(x: x, y: y, width: width, height: height)
     }
     
+    
+    func filterRange() {
+     
+        dummyTextView.perform(#selector(becomeFirstResponder), with: nil, afterDelay: 0.1)
+    
+    }
+    
+    // DataSource
+    func numberOfComponents(in pickerView: UIPickerView) -> Int {
+        
+        return 1
+        
+    }
+    func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
+        return geoPickerData.count
+    }
+    
+    // Delegate
+    
+    func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
+        return geoPickerData[row]
+    }
+    func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
+        self.rangeButton.setTitle(geoPickerData[row], for: .normal)
+        
+    }
     
     override func viewDidLayoutSubviews() {
         
@@ -57,6 +98,8 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         let topinset = (self.navigationController?.navigationBar.frame.size.height)! + UIApplication.shared.statusBarFrame.height + filterBarHeight
         collectionView?.frame = CGRect(x: 0, y: topinset, width: view.frame.width, height: view.frame.height)
     }
+    
+    
     
     
     override func viewDidLoad() {
@@ -75,9 +118,15 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         filterBar.addSubview(rangeButton)
         filterBar.addSubview(searchBar)
         filterBar.isHidden = true
+
+
         
         rangeButton.anchor(top: filterBar.topAnchor, left: nil, bottom: filterBar.bottomAnchor, right: filterBar.rightAnchor, paddingTop: 10, paddingLeft: 0, paddingBottom: 10, paddingRight: 10, width: 100, height: 0)
+      //  rangeButton.addTarget(self, action: #selector(addPopover), for: .touchUpInside)
+        
+        
         searchBar.anchor(top: filterBar.topAnchor, left: filterBar.leftAnchor, bottom: filterBar.bottomAnchor, right: rangeButton.leftAnchor, paddingTop: 8, paddingLeft: 8, paddingBottom: 8, paddingRight: 8, width: 0, height: 0)
+
         
         collectionView?.backgroundColor = .white
         collectionView?.register(HomePostCell.self, forCellWithReuseIdentifier: cellId)
@@ -88,11 +137,60 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         collectionView?.alwaysBounceVertical = true
         collectionView?.keyboardDismissMode = .onDrag
         
+        
+        
         setupNavigationItems()
+        //setupDropDown()
         fetchAllPosts()
-    
+ 
+        
+        filterBar.addSubview(dummyTextView)
+       // dummyTextView.anchor(top: rangeButton.topAnchor, left: nil, bottom: rangeButton.bottomAnchor, right: rangeButton.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 10, height: 0)
+ 
+       setupGeoPicker()
     }
     
+    
+
+    
+    func setupGeoPicker() {
+        
+
+        
+     //   var pickerView = UIPickerView(frame: CGRectMake(0, 200, view.frame.width, 300))
+        var pickerView = UIPickerView()
+        pickerView.backgroundColor = .white
+        pickerView.showsSelectionIndicator = true
+        pickerView.dataSource = self
+        pickerView.delegate = self
+        
+        var toolBar = UIToolbar()
+        toolBar.barStyle = UIBarStyle.default
+        toolBar.isTranslucent = true
+
+        toolBar.tintColor = UIColor(red: 76/255, green: 217/255, blue: 100/255, alpha: 1)
+        toolBar.sizeToFit()
+        
+        
+        let doneButton = UIBarButtonItem(title: "Done", style: UIBarButtonItemStyle.bordered, target: self, action: Selector("donePicker"))
+        let spaceButton = UIBarButtonItem(barButtonSystemItem: UIBarButtonSystemItem.flexibleSpace, target: nil, action: nil)
+        let cancelButton = UIBarButtonItem(title: "Cancel", style: UIBarButtonItemStyle.bordered, target: self, action: Selector("cancelPicker"))
+        
+        toolBar.setItems([cancelButton, spaceButton, doneButton], animated: false)
+        toolBar.isUserInteractionEnabled = true
+        
+        
+        self.dummyTextView.inputView = pickerView
+        self.dummyTextView.inputAccessoryView = toolBar
+    }
+    
+    func donePicker(){
+        dummyTextView.resignFirstResponder()
+    }
+    
+    func cancelPicker(){
+        dummyTextView.resignFirstResponder()
+    }
     
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
         
@@ -412,4 +510,12 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
             })
         
     }
+
+
+
+
 }
+
+
+
+
