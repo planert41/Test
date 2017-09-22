@@ -39,10 +39,33 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
         collectionView?.register(UserProfilePhotoCell.self, forCellWithReuseIdentifier: cellId)
         collectionView?.register(HomePostCell.self, forCellWithReuseIdentifier: homePostCellId)
         
+        let refreshControl = UIRefreshControl()
+        refreshControl.addTarget(self, action: #selector(handleRefresh), for: .valueChanged)
+        collectionView?.refreshControl = refreshControl
+        collectionView?.alwaysBounceVertical = true
+        collectionView?.keyboardDismissMode = .onDrag
+        
         setupLogOutButton()
         fetchUser()
         
         
+    }
+    
+    func handleUpdateFeed() {
+        handleRefresh()
+    }
+    
+    // IOS9 - let refreshControl = UIRefreshControl()
+    
+    func handleRefresh() {
+        
+        // RemoveAll so that when user follow/unfollows it updates
+        
+        posts.removeAll()
+
+        fetchUser()
+        self.collectionView?.refreshControl?.endRefreshing()
+        print("Refresh Profile Page")
     }
     
     var posts = [Post]()

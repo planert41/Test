@@ -244,7 +244,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         self.searchBar.text = ""
         self.geoFilterButton.titleLabel?.text = geoFilterRange[0]
         self.collectionView?.refreshControl?.endRefreshing()
-        print("Refresh")
+        print("Refresh Home Feed")
     }
     
     fileprivate func fetchAllPosts() {
