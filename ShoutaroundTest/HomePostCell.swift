@@ -13,6 +13,7 @@ import mailgun
 protocol HomePostCellDelegate {
     func didTapComment(post:Post)
     func didSendMessage(post:Post)
+    func didTapUser(post:Post)
     func didLike(for cell: HomePostCell)
 }
 
@@ -29,9 +30,16 @@ class HomePostCell: UICollectionViewCell {
                 
             photoImageView.loadImage(urlString: imageUrl)
             usernameLabel.text = post?.user.username
-            locationLabel.text = post?.locationAdress
+            locationLabel.text = post?.locationName
             emojiLabel.text = post?.emoji
-
+            
+            usernameLabel.isUserInteractionEnabled = true
+            let usernameTap = UITapGestureRecognizer(target: self, action: Selector("usernameTap"))
+            usernameLabel.addGestureRecognizer(usernameTap)
+            
+            locationLabel.isUserInteractionEnabled = true
+            let locationTap = UITapGestureRecognizer(target: self, action: Selector("locationTap"))
+            locationLabel.addGestureRecognizer(locationTap)
             
             guard let profileImageUrl = post?.user.profileImageUrl else {return}
             
@@ -42,6 +50,7 @@ class HomePostCell: UICollectionViewCell {
                 
         }
     }
+
     
     fileprivate func setupAttributedCaption(){
         
@@ -136,6 +145,19 @@ class HomePostCell: UICollectionViewCell {
     
     func handleLike() {
         delegate?.didLike(for: self)
+    }
+    
+    
+    func usernameTap() {
+        print("Tap username label")
+        print(post?.user.username)
+        guard let post = post else {return}
+        delegate?.didTapUser(post: post)
+    }
+    
+    func locationTap() {
+        print("Tap location label")
+        print(post?.locationName)
     }
     
 // Comments

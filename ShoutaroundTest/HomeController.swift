@@ -476,6 +476,13 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     }
     
     
+    func didTapUser(post: Post) {
+        let userProfileController = UserProfileController(collectionViewLayout: UICollectionViewFlowLayout())
+        userProfileController.userId = post.user.uid
+        
+        navigationController?.pushViewController(userProfileController, animated: true)
+    }
+    
     func didSendMessage(post:Post){
         
             print("emailtest")
