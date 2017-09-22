@@ -773,7 +773,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ShoutaroundTest/HomeController.swift"
-            timestampString = "527727862.278809"
+            timestampString = "527743105.006086"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "495"
@@ -789,7 +789,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ShoutaroundTest/HomeController.swift"
-            timestampString = "527727862.278809"
+            timestampString = "527743105.006086"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "503"
@@ -805,12 +805,12 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ShoutaroundTest/HomeController.swift"
-            timestampString = "527727862.278809"
+            timestampString = "527743105.006086"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "338"
-            endingLineNumber = "338"
-            landmarkName = "nearbyPost()"
+            startingLineNumber = "339"
+            endingLineNumber = "339"
+            landmarkName = "filterNearbyPost()"
             landmarkType = "7">
             <Locations>
                <Location
@@ -853,12 +853,12 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ShoutaroundTest/HomeController.swift"
-            timestampString = "527727862.278809"
+            timestampString = "527743105.006086"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "330"
-            endingLineNumber = "330"
-            landmarkName = "nearbyPost()"
+            startingLineNumber = "331"
+            endingLineNumber = "331"
+            landmarkName = "filterNearbyPost()"
             landmarkType = "7">
             <Locations>
                <Location
@@ -901,12 +901,12 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ShoutaroundTest/HomeController.swift"
-            timestampString = "527727862.278809"
+            timestampString = "527743105.006086"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "339"
-            endingLineNumber = "339"
-            landmarkName = "nearbyPost()"
+            startingLineNumber = "340"
+            endingLineNumber = "340"
+            landmarkName = "filterNearbyPost()"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -1040,12 +1040,28 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ShoutaroundTest/HomeController.swift"
-            timestampString = "527727817.637604"
+            timestampString = "527743105.006086"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "71"
-            endingLineNumber = "71"
-            landmarkName = "filterRange()"
+            startingLineNumber = "327"
+            endingLineNumber = "327"
+            landmarkName = "filterNearbyPost()"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "ShoutaroundTest/HomeController.swift"
+            timestampString = "527743105.006086"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "324"
+            endingLineNumber = "324"
+            landmarkName = "filterNearbyPost()"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>

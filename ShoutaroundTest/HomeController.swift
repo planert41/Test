@@ -15,82 +15,12 @@ import CoreGraphics
 class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLayout, HomePostCellDelegate, UISearchBarDelegate, UIPickerViewDelegate, UIPickerViewDataSource  {
     
     let cellId = "cellId"
-    let geoPickerData = ["ALL","500", "1000", "2500", "5000"]
     var allPosts = [Post]()
     var filteredPosts = [Post]()
+    
+    // GeoPickerData 1st element should always be default ALL
+    let geoFilterRange = ["ALL","500", "1000", "2500", "5000"]
 
-
-
-    lazy var filterBar: UIView = {
-        let sb = UIView()
-        sb.backgroundColor = UIColor.lightGray
-        return sb
-    }()
-    
-    lazy var searchBar: UISearchBar = {
-        let sb = UISearchBar()
-        sb.placeholder = "Search for Caption or Emoji 😍🐮🍔🇺🇸🔥"
-        sb.barTintColor = .white
-        sb.backgroundColor = .white
-        UITextField.appearance(whenContainedInInstancesOf: [UISearchBar.self]).backgroundColor = UIColor.rgb(red: 240, green: 240, blue: 240)
-        
-        sb.delegate = self
-        return sb
-    }()
-    
-    lazy var rangeButton: UIButton = {
-        let button = UIButton(type: .system)
-        button.setTitle("1000 m", for: .normal)
-        button.addTarget(self, action: #selector(filterRange), for: .touchUpInside)
-        button.backgroundColor = .white
-        button.layer.cornerRadius = 5
-        button.layer.borderWidth = 1
-        button.layer.borderColor = UIColor.black.cgColor
-        return button
-    }()
-    
-
-        lazy var dummyTextView: UITextView = {
-            let button = UITextView()
-            button.text = "1000"
-            button.backgroundColor = .blue
-            button.layer.cornerRadius = 5
-            button.layer.borderWidth = 1
-            button.layer.borderColor = UIColor.black.cgColor
-            return button
-        }()
- 
-
-    func CGRectMake(_ x: CGFloat, _ y: CGFloat, _ width: CGFloat, _ height: CGFloat) -> CGRect {
-        return CGRect(x: x, y: y, width: width, height: height)
-    }
-    
-    
-    func filterRange() {
-     
-        dummyTextView.perform(#selector(becomeFirstResponder), with: nil, afterDelay: 0.1)
-    
-    }
-    
-    // DataSource
-    func numberOfComponents(in pickerView: UIPickerView) -> Int {
-        
-        return 1
-        
-    }
-    func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
-        return geoPickerData.count
-    }
-    
-    // Delegate
-    
-    func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
-        return geoPickerData[row]
-    }
-    func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
-        self.rangeButton.setTitle(geoPickerData[row], for: .normal)
-        
-    }
     
     override func viewDidLayoutSubviews() {
         
@@ -108,24 +38,21 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         
         self.automaticallyAdjustsScrollViewInsets = false
         
-//            let name = NSNotification.Name(rawValue: "UpdateFeed")
-        
-        
         NotificationCenter.default.addObserver(self, selector: #selector(handleUpdateFeed), name: SharePhotoController.updateFeedNotificationName, object: nil)
 
         view.addSubview(filterBar)
         filterBar.anchor(top: topLayoutGuide.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 50)
-        filterBar.addSubview(rangeButton)
+        filterBar.addSubview(geoFilterButton)
         filterBar.addSubview(searchBar)
         filterBar.isHidden = true
+        filterBar.addSubview(dummyTextView)
 
 
         
-        rangeButton.anchor(top: filterBar.topAnchor, left: nil, bottom: filterBar.bottomAnchor, right: filterBar.rightAnchor, paddingTop: 10, paddingLeft: 0, paddingBottom: 10, paddingRight: 10, width: 100, height: 0)
-      //  rangeButton.addTarget(self, action: #selector(addPopover), for: .touchUpInside)
+        geoFilterButton.anchor(top: filterBar.topAnchor, left: nil, bottom: filterBar.bottomAnchor, right: filterBar.rightAnchor, paddingTop: 10, paddingLeft: 0, paddingBottom: 10, paddingRight: 10, width: 100, height: 0)
+
         
-        
-        searchBar.anchor(top: filterBar.topAnchor, left: filterBar.leftAnchor, bottom: filterBar.bottomAnchor, right: rangeButton.leftAnchor, paddingTop: 8, paddingLeft: 8, paddingBottom: 8, paddingRight: 8, width: 0, height: 0)
+        searchBar.anchor(top: filterBar.topAnchor, left: filterBar.leftAnchor, bottom: filterBar.bottomAnchor, right: geoFilterButton.leftAnchor, paddingTop: 8, paddingLeft: 8, paddingBottom: 8, paddingRight: 8, width: 0, height: 0)
 
         
         collectionView?.backgroundColor = .white
@@ -137,27 +64,61 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         collectionView?.alwaysBounceVertical = true
         collectionView?.keyboardDismissMode = .onDrag
         
-        
-        
         setupNavigationItems()
-        //setupDropDown()
         fetchAllPosts()
- 
-        
-        filterBar.addSubview(dummyTextView)
-       // dummyTextView.anchor(top: rangeButton.topAnchor, left: nil, bottom: rangeButton.bottomAnchor, right: rangeButton.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 10, height: 0)
- 
-       setupGeoPicker()
+
+        setupGeoPicker()
     }
     
     
-
+    
+    func CGRectMake(_ x: CGFloat, _ y: CGFloat, _ width: CGFloat, _ height: CGFloat) -> CGRect {
+        return CGRect(x: x, y: y, width: width, height: height)
+    }
+    
+    
+// Handle Filter Bar
+    
+    lazy var filterBar: UIView = {
+        let sb = UIView()
+        sb.backgroundColor = UIColor.lightGray
+        return sb
+    }()
+    
+    func hideHeader(){
+        
+        self.filterBar.isHidden = (self.filterBar.isHidden == true) ? false : true
+        self.collectionView?.reloadData()
+        
+    }
+    
+    
+// Setup for Geo Range Button, Dummy TextView and UIPicker
+    
+    lazy var geoFilterButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setTitle(self.geoFilterRange[0], for: .normal)
+        button.addTarget(self, action: #selector(filterRange), for: .touchUpInside)
+        button.backgroundColor = .white
+        button.layer.cornerRadius = 5
+        button.layer.borderWidth = 1
+        button.layer.borderColor = UIColor.black.cgColor
+        return button
+    }()
+    
+    
+    lazy var dummyTextView: UITextView = {
+        let button = UITextView()
+        button.text = "1000"
+        button.backgroundColor = .blue
+        button.layer.cornerRadius = 5
+        button.layer.borderWidth = 1
+        button.layer.borderColor = UIColor.black.cgColor
+        return button
+    }()
+    
     
     func setupGeoPicker() {
-        
-
-        
-     //   var pickerView = UIPickerView(frame: CGRectMake(0, 200, view.frame.width, 300))
         var pickerView = UIPickerView()
         pickerView.backgroundColor = .white
         pickerView.showsSelectionIndicator = true
@@ -167,7 +128,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         var toolBar = UIToolbar()
         toolBar.barStyle = UIBarStyle.default
         toolBar.isTranslucent = true
-
+        
         toolBar.tintColor = UIColor(red: 76/255, green: 217/255, blue: 100/255, alpha: 1)
         toolBar.sizeToFit()
         
@@ -186,11 +147,56 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     
     func donePicker(){
         dummyTextView.resignFirstResponder()
+        filterPostByCaption(self.searchBar.text)
+        filterNearbyPost()
     }
     
     func cancelPicker(){
         dummyTextView.resignFirstResponder()
     }
+    
+
+    
+    func filterRange() {
+        
+        dummyTextView.perform(#selector(becomeFirstResponder), with: nil, afterDelay: 0.1)
+        
+    }
+    
+    // UIPicker DataSource
+    func numberOfComponents(in pickerView: UIPickerView) -> Int {
+        
+        return 1
+        
+    }
+    func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
+        return geoFilterRange.count
+    }
+    
+    // UIPicker Delegate
+    
+    func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
+        return geoFilterRange[row]
+    }
+    func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
+        self.geoFilterButton.setTitle(geoFilterRange[row], for: .normal)
+        
+    }
+
+
+    
+// Setup for Search Button
+    
+    lazy var searchBar: UISearchBar = {
+        let sb = UISearchBar()
+        sb.placeholder = "Search for Caption or Emoji 😍🐮🍔🇺🇸🔥"
+        sb.barTintColor = .white
+        sb.backgroundColor = .white
+        UITextField.appearance(whenContainedInInstancesOf: [UISearchBar.self]).backgroundColor = UIColor.rgb(red: 240, green: 240, blue: 240)
+        
+        sb.delegate = self
+        return sb
+    }()
     
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
         
@@ -199,27 +205,14 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     }
     
     func searchBarTextDidEndEditing(_ searchBar: UISearchBar) {
-        guard let searchedText = searchBar.text else {
-            filteredPosts = allPosts
-            self.collectionView?.reloadData()
-            return
-        }
-        print(searchedText)
-        
-        if searchedText.isEmpty {
-            filteredPosts = allPosts
-        } else {
-            
-            //Makes everything case insensitive
-            
-            filteredPosts = self.allPosts.filter { (post) -> Bool in
-                return post.caption.lowercased().contains(searchedText.lowercased()) || post.emoji.contains(searchedText.lowercased())
-            }
-        }
+  
+        filterPostByCaption(searchBar.text)
+        filterNearbyPost()
         
         self.collectionView?.reloadData()
     }
     
+
 
     func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
         filteredPosts = allPosts
@@ -229,30 +222,11 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
         
-        
-//                if searchText.isEmpty {
-//                    filteredPosts = allPosts
-//                } else {
-//        
-//                    //Makes everything case insensitive
-//        
-//                    filteredPosts = self.allPosts.filter { (post) -> Bool in
-//                        return post.caption.lowercased().contains(searchText.lowercased()) || post.emoji.contains(searchText.lowercased())
-//                    }
-//                }
-//                
-//                self.collectionView?.reloadData()
 
     }
     
     
-    func hideHeader(){
-        
-        self.filterBar.isHidden = (self.filterBar.isHidden == true) ? false : true
-        self.collectionView?.reloadData()
-        
-    }
-    
+// Handle Update
     
     func handleUpdateFeed() {
         handleRefresh()
@@ -267,6 +241,8 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         allPosts.removeAll()
         filteredPosts.removeAll()
         fetchAllPosts()
+        self.searchBar.text = ""
+        self.geoFilterButton.titleLabel?.text = geoFilterRange[0]
         self.collectionView?.refreshControl?.endRefreshing()
         print("Refresh")
     }
@@ -310,22 +286,44 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     
     func nearbyPostTest(){
         
-        nearbyPost()
-
-        
+        filterNearbyPost()
         
     }
     
-    func nearbyPost(){
+    func filterPostByCaption(_ string: String?) {
+        
+        guard let searchedText = string else {
+            filteredPosts = allPosts
+            self.collectionView?.reloadData()
+            return
+        }
+        print(searchedText)
+        
+        if searchedText.isEmpty {
+            filteredPosts = allPosts
+        } else {
+            
+            //Makes everything case insensitive
+            filteredPosts = self.allPosts.filter { (post) -> Bool in
+                return post.caption.lowercased().contains(searchedText.lowercased()) || post.emoji.contains(searchedText.lowercased())
+            }
+        }
+    }
+    
+    
+    func filterNearbyPost(){
         
         let ref = Database.database().reference().child("postlocations")
         let geoFire = GeoFire(firebaseRef: ref)
         let currentLocation = CLLocation(latitude: 41.973735, longitude: -87.667751)
         
         var geoFilteredPosts = [Post]()
-
         
-        let circleQuery = geoFire?.query(at: currentLocation, withRadius: 100)
+        guard let geoDistance = Double((geoFilterButton.titleLabel?.text)!) else {
+            print("No Distance Number")
+            return}
+        
+        let circleQuery = geoFire?.query(at: currentLocation, withRadius: geoDistance)
         circleQuery?.observe(.keyEntered, with: { (key, location) in
             print(key)
             let geoFilteredPost = self.filteredPosts.filter { (post) -> Bool in
@@ -358,7 +356,6 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
             self.fetchPostsWithUser(user: user)
         }
 
-        
     }
     
     
