@@ -30,6 +30,7 @@
 		A57A674B1F5E62F30063D400 /* Credentials.swift in Sources */ = {isa = PBXBuildFile; fileRef = A57A674A1F5E62F30063D400 /* Credentials.swift */; };
 		A57A674D1F5FA8190063D400 /* UploadLocationFlowLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = A57A674C1F5FA8190063D400 /* UploadLocationFlowLayout.swift */; };
 		A57A674F1F5FA8CC0063D400 /* UploadLocationCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = A57A674E1F5FA8CC0063D400 /* UploadLocationCell.swift */; };
+		A57C060C1F76037C00A0568F /* BookmarkPhotoCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = A57C060B1F76037C00A0568F /* BookmarkPhotoCell.swift */; };
 		A58477A61F6DBFDA007DE06C /* Emoji.swift in Sources */ = {isa = PBXBuildFile; fileRef = A58477A51F6DBFDA007DE06C /* Emoji.swift */; };
 		A58477A81F6EB720007DE06C /* EmojiExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = A58477A71F6EB720007DE06C /* EmojiExtensions.swift */; };
 		A58477AA1F6EFFD7007DE06C /* LocationLabels.swift in Sources */ = {isa = PBXBuildFile; fileRef = A58477A91F6EFFD7007DE06C /* LocationLabels.swift */; };
@@ -83,6 +84,7 @@
 		A57A674A1F5E62F30063D400 /* Credentials.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Credentials.swift; sourceTree = "<group>"; };
 		A57A674C1F5FA8190063D400 /* UploadLocationFlowLayout.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UploadLocationFlowLayout.swift; sourceTree = "<group>"; };
 		A57A674E1F5FA8CC0063D400 /* UploadLocationCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UploadLocationCell.swift; sourceTree = "<group>"; };
+		A57C060B1F76037C00A0568F /* BookmarkPhotoCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BookmarkPhotoCell.swift; sourceTree = "<group>"; };
 		A58477A51F6DBFDA007DE06C /* Emoji.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Emoji.swift; sourceTree = "<group>"; };
 		A58477A71F6EB720007DE06C /* EmojiExtensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EmojiExtensions.swift; sourceTree = "<group>"; };
 		A58477A91F6EFFD7007DE06C /* LocationLabels.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LocationLabels.swift; sourceTree = "<group>"; };
@@ -200,6 +202,7 @@
 		A54E1D691F4E736B00C2AA77 /* ShoutaroundTest */ = {
 			isa = PBXGroup;
 			children = (
+				A57C060A1F7602F100A0568F /* Bookmark */,
 				A57941C71F6A2799004EC40D /* EmojiDictionary */,
 				A53E7E191F5E4A390011C1CA /* GooglePlaces */,
 				A54E1D6A1F4E736B00C2AA77 /* AppDelegate.swift */,
@@ -254,6 +257,14 @@
 				A57941C81F6A27A6004EC40D /* EmojiDictionary.swift */,
 			);
 			name = EmojiDictionary;
+			sourceTree = "<group>";
+		};
+		A57C060A1F7602F100A0568F /* Bookmark */ = {
+			isa = PBXGroup;
+			children = (
+				A57C060B1F76037C00A0568F /* BookmarkPhotoCell.swift */,
+			);
+			name = Bookmark;
 			sourceTree = "<group>";
 		};
 		A5C6450B1F564A4000C78244 /* Models */ = {
@@ -488,6 +499,7 @@
 				A57941C41F6A2092004EC40D /* UploadEmojiFlowLayout.swift in Sources */,
 				A51C13C91F51B6FD00CEB740 /* UserProfileController.swift in Sources */,
 				A51C13C71F51B59900CEB740 /* MainTabBarController.swift in Sources */,
+				A57C060C1F76037C00A0568F /* BookmarkPhotoCell.swift in Sources */,
 				A5C6451D1F57AE5A00C78244 /* UserSearchController.swift in Sources */,
 				A5C6452C1F5C459500C78244 /* CommentCell.swift in Sources */,
 				A57941C61F6A225D004EC40D /* UploadEmojiCell.swift in Sources */,

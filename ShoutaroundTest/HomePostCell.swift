@@ -15,6 +15,7 @@ protocol HomePostCellDelegate {
     func didSendMessage(post:Post)
     func didTapUser(post:Post)
     func didLike(for cell: HomePostCell)
+    func didBookmark(for cell: HomePostCell)
 }
 
 class HomePostCell: UICollectionViewCell {
@@ -27,6 +28,8 @@ class HomePostCell: UICollectionViewCell {
             guard let imageUrl = post?.imageUrl else {return}
             
             likeButton.setImage(post?.hasLiked == true ? #imageLiteral(resourceName: "like_selected").withRenderingMode(.alwaysOriginal) : #imageLiteral(resourceName: "like_unselected").withRenderingMode(.alwaysOriginal), for: .normal)
+            
+            bookmarkButton.setImage(post?.hasBookmarked == true ? #imageLiteral(resourceName: "bookmark_selected").withRenderingMode(.alwaysOriginal) : #imageLiteral(resourceName: "bookmark_unselected").withRenderingMode(.alwaysOriginal), for: .normal)
                 
             photoImageView.loadImage(urlString: imageUrl)
             usernameLabel.text = post?.user.username
@@ -51,6 +54,19 @@ class HomePostCell: UICollectionViewCell {
         }
     }
 
+    
+    func usernameTap() {
+        print("Tap username label")
+        print(post?.user.username)
+        guard let post = post else {return}
+        delegate?.didTapUser(post: post)
+    }
+    
+    func locationTap() {
+        print("Tap location label")
+        print(post?.locationName)
+    }
+    
     
     fileprivate func setupAttributedCaption(){
         
@@ -82,9 +98,6 @@ class HomePostCell: UICollectionViewCell {
         
     }()
     
-    
-    
-    
     let photoImageView: CustomImageView = {
         let iv = CustomImageView()
         iv.backgroundColor = .white
@@ -107,7 +120,6 @@ class HomePostCell: UICollectionViewCell {
     let usernameLabel: UILabel = {
         let label = UILabel()
         label.text = "Username"
-//        label.text = "😀👌🇰🇷🍖🐷🍺"
         label.font = UIFont.boldSystemFont(ofSize: 14)
         return label
     }()
@@ -115,9 +127,15 @@ class HomePostCell: UICollectionViewCell {
     let locationLabel: UILabel = {
         let label = UILabel()
         label.text = "Location"
-        //        label.text = "😀👌🇰🇷🍖🐷🍺"
         label.font = UIFont.boldSystemFont(ofSize: 12)
         label.textColor = UIColor.darkGray
+        return label
+    }()
+    
+    let captionLabel: UILabel = {
+        let label = UILabel()
+        
+        label.numberOfLines = 0
         return label
     }()
     
@@ -147,18 +165,20 @@ class HomePostCell: UICollectionViewCell {
         delegate?.didLike(for: self)
     }
     
+    // Bookmark
     
-    func usernameTap() {
-        print("Tap username label")
-        print(post?.user.username)
-        guard let post = post else {return}
-        delegate?.didTapUser(post: post)
-    }
+    lazy var bookmarkButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setImage(#imageLiteral(resourceName: "ribbon").withRenderingMode(.alwaysOriginal), for: .normal)
+        button.addTarget(self, action: #selector(handleBookmark), for: .touchUpInside)
+        return button
+        
+    }()
     
-    func locationTap() {
-        print("Tap location label")
-        print(post?.locationName)
+    func handleBookmark() {
+        delegate?.didBookmark(for: self)
     }
+
     
 // Comments
     
@@ -193,36 +213,8 @@ class HomePostCell: UICollectionViewCell {
     
 
     
-// Bookmark
-    
-    let bookmarkButton: UIButton = {
-        let button = UIButton(type: .system)
-        button.setImage(#imageLiteral(resourceName: "ribbon").withRenderingMode(.alwaysOriginal), for: .normal)
-        return button
-        
-    }()
-    
-// Caption Label
-    
-    let captionLabel: UILabel = {
-        let label = UILabel()
 
-//        label.text = "Something"
-//        label.attributedText = attributedText
-        
-        label.numberOfLines = 0
-        return label
-    }()
     
-//    let EmojiLabel: UILabel = {
-//        let label = UILabel()
-//
-//        label.text = "😀👌🇰🇷🍖🐷🍺"
-//        label.font = UIFont.boldSystemFont(ofSize: 25)
-//
-//        label.numberOfLines = 0
-//        return label
-//    }()
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -235,17 +227,9 @@ class HomePostCell: UICollectionViewCell {
         addSubview(emojiLabel)
 
 
-//        addSubview(EmojiLabel)
-//        EmojiLabel.anchor(top: userProfileImageView.bottomAnchor, left: leftAnchor, bottom: nil, right: nil, paddingTop: 0, paddingLeft: 8, paddingBottom: 0, paddingRight: 0, width: 0, height: 40)
 //        
 //        addSubview(optionsButton)
 //        optionsButton.anchor(top: topAnchor, left: nil, bottom: photoImageView.topAnchor, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 44, height: 0)
-        
-//        usernameLabel.anchor(top: topAnchor, left: userProfileImageView.rightAnchor, bottom: photoImageView.topAnchor, right: optionsButton.leftAnchor, paddingTop: 0, paddingLeft: 8, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
-        
-        
-//        let targetSize = CGSize(width: self.frame.width, height: 1000)
-//        let estimatedSize = emojiLabel.systemLayoutSizeFitting(targetSize)
         
         emojiLabel.anchor(top: topAnchor, left: nil, bottom: photoImageView.topAnchor, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 140, height: 0)
         

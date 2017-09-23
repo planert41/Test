@@ -23,6 +23,7 @@ struct Post {
     var locationGooglePlaceID: String?
     
     var hasLiked: Bool = false
+    var hasBookmarked: Bool = false
     
     
     init(user: User, dictionary: [String: Any]) {

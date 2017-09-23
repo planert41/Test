@@ -423,11 +423,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ShoutaroundTest/Post.swift"
-            timestampString = "527311823.886953"
+            timestampString = "527829305.464182"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "40"
-            endingLineNumber = "40"
+            startingLineNumber = "41"
+            endingLineNumber = "41"
             landmarkName = "init(user:dictionary:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -756,28 +756,12 @@
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "ShoutaroundTest/HomePostCell.swift"
-            timestampString = "527745081.016138"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "200"
-            endingLineNumber = "200"
-            landmarkName = "bookmarkButton"
-            landmarkType = "24">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
             filePath = "ShoutaroundTest/HomeController.swift"
-            timestampString = "527745081.016138"
+            timestampString = "527831272.186475"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "501"
-            endingLineNumber = "501"
+            startingLineNumber = "529"
+            endingLineNumber = "529"
             landmarkName = "didSendMessage(post:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -789,11 +773,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ShoutaroundTest/HomeController.swift"
-            timestampString = "527745081.016138"
+            timestampString = "527831272.186475"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "509"
-            endingLineNumber = "509"
+            startingLineNumber = "537"
+            endingLineNumber = "537"
             landmarkName = "didSendMessage(post:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -805,11 +789,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ShoutaroundTest/HomeController.swift"
-            timestampString = "527743742.57292"
+            timestampString = "527831272.186475"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "338"
-            endingLineNumber = "338"
+            startingLineNumber = "322"
+            endingLineNumber = "322"
             landmarkName = "filterNearbyPost()"
             landmarkType = "7">
             <Locations>
@@ -853,11 +837,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ShoutaroundTest/HomeController.swift"
-            timestampString = "527743742.57292"
+            timestampString = "527831272.186475"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "330"
-            endingLineNumber = "330"
+            startingLineNumber = "314"
+            endingLineNumber = "314"
             landmarkName = "filterNearbyPost()"
             landmarkType = "7">
             <Locations>
@@ -901,11 +885,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ShoutaroundTest/HomeController.swift"
-            timestampString = "527743742.57292"
+            timestampString = "527831272.186475"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "339"
-            endingLineNumber = "339"
+            startingLineNumber = "323"
+            endingLineNumber = "323"
             landmarkName = "filterNearbyPost()"
             landmarkType = "7">
          </BreakpointContent>
@@ -1040,11 +1024,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ShoutaroundTest/HomeController.swift"
-            timestampString = "527743742.57292"
+            timestampString = "527831272.186475"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "326"
-            endingLineNumber = "326"
+            startingLineNumber = "310"
+            endingLineNumber = "310"
             landmarkName = "filterNearbyPost()"
             landmarkType = "7">
          </BreakpointContent>
@@ -1056,11 +1040,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ShoutaroundTest/HomeController.swift"
-            timestampString = "527743742.57292"
+            timestampString = "527831272.186475"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "323"
-            endingLineNumber = "323"
+            startingLineNumber = "307"
+            endingLineNumber = "307"
             landmarkName = "filterNearbyPost()"
             landmarkType = "7">
          </BreakpointContent>

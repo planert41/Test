@@ -47,13 +47,9 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         filterBar.isHidden = true
         filterBar.addSubview(dummyTextView)
 
-
-        
         geoFilterButton.anchor(top: filterBar.topAnchor, left: nil, bottom: filterBar.bottomAnchor, right: filterBar.rightAnchor, paddingTop: 10, paddingLeft: 0, paddingBottom: 10, paddingRight: 10, width: 100, height: 0)
-
         
         searchBar.anchor(top: filterBar.topAnchor, left: filterBar.leftAnchor, bottom: filterBar.bottomAnchor, right: geoFilterButton.leftAnchor, paddingTop: 8, paddingLeft: 8, paddingBottom: 8, paddingRight: 8, width: 0, height: 0)
-
         
         collectionView?.backgroundColor = .white
         collectionView?.register(HomePostCell.self, forCellWithReuseIdentifier: cellId)
@@ -66,7 +62,6 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         
         setupNavigationItems()
         fetchAllPosts()
-
         setupGeoPicker()
     }
     
@@ -140,7 +135,6 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         toolBar.setItems([cancelButton, spaceButton, doneButton], animated: false)
         toolBar.isUserInteractionEnabled = true
         
-        
         self.dummyTextView.inputView = pickerView
         self.dummyTextView.inputAccessoryView = toolBar
     }
@@ -155,12 +149,8 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         dummyTextView.resignFirstResponder()
     }
     
-
-    
     func filterRange() {
-        
         dummyTextView.perform(#selector(becomeFirstResponder), with: nil, afterDelay: 0.1)
-        
     }
     
     // UIPicker DataSource
@@ -178,9 +168,9 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
         return geoFilterRange[row]
     }
+    
     func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
         self.geoFilterButton.setTitle(geoFilterRange[row], for: .normal)
-        
     }
 
 
@@ -199,21 +189,15 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     }()
     
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
-        
         searchBar.resignFirstResponder()
-        
     }
     
     func searchBarTextDidEndEditing(_ searchBar: UISearchBar) {
-  
         filterPostByCaption(searchBar.text)
         filterNearbyPost()
-        
         self.collectionView?.reloadData()
     }
     
-
-
     func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
         filteredPosts = allPosts
         self.collectionView?.reloadData()
@@ -385,13 +369,21 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
                 guard let uid = Auth.auth().currentUser?.uid else {return}
                 
                 Database.database().reference().child("likes").child(key).child(uid).observeSingleEvent(of: .value, with: { (snapshot) in
-                    print(snapshot)
                     
                     if let value = snapshot.value as? Int, value == 1 {
                         post.hasLiked = true
                     } else {
                         post.hasLiked = false
                     }
+                    
+                    Database.database().reference().child("bookmarks").child(key).child(uid).observeSingleEvent(of: .value, with: { (snapshot) in
+
+                        if let value = snapshot.value as? Int, value == 1 {
+                            post.hasBookmarked = true
+                        } else {
+                            post.hasBookmarked = false
+                        }
+                    
                     
                     self.allPosts.append(post)
                     
@@ -402,6 +394,11 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
                     self.filteredPosts = self.allPosts
                     self.collectionView?.reloadData()
                     
+                    }, withCancel: { (err) in
+                        print("Failed to fetch bookmark info for post:", err)
+                    })
+                    
+                        
                 }, withCancel: { (err) in
                     print("Failed to fetch like info for post:", err)
                 })
@@ -458,6 +455,37 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
             }
             print("Succesfully Saved Likes")
             post.hasLiked = !post.hasLiked
+            
+            self.filteredPosts[indexPath.item] = post
+            self.collectionView?.reloadItems(at: [indexPath])
+            
+        }
+        
+        
+    }
+    
+    func didBookmark(for cell: HomePostCell) {
+        print("Handling Like inside controller")
+        
+        guard let indexPath = collectionView?.indexPath(for: cell) else {return}
+        
+        var post = self.filteredPosts[indexPath.item]
+        print(post.caption)
+        
+        
+        guard let postId = post.id else {return}
+        guard let uid = Auth.auth().currentUser?.uid else {return}
+        let values = [uid: post.hasBookmarked == true ? 0 : 1]
+        
+        
+        
+        Database.database().reference().child("bookmarks").child(postId).updateChildValues(values) { (err, ref) in
+            if let err = err {
+                print("Failed to bookmark post", err)
+                return
+            }
+            print("Succesfully Saved Bookmark")
+            post.hasBookmarked = !post.hasBookmarked
             
             self.filteredPosts[indexPath.item] = post
             self.collectionView?.reloadItems(at: [indexPath])
