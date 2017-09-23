@@ -8,14 +8,18 @@
 
 import UIKit
 import mailgun
+import Firebase
 
 
 protocol HomePostCellDelegate {
     func didTapComment(post:Post)
-    func didSendMessage(post:Post)
     func didTapUser(post:Post)
-    func didLike(for cell: HomePostCell)
-    func didBookmark(for cell: HomePostCell)
+    func refreshPost(post:Post)    
+    
+//    func didSendMessage(post:Post)
+//    func didLike(for cell: HomePostCell)
+//    func didBookmark(for cell: HomePostCell)
+
 }
 
 class HomePostCell: UICollectionViewCell {
@@ -162,9 +166,25 @@ class HomePostCell: UICollectionViewCell {
     }()
     
     func handleLike() {
-        delegate?.didLike(for: self)
+  //      delegate?.didLike(for: self)
+        
+        guard let postId = self.post?.id else {return}
+        guard let uid = Auth.auth().currentUser?.uid else {return}
+        let values = [uid: self.post?.hasLiked == true ? 0 : 1]
+        
+        
+        
+        Database.database().reference().child("likes").child(postId).updateChildValues(values) { (err, ref) in
+            if let err = err {
+                print("Failed to like post", err)
+                return
+            }
+            print("Succesfully Saved Likes")
+            self.post?.hasLiked = !(self.post?.hasLiked)!
+            self.delegate?.refreshPost(post: self.post!)
+        }
     }
-    
+
     // Bookmark
     
     lazy var bookmarkButton: UIButton = {
@@ -176,7 +196,24 @@ class HomePostCell: UICollectionViewCell {
     }()
     
     func handleBookmark() {
-        delegate?.didBookmark(for: self)
+        
+    //    delegate?.didBookmark(for: self)
+        
+        guard let postId = self.post?.id else {return}
+        guard let uid = Auth.auth().currentUser?.uid else {return}
+        let values = [uid: self.post?.hasBookmarked == true ? 0 : 1]
+        
+        Database.database().reference().child("bookmarks").child(postId).updateChildValues(values) { (err, ref) in
+            if let err = err {
+                print("Failed to bookmark post", err)
+                return
+            }
+            print("Succesfully Saved Bookmark")
+            self.post?.hasBookmarked = !(self.post?.hasBookmarked)!
+            self.delegate?.refreshPost(post: self.post!)
+            
+        }
+        
     }
 
     
@@ -207,8 +244,35 @@ class HomePostCell: UICollectionViewCell {
 
     
     func handleMessage(){
-        guard let post = post else {return}
-        delegate?.didSendMessage(post: post)
+        guard let post = self.post else {return}
+        
+        print("emailtest")
+        let mailgun = Mailgun.client(withDomain: "sandbox036bf1de5ba44e7e8ad4f19b9cc5b7d8.mailgun.org", apiKey: "key-2562988360d4f7f8a1fcc6f3647b446a")
+        
+        let message = MGMessage(from:"Excited User <someone@sample.org>",
+                                to:"Jay Baird <planert41@gmail.com>",
+                                subject:"Mailgun is awesome!",
+                                body:("<html>Inline image here: <img src=cid:image01.jpg></html>"))!
+        
+        
+        
+        let postImage = CustomImageView()
+        postImage.loadImage(urlString: post.imageUrl)
+        
+        //        message.add(postImage.image, withName: "image01", type: .JPEGFileType, inline: true)
+        message.html = "<html>Inline image here: <img src="+post.imageUrl+" width = \"25%\" height = \"25%\"/></html>"
+        
+        
+        // someImage: UIImage
+        // type can be either .JPEGFileType or .PNGFileType
+        // message.add(postImage.image, withName: "image01", type:.PNGFileType)
+        
+        
+        mailgun?.send(message, success: { (success) in
+            print("success sending email")
+        }, failure: { (error) in
+            print(error)
+        })
     }
     
 

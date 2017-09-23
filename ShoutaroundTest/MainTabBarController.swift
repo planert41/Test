@@ -61,20 +61,29 @@ class MainTabBarController: UITabBarController, UITabBarControllerDelegate {
         
         let plusNavController = templateNavController(unselectedImage: #imageLiteral(resourceName: "plus_unselected"), selectedImage: #imageLiteral(resourceName: "plus_unselected"))
         
-        let likeNavController = templateNavController(unselectedImage: #imageLiteral(resourceName: "like_unselected"), selectedImage: #imageLiteral(resourceName: "like_selected"))
+        let likeNavController = templateNavController(unselectedImage: #imageLiteral(resourceName: "like_unselected"), selectedImage: #imageLiteral(resourceName: "like_selected"), rootViewController:  BookMarkController(collectionViewLayout: UICollectionViewLayout()))
+        
+        //Bookmark
+        
+        let bookmarkLayout = UICollectionViewFlowLayout()
+        let bookmarkController = BookMarkController(collectionViewLayout: bookmarkLayout)
+        let bookmarkNavController = UINavigationController(rootViewController: bookmarkController)
+        bookmarkNavController.tabBarItem.image = #imageLiteral(resourceName: "like_unselected")
+        bookmarkNavController.tabBarItem.selectedImage = #imageLiteral(resourceName: "like_selected")
+        
         
         //user profile
         
         let layout = UICollectionViewFlowLayout()
         let userProfileController = UserProfileController(collectionViewLayout: layout)
-        let userProfileNavController = UINavigationController(rootViewController: userProfileController)
+        let userProfileNavController = UINavigationController(rootViewController: userProfileController)        
         
         userProfileNavController.tabBarItem.image = #imageLiteral(resourceName: "profile_unselected")
         userProfileNavController.tabBarItem.selectedImage = #imageLiteral(resourceName: "profile_selected")
         
         tabBar.tintColor = .black
 
-        viewControllers = [homeNavController, searchNavController, plusNavController, likeNavController, userProfileNavController]
+        viewControllers = [homeNavController, searchNavController, plusNavController, bookmarkNavController, userProfileNavController]
         
         //modify tab bar item insets
         

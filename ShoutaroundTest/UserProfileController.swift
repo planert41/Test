@@ -10,10 +10,13 @@ import UIKit
 import Firebase
 import FBSDKLoginKit
 
-class UserProfileController: UICollectionViewController, UICollectionViewDelegateFlowLayout, UserProfileHeaderDelegate {
+class UserProfileController: UICollectionViewController, UICollectionViewDelegateFlowLayout, UserProfileHeaderDelegate, HomePostCellDelegate {
     
     let cellId = "cellId"
     let homePostCellId = "homePostCellId"
+    
+    var posts = [Post]()
+    var isFinishedPaging = false
     
     var userId:String?
     
@@ -51,10 +54,6 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
         
     }
     
-    func handleUpdateFeed() {
-        handleRefresh()
-    }
-    
     // IOS9 - let refreshControl = UIRefreshControl()
     
     func handleRefresh() {
@@ -62,14 +61,44 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
         // RemoveAll so that when user follow/unfollows it updates
         
         posts.removeAll()
-
         fetchUser()
         self.collectionView?.refreshControl?.endRefreshing()
         print("Refresh Profile Page")
     }
     
-    var posts = [Post]()
-    var isFinishedPaging = false
+// HomePost Cell Delegate Functions
+    
+    func didTapComment(post: Post) {
+        
+        let commentsController = CommentsController(collectionViewLayout: UICollectionViewFlowLayout())
+        commentsController.post = post
+        
+        navigationController?.pushViewController(commentsController, animated: true)
+    }
+    
+    
+    func didTapUser(post: Post) {
+        let userProfileController = UserProfileController(collectionViewLayout: UICollectionViewFlowLayout())
+        userProfileController.userId = post.user.uid
+        
+        navigationController?.pushViewController(userProfileController, animated: true)
+    }
+    
+    func refreshPost(post: Post) {
+        let index = posts.index { (filteredpost) -> Bool in
+            filteredpost.id  == post.id
+            
+        }
+        
+
+        let filteredindexpath = IndexPath(row:index!, section: 0)
+        
+        self.posts[index!] = post
+        //        self.collectionView?.reloadItems(at: [filteredindexpath])
+        
+    }
+    
+
     
     fileprivate func paginatePosts(){
         
@@ -78,9 +107,11 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
         //var query = ref.queryOrderedByKey()
         var query = ref.queryOrdered(byChild: "creationDate")
         
-        
+        print(posts.count)
         if posts.count > 0 {
             let value = posts.last?.creationDate.timeIntervalSince1970
+            print(posts)
+            print(value)
             query = query.queryEnding(atValue: value)
         }
         
@@ -106,15 +137,47 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
                 
                 var post = Post(user: user, dictionary: dictionary)
                 post.id = snapshot.key
+                guard let uid = Auth.auth().currentUser?.uid else {return}
+                guard let key = post.id else {return}
                 
+// Check for Likes and Bookmarks
+                
+                Database.database().reference().child("likes").child(key).child(uid).observeSingleEvent(of: .value, with: { (snapshot) in
+                    
+                    if let value = snapshot.value as? Int, value == 1 {
+                        post.hasLiked = true
+                    } else {
+                        post.hasLiked = false
+                    }
+                    
+                    Database.database().reference().child("bookmarks").child(key).child(uid).observeSingleEvent(of: .value, with: { (snapshot) in
+                        
+                        if let value = snapshot.value as? Int, value == 1 {
+                            post.hasBookmarked = true
+                        } else {
+                            post.hasBookmarked = false
+                        }
+                        
+                    }, withCancel: { (err) in
+                        print("Failed to fetch bookmark info for post:", err)
+                    })
+                    
+                }, withCancel: { (err) in
+                    print("Failed to fetch like info for post:", err)
+                })
+          
                 self.posts.append(post)
+                print(self.posts.count)
+                self.collectionView?.reloadData()
+                
                 
             })
+  
+         
             self.posts.forEach({ (post) in
                 print(post.id ?? "")
+
             })
-            self.collectionView?.reloadData()
-            
             
         }) { (err) in
             print("Failed to Paginate for Posts:", err)
@@ -198,7 +261,9 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
     
     override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         
-        
+        print("collectionview post count", self.posts.count)
+        print("isfinishedpaging",self.isFinishedPaging)
+        print(indexPath.item)
         if indexPath.item == self.posts.count - 1 && !isFinishedPaging{
             
             paginatePosts()
@@ -212,6 +277,7 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
         } else {
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: homePostCellId, for: indexPath) as! HomePostCell
             cell.post = posts[indexPath.item]
+            cell.delegate = self
             return cell
         }
     
@@ -275,6 +341,7 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
             self.collectionView?.reloadData()
             
             self.paginatePosts()
+            
         }
         
     }

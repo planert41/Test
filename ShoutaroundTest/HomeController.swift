@@ -65,7 +65,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         setupGeoPicker()
     }
     
-    
+
     
     func CGRectMake(_ x: CGFloat, _ y: CGFloat, _ width: CGFloat, _ height: CGFloat) -> CGRect {
         return CGRect(x: x, y: y, width: width, height: height)
@@ -433,120 +433,142 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         return cell
     }
     
-    func didLike(for cell: HomePostCell) {
-        print("Handling Like inside controller")
-        
-        guard let indexPath = collectionView?.indexPath(for: cell) else {return}
-        
-        var post = self.filteredPosts[indexPath.item]
-        print(post.caption)
-        
-        
-        guard let postId = post.id else {return}
-        guard let uid = Auth.auth().currentUser?.uid else {return}
-        let values = [uid: post.hasLiked == true ? 0 : 1]
-        
-        
-        
-        Database.database().reference().child("likes").child(postId).updateChildValues(values) { (err, ref) in
-            if let err = err {
-                print("Failed to like post", err)
-                return
-            }
-            print("Succesfully Saved Likes")
-            post.hasLiked = !post.hasLiked
-            
-            self.filteredPosts[indexPath.item] = post
-            self.collectionView?.reloadItems(at: [indexPath])
-            
-        }
-        
-        
-    }
     
-    func didBookmark(for cell: HomePostCell) {
-        print("Handling Like inside controller")
-        
-        guard let indexPath = collectionView?.indexPath(for: cell) else {return}
-        
-        var post = self.filteredPosts[indexPath.item]
-        print(post.caption)
-        
-        
-        guard let postId = post.id else {return}
-        guard let uid = Auth.auth().currentUser?.uid else {return}
-        let values = [uid: post.hasBookmarked == true ? 0 : 1]
-        
-        
-        
-        Database.database().reference().child("bookmarks").child(postId).updateChildValues(values) { (err, ref) in
-            if let err = err {
-                print("Failed to bookmark post", err)
-                return
-            }
-            print("Succesfully Saved Bookmark")
-            post.hasBookmarked = !post.hasBookmarked
-            
-            self.filteredPosts[indexPath.item] = post
-            self.collectionView?.reloadItems(at: [indexPath])
-            
-        }
-        
-        
-    }
+// HOME POST CELL DELEGATE METHODS
     
     func didTapComment(post: Post) {
-        
+    
         let commentsController = CommentsController(collectionViewLayout: UICollectionViewFlowLayout())
         commentsController.post = post
-        
+    
         navigationController?.pushViewController(commentsController, animated: true)
     }
-    
     
     func didTapUser(post: Post) {
         let userProfileController = UserProfileController(collectionViewLayout: UICollectionViewFlowLayout())
         userProfileController.userId = post.user.uid
-        
+    
         navigationController?.pushViewController(userProfileController, animated: true)
     }
     
-    func didSendMessage(post:Post){
-        
-            print("emailtest")
-            let mailgun = Mailgun.client(withDomain: "sandbox036bf1de5ba44e7e8ad4f19b9cc5b7d8.mailgun.org", apiKey: "key-2562988360d4f7f8a1fcc6f3647b446a")
-        
-        let message = MGMessage(from:"Excited User <someone@sample.org>",
-                                to:"Jay Baird <planert41@gmail.com>",
-                                subject:"Mailgun is awesome!",
-                                body:("<html>Inline image here: <img src=cid:image01.jpg></html>"))!
-        
-
-        
-        let postImage = CustomImageView()
-        postImage.loadImage(urlString: post.imageUrl)
-
-//        message.add(postImage.image, withName: "image01", type: .JPEGFileType, inline: true)
-        message.html = "<html>Inline image here: <img src="+post.imageUrl+" width = \"25%\" height = \"25%\"/></html>"
-
-        
-        // someImage: UIImage
-        // type can be either .JPEGFileType or .PNGFileType
-        // message.add(postImage.image, withName: "image01", type:.PNGFileType)
-        
-        
-            mailgun?.send(message, success: { (success) in
-                print("success sending email")
-            }, failure: { (error) in
-                print(error)
-            })
-        
+    func refreshPost(post: Post) {
+        let index = filteredPosts.index { (filteredpost) -> Bool in
+            filteredpost.id  == post.id
+        }
+        print(index)
+        let filteredindexpath = IndexPath(row:index!, section: 0)
+        self.filteredPosts[index!] = post
+//        self.collectionView?.reloadItems(at: [filteredindexpath])
     }
-
-
-
-
 }
+
+// OLD HOMEPOST CELL DELEGATE FUNCTIONS
+
+//func didBookmark(for cell: HomePostCell) {
+//    print("Handling Like inside controller")
+//    
+//    guard let indexPath = collectionView?.indexPath(for: cell) else {return}
+//    
+//    var post = self.filteredPosts[indexPath.item]
+//    print(post.caption)
+//    
+//    
+//    guard let postId = post.id else {return}
+//    guard let uid = Auth.auth().currentUser?.uid else {return}
+//    let values = [uid: post.hasBookmarked == true ? 0 : 1]
+//    
+//    
+//    
+//    Database.database().reference().child("bookmarks").child(postId).updateChildValues(values) { (err, ref) in
+//        if let err = err {
+//            print("Failed to bookmark post", err)
+//            return
+//        }
+//        print("Succesfully Saved Bookmark")
+//        post.hasBookmarked = !post.hasBookmarked
+//        
+//        self.filteredPosts[indexPath.item] = post
+//        self.collectionView?.reloadItems(at: [indexPath])
+//        
+//    }
+//    
+//    
+//}
+//
+//
+//func didLike(for cell: HomePostCell) {
+//    print("Handling Like inside controller")
+//    
+//    guard let indexPath = collectionView?.indexPath(for: cell) else {return}
+//    
+//    var post = self.filteredPosts[indexPath.item]
+//    print(post.caption)
+//    
+//    
+//    guard let postId = post.id else {return}
+//    guard let uid = Auth.auth().currentUser?.uid else {return}
+//    let values = [uid: post.hasLiked == true ? 0 : 1]
+//    
+//    
+//    
+//    Database.database().reference().child("likes").child(postId).updateChildValues(values) { (err, ref) in
+//        if let err = err {
+//            print("Failed to like post", err)
+//            return
+//        }
+//        print("Succesfully Saved Likes")
+//        post.hasLiked = !post.hasLiked
+//        
+//        self.filteredPosts[indexPath.item] = post
+//        self.collectionView?.reloadItems(at: [indexPath])
+//        
+//    }
+//    
+//    
+//}
+
+
+//
+//
+//func didTapUser(post: Post) {
+//    let userProfileController = UserProfileController(collectionViewLayout: UICollectionViewFlowLayout())
+//    userProfileController.userId = post.user.uid
+//    
+//    navigationController?.pushViewController(userProfileController, animated: true)
+//}
+//
+//func didSendMessage(post:Post){
+//    
+//    print("emailtest")
+//    let mailgun = Mailgun.client(withDomain: "sandbox036bf1de5ba44e7e8ad4f19b9cc5b7d8.mailgun.org", apiKey: "key-2562988360d4f7f8a1fcc6f3647b446a")
+//    
+//    let message = MGMessage(from:"Excited User <someone@sample.org>",
+//                            to:"Jay Baird <planert41@gmail.com>",
+//                            subject:"Mailgun is awesome!",
+//                            body:("<html>Inline image here: <img src=cid:image01.jpg></html>"))!
+//    
+//    
+//    
+//    let postImage = CustomImageView()
+//    postImage.loadImage(urlString: post.imageUrl)
+//    
+//    //        message.add(postImage.image, withName: "image01", type: .JPEGFileType, inline: true)
+//    message.html = "<html>Inline image here: <img src="+post.imageUrl+" width = \"25%\" height = \"25%\"/></html>"
+//    
+//    
+//    // someImage: UIImage
+//    // type can be either .JPEGFileType or .PNGFileType
+//    // message.add(postImage.image, withName: "image01", type:.PNGFileType)
+//    
+//    
+//    mailgun?.send(message, success: { (success) in
+//        print("success sending email")
+//    }, failure: { (error) in
+//        print(error)
+//    })
+//    
+//}
+
 
 
 
