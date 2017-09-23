@@ -15,11 +15,25 @@ class BookmarkPhotoCell: UICollectionViewCell {
         didSet {
             
             guard let imageUrl = post?.imageUrl else {return}
-            
             photoImageView.loadImage(urlString: imageUrl)
+            usernameLabel.text = post?.user.username
+            locationLabel.text = post?.locationName
+            emojiLabel.text = post?.emoji
+            
+            guard let profileImageUrl = post?.user.profileImageUrl else {return}
+            userProfileImageView.loadImage(urlString: profileImageUrl)
+            captionLabel.text = post?.caption
             
         }
     }
+    
+    
+    let usernameLabel: UILabel = {
+        let label = UILabel()
+        label.text = "Username"
+        label.font = UIFont.boldSystemFont(ofSize: 14)
+        return label
+    }()
     
     let userProfileImageView: CustomImageView = {
         
@@ -50,13 +64,6 @@ class BookmarkPhotoCell: UICollectionViewCell {
         
     }()
     
-    let usernameLabel: UILabel = {
-        let label = UILabel()
-        label.text = "Username"
-        label.font = UIFont.boldSystemFont(ofSize: 14)
-        return label
-    }()
-    
     let locationLabel: UILabel = {
         let label = UILabel()
         label.text = "Location"
@@ -77,9 +84,26 @@ class BookmarkPhotoCell: UICollectionViewCell {
         
         addSubview(photoImageView)
         photoImageView.anchor(top: topAnchor, left: leftAnchor, bottom: bottomAnchor, right: nil, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
-        photoImageView.heightAnchor.constraint(equalTo: widthAnchor, multiplier: 1).isActive = true
-
-    
+        photoImageView.widthAnchor.constraint(equalTo: heightAnchor, multiplier: 1).isActive = true
+        
+        let usernameRow = UIView()
+        usernameRow.addSubview(userProfileImageView)
+        usernameRow.addSubview(usernameLabel)
+        
+        userProfileImageView.anchor(top: topAnchor, left: leftAnchor, bottom: bottomAnchor, right: nil, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
+        
+        usernameLabel.anchor(top: topAnchor, left: userProfileImageView.rightAnchor, bottom: bottomAnchor, right: nil, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
+        
+        let stackview = UIStackView()
+        stackview.axis = .vertical
+        stackview.distribution = .fillEqually
+        stackview.insertArrangedSubview(emojiLabel, at: 0)
+        stackview.insertArrangedSubview(locationLabel, at: 1)
+        stackview.insertArrangedSubview(usernameRow, at: 2)
+        stackview.insertArrangedSubview(captionLabel, at: 3)
+        
+        stackview.anchor(top: topAnchor, left: photoImageView.rightAnchor, bottom: bottomAnchor, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
+        
     }
     
     required init?(coder aDecoder: NSCoder) {

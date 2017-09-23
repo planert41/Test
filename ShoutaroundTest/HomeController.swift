@@ -368,7 +368,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
                 
                 guard let uid = Auth.auth().currentUser?.uid else {return}
                 
-                Database.database().reference().child("likes").child(key).child(uid).observeSingleEvent(of: .value, with: { (snapshot) in
+                Database.database().reference().child("likes").child(uid).child(key).observeSingleEvent(of: .value, with: { (snapshot) in
                     
                     if let value = snapshot.value as? Int, value == 1 {
                         post.hasLiked = true
@@ -376,7 +376,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
                         post.hasLiked = false
                     }
                     
-                    Database.database().reference().child("bookmarks").child(key).child(uid).observeSingleEvent(of: .value, with: { (snapshot) in
+                    Database.database().reference().child("bookmarks").child(uid).child(key).observeSingleEvent(of: .value, with: { (snapshot) in
 
                         if let value = snapshot.value as? Int, value == 1 {
                             post.hasBookmarked = true

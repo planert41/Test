@@ -170,11 +170,11 @@ class HomePostCell: UICollectionViewCell {
         
         guard let postId = self.post?.id else {return}
         guard let uid = Auth.auth().currentUser?.uid else {return}
-        let values = [uid: self.post?.hasLiked == true ? 0 : 1]
+        let values = [postId: self.post?.hasLiked == true ? 0 : 1]
         
         
         
-        Database.database().reference().child("likes").child(postId).updateChildValues(values) { (err, ref) in
+        Database.database().reference().child("likes").child(uid).updateChildValues(values) { (err, ref) in
             if let err = err {
                 print("Failed to like post", err)
                 return
@@ -201,9 +201,9 @@ class HomePostCell: UICollectionViewCell {
         
         guard let postId = self.post?.id else {return}
         guard let uid = Auth.auth().currentUser?.uid else {return}
-        let values = [uid: self.post?.hasBookmarked == true ? 0 : 1]
+        let values = [postId: self.post?.hasBookmarked == true ? 0 : 1]
         
-        Database.database().reference().child("bookmarks").child(postId).updateChildValues(values) { (err, ref) in
+        Database.database().reference().child("bookmarks").child(uid).updateChildValues(values) { (err, ref) in
             if let err = err {
                 print("Failed to bookmark post", err)
                 return

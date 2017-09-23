@@ -142,7 +142,8 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
                 
 // Check for Likes and Bookmarks
                 
-                Database.database().reference().child("likes").child(key).child(uid).observeSingleEvent(of: .value, with: { (snapshot) in
+                
+                Database.database().reference().child("likes").child(uid).child(key).observeSingleEvent(of: .value, with: { (snapshot) in
                     
                     if let value = snapshot.value as? Int, value == 1 {
                         post.hasLiked = true
@@ -150,13 +151,19 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
                         post.hasLiked = false
                     }
                     
-                    Database.database().reference().child("bookmarks").child(key).child(uid).observeSingleEvent(of: .value, with: { (snapshot) in
+
+
+                    
+                    Database.database().reference().child("bookmarks").child(uid).child(key).observeSingleEvent(of: .value, with: { (snapshot) in
                         
                         if let value = snapshot.value as? Int, value == 1 {
                             post.hasBookmarked = true
                         } else {
                             post.hasBookmarked = false
                         }
+                        
+                        self.posts.append(post)
+                        
                         
                     }, withCancel: { (err) in
                         print("Failed to fetch bookmark info for post:", err)
@@ -165,10 +172,17 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
                 }, withCancel: { (err) in
                     print("Failed to fetch like info for post:", err)
                 })
+
           
-                self.posts.append(post)
-                print(self.posts.count)
-                self.collectionView?.reloadData()
+                // Have 1 second delay so that Firebase returns like/bookmark info with post before reloading collectionview
+                // The problem is that reloading data after every single new post gets added (after getting checked) calls paginate post again before 
+                // the other posts are finished, so it creates duplicates posts
+            
+                
+                let when = DispatchTime.now() + 0.25 // change 2 to desired number of seconds
+                DispatchQueue.main.asyncAfter(deadline: when) {
+                    self.collectionView?.reloadData()
+                }
                 
                 
             })
@@ -185,6 +199,7 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
         
         
     }
+    
     
     
     fileprivate func fetchOrderedPosts() {
