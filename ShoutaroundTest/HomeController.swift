@@ -209,6 +209,26 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
 
     }
     
+    func filterPostByCaption(_ string: String?) {
+        
+        guard let searchedText = string else {
+            filteredPosts = allPosts
+            self.collectionView?.reloadData()
+            return
+        }
+        print(searchedText)
+        
+        if searchedText.isEmpty {
+            filteredPosts = allPosts
+        } else {
+            
+            //Makes everything case insensitive
+            filteredPosts = self.allPosts.filter { (post) -> Bool in
+                return post.caption.lowercased().contains(searchedText.lowercased()) || post.emoji.contains(searchedText.lowercased())
+            }
+        }
+    }
+    
     
 // Handle Update
     
@@ -274,25 +294,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         
     }
     
-    func filterPostByCaption(_ string: String?) {
-        
-        guard let searchedText = string else {
-            filteredPosts = allPosts
-            self.collectionView?.reloadData()
-            return
-        }
-        print(searchedText)
-        
-        if searchedText.isEmpty {
-            filteredPosts = allPosts
-        } else {
-            
-            //Makes everything case insensitive
-            filteredPosts = self.allPosts.filter { (post) -> Bool in
-                return post.caption.lowercased().contains(searchedText.lowercased()) || post.emoji.contains(searchedText.lowercased())
-            }
-        }
-    }
+
     
     
     func filterNearbyPost(){

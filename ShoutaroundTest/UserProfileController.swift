@@ -257,7 +257,7 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
                 print("Failed to sign out:", signOutErr)
             }
             
-            
+
             
         }))
         

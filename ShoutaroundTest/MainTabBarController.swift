@@ -61,12 +61,12 @@ class MainTabBarController: UITabBarController, UITabBarControllerDelegate {
         
         let plusNavController = templateNavController(unselectedImage: #imageLiteral(resourceName: "plus_unselected"), selectedImage: #imageLiteral(resourceName: "plus_unselected"))
         
-        let likeNavController = templateNavController(unselectedImage: #imageLiteral(resourceName: "like_unselected"), selectedImage: #imageLiteral(resourceName: "like_selected"), rootViewController:  BookMarkController(collectionViewLayout: UICollectionViewLayout()))
+        let likeNavController = templateNavController(unselectedImage: #imageLiteral(resourceName: "like_unselected"), selectedImage: #imageLiteral(resourceName: "like_selected"), rootViewController:  BookMarkController())
         
         //Bookmark
         
         let bookmarkLayout = UICollectionViewFlowLayout()
-        let bookmarkController = BookMarkController(collectionViewLayout: bookmarkLayout)
+        let bookmarkController = BookMarkController()
         let bookmarkNavController = UINavigationController(rootViewController: bookmarkController)
         bookmarkNavController.tabBarItem.image = #imageLiteral(resourceName: "like_unselected")
         bookmarkNavController.tabBarItem.selectedImage = #imageLiteral(resourceName: "like_selected")
