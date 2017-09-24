@@ -24,6 +24,8 @@
 		A562E5191F539C040095C7C1 /* PhotoSelectorController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A562E5181F539C040095C7C1 /* PhotoSelectorController.swift */; };
 		A562E51B1F53C1650095C7C1 /* PhotoSelectorCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = A562E51A1F53C1650095C7C1 /* PhotoSelectorCell.swift */; };
 		A562E51D1F53C67B0095C7C1 /* PhotoSelectorHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = A562E51C1F53C67B0095C7C1 /* PhotoSelectorHeader.swift */; };
+		A56868B81F782F0D0050C406 /* UserLocation.swift in Sources */ = {isa = PBXBuildFile; fileRef = A56868B71F782F0D0050C406 /* UserLocation.swift */; };
+		A56868BA1F7843DD0050C406 /* Conversions.swift in Sources */ = {isa = PBXBuildFile; fileRef = A56868B91F7843DD0050C406 /* Conversions.swift */; };
 		A57941C41F6A2092004EC40D /* UploadEmojiFlowLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = A57941C31F6A2092004EC40D /* UploadEmojiFlowLayout.swift */; };
 		A57941C61F6A225D004EC40D /* UploadEmojiCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = A57941C51F6A225D004EC40D /* UploadEmojiCell.swift */; };
 		A57941C91F6A27A6004EC40D /* EmojiDictionary.swift in Sources */ = {isa = PBXBuildFile; fileRef = A57941C81F6A27A6004EC40D /* EmojiDictionary.swift */; };
@@ -79,6 +81,8 @@
 		A562E5181F539C040095C7C1 /* PhotoSelectorController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PhotoSelectorController.swift; sourceTree = "<group>"; };
 		A562E51A1F53C1650095C7C1 /* PhotoSelectorCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PhotoSelectorCell.swift; sourceTree = "<group>"; };
 		A562E51C1F53C67B0095C7C1 /* PhotoSelectorHeader.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PhotoSelectorHeader.swift; sourceTree = "<group>"; };
+		A56868B71F782F0D0050C406 /* UserLocation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserLocation.swift; sourceTree = "<group>"; };
+		A56868B91F7843DD0050C406 /* Conversions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Conversions.swift; sourceTree = "<group>"; };
 		A57941C31F6A2092004EC40D /* UploadEmojiFlowLayout.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UploadEmojiFlowLayout.swift; sourceTree = "<group>"; };
 		A57941C51F6A225D004EC40D /* UploadEmojiCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UploadEmojiCell.swift; sourceTree = "<group>"; };
 		A57941C81F6A27A6004EC40D /* EmojiDictionary.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EmojiDictionary.swift; sourceTree = "<group>"; };
@@ -159,6 +163,7 @@
 				A5C645101F56547300C78244 /* CustomImageView.swift */,
 				A5C645191F57AB0000C78244 /* Firebase.swift */,
 				A58477A71F6EB720007DE06C /* EmojiExtensions.swift */,
+				A56868B91F7843DD0050C406 /* Conversions.swift */,
 			);
 			name = Utils;
 			sourceTree = "<group>";
@@ -277,6 +282,7 @@
 				A5C645171F57A4BF00C78244 /* User.swift */,
 				A5C6452D1F5C481300C78244 /* Comment.swift */,
 				A58477A51F6DBFDA007DE06C /* Emoji.swift */,
+				A56868B71F782F0D0050C406 /* UserLocation.swift */,
 			);
 			name = Models;
 			sourceTree = "<group>";
@@ -515,10 +521,12 @@
 				A5C645241F5B6DBB00C78244 /* PreviewPhotoContainerView.swift in Sources */,
 				A562E5161F5354A50095C7C1 /* LoginController.swift in Sources */,
 				A54E1D6B1F4E736B00C2AA77 /* AppDelegate.swift in Sources */,
+				A56868BA1F7843DD0050C406 /* Conversions.swift in Sources */,
 				A5C645141F565E8800C78244 /* HomeController.swift in Sources */,
 				A5C645181F57A4BF00C78244 /* User.swift in Sources */,
 				A57A674B1F5E62F30063D400 /* Credentials.swift in Sources */,
 				A5C6450F1F564C7700C78244 /* UserProfilePhotoCell.swift in Sources */,
+				A56868B81F782F0D0050C406 /* UserLocation.swift in Sources */,
 				A53E7E1B1F5E4A4B0011C1CA /* GoogleDataProvider.swift in Sources */,
 				A51C13C31F4FBF2F00CEB740 /* Extensions.swift in Sources */,
 				A5C6451F1F57B1BD00C78244 /* UserSearchCell.swift in Sources */,

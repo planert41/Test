@@ -37,7 +37,7 @@ class HomePostCell: UICollectionViewCell {
                 
             photoImageView.loadImage(urlString: imageUrl)
             usernameLabel.text = post?.user.username
-            locationLabel.text = post?.locationName
+
             emojiLabel.text = post?.emoji
             
             usernameLabel.isUserInteractionEnabled = true
@@ -52,8 +52,12 @@ class HomePostCell: UICollectionViewCell {
             
             userProfileImageView.loadImage(urlString: profileImageUrl)
             captionLabel.text = post?.caption
-            
             setupAttributedCaption()
+
+            
+            setupAttributedLocationName()
+            
+            
                 
         }
     }
@@ -89,6 +93,26 @@ class HomePostCell: UICollectionViewCell {
         
         self.captionLabel.attributedText = attributedText
         
+        
+    }
+    
+    fileprivate func setupAttributedLocationName(){
+        
+        guard let post = self.post else {return}
+        
+        let attributedText = NSMutableAttributedString(string: post.locationName.truncate(length: 20), attributes: [NSFontAttributeName: UIFont.boldSystemFont(ofSize: 14)])
+        
+        if post.distance != nil && post.locationGPS?.coordinate.longitude != 0 && post.locationGPS?.coordinate.latitude != 0 {
+
+            let distanceformat = ".2"
+            
+            // Convert to M to KM
+            let locationDistance = post.distance!/1000
+            
+            attributedText.append(NSAttributedString(string: " \(locationDistance.format(f: distanceformat)) KM", attributes: [NSFontAttributeName: UIFont.systemFont(ofSize: 12),NSForegroundColorAttributeName: UIColor.gray]))
+        }
+        
+        self.locationLabel.attributedText = attributedText
         
     }
     
@@ -135,6 +159,7 @@ class HomePostCell: UICollectionViewCell {
         label.textColor = UIColor.darkGray
         return label
     }()
+
     
     let captionLabel: UILabel = {
         let label = UILabel()
@@ -298,7 +323,6 @@ class HomePostCell: UICollectionViewCell {
         emojiLabel.anchor(top: topAnchor, left: nil, bottom: photoImageView.topAnchor, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 140, height: 0)
         
         usernameLabel.anchor(top: topAnchor, left: userProfileImageView.rightAnchor, bottom: nil, right: emojiLabel.leftAnchor, paddingTop: 0, paddingLeft: 8, paddingBottom: 0, paddingRight: 0, width: 0, height: userProfileImageView.frame.height/2)
-        
 
         locationLabel.anchor(top: usernameLabel.bottomAnchor, left: userProfileImageView.rightAnchor, bottom: photoImageView.topAnchor, right: emojiLabel.leftAnchor, paddingTop: 0, paddingLeft: 8, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
         

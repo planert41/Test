@@ -21,6 +21,7 @@ struct Post {
     var locationName: String
     var locationAdress: String
     var locationGooglePlaceID: String?
+    var distance: Double? = nil
     
     var hasLiked: Bool = false
     var hasBookmarked: Bool = false
@@ -42,6 +43,12 @@ struct Post {
         self.locationName = dictionary["locationName"] as? String ?? ""
         self.locationAdress = dictionary["locationAdress"] as? String ?? ""
         self.locationGooglePlaceID = dictionary["googlePlaceID"] as? String ?? ""
+        
+        let locationGPSText = dictionary["postLocationGPS"] as? String ?? "0,0"
+        let locationGPSTextArray = locationGPSText.components(separatedBy: ",")
+        self.locationGPS = CLLocation(latitude: Double(locationGPSTextArray[0])!, longitude: Double(locationGPSTextArray[1])!)
+        self.distance = nil
+        
 
     
     }

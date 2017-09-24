@@ -24,8 +24,30 @@ class BookmarkPhotoCell: UICollectionViewCell {
             userProfileImageView.loadImage(urlString: profileImageUrl)
             captionLabel.text = post?.caption
             
+            setupAttributedLocationName()
+            
         }
     }
+    
+    fileprivate func setupAttributedLocationName(){
+        
+        guard let post = self.post else {return}
+        
+        let attributedText = NSMutableAttributedString(string: post.locationName.truncate(length: 20), attributes: [NSFontAttributeName: UIFont.boldSystemFont(ofSize: 14)])
+        
+        if post.distance != nil && post.locationGPS?.coordinate.longitude != 0 && post.locationGPS?.coordinate.latitude != 0 {
+            
+            let distanceformat = ".2"
+            
+            // Convert to M to KM
+            let locationDistance = post.distance!/1000
+            
+            attributedText.append(NSAttributedString(string: " \(locationDistance.format(f: distanceformat)) KM", attributes: [NSFontAttributeName: UIFont.systemFont(ofSize: 12),NSForegroundColorAttributeName: UIColor.gray]))
+        }
+        
+        self.locationLabel.attributedText = attributedText
+        
+    }    
     
     
     let usernameLabel: UILabel = {

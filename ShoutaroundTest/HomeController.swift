@@ -12,6 +12,7 @@ import mailgun
 import GeoFire
 import CoreGraphics
 
+
 class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLayout, HomePostCellDelegate, UISearchBarDelegate, UIPickerViewDelegate, UIPickerViewDataSource  {
     
     let cellId = "cellId"
@@ -21,7 +22,6 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     // GeoPickerData 1st element should always be default ALL
     let geoFilterRange = ["ALL","500", "1000", "2500", "5000"]
 
-    
     override func viewDidLayoutSubviews() {
         
         let filterBarHeight = (self.filterBar.isHidden == false) ? self.filterBar.frame.height : 0
@@ -113,8 +113,10 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     }()
     
     
+    
     func setupGeoPicker() {
-        var pickerView = UIPickerView()
+
+        let pickerView = UIPickerView()
         pickerView.backgroundColor = .white
         pickerView.showsSelectionIndicator = true
         pickerView.dataSource = self
@@ -246,7 +248,8 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         filteredPosts.removeAll()
         fetchAllPosts()
         self.searchBar.text = ""
-        self.geoFilterButton.titleLabel?.text = geoFilterRange[0]
+
+        geoFilterButton.setTitle(geoFilterRange[0], for: .normal)
         self.collectionView?.refreshControl?.endRefreshing()
         print("Refresh Home Feed")
     }
@@ -301,28 +304,38 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         
         let ref = Database.database().reference().child("postlocations")
         let geoFire = GeoFire(firebaseRef: ref)
-        let currentLocation = CLLocation(latitude: 41.973735, longitude: -87.667751)
+   //     let currentLocation = CLLocation(latitude: 41.973735, longitude: -87.667751)
         
         var geoFilteredPosts = [Post]()
         
-        guard let geoDistance = Double((geoFilterButton.titleLabel?.text)!) else {
+        guard let filterDistance = Double((geoFilterButton.titleLabel?.text)!) else {
             print("No Distance Number")
             return}
         
-        let circleQuery = geoFire?.query(at: currentLocation, withRadius: geoDistance)
+        let circleQuery = geoFire?.query(at: UserLocation.currentLocation, withRadius: filterDistance)
         circleQuery?.observe(.keyEntered, with: { (key, location) in
             print(key)
-            let geoFilteredPost = self.filteredPosts.filter { (post) -> Bool in
+            var geoFilteredPost: [Post] = self.filteredPosts.filter { (post) -> Bool in
                 return post.id == key
             }
+            
+            if geoFilteredPost != nil && geoFilteredPost.count > 0 {
+                geoFilteredPost[0].locationGPS = location
+                geoFilteredPost[0].distance = Double((location?.distance(from: UserLocation.currentLocation))!)
+            
+            }
+            
             print(geoFilteredPost)
             geoFilteredPosts += geoFilteredPost
             
         })
         
         circleQuery?.observeReady({ 
-            self.filteredPosts = geoFilteredPosts
+            self.filteredPosts = geoFilteredPosts.sorted(by: { (p1, p2) -> Bool in
+                p1.distance!.isLess(than: p2.distance!)
+            })
             self.collectionView?.reloadData()
+            
         })
         
     }
@@ -437,6 +450,11 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         
         return cell
     }
+    
+    override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        print(filteredPosts[indexPath.item])
+    }
+    
     
     
 // HOME POST CELL DELEGATE METHODS

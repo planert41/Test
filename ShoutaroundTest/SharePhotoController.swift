@@ -635,7 +635,7 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         
         else if collectionView == placesCollectionView {
 
-            
+            // Unselects Location
             
             if self.selectedPostLocation == self.googlePlaceLocations[indexPath.item] {
 
@@ -687,8 +687,8 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         guard let image = selectedImage else { return }
         guard let uploadData = UIImageJPEGRepresentation(image, 0.5) else {return}
         guard let caption = captionTextView.text, caption.characters.count > 0 else {return}
-
         
+
         
         
         navigationItem.rightBarButtonItem?.isEnabled = false
@@ -724,10 +724,25 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         let googlePlaceID = selectedPostGooglePlaceID ?? ""
         guard let postLocationName = locationNameLabel.text else {return}
         guard let postLocationAdress = locationAdressLabel.text else {return}
-        
-        
-        
         guard let uid = Auth.auth().currentUser?.uid else {return}
+        
+        var uploadedLocationGPSLatitude: String
+        var uploadedlocationGPSLongitude: String
+        var uploadedLocationGPS: String
+        
+        if selectedPostLocation == nil {
+            uploadedLocationGPSLatitude = "0"
+            uploadedlocationGPSLongitude = "0"
+        } else {
+            uploadedLocationGPSLatitude = String(format: "%f", (selectedPostLocation?.coordinate.latitude)!)
+            uploadedlocationGPSLongitude = String(format: "%f", (selectedPostLocation?.coordinate.longitude)!)
+        }
+        // "postLocationGPS" : uploadedLocationGPS
+        
+        
+        uploadedLocationGPS = uploadedLocationGPSLatitude + "," + uploadedlocationGPSLongitude
+        print(uploadedLocationGPS)
+        
         
         let userPostRef = Database.database().reference().child("posts").child(uid)
         let ref = userPostRef.childByAutoId()
