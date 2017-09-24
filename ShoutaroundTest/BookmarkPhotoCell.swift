@@ -58,7 +58,7 @@ class BookmarkPhotoCell: UICollectionViewCell {
         let label = UILabel()
         label.text = "Emojis"
         label.font = UIFont.boldSystemFont(ofSize: 20)
-        label.textAlignment = NSTextAlignment.right
+        label.textAlignment = NSTextAlignment.left
         label.backgroundColor = UIColor.yellow
         return label
         
@@ -79,21 +79,17 @@ class BookmarkPhotoCell: UICollectionViewCell {
         return label
     }()
     
+    
+    
     override init(frame: CGRect) {
         super.init(frame:frame)
         
         addSubview(photoImageView)
         photoImageView.anchor(top: topAnchor, left: leftAnchor, bottom: bottomAnchor, right: nil, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
-        photoImageView.widthAnchor.constraint(equalTo: heightAnchor, multiplier: 1).isActive = true
-        
+        photoImageView.widthAnchor.constraint(equalTo: photoImageView.heightAnchor, multiplier: 1).isActive = true
+
         let usernameRow = UIView()
-        usernameRow.addSubview(userProfileImageView)
-        usernameRow.addSubview(usernameLabel)
-        
-        userProfileImageView.anchor(top: topAnchor, left: leftAnchor, bottom: bottomAnchor, right: nil, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
-        
-        usernameLabel.anchor(top: topAnchor, left: userProfileImageView.rightAnchor, bottom: bottomAnchor, right: nil, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
-        
+
         let stackview = UIStackView()
         stackview.axis = .vertical
         stackview.distribution = .fillEqually
@@ -102,7 +98,31 @@ class BookmarkPhotoCell: UICollectionViewCell {
         stackview.insertArrangedSubview(usernameRow, at: 2)
         stackview.insertArrangedSubview(captionLabel, at: 3)
         
-        stackview.anchor(top: topAnchor, left: photoImageView.rightAnchor, bottom: bottomAnchor, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
+        addSubview(stackview)
+        stackview.anchor(top: topAnchor, left: photoImageView.rightAnchor, bottom: bottomAnchor, right: rightAnchor, paddingTop: 2, paddingLeft: 2, paddingBottom: 2, paddingRight: 2, width: 0, height: 0)
+        
+        usernameRow.addSubview(userProfileImageView)
+        usernameRow.addSubview(usernameLabel)
+        
+        userProfileImageView.anchor(top: usernameRow.topAnchor, left: usernameRow.leftAnchor, bottom: usernameRow.bottomAnchor, right: nil, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
+        userProfileImageView.widthAnchor.constraint(equalTo: userProfileImageView.heightAnchor, multiplier: 1).isActive = true
+        
+        usernameLabel.anchor(top: usernameRow.topAnchor, left: userProfileImageView.rightAnchor, bottom: usernameRow.bottomAnchor, right: nil, paddingTop: 0, paddingLeft: 10, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
+        
+        let topDividerView = UIView()
+        topDividerView.backgroundColor = UIColor.lightGray
+        
+        let bottomDividerView = UIView()
+        bottomDividerView.backgroundColor = UIColor.lightGray
+        
+        addSubview(topDividerView)
+        addSubview(bottomDividerView)
+        
+        topDividerView.anchor(top: topAnchor, left: leftAnchor, bottom: nil, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0.5)
+        
+        
+        bottomDividerView.anchor(top: bottomAnchor, left: leftAnchor, bottom: nil, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0.5)
+        
         
     }
     

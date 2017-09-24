@@ -137,6 +137,7 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
                 
                 var post = Post(user: user, dictionary: dictionary)
                 post.id = snapshot.key
+                post.creatorUID = uid
                 guard let uid = Auth.auth().currentUser?.uid else {return}
                 guard let key = post.id else {return}
                 

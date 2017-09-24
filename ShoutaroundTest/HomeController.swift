@@ -364,6 +364,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
                 //print("imageUrl: \(imageUrl)")
                 var post = Post(user: user, dictionary: dictionary)
                 post.id = key
+                post.creatorUID = user.uid
                 
                 
                 guard let uid = Auth.auth().currentUser?.uid else {return}
@@ -378,7 +379,9 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
                     
                     Database.database().reference().child("bookmarks").child(uid).child(key).observeSingleEvent(of: .value, with: { (snapshot) in
 
-                        if let value = snapshot.value as? Int, value == 1 {
+                        let dictionaries = snapshot.value as? [String: Any]
+                        
+                        if let value = dictionaries?["bookmarked"] as? Int, value == 1 {
                             post.hasBookmarked = true
                         } else {
                             post.hasBookmarked = false

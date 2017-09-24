@@ -24,6 +24,7 @@ struct Post {
     
     var hasLiked: Bool = false
     var hasBookmarked: Bool = false
+    var creatorUID: String?
     
     
     init(user: User, dictionary: [String: Any]) {

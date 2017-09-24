@@ -201,9 +201,9 @@ class HomePostCell: UICollectionViewCell {
         
         guard let postId = self.post?.id else {return}
         guard let uid = Auth.auth().currentUser?.uid else {return}
-        let values = [postId: self.post?.hasBookmarked == true ? 0 : 1]
+        let values = ["bookmarked": self.post?.hasBookmarked == true ? 0 : 1, "creatorUID": post?.creatorUID] as [String : Any]
         
-        Database.database().reference().child("bookmarks").child(uid).updateChildValues(values) { (err, ref) in
+        Database.database().reference().child("bookmarks").child(uid).child(postId).updateChildValues(values) { (err, ref) in
             if let err = err {
                 print("Failed to bookmark post", err)
                 return
