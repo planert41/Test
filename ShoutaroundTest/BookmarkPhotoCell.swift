@@ -17,7 +17,8 @@ class BookmarkPhotoCell: UICollectionViewCell {
             guard let imageUrl = post?.imageUrl else {return}
             photoImageView.loadImage(urlString: imageUrl)
             usernameLabel.text = post?.user.username
-            locationLabel.text = post?.locationName
+            locationNameLabel.text = post?.locationName
+            locationAdressLabel.text = post?.locationAdress
             emojiLabel.text = post?.emoji
             
             guard let profileImageUrl = post?.user.profileImageUrl else {return}
@@ -45,7 +46,7 @@ class BookmarkPhotoCell: UICollectionViewCell {
             attributedText.append(NSAttributedString(string: " \(locationDistance.format(f: distanceformat)) KM", attributes: [NSFontAttributeName: UIFont.systemFont(ofSize: 12),NSForegroundColorAttributeName: UIColor.gray]))
         }
         
-        self.locationLabel.attributedText = attributedText
+        self.locationNameLabel.attributedText = attributedText
         
     }
     
@@ -86,7 +87,15 @@ class BookmarkPhotoCell: UICollectionViewCell {
         
     }()
     
-    let locationLabel: UILabel = {
+    let locationNameLabel: UILabel = {
+        let label = UILabel()
+        label.text = "Location"
+        label.font = UIFont.boldSystemFont(ofSize: 12)
+        label.textColor = UIColor.darkGray
+        return label
+    }()
+    
+    let locationAdressLabel: UILabel = {
         let label = UILabel()
         label.text = "Location"
         label.font = UIFont.boldSystemFont(ofSize: 12)
@@ -116,9 +125,10 @@ class BookmarkPhotoCell: UICollectionViewCell {
         stackview.axis = .vertical
         stackview.distribution = .fillEqually
         stackview.insertArrangedSubview(emojiLabel, at: 0)
-        stackview.insertArrangedSubview(locationLabel, at: 1)
-        stackview.insertArrangedSubview(usernameRow, at: 2)
-        stackview.insertArrangedSubview(captionLabel, at: 3)
+        stackview.insertArrangedSubview(locationNameLabel, at: 1)
+        stackview.insertArrangedSubview(locationAdressLabel, at: 2)
+        stackview.insertArrangedSubview(usernameRow, at: 3)
+        stackview.insertArrangedSubview(captionLabel, at: 4)
         
         addSubview(stackview)
         stackview.anchor(top: topAnchor, left: photoImageView.rightAnchor, bottom: bottomAnchor, right: rightAnchor, paddingTop: 2, paddingLeft: 2, paddingBottom: 2, paddingRight: 2, width: 0, height: 0)

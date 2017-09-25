@@ -486,6 +486,15 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         self.filteredPosts[index!] = post
 //        self.collectionView?.reloadItems(at: [filteredindexpath])
     }
+    
+    func didTapMessage(post: Post) {
+        
+        let messageController = MessageController()
+        messageController.post = post
+        
+        navigationController?.pushViewController(messageController, animated: true)
+    }
+    
 }
 
 // FUNCTION TO UPDATE GPS LOCATIONS FOR EACH POST

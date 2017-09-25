@@ -31,6 +31,7 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
         isGridView = false
         collectionView?.reloadData()
     }
+
     
     override func viewDidLoad() {
         
@@ -86,17 +87,23 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
     
     func refreshPost(post: Post) {
         let index = posts.index { (filteredpost) -> Bool in
-            filteredpost.id  == post.id
+        filteredpost.id  == post.id
             
-        }
-        
-
+    }
         let filteredindexpath = IndexPath(row:index!, section: 0)
-        
         self.posts[index!] = post
         //        self.collectionView?.reloadItems(at: [filteredindexpath])
         
     }
+    
+    func didTapMessage(post: Post) {
+        
+        let messageController = MessageController()
+        messageController.post = post
+        
+        navigationController?.pushViewController(messageController, animated: true)
+    }
+    
     
 
     
