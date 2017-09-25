@@ -42,11 +42,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ShoutaroundTest/SharePhotoController.swift"
-            timestampString = "527977383.160314"
+            timestampString = "527998193.357358"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1174"
-            endingLineNumber = "1174">
+            startingLineNumber = "1173"
+            endingLineNumber = "1173">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -56,11 +56,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ShoutaroundTest/SharePhotoController.swift"
-            timestampString = "527977383.160314"
+            timestampString = "527998193.357358"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1120"
-            endingLineNumber = "1120">
+            startingLineNumber = "1119"
+            endingLineNumber = "1119">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -70,11 +70,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ShoutaroundTest/SharePhotoController.swift"
-            timestampString = "527977383.160314"
+            timestampString = "527998193.357358"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1154"
-            endingLineNumber = "1154">
+            startingLineNumber = "1153"
+            endingLineNumber = "1153">
             <Locations>
                <Location
                   shouldBeEnabled = "No"
@@ -116,11 +116,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ShoutaroundTest/SharePhotoController.swift"
-            timestampString = "527977383.160314"
+            timestampString = "527998193.357358"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1156"
-            endingLineNumber = "1156">
+            startingLineNumber = "1155"
+            endingLineNumber = "1155">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -130,11 +130,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ShoutaroundTest/SharePhotoController.swift"
-            timestampString = "527977383.160314"
+            timestampString = "527998193.357358"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1144"
-            endingLineNumber = "1144">
+            startingLineNumber = "1143"
+            endingLineNumber = "1143">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -144,11 +144,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ShoutaroundTest/SharePhotoController.swift"
-            timestampString = "527977383.160314"
+            timestampString = "527998193.357358"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "921"
-            endingLineNumber = "921"
+            startingLineNumber = "920"
+            endingLineNumber = "920"
             landmarkName = "downloadRestaurantDetails(_:searchRadius:searchType:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -160,11 +160,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ShoutaroundTest/SharePhotoController.swift"
-            timestampString = "527977383.160314"
+            timestampString = "527998193.357358"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1172"
-            endingLineNumber = "1172">
+            startingLineNumber = "1171"
+            endingLineNumber = "1171">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -174,11 +174,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ShoutaroundTest/SharePhotoController.swift"
-            timestampString = "527977383.160314"
+            timestampString = "527998193.357358"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1177"
-            endingLineNumber = "1177">
+            startingLineNumber = "1176"
+            endingLineNumber = "1176">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -297,11 +297,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ShoutaroundTest/SharePhotoController.swift"
-            timestampString = "527977383.160314"
+            timestampString = "527998193.357358"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "828"
-            endingLineNumber = "828"
+            startingLineNumber = "827"
+            endingLineNumber = "827"
             landmarkName = "displayLocationInfo(_:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -407,11 +407,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ShoutaroundTest/SharePhotoController.swift"
-            timestampString = "527977383.160314"
+            timestampString = "527998193.357358"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "848"
-            endingLineNumber = "848"
+            startingLineNumber = "847"
+            endingLineNumber = "847"
             landmarkName = "googleReverseGPS(GPSLocation:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -535,11 +535,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ShoutaroundTest/SharePhotoController.swift"
-            timestampString = "527977383.160314"
+            timestampString = "527998193.357358"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "798"
-            endingLineNumber = "798"
+            startingLineNumber = "797"
+            endingLineNumber = "797"
             landmarkName = "appleCurrentLocation(_:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -663,11 +663,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ShoutaroundTest/SharePhotoController.swift"
-            timestampString = "527977383.160314"
+            timestampString = "527998193.357358"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "935"
-            endingLineNumber = "935"
+            startingLineNumber = "934"
+            endingLineNumber = "934"
             landmarkName = "downloadRestaurantDetails(_:searchRadius:searchType:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -757,11 +757,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ShoutaroundTest/HomeController.swift"
-            timestampString = "527978979.386884"
+            timestampString = "527999042.383702"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "333"
-            endingLineNumber = "333"
+            startingLineNumber = "334"
+            endingLineNumber = "334"
             landmarkName = "filterNearbyPost()"
             landmarkType = "7">
             <Locations>
@@ -805,11 +805,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ShoutaroundTest/HomeController.swift"
-            timestampString = "527978979.386884"
+            timestampString = "527998193.357358"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "318"
-            endingLineNumber = "318"
+            startingLineNumber = "320"
+            endingLineNumber = "320"
             landmarkName = "filterNearbyPost()"
             landmarkType = "7">
             <Locations>
@@ -976,11 +976,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ShoutaroundTest/HomeController.swift"
-            timestampString = "527978979.386884"
+            timestampString = "527998193.357358"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "314"
-            endingLineNumber = "314"
+            startingLineNumber = "316"
+            endingLineNumber = "316"
             landmarkName = "filterNearbyPost()"
             landmarkType = "7">
          </BreakpointContent>
@@ -992,11 +992,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ShoutaroundTest/HomeController.swift"
-            timestampString = "527978979.386884"
+            timestampString = "527998193.357358"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "311"
-            endingLineNumber = "311"
+            startingLineNumber = "313"
+            endingLineNumber = "313"
             landmarkName = "filterNearbyPost()"
             landmarkType = "7">
          </BreakpointContent>
@@ -1072,11 +1072,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ShoutaroundTest/HomeController.swift"
-            timestampString = "527979181.212191"
+            timestampString = "527999042.383702"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "483"
-            endingLineNumber = "483"
+            startingLineNumber = "516"
+            endingLineNumber = "516"
             landmarkName = "refreshPost(post:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -1088,11 +1088,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ShoutaroundTest/HomeController.swift"
-            timestampString = "527979181.212191"
+            timestampString = "527999042.383702"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "478"
-            endingLineNumber = "478"
+            startingLineNumber = "511"
+            endingLineNumber = "511"
             landmarkName = "refreshPost(post:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -1104,11 +1104,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ShoutaroundTest/HomeController.swift"
-            timestampString = "527979181.212191"
+            timestampString = "527999042.383702"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "477"
-            endingLineNumber = "477"
+            startingLineNumber = "510"
+            endingLineNumber = "510"
             landmarkName = "refreshPost(post:)"
             landmarkType = "7">
             <Locations>
@@ -1152,11 +1152,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ShoutaroundTest/HomeController.swift"
-            timestampString = "527979181.212191"
+            timestampString = "527999042.383702"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "482"
-            endingLineNumber = "482"
+            startingLineNumber = "515"
+            endingLineNumber = "515"
             landmarkName = "refreshPost(post:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -1312,11 +1312,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ShoutaroundTest/HomeController.swift"
-            timestampString = "527979181.212191"
+            timestampString = "527999042.383702"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "398"
-            endingLineNumber = "398"
+            startingLineNumber = "431"
+            endingLineNumber = "431"
             landmarkName = "fetchPostsWithUser(user:)"
             landmarkType = "7">
             <Locations>
@@ -1360,11 +1360,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ShoutaroundTest/HomeController.swift"
-            timestampString = "527979181.212191"
+            timestampString = "527999042.383702"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "399"
-            endingLineNumber = "399"
+            startingLineNumber = "432"
+            endingLineNumber = "432"
             landmarkName = "fetchPostsWithUser(user:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -1376,11 +1376,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ShoutaroundTest/HomeController.swift"
-            timestampString = "527979181.212191"
+            timestampString = "527999042.383702"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "397"
-            endingLineNumber = "397"
+            startingLineNumber = "430"
+            endingLineNumber = "430"
             landmarkName = "fetchPostsWithUser(user:)"
             landmarkType = "7">
             <Locations>
@@ -1533,11 +1533,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ShoutaroundTest/HomeController.swift"
-            timestampString = "527978979.386884"
+            timestampString = "527998193.357358"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "307"
-            endingLineNumber = "307"
+            startingLineNumber = "309"
+            endingLineNumber = "309"
             landmarkName = "filterNearbyPost()"
             landmarkType = "7">
          </BreakpointContent>
@@ -1581,11 +1581,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ShoutaroundTest/HomeController.swift"
-            timestampString = "527978979.386884"
+            timestampString = "527999042.383702"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "335"
-            endingLineNumber = "335"
+            startingLineNumber = "336"
+            endingLineNumber = "336"
             landmarkName = "filterNearbyPost()"
             landmarkType = "7">
          </BreakpointContent>

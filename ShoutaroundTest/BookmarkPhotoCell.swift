@@ -47,7 +47,7 @@ class BookmarkPhotoCell: UICollectionViewCell {
         
         self.locationLabel.attributedText = attributedText
         
-    }    
+    }
     
     
     let usernameLabel: UILabel = {

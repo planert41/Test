@@ -46,8 +46,21 @@ struct Post {
         
         let locationGPSText = dictionary["postLocationGPS"] as? String ?? "0,0"
         let locationGPSTextArray = locationGPSText.components(separatedBy: ",")
+        
+        if locationGPSTextArray.count == 1 {
+            self.locationGPS = nil
+            self.distance = nil
+        } else {
         self.locationGPS = CLLocation(latitude: Double(locationGPSTextArray[0])!, longitude: Double(locationGPSTextArray[1])!)
-        self.distance = nil
+        
+            if UserLocation.currentLocation != nil {
+                self.distance = Double((self.locationGPS?.distance(from: UserLocation.currentLocation))!)
+            }
+        
+        }
+        
+
+
         
 
     

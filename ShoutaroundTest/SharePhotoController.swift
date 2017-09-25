@@ -747,7 +747,7 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         let userPostRef = Database.database().reference().child("posts").child(uid)
         let ref = userPostRef.childByAutoId()
         
-        let values = ["imageUrl": imageUrl, "caption": caption, "emoji": selectedPostEmoji, "imageWidth": postImage.size.width, "imageHeight": postImage.size.height, "creationDate": Date().timeIntervalSince1970, "googlePlaceID": googlePlaceID, "locationName": postLocationName, "locationAdress": postLocationAdress] as [String:Any]
+        let values = ["imageUrl": imageUrl, "caption": caption, "emoji": selectedPostEmoji, "imageWidth": postImage.size.width, "imageHeight": postImage.size.height, "creationDate": Date().timeIntervalSince1970, "googlePlaceID": googlePlaceID, "locationName": postLocationName, "locationAdress": postLocationAdress, "postLocationGPS": uploadedLocationGPS] as [String:Any]
         ref.updateChildValues(values) { (err, ref) in
             if let err = err {
                 self.navigationItem.rightBarButtonItem?.isEnabled = true
@@ -771,7 +771,6 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
                     print("Saved location successfully!")
                 }
             }
-            
             
             self.dismiss(animated: true, completion: nil)
             

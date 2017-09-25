@@ -297,6 +297,8 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         
     }
     
+    
+    
 
     
     
@@ -319,10 +321,9 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
                 return post.id == key
             }
             
-            if geoFilteredPost != nil && geoFilteredPost.count > 0 {
+            if geoFilteredPost != nil && geoFilteredPost.count > 0 && geoFilteredPost[0].locationGPS != nil {
                 geoFilteredPost[0].locationGPS = location
                 geoFilteredPost[0].distance = Double((location?.distance(from: UserLocation.currentLocation))!)
-            
             }
             
             print(geoFilteredPost)
@@ -356,6 +357,8 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         }
 
     }
+    
+
     
     
     fileprivate func fetchPostsWithUser(user: User){
@@ -484,6 +487,40 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
 //        self.collectionView?.reloadItems(at: [filteredindexpath])
     }
 }
+
+// FUNCTION TO UPDATE GPS LOCATIONS FOR EACH POST
+//
+//func updateGPSForPosts() {
+//    
+//    for post in allPosts {
+//        
+//        let postID = post.id
+//        
+//        let ref = Database.database().reference().child("postlocations")
+//        let geoFire = GeoFire(firebaseRef: ref)
+//        
+//        geoFire?.getLocationForKey(postID, withCallback: { (location, error) in
+//            if (error != nil) {
+//                print("An error occurred getting the location for \"firebase-hq\": \(error?.localizedDescription)")
+//            } else if (location != nil) {
+//                
+//                let uploadedLocationGPSLatitude = String(format: "%f", (location?.coordinate.latitude)!)
+//                let uploadedlocationGPSLongitude = String(format: "%f", (location?.coordinate.longitude)!)
+//                let uploadedLocationGPS = uploadedLocationGPSLatitude + "," + uploadedlocationGPSLongitude
+//                
+//                Database.database().reference().child("posts").child(post.creatorUID!).child(postID!).updateChildValues(["postLocationGPS": uploadedLocationGPS])
+//                
+//                
+//                print("Location for \"firebase-hq\" is [\(location?.coordinate.latitude), \(location?.coordinate.longitude)]")
+//            } else {
+//                Database.database().reference().child("posts").child(post.creatorUID!).child(postID!).updateChildValues(["postLocationGPS": ""])
+//                print("GeoFire does not contain a location for \"firebase-hq\"")
+//            }
+//        })
+//        print("Updated ", post.creatorUID, "", post.id )
+//    }
+//    
+//}
 
 // OLD HOMEPOST CELL DELEGATE FUNCTIONS
 
