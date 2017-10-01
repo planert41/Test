@@ -15,7 +15,7 @@ import SwiftyJSON
 import SwiftLocation
 import Alamofire
 
-class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout, UICollectionViewDelegate,UICollectionViewDataSource, CLLocationManagerDelegate, UITextViewDelegate {
+class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout, UICollectionViewDelegate,UICollectionViewDataSource, UITextViewDelegate, CLLocationManagerDelegate {
     
     
     let locationCellID = "locationCellID"

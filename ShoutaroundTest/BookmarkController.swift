@@ -242,7 +242,9 @@ class BookMarkController: UIViewController, UICollectionViewDelegate, UICollecti
             print("No Distance Number")
             return}
         
-        let circleQuery = geoFire?.query(at: UserLocation.currentLocation, withRadius: filterDistance)
+   //     self.determineCurrentLocation()
+        
+        let circleQuery = geoFire?.query(at:CurrentUser.currentLocation, withRadius: filterDistance)
         circleQuery?.observe(.keyEntered, with: { (key, location) in
             print(key)
             var geoFilteredPost = self.filteredPosts.filter { (post) -> Bool in
@@ -251,7 +253,7 @@ class BookMarkController: UIViewController, UICollectionViewDelegate, UICollecti
             
             if geoFilteredPost != nil && geoFilteredPost.count > 0 {
                 geoFilteredPost[0].locationGPS = location
-                geoFilteredPost[0].distance = Double((location?.distance(from: UserLocation.currentLocation))!)
+                geoFilteredPost[0].distance = Double((location?.distance(from: CurrentUser.currentLocation!))!)
                 
             }
             

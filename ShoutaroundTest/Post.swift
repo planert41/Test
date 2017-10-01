@@ -53,8 +53,8 @@ struct Post {
         } else {
         self.locationGPS = CLLocation(latitude: Double(locationGPSTextArray[0])!, longitude: Double(locationGPSTextArray[1])!)
         
-            if UserLocation.currentLocation != nil {
-                self.distance = Double((self.locationGPS?.distance(from: UserLocation.currentLocation))!)
+            if CurrentUser.currentLocation != nil {
+                self.distance = Double((self.locationGPS?.distance(from: CurrentUser.currentLocation!))!)
             }
         
         }

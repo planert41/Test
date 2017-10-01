@@ -11,13 +11,16 @@ import Firebase
 import mailgun
 import GeoFire
 import CoreGraphics
+import CoreLocation
 
 
-class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLayout, HomePostCellDelegate, UISearchBarDelegate, UIPickerViewDelegate, UIPickerViewDataSource  {
+class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLayout, HomePostCellDelegate, UISearchBarDelegate, UIPickerViewDelegate, UIPickerViewDataSource, CLLocationManagerDelegate  {
     
     let cellId = "cellId"
     var allPosts = [Post]()
     var filteredPosts = [Post]()
+    
+    var locationManager: CLLocationManager!
     
     // GeoPickerData 1st element should always be default ALL
     let geoFilterRange = ["ALL","500", "1000", "2500", "5000"]
@@ -25,15 +28,14 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     override func viewDidLayoutSubviews() {
         
         let filterBarHeight = (self.filterBar.isHidden == false) ? self.filterBar.frame.height : 0
+        
         let topinset = (self.navigationController?.navigationBar.frame.size.height)! + UIApplication.shared.statusBarFrame.height + filterBarHeight
-        collectionView?.frame = CGRect(x: 0, y: topinset, width: view.frame.width, height: view.frame.height)
+        collectionView?.frame = CGRect(x: 0, y: topinset, width: view.frame.width, height: view.frame.height - topinset - (self.tabBarController?.tabBar.frame.size.height)!)
     }
-    
-    
-    
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        self.fetchCurrentUser()
         self.navigationController?.navigationBar.backgroundColor = UIColor.white
         
         self.automaticallyAdjustsScrollViewInsets = false
@@ -287,7 +289,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         
         navigationItem.leftBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "camera3").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(handleCamera))
         
-        navigationItem.rightBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "home_selected").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(hideHeader))
+        navigationItem.rightBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "search_selected").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(hideHeader))
         
     }
     
@@ -308,13 +310,18 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         let geoFire = GeoFire(firebaseRef: ref)
    //     let currentLocation = CLLocation(latitude: 41.973735, longitude: -87.667751)
         
+        
+        
         var geoFilteredPosts = [Post]()
         
         guard let filterDistance = Double((geoFilterButton.titleLabel?.text)!) else {
             print("No Distance Number")
             return}
         
-        let circleQuery = geoFire?.query(at: UserLocation.currentLocation, withRadius: filterDistance)
+        self.determineCurrentLocation()
+        print("Current Location", CurrentUser.currentLocation)
+        
+        let circleQuery = geoFire?.query(at: CurrentUser.currentLocation, withRadius: filterDistance)
         circleQuery?.observe(.keyEntered, with: { (key, location) in
             print(key)
             var geoFilteredPost: [Post] = self.filteredPosts.filter { (post) -> Bool in
@@ -323,7 +330,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
             
             if geoFilteredPost != nil && geoFilteredPost.count > 0 && geoFilteredPost[0].locationGPS != nil {
                 geoFilteredPost[0].locationGPS = location
-                geoFilteredPost[0].distance = Double((location?.distance(from: UserLocation.currentLocation))!)
+                geoFilteredPost[0].distance = Double((location?.distance(from: CurrentUser.currentLocation!))!)
             }
             
             print(geoFilteredPost)
@@ -493,6 +500,39 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         messageController.post = post
         
         navigationController?.pushViewController(messageController, animated: true)
+    }
+    
+    
+// LOCATION MANAGER DELEGATE METHODS
+    
+    func determineCurrentLocation(){
+        var locationManager: CLLocationManager!
+        locationManager = CLLocationManager()
+        locationManager.delegate = self
+        locationManager.desiredAccuracy = kCLLocationAccuracyBest
+        locationManager.requestWhenInUseAuthorization()
+        
+        if CLLocationManager.locationServicesEnabled() {
+            locationManager.startUpdatingLocation()
+        }        
+        
+    }
+    
+
+    
+    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        let userLocation:CLLocation = locations[0] as CLLocation
+        
+        if userLocation != nil {
+            print("Current User Location", userLocation)
+            CurrentUser.currentLocation = userLocation
+            manager.stopUpdatingLocation()
+        }
+        
+    }
+    
+    func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
+        print("GPS Location Not Found")
     }
     
 }

@@ -7,6 +7,8 @@
 //
 
 import UIKit
+import CoreLocation
+import Firebase
 
 extension UIColor {
     
@@ -142,6 +144,33 @@ extension Double {
         return String(format: "%\(f)f", self)
     }
 }
+
+
+extension UICollectionViewController {
+    
+    func fetchCurrentUser() {
+        
+        // uid using userID if exist, if not, uses current user, if not uses blank
+        
+        guard let uid = Auth.auth().currentUser?.uid else {return}
+        
+        //        guard let uid = Auth.auth().currentUser?.uid else {return}
+        
+        
+        Database.fetchUserWithUID(uid: uid) { (user) in
+            
+            CurrentUser.uid = uid
+            CurrentUser.username = user.username
+            CurrentUser.profileImageUrl = user.profileImageUrl
+            print(CurrentUser())
+            
+        }
+        
+    }
+    
+}
+
+
 
 class TextField: UITextField {
     

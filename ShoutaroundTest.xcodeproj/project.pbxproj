@@ -24,9 +24,9 @@
 		A562E5191F539C040095C7C1 /* PhotoSelectorController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A562E5181F539C040095C7C1 /* PhotoSelectorController.swift */; };
 		A562E51B1F53C1650095C7C1 /* PhotoSelectorCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = A562E51A1F53C1650095C7C1 /* PhotoSelectorCell.swift */; };
 		A562E51D1F53C67B0095C7C1 /* PhotoSelectorHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = A562E51C1F53C67B0095C7C1 /* PhotoSelectorHeader.swift */; };
-		A56868B81F782F0D0050C406 /* UserLocation.swift in Sources */ = {isa = PBXBuildFile; fileRef = A56868B71F782F0D0050C406 /* UserLocation.swift */; };
 		A56868BA1F7843DD0050C406 /* Conversions.swift in Sources */ = {isa = PBXBuildFile; fileRef = A56868B91F7843DD0050C406 /* Conversions.swift */; };
 		A56868BD1F78A0FA0050C406 /* MessageController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A56868BC1F78A0FA0050C406 /* MessageController.swift */; };
+		A56868BF1F79C2FF0050C406 /* EmailHtmlFormat.swift in Sources */ = {isa = PBXBuildFile; fileRef = A56868BE1F79C2FF0050C406 /* EmailHtmlFormat.swift */; };
 		A57941C41F6A2092004EC40D /* UploadEmojiFlowLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = A57941C31F6A2092004EC40D /* UploadEmojiFlowLayout.swift */; };
 		A57941C61F6A225D004EC40D /* UploadEmojiCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = A57941C51F6A225D004EC40D /* UploadEmojiCell.swift */; };
 		A57941C91F6A27A6004EC40D /* EmojiDictionary.swift in Sources */ = {isa = PBXBuildFile; fileRef = A57941C81F6A27A6004EC40D /* EmojiDictionary.swift */; };
@@ -82,9 +82,9 @@
 		A562E5181F539C040095C7C1 /* PhotoSelectorController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PhotoSelectorController.swift; sourceTree = "<group>"; };
 		A562E51A1F53C1650095C7C1 /* PhotoSelectorCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PhotoSelectorCell.swift; sourceTree = "<group>"; };
 		A562E51C1F53C67B0095C7C1 /* PhotoSelectorHeader.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PhotoSelectorHeader.swift; sourceTree = "<group>"; };
-		A56868B71F782F0D0050C406 /* UserLocation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserLocation.swift; sourceTree = "<group>"; };
 		A56868B91F7843DD0050C406 /* Conversions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Conversions.swift; sourceTree = "<group>"; };
 		A56868BC1F78A0FA0050C406 /* MessageController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MessageController.swift; sourceTree = "<group>"; };
+		A56868BE1F79C2FF0050C406 /* EmailHtmlFormat.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EmailHtmlFormat.swift; sourceTree = "<group>"; };
 		A57941C31F6A2092004EC40D /* UploadEmojiFlowLayout.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UploadEmojiFlowLayout.swift; sourceTree = "<group>"; };
 		A57941C51F6A225D004EC40D /* UploadEmojiCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UploadEmojiCell.swift; sourceTree = "<group>"; };
 		A57941C81F6A27A6004EC40D /* EmojiDictionary.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EmojiDictionary.swift; sourceTree = "<group>"; };
@@ -248,9 +248,9 @@
 		A562E5171F539BF50095C7C1 /* AddPhoto */ = {
 			isa = PBXGroup;
 			children = (
-				A562E5181F539C040095C7C1 /* PhotoSelectorController.swift */,
 				A562E51A1F53C1650095C7C1 /* PhotoSelectorCell.swift */,
 				A562E51C1F53C67B0095C7C1 /* PhotoSelectorHeader.swift */,
+				A562E5181F539C040095C7C1 /* PhotoSelectorController.swift */,
 				A5C645091F54F68800C78244 /* SharePhotoController.swift */,
 				A57941C31F6A2092004EC40D /* UploadEmojiFlowLayout.swift */,
 				A57941C51F6A225D004EC40D /* UploadEmojiCell.swift */,
@@ -265,6 +265,7 @@
 			isa = PBXGroup;
 			children = (
 				A56868BC1F78A0FA0050C406 /* MessageController.swift */,
+				A56868BE1F79C2FF0050C406 /* EmailHtmlFormat.swift */,
 			);
 			name = Message;
 			sourceTree = "<group>";
@@ -293,7 +294,6 @@
 				A5C645171F57A4BF00C78244 /* User.swift */,
 				A5C6452D1F5C481300C78244 /* Comment.swift */,
 				A58477A51F6DBFDA007DE06C /* Emoji.swift */,
-				A56868B71F782F0D0050C406 /* UserLocation.swift */,
 			);
 			name = Models;
 			sourceTree = "<group>";
@@ -365,6 +365,7 @@
 				TargetAttributes = {
 					A54E1D661F4E736B00C2AA77 = {
 						CreatedOnToolsVersion = 8.3.3;
+						DevelopmentTeam = YQ37FCKXVH;
 						ProvisioningStyle = Automatic;
 					};
 				};
@@ -511,6 +512,7 @@
 				A53E7E171F5E46DB0011C1CA /* GooglePlaces.swift in Sources */,
 				A5C6451A1F57AB0000C78244 /* Firebase.swift in Sources */,
 				A562E5191F539C040095C7C1 /* PhotoSelectorController.swift in Sources */,
+				A56868BF1F79C2FF0050C406 /* EmailHtmlFormat.swift in Sources */,
 				A5C645221F5B5F2700C78244 /* CameraController.swift in Sources */,
 				A5BFBB6B1F7315D200F36AF8 /* test.swift in Sources */,
 				A5C645111F56547300C78244 /* CustomImageView.swift in Sources */,
@@ -538,7 +540,6 @@
 				A57A674B1F5E62F30063D400 /* Credentials.swift in Sources */,
 				A56868BD1F78A0FA0050C406 /* MessageController.swift in Sources */,
 				A5C6450F1F564C7700C78244 /* UserProfilePhotoCell.swift in Sources */,
-				A56868B81F782F0D0050C406 /* UserLocation.swift in Sources */,
 				A53E7E1B1F5E4A4B0011C1CA /* GoogleDataProvider.swift in Sources */,
 				A51C13C31F4FBF2F00CEB740 /* Extensions.swift in Sources */,
 				A5C6451F1F57B1BD00C78244 /* UserSearchCell.swift in Sources */,
@@ -668,6 +669,7 @@
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				DEVELOPMENT_TEAM = YQ37FCKXVH;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/ShoutaroundTest/FacebookSDKs-iOS-4.26.0",
@@ -686,6 +688,7 @@
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				DEVELOPMENT_TEAM = YQ37FCKXVH;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/ShoutaroundTest/FacebookSDKs-iOS-4.26.0",

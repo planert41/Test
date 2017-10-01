@@ -101,7 +101,7 @@ class HomePostCell: UICollectionViewCell {
         
         guard let post = self.post else {return}
         
-        let attributedText = NSMutableAttributedString(string: post.locationName.truncate(length: 20), attributes: [NSFontAttributeName: UIFont.boldSystemFont(ofSize: 14)])
+        let attributedText = NSMutableAttributedString(string: post.locationName.truncate(length: 20), attributes: [NSFontAttributeName: UIFont.boldSystemFont(ofSize: 12)])
         
         if post.distance != nil && post.locationGPS?.coordinate.longitude != 0 && post.locationGPS?.coordinate.latitude != 0 {
 
@@ -110,7 +110,7 @@ class HomePostCell: UICollectionViewCell {
             // Convert to M to KM
             let locationDistance = post.distance!/1000
             
-            attributedText.append(NSAttributedString(string: " \(locationDistance.format(f: distanceformat)) KM", attributes: [NSFontAttributeName: UIFont.systemFont(ofSize: 12),NSForegroundColorAttributeName: UIColor.gray]))
+            attributedText.append(NSAttributedString(string: " \(locationDistance.format(f: distanceformat)) KM", attributes: [NSFontAttributeName: UIFont.systemFont(ofSize: 10),NSForegroundColorAttributeName: UIColor.gray]))
         }
         
         self.locationLabel.attributedText = attributedText
@@ -197,7 +197,6 @@ class HomePostCell: UICollectionViewCell {
         guard let postId = self.post?.id else {return}
         guard let uid = Auth.auth().currentUser?.uid else {return}
         let values = [postId: self.post?.hasLiked == true ? 0 : 1]
-        
         
         
         Database.database().reference().child("likes").child(uid).updateChildValues(values) { (err, ref) in
