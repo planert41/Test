@@ -11,6 +11,7 @@ target ‘ShoutaroundTest’ do
 pod 'Firebase/Auth’
 pod 'Firebase/Database’
 pod 'Firebase/Storage’
+pod ‘Firebase/Analytics’
 pod 'FacebookCore'
 pod 'FacebookLogin’
 pod 'GooglePlaces'
@@ -21,9 +22,9 @@ pod 'GeoFire', :git => 'https://github.com/firebase/geofire-objc.git'
 pod 'SwiftLocation'
 pod 'Alamofire', '~> 4.4'
 pod 'mailgun', '~> 1.0.3'
-pod ‘Dropper’
-pod ‘DropDown'
-pod 'AZDropdownMenu' 
+pod 'GoogleAPIClientForREST/Gmail', '~> 1.2.1'
+pod 'GoogleSignIn'
+
 
 
 end
