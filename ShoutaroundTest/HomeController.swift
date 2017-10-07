@@ -20,7 +20,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     var allPosts = [Post]()
     var filteredPosts = [Post]()
     
-    var locationManager: CLLocationManager!
+    let locationManager = CLLocationManager()
     
     // GeoPickerData 1st element should always be default ALL
     let geoFilterRange = ["ALL","500", "1000", "2500", "5000"]
@@ -65,6 +65,18 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         setupNavigationItems()
         fetchAllPosts()
         setupGeoPicker()
+        
+        // Ask for Authorisation from the User.
+        self.locationManager.requestAlwaysAuthorization()
+        
+        // For use in foreground
+        self.locationManager.requestWhenInUseAuthorization()
+        
+        if CLLocationManager.locationServicesEnabled() {
+            locationManager.delegate = self
+            locationManager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters
+        }
+        
     }
     
 
@@ -318,34 +330,39 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
             print("No Distance Number")
             return}
         
-        self.determineCurrentLocation()
-        print("Current Location", CurrentUser.currentLocation)
-        
-        let circleQuery = geoFire?.query(at: CurrentUser.currentLocation, withRadius: filterDistance)
-        circleQuery?.observe(.keyEntered, with: { (key, location) in
-            print(key)
-            var geoFilteredPost: [Post] = self.filteredPosts.filter { (post) -> Bool in
-                return post.id == key
+            self.determineCurrentLocation()
+
+            let when = DispatchTime.now() + 0.5 // change 2 to desired number of seconds
+            DispatchQueue.main.asyncAfter(deadline: when) {
+                
+                print("Current User Location Used for Post Filtering", CurrentUser.currentLocation)
+                let circleQuery = geoFire?.query(at: CurrentUser.currentLocation, withRadius: filterDistance)
+                circleQuery?.observe(.keyEntered, with: { (key, location) in
+                    print(key)
+                    var geoFilteredPost: [Post] = self.filteredPosts.filter { (post) -> Bool in
+                        return post.id == key
+                    }
+                    
+                    if geoFilteredPost != nil && geoFilteredPost.count > 0 && geoFilteredPost[0].locationGPS != nil {
+                        geoFilteredPost[0].locationGPS = location
+                        geoFilteredPost[0].distance = Double((location?.distance(from: CurrentUser.currentLocation!))!)
+                    }
+                    
+                    print(geoFilteredPost)
+                    geoFilteredPosts += geoFilteredPost
+                    
+                })
+                
+                circleQuery?.observeReady({
+                    self.filteredPosts = geoFilteredPosts.sorted(by: { (p1, p2) -> Bool in
+                        p1.distance!.isLess(than: p2.distance!)
+                    })
+                    self.collectionView?.reloadData()
+                    
+                })
+                
+
             }
-            
-            if geoFilteredPost != nil && geoFilteredPost.count > 0 && geoFilteredPost[0].locationGPS != nil {
-                geoFilteredPost[0].locationGPS = location
-                geoFilteredPost[0].distance = Double((location?.distance(from: CurrentUser.currentLocation!))!)
-            }
-            
-            print(geoFilteredPost)
-            geoFilteredPosts += geoFilteredPost
-            
-        })
-        
-        circleQuery?.observeReady({ 
-            self.filteredPosts = geoFilteredPosts.sorted(by: { (p1, p2) -> Bool in
-                p1.distance!.isLess(than: p2.distance!)
-            })
-            self.collectionView?.reloadData()
-            
-        })
-        
     }
     
     
@@ -500,21 +517,19 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         messageController.post = post
         
         navigationController?.pushViewController(messageController, animated: true)
+        
     }
     
     
 // LOCATION MANAGER DELEGATE METHODS
     
     func determineCurrentLocation(){
-        var locationManager: CLLocationManager!
-        locationManager = CLLocationManager()
-        locationManager.delegate = self
-        locationManager.desiredAccuracy = kCLLocationAccuracyBest
-        locationManager.requestWhenInUseAuthorization()
+
+        CurrentUser.currentLocation = nil
         
         if CLLocationManager.locationServicesEnabled() {
             locationManager.startUpdatingLocation()
-        }        
+        }
         
     }
     

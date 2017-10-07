@@ -27,6 +27,8 @@ struct CurrentUser {
     static var username: String?
     static var profileImageUrl: String?
     static var uid : String?
-    static var currentLocation: CLLocation? = CLLocation(latitude: 41.9735039, longitude: -87.66775139999999)
+    static var currentLocation: CLLocation?
+    
+    //static var currentLocation: CLLocation? = CLLocation(latitude: 41.9735039, longitude: -87.66775139999999)
     
 }
