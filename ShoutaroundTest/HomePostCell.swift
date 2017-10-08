@@ -42,11 +42,11 @@ class HomePostCell: UICollectionViewCell {
             emojiLabel.text = post?.emoji
             
             usernameLabel.isUserInteractionEnabled = true
-            let usernameTap = UITapGestureRecognizer(target: self, action: Selector("usernameTap"))
+            let usernameTap = UITapGestureRecognizer(target: self, action: #selector(HomePostCell.usernameTap))
             usernameLabel.addGestureRecognizer(usernameTap)
             
             locationLabel.isUserInteractionEnabled = true
-            let locationTap = UITapGestureRecognizer(target: self, action: Selector("locationTap"))
+            let locationTap = UITapGestureRecognizer(target: self, action: #selector(HomePostCell.locationTap))
             locationLabel.addGestureRecognizer(locationTap)
             
             guard let profileImageUrl = post?.user.profileImageUrl else {return}
@@ -65,15 +65,13 @@ class HomePostCell: UICollectionViewCell {
 
     
     func usernameTap() {
-        print("Tap username label")
-        print(post?.user.username)
+        print("Tap username label", post?.user.username ?? "")
         guard let post = post else {return}
         delegate?.didTapUser(post: post)
     }
     
     func locationTap() {
-        print("Tap location label")
-        print(post?.locationName)
+        print("Tap location label", post?.locationName ?? "")
     }
     
     

@@ -12,6 +12,7 @@ import CoreData
 import FBSDKCoreKit
 import GooglePlaces
 import GoogleMaps
+import IQKeyboardManagerSwift
 
 
 @UIApplicationMain
@@ -28,6 +29,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         GMSPlacesClient.provideAPIKey(googlePlacesApiKey)
         GMSServices.provideAPIKey(googlePlacesApiKey)
+        IQKeyboardManager.sharedManager().enable = true
+        
         
         window = UIWindow()
         window?.rootViewController = MainTabBarController()

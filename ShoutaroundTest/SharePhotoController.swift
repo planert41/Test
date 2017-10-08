@@ -444,7 +444,7 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         
             else if (text == " ") {
                 let words = textView.text!.components(separatedBy: " ")
-                var lastWord = words[words.endIndex - 1]
+                let lastWord = words[words.endIndex - 1]
                 var emojiLookup = EmojiDictionary.key(forValue: lastWord.lowercased())
                 self.emojiCheck(emojiLookup)
             }
@@ -655,8 +655,8 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         
                 print(self.googlePlaceLocations[indexPath.item])
                 print(self.googlePlaceAdresses[indexPath.item])
-                print(self.selectedPostLocation)
-                print(self.selectedPostGooglePlaceID)
+                print(self.selectedPostLocation ?? nil)
+                print(self.selectedPostGooglePlaceID ?? "")
             
             }
             
@@ -844,7 +844,7 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         let urlString = "\(URL_Search)latlng=\(GPSLocation.coordinate.latitude),\(GPSLocation.coordinate.longitude)&key=\(API_iOSKey)"
         let url = URL(string: urlString)!
         
-        //   https://maps.googleapis.com/maps/api/geocode/json?latlng=34.79,-111.76&key=AIzaSyD8fxaDv9iwEbvj-SSnI4ruV_htjQUie5s
+        //   https://maps.googleapis.com/maps/api/geocode/json?latlng=34.79,-111.76&key=AIzaSyAzwACZh50Qq1V5YYKpmfN21mZs8dW6210
     
         var temp = [String()]
         var locationGPStemp = [CLLocation()]

@@ -10,7 +10,7 @@ import Foundation
 
 func GoogleAPIKey() -> String {
     struct API {
-        static var Key = "AIzaSyD8fxaDv9iwEbvj-SSnI4ruV_htjQUie5s"
+        static var Key = "AIzaSyAzwACZh50Qq1V5YYKpmfN21mZs8dW6210"
     }
     return API.Key
 }
