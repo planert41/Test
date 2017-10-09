@@ -12,6 +12,7 @@
 		A51C13C71F51B59900CEB740 /* MainTabBarController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A51C13C61F51B59900CEB740 /* MainTabBarController.swift */; };
 		A51C13C91F51B6FD00CEB740 /* UserProfileController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A51C13C81F51B6FD00CEB740 /* UserProfileController.swift */; };
 		A51C13CD1F51C03100CEB740 /* UserProfileHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = A51C13CC1F51C03100CEB740 /* UserProfileHeader.swift */; };
+		A530FE8F1F8B17BA003C3591 /* LocationSearchController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A530FE8E1F8B17BA003C3591 /* LocationSearchController.swift */; };
 		A53E7E171F5E46DB0011C1CA /* GooglePlaces.swift in Sources */ = {isa = PBXBuildFile; fileRef = A53E7E161F5E46DB0011C1CA /* GooglePlaces.swift */; };
 		A53E7E1B1F5E4A4B0011C1CA /* GoogleDataProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = A53E7E1A1F5E4A4B0011C1CA /* GoogleDataProvider.swift */; };
 		A54E1D6B1F4E736B00C2AA77 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = A54E1D6A1F4E736B00C2AA77 /* AppDelegate.swift */; };
@@ -68,6 +69,7 @@
 		A51C13C61F51B59900CEB740 /* MainTabBarController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MainTabBarController.swift; sourceTree = "<group>"; };
 		A51C13C81F51B6FD00CEB740 /* UserProfileController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserProfileController.swift; sourceTree = "<group>"; };
 		A51C13CC1F51C03100CEB740 /* UserProfileHeader.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserProfileHeader.swift; sourceTree = "<group>"; };
+		A530FE8E1F8B17BA003C3591 /* LocationSearchController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LocationSearchController.swift; sourceTree = "<group>"; };
 		A53E7E161F5E46DB0011C1CA /* GooglePlaces.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GooglePlaces.swift; sourceTree = "<group>"; };
 		A53E7E1A1F5E4A4B0011C1CA /* GoogleDataProvider.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GoogleDataProvider.swift; sourceTree = "<group>"; };
 		A54E1D671F4E736B00C2AA77 /* ShoutaroundTest.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ShoutaroundTest.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -315,6 +317,7 @@
 			children = (
 				A5C6451C1F57AE5A00C78244 /* UserSearchController.swift */,
 				A5C6451E1F57B1BD00C78244 /* UserSearchCell.swift */,
+				A530FE8E1F8B17BA003C3591 /* LocationSearchController.swift */,
 			);
 			name = Search;
 			sourceTree = "<group>";
@@ -515,6 +518,7 @@
 				A562E5191F539C040095C7C1 /* PhotoSelectorController.swift in Sources */,
 				A56868BF1F79C2FF0050C406 /* EmailHtmlFormat.swift in Sources */,
 				A5C645221F5B5F2700C78244 /* CameraController.swift in Sources */,
+				A530FE8F1F8B17BA003C3591 /* LocationSearchController.swift in Sources */,
 				A5BFBB6B1F7315D200F36AF8 /* test.swift in Sources */,
 				A5C645111F56547300C78244 /* CustomImageView.swift in Sources */,
 				A5C6450D1F564A4C00C78244 /* Post.swift in Sources */,

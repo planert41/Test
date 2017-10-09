@@ -15,7 +15,18 @@ import SwiftyJSON
 import SwiftLocation
 import Alamofire
 
-class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout, UICollectionViewDelegate,UICollectionViewDataSource, UITextViewDelegate, CLLocationManagerDelegate {
+class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout, UICollectionViewDelegate,UICollectionViewDataSource, UITextViewDelegate, CLLocationManagerDelegate, LocationSearchControllerDelegate {
+   
+    
+    
+    func didUpdate(lat: Double?, long: Double?, locationAdress: String?, locationName: String?, locationGooglePlaceID: String?) {
+        self.selectedImageLocation = CLLocation.init(latitude: lat!, longitude: long!)
+        self.selectedPostGooglePlaceID = locationGooglePlaceID
+        self.selectedImageLocationName = locationName
+        self.selectedImageLocationAdress = locationAdress
+        
+    }
+
     
     
     let locationCellID = "locationCellID"
@@ -96,8 +107,8 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
 
         didSet {
 
-            let postLatitude:String! = String(format:"%.2f",(selectedImageLocation?.coordinate.latitude)!)
-            let postLongitude:String! = String(format:"%.2f",(selectedImageLocation?.coordinate.longitude)!)
+            let postLatitude:String! = String(format:"%.4f",(selectedImageLocation?.coordinate.latitude)!)
+            let postLongitude:String! = String(format:"%.4f",(selectedImageLocation?.coordinate.longitude)!)
             var GPSLabelText:String?
             
             if selectedImageLocation?.coordinate.latitude != 0 && selectedImageLocation?.coordinate.longitude != 0 {
@@ -234,6 +245,35 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         
     }
     
+    let locationSearchButton: UIButton = {
+        
+        let button = UIButton(type: .system)
+        button.setImage(#imageLiteral(resourceName: "search_selected").withRenderingMode(.alwaysOriginal), for: .normal)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        
+        button.backgroundColor = UIColor.gray
+        button.layer.cornerRadius = 0.5 * button.bounds.size.width
+        button.layer.masksToBounds  = true
+        button.clipsToBounds = true
+        
+        button.addTarget(self, action: #selector(locationSearch), for: .touchUpInside)
+        return button
+        
+    } ()
+    
+    func locationSearch(){
+        
+        let locationSearchController = LocationSearchController()
+
+        locationSearchController.selectedLocation = self.selectedPostLocation
+        locationSearchController.refreshMap(long: (self.selectedPostLocation?.coordinate.longitude)!, lat: (self.selectedPostLocation?.coordinate.latitude)!, name: self.locationNameLabel.text, adress: self.locationAdressLabel.text)
+        locationSearchController.selectedGooglePlaceID = self.selectedPostGooglePlaceID
+        locationSearchController.delegate = self
+        
+        navigationController?.pushViewController(locationSearchController, animated: true)
+        
+    }
+    
     let adressIcon: UILabel = {
         let tv = UILabel()
         tv.font = UIFont.systemFont(ofSize: 30)
@@ -338,6 +378,9 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         
         view.addSubview(locationAdressLabel)
         locationAdressLabel.anchor(top: locationNameLabel.bottomAnchor, left: adressIcon.rightAnchor, bottom: nil, right: LocationContainerView.rightAnchor, paddingTop: 8, paddingLeft: 8, paddingBottom: 0, paddingRight: 8, width: 0, height: 40)
+        
+        view.addSubview(locationSearchButton)
+        locationSearchButton.anchor(top: locationAdressLabel.topAnchor, left: nil, bottom: nil, right: locationAdressLabel.rightAnchor, paddingTop: 18, paddingLeft: 8, paddingBottom: 0, paddingRight: 8, width: 20, height: 20)
         
         
         view.addSubview(placesCollectionView)
