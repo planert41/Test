@@ -147,6 +147,18 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+
+        // Invalidate Layout so that after location search it will not crash
+        
+        print("View will appear")
+        self.placesCollectionView.collectionViewLayout.invalidateLayout()
+        self.Emoji1CollectionView.collectionViewLayout.invalidateLayout()
+        self.Emoji2CollectionView.collectionViewLayout.invalidateLayout()
+        self.Emoji3CollectionView.collectionViewLayout.invalidateLayout()
+        self.Emoji4CollectionView.collectionViewLayout.invalidateLayout()
+        
+    }
     
 
     let imageView: UIImageView = {
