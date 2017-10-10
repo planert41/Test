@@ -8,7 +8,7 @@
 
 import UIKit
 import Firebase
-
+import IQKeyboardManagerSwift
 
 protocol UserProfileHeaderDelegate {
     func didChangeToListView()
@@ -16,7 +16,7 @@ protocol UserProfileHeaderDelegate {
 }
 
 
-class UserProfileHeader: UICollectionViewCell  {
+class UserProfileHeader: UICollectionViewCell, UITextFieldDelegate  {
     
     var delegate: UserProfileHeaderDelegate?
     
@@ -26,6 +26,7 @@ class UserProfileHeader: UICollectionViewCell  {
             guard let profileImageUrl = user?.profileImageUrl else {return}
             profileImageView.loadImage(urlString: profileImageUrl)
             usernameLabel.text = user?.username
+            statusText.text = user?.status
             
             setupEditFollowButton()
             
@@ -130,6 +131,12 @@ class UserProfileHeader: UICollectionViewCell  {
         
     }()
     
+    let statusText: UITextField = {
+        let tf = UITextField()
+        tf.layer.borderWidth = 0.25
+        return tf
+    }()
+    
     lazy var gridButton: UIButton = {
         let button = UIButton(type: .system)
         button.setImage(#imageLiteral(resourceName: "grid"), for: .normal)
@@ -230,12 +237,17 @@ class UserProfileHeader: UICollectionViewCell  {
     override init(frame: CGRect) {
         super.init(frame:frame)
 
+        // Turnt off for Status Updates
         
         addSubview(profileImageView)
         profileImageView.anchor(top: topAnchor, left: leftAnchor, bottom: nil, right: nil, paddingTop: 12, paddingLeft: 12, paddingBottom: 0, paddingRight: 0, width: 80, height: 80)
         profileImageView.layer.cornerRadius = 80/2
         profileImageView.contentMode = .scaleAspectFill
         profileImageView.clipsToBounds = true
+        
+        addSubview(statusText)
+        statusText.anchor(top: topAnchor, left: profileImageView.rightAnchor, bottom: nil, right: rightAnchor, paddingTop: 12, paddingLeft: 12, paddingBottom: 0, paddingRight: 12, width: 0, height: 30)
+        statusText.delegate = self
         
         setupBottomToolbar()
         
@@ -250,13 +262,32 @@ class UserProfileHeader: UICollectionViewCell  {
         
     }
     
+    func textFieldDidEndEditing(_ textField: UITextField) {
+        guard let currentLoggedInUserId = Auth.auth().currentUser?.uid else {return}
+        
+        let ref = Database.database().reference().child("users").child(currentLoggedInUserId)
+        
+        let values = ["status": textField.text]
+        
+        ref.updateChildValues(values) { (err, ref) in
+            if let err = err {
+                
+                print("Failed to Update Status", err)
+                return
+            }
+            print("Successfully Update Status: ",textField.text , self.user?.username ?? "")
+            
+        }
+
+    }
+    
     fileprivate func setupUserStatsView(){
         
         let stackView = UIStackView(arrangedSubviews: [postsLabel, followersLabel, followingLabel])
 
         stackView.distribution = .fillEqually
         addSubview(stackView)
-        stackView.anchor(top: topAnchor, left: profileImageView.rightAnchor, bottom: nil, right: rightAnchor, paddingTop: 12, paddingLeft: 12, paddingBottom: 0, paddingRight: 12, width: 0, height: 50)
+        stackView.anchor(top: statusText.bottomAnchor, left: profileImageView.rightAnchor, bottom: nil, right: rightAnchor, paddingTop: 0, paddingLeft: 12, paddingBottom: 0, paddingRight: 12, width: 0, height: 50)
         
         
         

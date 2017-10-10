@@ -112,6 +112,19 @@ class SignUpController: UIViewController, UIImagePickerControllerDelegate, UINav
         
     }()
     
+    let statusTextField: UITextField = {
+        let tf = UITextField()
+        tf.placeholder = "Status/About You"
+        tf.backgroundColor = UIColor(white: 0, alpha: 0.03)
+        tf.borderStyle = .roundedRect
+        tf.font = UIFont.systemFont(ofSize: 14)
+        
+        tf.addTarget(self, action: #selector(handleTextInputChange), for: .editingChanged)
+        
+        return tf
+        
+    }()
+    
     
     let signUpButton: UIButton = {
         
@@ -156,9 +169,16 @@ class SignUpController: UIViewController, UIImagePickerControllerDelegate, UINav
     func handleSignUp() {
         
         guard let email = emailTextField.text, email.characters.count > 0 else {return}
-        guard let username = usernameTextField.text, username.characters.count > 0 else {return}
+
         guard let password = passwordTextField.text, password.characters.count > 0 else {return}
         
+        var usernameTemp = usernameTextField.text
+        usernameTemp = usernameTemp?.replacingOccurrences(of: " ", with: "")
+        if usernameTemp?.characters.first != "@" {
+            usernameTemp = "@" + usernameTemp!
+        }
+        guard let username = usernameTemp, username.characters.count > 1 else {return}
+        guard let status = statusTextField.text else {return}
         
         Auth.auth().createUser(withEmail: email, password: password) { (user, error) in
         
@@ -195,7 +215,7 @@ class SignUpController: UIViewController, UIImagePickerControllerDelegate, UINav
                 
                 
                 guard let uid = user?.uid else {return}
-                let dictionaryValues = ["username": username, "profileImageUrl": profileImageUrl]
+                let dictionaryValues = ["username": username, "profileImageUrl": profileImageUrl, "status": status]
                 let values = [uid:dictionaryValues]
                 
                 Database.database().reference().child("users").updateChildValues(values, withCompletionBlock: { (err, ref) in

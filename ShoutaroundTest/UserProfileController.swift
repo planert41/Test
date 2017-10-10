@@ -9,6 +9,7 @@
 import UIKit
 import Firebase
 import FBSDKLoginKit
+import IQKeyboardManagerSwift
 
 class UserProfileController: UICollectionViewController, UICollectionViewDelegateFlowLayout, UserProfileHeaderDelegate, HomePostCellDelegate {
     
@@ -52,7 +53,13 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
         setupLogOutButton()
         fetchUser()
         
+        IQKeyboardManager.sharedManager().enable = false
         
+        
+    }
+
+    override func viewWillDisappear(_ animated: Bool) {
+        IQKeyboardManager.sharedManager().enable = true
     }
     
     // IOS9 - let refreshControl = UIRefreshControl()

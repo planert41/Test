@@ -336,7 +336,10 @@ class LoginController: UIViewController, FBSDKLoginButtonDelegate   {
 
     
     fileprivate func setupInputFields() {
-        let stackView = UIStackView(arrangedSubviews: [emailTextField, passwordTextField, loginButton, fbLoginButton])
+//        let stackView = UIStackView(arrangedSubviews: [emailTextField, passwordTextField, loginButton, fbLoginButton])
+        
+        let stackView = UIStackView(arrangedSubviews: [emailTextField, passwordTextField, loginButton])
+        
         stackView.axis = .vertical
         stackView.spacing = 10
         stackView.distribution = .fillEqually
