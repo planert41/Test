@@ -43,6 +43,7 @@ struct Post {
         self.locationName = dictionary["locationName"] as? String ?? ""
         self.locationAdress = dictionary["locationAdress"] as? String ?? ""
         self.locationGooglePlaceID = dictionary["googlePlaceID"] as? String ?? ""
+        self.creatorUID = dictionary["creatorUID"] as? String ?? ""
         
         let locationGPSText = dictionary["postLocationGPS"] as? String ?? "0,0"
         let locationGPSTextArray = locationGPSText.components(separatedBy: ",")

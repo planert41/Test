@@ -770,11 +770,14 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
     
     fileprivate func saveToDatabaseWithImageURL(imageUrl: String) {
         
+        
+        // SAVE POST
+        
         guard let postImage = selectedImage else {return}
         var caption = captionTextView.text
-            if caption == captionDefault {
-                caption = ""
-            }
+        if caption == captionDefault {
+            caption = ""
+        }
         let selectedPostEmoji = selectedEmojis
         let googlePlaceID = selectedPostGooglePlaceID ?? ""
         guard let postLocationName = locationNameLabel.text else {return}
@@ -799,26 +802,43 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         print(uploadedLocationGPS)
         
         
-        let userPostRef = Database.database().reference().child("posts").child(uid)
+        let userPostRef = Database.database().reference().child("posts")
         let ref = userPostRef.childByAutoId()
+        let uploadTime = Date().timeIntervalSince1970
         
-        let values = ["imageUrl": imageUrl, "caption": caption, "emoji": selectedPostEmoji, "imageWidth": postImage.size.width, "imageHeight": postImage.size.height, "creationDate": Date().timeIntervalSince1970, "googlePlaceID": googlePlaceID, "locationName": postLocationName, "locationAdress": postLocationAdress, "postLocationGPS": uploadedLocationGPS] as [String:Any]
+        let values = ["imageUrl": imageUrl, "caption": caption, "emoji": selectedPostEmoji, "imageWidth": postImage.size.width, "imageHeight": postImage.size.height, "creationDate": uploadTime, "googlePlaceID": googlePlaceID, "locationName": postLocationName, "locationAdress": postLocationAdress, "postLocationGPS": uploadedLocationGPS, "creatorUID": uid] as [String:Any]
         ref.updateChildValues(values) { (err, ref) in
             if let err = err {
                 self.navigationItem.rightBarButtonItem?.isEnabled = true
                 print("Failed to save post to DB", err)
                 return
             }
-        
-        print("Successfully save post to DB")
             
-// SAVE GEOFIRE LOCATION DATA
+            print("Successfully save post to DB")
+            
+            
+            // SAVE USER AND POSTID
+            
+            let postref = ref.key
+            let userPostRef = Database.database().reference().child("userposts").child(uid).child(postref)
+            let values = ["creationDate": uploadTime]
+
+            userPostRef.updateChildValues(values) { (err, ref) in
+                if let err = err {
+                    print("Failed to save post to user", err)
+                    return
+                }
+                
+                print("Successfully save post to user")
+            }
+            
+            
+            // SAVE GEOFIRE LOCATION DATA
             
             let geofireRef = Database.database().reference().child("postlocations")
             guard let geoFire = GeoFire(firebaseRef: geofireRef) else {return}
-            let postref = ref.key
-            print(postref)
 
+            
             geoFire.setLocation(self.selectedPostLocation, forKey: postref) { (error) in
                 if (error != nil) {
                     print("An error occured: \(error)")
@@ -829,13 +849,12 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
             
             self.dismiss(animated: true, completion: nil)
             
-
+            
             NotificationCenter.default.post(name: SharePhotoController.updateFeedNotificationName, object: nil)
         }
-
+        
         
     }
-    
     
     override var prefersStatusBarHidden: Bool {
         return true

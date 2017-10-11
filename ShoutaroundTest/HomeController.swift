@@ -269,6 +269,13 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     }
     
     fileprivate func fetchAllPosts() {
+
+//            Database.fetchAllPostWithGooglePlaceID(googlePlaceId: "ChIJm4akPX3HwoARU0lu6HMG2Pw") { (fetchedPosts) in
+//                print(fetchedPosts)
+//                self.filteredPosts = fetchedPosts
+//                self.collectionView?.reloadData()
+//        }
+        
         fetchPosts()
         fetchFollowingUserIds()
         filteredPosts = allPosts
@@ -383,76 +390,90 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     }
     
 
-    
-    
     fileprivate func fetchPostsWithUser(user: User){
-        
-//        guard let uid = Auth.auth().currentUser?.uid  else {return}
-        
-        let ref = Database.database().reference().child("posts").child(user.uid)
-        
-        ref.observeSingleEvent(of: .value, with: {(snapshot) in
-            //print(snapshot.value)
-            
-            
-            guard let dictionaries = snapshot.value as? [String: Any] else {return}
-            
-            dictionaries.forEach({ (key,value) in
-                //print("Key \(key), Value: \(value)")
-                
-                guard let dictionary = value as? [String: Any] else {return}
-                
-                //let imageUrl = dictionary["imageUrl"] as? String
-                //print("imageUrl: \(imageUrl)")
-                var post = Post(user: user, dictionary: dictionary)
-                post.id = key
-                post.creatorUID = user.uid
-                
-                
-                guard let uid = Auth.auth().currentUser?.uid else {return}
-                
-                Database.database().reference().child("likes").child(uid).child(key).observeSingleEvent(of: .value, with: { (snapshot) in
-                    
-                    if let value = snapshot.value as? Int, value == 1 {
-                        post.hasLiked = true
-                    } else {
-                        post.hasLiked = false
-                    }
-                    
-                    Database.database().reference().child("bookmarks").child(uid).child(key).observeSingleEvent(of: .value, with: { (snapshot) in
+    
+        Database.fetchAllPostWithUID(creatoruid: user.uid) { (fetchedPosts) in
+            self.allPosts = self.allPosts + fetchedPosts
+            self.allPosts.sort(by: { (p1, p2) -> Bool in
+                return p1.creationDate.compare(p2.creationDate) == .orderedDescending
+             })
+            self.filteredPosts = self.allPosts
+            self.collectionView?.reloadData()
+        }
 
-                        let dictionaries = snapshot.value as? [String: Any]
-                        
-                        if let value = dictionaries?["bookmarked"] as? Int, value == 1 {
-                            post.hasBookmarked = true
-                        } else {
-                            post.hasBookmarked = false
-                        }
-                    
-                    
-                    self.allPosts.append(post)
-                    
-                    self.allPosts.sort(by: { (p1, p2) -> Bool in
-                        return p1.creationDate.compare(p2.creationDate) == .orderedDescending
-                        })
-                    
-                    self.filteredPosts = self.allPosts
-                    self.collectionView?.reloadData()
-                    
-                    }, withCancel: { (err) in
-                        print("Failed to fetch bookmark info for post:", err)
-                    })
-                    
-                        
-                }, withCancel: { (err) in
-                    print("Failed to fetch like info for post:", err)
-                })
-            })
-            
-        }) { (err) in print("Failed to fetchposts:", err) }
-        
-        
     }
+    
+    
+    
+    
+//    fileprivate func fetchPostsWithUser(user: User){
+//        
+////        guard let uid = Auth.auth().currentUser?.uid  else {return}
+//        
+//        let ref = Database.database().reference().child("posts").child(user.uid)
+//        
+//        ref.observeSingleEvent(of: .value, with: {(snapshot) in
+//            //print(snapshot.value)
+//            
+//            
+//            guard let dictionaries = snapshot.value as? [String: Any] else {return}
+//            
+//            dictionaries.forEach({ (key,value) in
+//                //print("Key \(key), Value: \(value)")
+//                
+//                guard let dictionary = value as? [String: Any] else {return}
+//                
+//                //let imageUrl = dictionary["imageUrl"] as? String
+//                //print("imageUrl: \(imageUrl)")
+//                var post = Post(user: user, dictionary: dictionary)
+//                post.id = key
+//                post.creatorUID = user.uid
+//                
+//                
+//                guard let uid = Auth.auth().currentUser?.uid else {return}
+//                
+//                Database.database().reference().child("likes").child(uid).child(key).observeSingleEvent(of: .value, with: { (snapshot) in
+//                    
+//                    if let value = snapshot.value as? Int, value == 1 {
+//                        post.hasLiked = true
+//                    } else {
+//                        post.hasLiked = false
+//                    }
+//                    
+//                    Database.database().reference().child("bookmarks").child(uid).child(key).observeSingleEvent(of: .value, with: { (snapshot) in
+//
+//                        let dictionaries = snapshot.value as? [String: Any]
+//                        
+//                        if let value = dictionaries?["bookmarked"] as? Int, value == 1 {
+//                            post.hasBookmarked = true
+//                        } else {
+//                            post.hasBookmarked = false
+//                        }
+//                    
+//                    
+//                    self.allPosts.append(post)
+//                    
+//                    self.allPosts.sort(by: { (p1, p2) -> Bool in
+//                        return p1.creationDate.compare(p2.creationDate) == .orderedDescending
+//                        })
+//                    
+//                    self.filteredPosts = self.allPosts
+//                    self.collectionView?.reloadData()
+//                    
+//                    }, withCancel: { (err) in
+//                        print("Failed to fetch bookmark info for post:", err)
+//                    })
+//                    
+//                        
+//                }, withCancel: { (err) in
+//                    print("Failed to fetch like info for post:", err)
+//                })
+//            })
+//            
+//        }) { (err) in print("Failed to fetchposts:", err) }
+//        
+//        
+//    }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         
