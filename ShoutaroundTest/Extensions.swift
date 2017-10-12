@@ -175,6 +175,18 @@ extension UICollectionViewController {
     
 }
 
+extension UIViewController {
+    
+    func alert(message: String) {
+        
+        let alert = UIAlertController(title: "Alert", message: message, preferredStyle: UIAlertControllerStyle.alert)
+        alert.addAction(UIAlertAction(title: "Click", style: UIAlertActionStyle.default, handler: nil))
+        self.present(alert, animated: true, completion: nil)
+        
+    }
+    
+}
+
 
 
 class TextField: UITextField {

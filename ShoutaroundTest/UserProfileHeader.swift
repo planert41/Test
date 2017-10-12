@@ -28,6 +28,13 @@ class UserProfileHeader: UICollectionViewCell, UITextFieldDelegate  {
             usernameLabel.text = user?.username
             statusText.text = user?.status
             
+            if user?.uid == Auth.auth().currentUser?.uid {
+                statusText.isEnabled = true
+            } else {
+                statusText.isEnabled = true
+            }
+            
+            
             setupEditFollowButton()
             
         }

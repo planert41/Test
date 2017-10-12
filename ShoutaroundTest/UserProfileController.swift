@@ -85,12 +85,18 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
         navigationController?.pushViewController(commentsController, animated: true)
     }
     
-    
     func didTapUser(post: Post) {
         let userProfileController = UserProfileController(collectionViewLayout: UICollectionViewFlowLayout())
         userProfileController.userId = post.user.uid
         
         navigationController?.pushViewController(userProfileController, animated: true)
+    }
+    
+    func didTapLocation(post: Post) {
+        let locationController = LocationController()
+        locationController.selectedPost = post
+        
+        navigationController?.pushViewController(locationController, animated: true)
     }
     
     func refreshPost(post: Post) {

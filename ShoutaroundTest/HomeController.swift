@@ -333,7 +333,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         
         var geoFilteredPosts = [Post]()
         
-        guard let filterDistance = Double((geoFilterButton.titleLabel?.text)!) else {
+            guard let filterDistance = Double((geoFilterButton.titleLabel?.text)!) else {
             print("No Distance Number")
             return}
         
@@ -520,6 +520,13 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         userProfileController.userId = post.user.uid
     
         navigationController?.pushViewController(userProfileController, animated: true)
+    }
+    
+    func didTapLocation(post: Post) {
+        let locationController = LocationController()
+        locationController.selectedPost = post
+        
+        navigationController?.pushViewController(locationController, animated: true)
     }
     
     func refreshPost(post: Post) {

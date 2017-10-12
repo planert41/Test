@@ -14,8 +14,9 @@ import Firebase
 protocol HomePostCellDelegate {
     func didTapComment(post:Post)
     func didTapUser(post:Post)
+    func didTapLocation(post:Post)
     func didTapMessage(post:Post)
-    func refreshPost(post:Post)    
+    func refreshPost(post:Post)
     
 //    func didSendMessage(post:Post)
 //    func didLike(for cell: HomePostCell)
@@ -72,6 +73,8 @@ class HomePostCell: UICollectionViewCell {
     
     func locationTap() {
         print("Tap location label", post?.locationName ?? "")
+        guard let post = post else {return}
+        delegate?.didTapLocation(post: post)
     }
     
     
