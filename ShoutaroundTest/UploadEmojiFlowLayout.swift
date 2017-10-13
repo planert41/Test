@@ -40,7 +40,7 @@ class UploadEmojiList: UICollectionViewFlowLayout {
         minimumInteritemSpacing = 1
         minimumLineSpacing = 1
         scrollDirection = .horizontal
-        sectionInset = UIEdgeInsets(top: 0, left: 10, bottom: 0, right: 10)
+        sectionInset = UIEdgeInsets(top: 5, left: 10, bottom: 5, right: 10)
         
     }
     

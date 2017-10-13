@@ -189,7 +189,7 @@ extension UIViewController {
 
 
 
-class TextField: UITextField {
+class PaddedTextField: UITextField {
     
     let padding = UIEdgeInsets(top: 0, left: 10, bottom: 0, right: 10);
     

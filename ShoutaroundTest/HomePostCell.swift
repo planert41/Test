@@ -142,7 +142,7 @@ class HomePostCell: UICollectionViewCell {
         label.text = "Emojis"
         label.font = UIFont.boldSystemFont(ofSize: 20)
         label.textAlignment = NSTextAlignment.right
-        label.backgroundColor = UIColor.yellow
+        label.backgroundColor = UIColor.white
         return label
         
     }()
