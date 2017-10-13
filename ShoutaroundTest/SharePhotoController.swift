@@ -17,6 +17,7 @@ import Alamofire
 
 class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout, UICollectionViewDelegate,UICollectionViewDataSource, UITextViewDelegate, CLLocationManagerDelegate, LocationSearchControllerDelegate, UIGestureRecognizerDelegate {
    
+    let locationManager = CLLocationManager()
     
     
     func didUpdate(lat: Double?, long: Double?, locationAdress: String?, locationName: String?, locationGooglePlaceID: String?) {
@@ -83,6 +84,9 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         }
     }
     
+    var ratingEmoji: String?
+    var foodEmoji: String?
+    
     
     var selectedImage: UIImage? {
         didSet{
@@ -141,9 +145,10 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = UIColor.rgb(red: 204, green: 238, blue: 255)
+        
 
         
+        view.backgroundColor = UIColor.rgb(red: 204, green: 238, blue: 255)
         navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Share", style: .plain, target: self, action: #selector(handleShare))
         
         setupImageAndTextViews()
@@ -302,17 +307,31 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         var sentLocation: CLLocation?
         
         if self.selectedPostLocation == nil {
-            sentLocation = CurrentUser.currentLocation
+
+            self.determineCurrentLocation()
+            
+            let when = DispatchTime.now() + 1 // change 2 to desired number of seconds
+            DispatchQueue.main.asyncAfter(deadline: when) {
+            
+                sentLocation = CurrentUser.currentLocation
+                print(sentLocation)
+                locationSearchController.selectedLocation = sentLocation
+                locationSearchController.refreshMap(long: (sentLocation!.coordinate.longitude), lat: (sentLocation!.coordinate.latitude), name: self.locationNameLabel.text, adress: self.locationAdressLabel.text)
+                locationSearchController.selectedGooglePlaceID = self.selectedPostGooglePlaceID
+                locationSearchController.delegate = self
+                self.navigationController?.pushViewController(locationSearchController, animated: true)
+            }
+            
+
+            
         } else {
             sentLocation = self.selectedPostLocation
+            locationSearchController.selectedLocation = sentLocation
+            locationSearchController.refreshMap(long: (sentLocation!.coordinate.longitude), lat: (sentLocation!.coordinate.latitude), name: self.locationNameLabel.text, adress: self.locationAdressLabel.text)
+            locationSearchController.selectedGooglePlaceID = self.selectedPostGooglePlaceID
+            locationSearchController.delegate = self
+            navigationController?.pushViewController(locationSearchController, animated: true)
         }
-        
-        locationSearchController.selectedLocation = sentLocation
-        locationSearchController.refreshMap(long: (sentLocation!.coordinate.longitude), lat: (sentLocation!.coordinate.latitude), name: self.locationNameLabel.text, adress: self.locationAdressLabel.text)
-        locationSearchController.selectedGooglePlaceID = self.selectedPostGooglePlaceID
-        locationSearchController.delegate = self
-        
-        navigationController?.pushViewController(locationSearchController, animated: true)
         
     }
 
@@ -550,13 +569,19 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
                 let words = textView.text!.components(separatedBy: " ")
                 let lastWord = words[words.endIndex - 1]
                 var emojiLookup = EmojiDictionary.key(forValue: lastWord.lowercased())
-                self.emojiCheck(emojiLookup)
+                
+                // Only check text for emoji if emoji does not already exist in selected emoji
+                if emojiLookup != nil && self.selectedEmojis.contains(emojiLookup!) == false {
+                    self.emojiCheck(emojiLookup)
+                }
+                
             }
             return true
             
             }
         
         else { return false }
+
     }
     
     
@@ -643,12 +668,17 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         // Check if selected Emojis already have emoji
         
         guard let emoji = emoji else {return}
+
+        
+//        print(emoji, emoji.unicodeScalars, emoji.containsRatingEmoji)
+        
+        
         var selectedEmojis = self.selectedEmojis
         
         if emoji.containsOnlyEmoji == false {
             return
         }
-      
+
         else if selectedEmojis == nil {
             selectedEmojis = emoji
             self.selectedEmojis = selectedEmojis
@@ -833,6 +863,21 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         
         if collectionView == EmojiCollectionView{
             let cell = collectionView.cellForItem(at: indexPath) as! UploadEmojiCell
+            let pressedEmoji = cell.uploadEmojis.text!
+            
+            if self.captionTextView.text.contains(pressedEmoji) == false && self.selectedEmojis.contains(pressedEmoji) == false
+            {
+                if self.captionTextView.text == "Insert Caption Here" {
+                    self.captionTextView.text = cell.uploadEmojis.text!
+
+                } else {
+                    self.captionTextView.text = self.captionTextView.text + cell.uploadEmojis.text!
+                }
+                
+            } else if self.captionTextView.text.contains(pressedEmoji) == true && self.selectedEmojis.contains(pressedEmoji) == true {
+                captionTextView.text = captionTextView.text.replacingOccurrences(of: pressedEmoji, with: "")
+            }
+            
             // cell.contentView.backgroundColor = UIColor.blue
             self.emojiCheck(cell.uploadEmojis.text)
         }
@@ -1017,10 +1062,45 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         return true
     }
     
+    
+    // LOCATION MANAGER DELEGATE METHODS
+    
+    func determineCurrentLocation(){
+        
+        CurrentUser.currentLocation = nil
+        
+        if CLLocationManager.locationServicesEnabled() {
+            locationManager.delegate = self
+            locationManager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters
+        }
+        
+        if CLLocationManager.locationServicesEnabled() {
+            locationManager.startUpdatingLocation()
+        }
+        
+    }
+    
+    
+    
+    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        let userLocation:CLLocation = locations[0] as CLLocation
+        
+        if userLocation != nil {
+            print("Current User Location", userLocation)
+            CurrentUser.currentLocation = userLocation
+            manager.stopUpdatingLocation()
+        }
+        
+    }
+    
+    func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
+        print("GPS Location Not Found")
+    }
+    
+    
+    
 
 // APPLE PLACES QUERY
-    
-    let locationManager = CLLocationManager()
     
     func appleCurrentLocation(_ GPSLocation: CLLocation) {
         

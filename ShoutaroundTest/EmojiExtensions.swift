@@ -29,6 +29,17 @@ extension UnicodeScalar {
         }
     }
     
+    var isFaceEmoji: Bool {
+        
+        switch value {
+        case 0x1F600...0x1F64F: // Emoticons
+
+            return true
+            
+        default: return false
+        }
+    }
+    
     var isZeroWidthJoiner: Bool {
         
         return value == 8205
@@ -47,6 +58,11 @@ extension String {
     var isSingleEmoji: Bool {
         
         return glyphCount == 1 && containsEmoji
+    }
+    
+    var containsRatingEmoji: Bool {
+        
+        return unicodeScalars.contains { $0.isFaceEmoji } || Emote1Init.contains(self)
     }
     
     var containsEmoji: Bool {
