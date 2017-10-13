@@ -15,7 +15,7 @@ import SwiftyJSON
 import SwiftLocation
 import Alamofire
 
-class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout, UICollectionViewDelegate,UICollectionViewDataSource, UITextViewDelegate, CLLocationManagerDelegate, LocationSearchControllerDelegate {
+class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout, UICollectionViewDelegate,UICollectionViewDataSource, UITextViewDelegate, CLLocationManagerDelegate, LocationSearchControllerDelegate, UIGestureRecognizerDelegate {
    
     
     
@@ -141,7 +141,7 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = UIColor.rgb(red: 240, green: 240, blue: 240)
+        view.backgroundColor = UIColor.rgb(red: 204, green: 238, blue: 255)
 
         
         navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Share", style: .plain, target: self, action: #selector(handleShare))
@@ -456,6 +456,11 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
                     EmojiCollectionView.dataSource = self
                     EmojiCollectionView.allowsMultipleSelection = true
         
+        let emojiRef = UILongPressGestureRecognizer(target: self, action: #selector(SharePhotoController.handleLongPress(_:)))
+        emojiRef.minimumPressDuration = 0.5
+        emojiRef.delegate = self
+        EmojiCollectionView.addGestureRecognizer(emojiRef)
+        
 //        view.addSubview(Emoji1CollectionView)
 //        view.addSubview(Emoji2CollectionView)
 //        view.addSubview(Emoji3CollectionView)
@@ -659,9 +664,85 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         }
         
         print(self.selectedEmojis)
+    
+    }
+    
+    
+    func handleLongPress(_ gestureReconizer: UILongPressGestureRecognizer) {
         
+        let p = gestureReconizer.location(in: self.view)
+        let subViews = self.view.subviews
+        
+        if gestureReconizer.state != UIGestureRecognizerState.recognized {
 
-        
+            let point = self.EmojiCollectionView.convert(p, from:self.view)
+            let indexPath = self.EmojiCollectionView.indexPathForItem(at: point)
+            
+            print(indexPath)
+            
+            if let index = indexPath  {
+                
+                let cell = self.EmojiCollectionView.cellForItem(at: index) as! UploadEmojiCell
+                print(cell.uploadEmojis.text)
+                
+                let topright = CGPoint(x: cell.center.x + cell.bounds.size.width/2, y: cell.center.y - cell.bounds.size.height/2-25)
+                let converttopright = self.view.convert(topright, from:self.EmojiCollectionView)
+                
+                let label = UILabel(frame: CGRect(x: converttopright.x, y: converttopright.y, width: 75, height: 25))
+                label.backgroundColor = UIColor.rgb(red: 240, green: 240, blue: 240)
+                label.layer.cornerRadius = 5
+                label.layer.masksToBounds = true
+                label.layer.borderWidth = 0.25
+                label.tag = 1
+                label.font = label.font.withSize(15)
+                label.textColor = UIColor.black
+                label.textAlignment = NSTextAlignment.center
+                label.text = EmojiDictionary[(cell.uploadEmojis.text)!]
+                print(cell.uploadEmojis.text)
+                print("text label is", label.text)
+                self.view.addSubview(label)
+                
+                
+
+                // do stuff with your cell, for example print the indexPath
+
+                cell.backgroundColor = UIColor.rgb(red: 149, green: 204, blue: 244)
+                
+            } else {
+                print("Could not find index path")
+            }
+            
+        }
+    
+        else if gestureReconizer.state != UIGestureRecognizerState.changed {
+            
+            let point = self.EmojiCollectionView.convert(p, from:self.view)
+            let indexPath = self.EmojiCollectionView.indexPathForItem(at: point)
+            
+            if let index = indexPath  {
+                
+                // Removes label subview when released
+                
+                for subview in subViews{
+                    if (subview.tag == 1) {
+                        subview.removeFromSuperview()
+                    }}
+                
+                let cell = self.EmojiCollectionView.cellForItem(at: index) as! UploadEmojiCell
+                
+                cell.backgroundColor = UIColor.white
+                
+            } else {
+                print("Could not find index path")
+            }
+            
+            return
+            
+        }
+    
+    
+    
+    
     }
     
     func numberOfSections(in collectionView: UICollectionView) -> Int {
