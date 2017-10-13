@@ -206,5 +206,13 @@ class PaddedTextField: UITextField {
     }
 }
 
+class PaddedUILabel: UILabel {
+    
+    override func drawText(in rect: CGRect) {
+        let insets = UIEdgeInsets.init(top: 0, left: 15, bottom: 0, right: 15)
+        super.drawText(in: UIEdgeInsetsInsetRect(rect, insets))
+    }
+}
+
 
 

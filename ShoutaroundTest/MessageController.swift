@@ -49,8 +49,8 @@ class MessageController: UIViewController, UICollectionViewDataSource, UICollect
         return ul
     }()
     
-    lazy var fromInput: UITextField = {
-        let tf = UITextField()
+    lazy var fromInput: PaddedTextField = {
+        let tf = PaddedTextField()
         tf.font = UIFont.systemFont(ofSize: 14.0)
         tf.layer.borderWidth = 1
         tf.layer.borderColor = UIColor.gray.cgColor
@@ -75,8 +75,8 @@ class MessageController: UIViewController, UICollectionViewDataSource, UICollect
         return ul
     }()
     
-    lazy var toInput: UITextField = {
-        let tf = UITextField()
+    lazy var toInput: PaddedTextField = {
+        let tf = PaddedTextField()
         
         tf.font = UIFont.systemFont(ofSize: 14.0)
         tf.layer.borderWidth = 1
@@ -227,8 +227,10 @@ class MessageController: UIViewController, UICollectionViewDataSource, UICollect
                 fromLabel = "<user@shoutaround.com>"
             } else {
                 
-                let trimmedusername = CurrentUser.username!.replacingOccurrences(of: " ", with: "") 
-                fromLabel = fromInput.text! + ", <" + trimmedusername + "@shoutaround.com>"
+                var trimmedusername = CurrentUser.username!.replacingOccurrences(of: " ", with: "")
+                    trimmedusername = trimmedusername.replacingOccurrences(of: "@", with: "")
+                
+                fromLabel = fromInput.text!.replacingOccurrences(of: "@", with: "") + ", <" + trimmedusername + "@shoutaround.com>"
             }
             
             var toLabel: String?
