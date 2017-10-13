@@ -35,7 +35,7 @@ class HomePostCell: UICollectionViewCell {
             
             likeButton.setImage(post?.hasLiked == true ? #imageLiteral(resourceName: "like_selected").withRenderingMode(.alwaysOriginal) : #imageLiteral(resourceName: "like_unselected").withRenderingMode(.alwaysOriginal), for: .normal)
             
-            bookmarkButton.setImage(post?.hasBookmarked == true ? #imageLiteral(resourceName: "bookmark_selected").withRenderingMode(.alwaysOriginal) : #imageLiteral(resourceName: "bookmark_unselected").withRenderingMode(.alwaysOriginal), for: .normal)
+            bookmarkButton.setImage(post?.hasBookmarked == true ? #imageLiteral(resourceName: "bookmark_ribbon_filled").withRenderingMode(.alwaysOriginal) : #imageLiteral(resourceName: "bookmark_ribbon_unfilled").withRenderingMode(.alwaysOriginal), for: .normal)
                 
             photoImageView.loadImage(urlString: imageUrl)
             usernameLabel.text = post?.user.username
@@ -46,9 +46,15 @@ class HomePostCell: UICollectionViewCell {
             let usernameTap = UITapGestureRecognizer(target: self, action: #selector(HomePostCell.usernameTap))
             usernameLabel.addGestureRecognizer(usernameTap)
             
+            let locationTapGesture = UITapGestureRecognizer(target: self, action: #selector(HomePostCell.locationTap))
+            
+            locationLabel.text = post?.locationName.truncate(length: 30)
             locationLabel.isUserInteractionEnabled = true
-            let locationTap = UITapGestureRecognizer(target: self, action: #selector(HomePostCell.locationTap))
-            locationLabel.addGestureRecognizer(locationTap)
+            locationLabel.addGestureRecognizer(locationTapGesture)
+            
+            adressLabel.text = post?.locationAdress.truncate(length: 60)
+            adressLabel.isUserInteractionEnabled = true
+            adressLabel.addGestureRecognizer(locationTapGesture)
             
             guard let profileImageUrl = post?.user.profileImageUrl else {return}
             
@@ -57,7 +63,7 @@ class HomePostCell: UICollectionViewCell {
             setupAttributedCaption()
 
             
-            setupAttributedLocationName()
+           // setupAttributedLocationName()
             
             
                 
@@ -154,13 +160,36 @@ class HomePostCell: UICollectionViewCell {
         return label
     }()
     
+    
+    let locationView: UIView = {
+        let uv = UIView()
+        return uv
+    }()
+    
     let locationLabel: UILabel = {
         let label = UILabel()
         label.text = "Location"
         label.font = UIFont.boldSystemFont(ofSize: 12)
+        label.textColor = UIColor.black
+        return label
+    }()
+    
+    let adressLabel: UILabel = {
+        let label = UILabel()
+        label.text = "Adress"
+        label.font = UIFont.italicSystemFont(ofSize: 10)
         label.textColor = UIColor.darkGray
         return label
     }()
+    
+    lazy var locationButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setImage(#imageLiteral(resourceName: "map_marker").withRenderingMode(.alwaysOriginal), for: .normal)
+        button.addTarget(self, action: #selector(locationTap), for: .touchUpInside)
+        return button
+        
+    }()
+    
 
     
     let captionLabel: UILabel = {
@@ -169,6 +198,7 @@ class HomePostCell: UICollectionViewCell {
         label.numberOfLines = 0
         return label
     }()
+
     
     
     let optionsButton: UIButton = {
@@ -330,18 +360,43 @@ class HomePostCell: UICollectionViewCell {
         
         emojiLabel.anchor(top: topAnchor, left: nil, bottom: photoImageView.topAnchor, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 140, height: 0)
         
-        usernameLabel.anchor(top: topAnchor, left: userProfileImageView.rightAnchor, bottom: nil, right: emojiLabel.leftAnchor, paddingTop: 0, paddingLeft: 8, paddingBottom: 0, paddingRight: 0, width: 0, height: userProfileImageView.frame.height/2)
+        usernameLabel.anchor(top: topAnchor, left: userProfileImageView.rightAnchor, bottom: photoImageView.topAnchor, right: emojiLabel.leftAnchor, paddingTop: 0, paddingLeft: 8, paddingBottom: 0, paddingRight: 0, width: 0, height: userProfileImageView.frame.height)
 
-        locationLabel.anchor(top: usernameLabel.bottomAnchor, left: userProfileImageView.rightAnchor, bottom: photoImageView.topAnchor, right: emojiLabel.leftAnchor, paddingTop: 0, paddingLeft: 8, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
+//        locationLabel.anchor(top: usernameLabel.bottomAnchor, left: userProfileImageView.rightAnchor, bottom: photoImageView.topAnchor, right: emojiLabel.leftAnchor, paddingTop: 0, paddingLeft: 8, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
         
         
-        userProfileImageView.anchor(top: topAnchor, left: leftAnchor, bottom: nil, right: nil, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 40, height: 40)
+        userProfileImageView.anchor(top: topAnchor, left: leftAnchor, bottom: nil, right: nil, paddingTop: 1, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 40, height: 40)
         userProfileImageView.layer.cornerRadius = 40/2
         
         photoImageView.anchor(top: userProfileImageView.bottomAnchor, left: leftAnchor, bottom: nil, right: rightAnchor, paddingTop: 8, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
         photoImageView.heightAnchor.constraint(equalTo: widthAnchor, multiplier: 1).isActive = true
         
-
+        addSubview(locationView)
+        locationView.anchor(top: photoImageView.bottomAnchor, left: leftAnchor, bottom: nil, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 40)
+//        locationView.backgroundColor = UIColor.yellow
+        
+        addSubview(locationButton)
+        addSubview(locationLabel)
+        addSubview(adressLabel)
+        
+        
+        addSubview(bookmarkButton)
+        bookmarkButton.anchor(top: photoImageView.bottomAnchor, left: nil, bottom: nil, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 40, height: 50)
+        
+        locationButton.anchor(top: locationView.topAnchor, left: locationView.leftAnchor, bottom: locationView.bottomAnchor, right: nil, paddingTop: 5, paddingLeft: 8, paddingBottom: 5, paddingRight: 0, width: 30, height: 30)
+        
+        locationLabel.anchor(top: locationView.topAnchor, left: locationButton.rightAnchor, bottom: nil, right: bookmarkButton.leftAnchor, paddingTop: 5, paddingLeft: 15, paddingBottom: 0, paddingRight: 0, width: 0, height: 15)
+        
+        adressLabel.anchor(top: locationLabel.bottomAnchor, left: locationButton.rightAnchor, bottom: locationView.bottomAnchor, right: bookmarkButton.leftAnchor, paddingTop: 2, paddingLeft: 15, paddingBottom: 5, paddingRight: 0, width: 0, height: 0)
+        
+        let bottomDividerView = UIView()
+        bottomDividerView.backgroundColor = UIColor.lightGray
+        addSubview(bottomDividerView)
+        
+        bottomDividerView.anchor(top: locationView.bottomAnchor, left: leftAnchor, bottom: nil, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0.5)
+        
+        
+        
         
         setupActionButtons()
         
@@ -356,10 +411,8 @@ class HomePostCell: UICollectionViewCell {
         stackView.distribution = .fillEqually
         
         addSubview(stackView)
-        stackView.anchor(top: photoImageView.bottomAnchor, left: leftAnchor, bottom: nil, right: nil, paddingTop: 0, paddingLeft: 8, paddingBottom: 0, paddingRight: 0, width: 120, height: 50)
-        
-        addSubview(bookmarkButton)
-        bookmarkButton.anchor(top: photoImageView.bottomAnchor, left: nil, bottom: nil, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 40, height: 50)
+        stackView.anchor(top: locationView.bottomAnchor, left: leftAnchor, bottom: nil, right: nil, paddingTop: 0, paddingLeft: 8, paddingBottom: 0, paddingRight: 0, width: 120, height: 50)
+
         
         
     }
