@@ -23,7 +23,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     let locationManager = CLLocationManager()
     
     // GeoPickerData 1st element should always be default ALL
-    let geoFilterRange = ["ALL","500", "1000", "2500", "5000"]
+    let geoFilterRange = ["Filter Range","1", "5", "10", "25","100"]
 
     override func viewDidLayoutSubviews() {
         
@@ -159,6 +159,8 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         dummyTextView.resignFirstResponder()
         filterPostByCaption(self.searchBar.text)
         filterNearbyPost()
+        
+        
     }
     
     func cancelPicker(){
@@ -211,7 +213,6 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     func searchBarTextDidEndEditing(_ searchBar: UISearchBar) {
         filterPostByCaption(searchBar.text)
         filterNearbyPost()
-        self.collectionView?.reloadData()
     }
     
     func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
@@ -308,20 +309,21 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         
 //        navigationItem.leftBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "camera3").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(handleCamera))
         
-        navigationItem.rightBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "search_selected").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(hideHeader))
+        navigationItem.leftBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "search_selected").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(hideHeader))
         
-    }
-    
-    func nearbyPostTest(){
-        
-        filterNearbyPost()
+        navigationItem.rightBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "FilterHere").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(filterHere))
         
     }
     
     
-    
-
-    
+    func filterHere(){
+        
+        self.geoFilterButton.titleLabel?.text = "5"
+        self.filterNearbyPost()
+        let indexPath = IndexPath(item: 0, section: 0)
+        self.collectionView?.scrollToItem(at: indexPath, at: .bottom, animated: true)
+        
+    }
     
     func filterNearbyPost(){
         
@@ -364,6 +366,12 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
                     self.filteredPosts = geoFilteredPosts.sorted(by: { (p1, p2) -> Bool in
                         p1.distance!.isLess(than: p2.distance!)
                     })
+
+
+                    if self.collectionView?.numberOfItems(inSection: 0) != 0 {
+                    let indexPath = IndexPath(item: 0, section: 0)
+                    self.collectionView?.scrollToItem(at: indexPath, at: .bottom, animated: true)
+                    }
                     self.collectionView?.reloadData()
                     
                 })

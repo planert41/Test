@@ -61,6 +61,16 @@ class HomePostCell: UICollectionViewCell {
             userProfileImageView.loadImage(urlString: profileImageUrl)
             captionLabel.text = post?.caption
             setupAttributedCaption()
+            
+            if post?.distance != nil && post?.locationGPS?.coordinate.longitude != 0 && post?.locationGPS?.coordinate.latitude != 0 {
+                
+                let distanceformat = ".2"
+                
+                // Convert to M to KM
+                let locationDistance = (post?.distance)!/1000
+                locationDistanceLabel.text = String(locationDistance.format(f: distanceformat)) + "KM"
+
+            }
 
             
            // setupAttributedLocationName()
@@ -171,6 +181,15 @@ class HomePostCell: UICollectionViewCell {
         label.text = "Location"
         label.font = UIFont.boldSystemFont(ofSize: 12)
         label.textColor = UIColor.black
+        return label
+    }()
+    
+    let locationDistanceLabel: UILabel = {
+        let label = UILabel()
+        label.text = ""
+        label.font = UIFont.boldSystemFont(ofSize: 12)
+        label.textColor = UIColor.mainBlue()
+        label.textAlignment = NSTextAlignment.right
         return label
     }()
     
@@ -378,10 +397,13 @@ class HomePostCell: UICollectionViewCell {
         addSubview(locationButton)
         addSubview(locationLabel)
         addSubview(adressLabel)
+        addSubview(locationDistanceLabel)
         
         
         addSubview(bookmarkButton)
-        bookmarkButton.anchor(top: photoImageView.bottomAnchor, left: nil, bottom: nil, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 40, height: 50)
+        bookmarkButton.anchor(top: locationView.bottomAnchor, left: nil, bottom: nil, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 40, height: 50)
+        
+        locationDistanceLabel.anchor(top: photoImageView.bottomAnchor, left: nil, bottom: nil, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 5, width: 75, height: 50)
         
         locationButton.anchor(top: locationView.topAnchor, left: locationView.leftAnchor, bottom: locationView.bottomAnchor, right: nil, paddingTop: 5, paddingLeft: 8, paddingBottom: 5, paddingRight: 0, width: 30, height: 30)
         
@@ -394,9 +416,6 @@ class HomePostCell: UICollectionViewCell {
         addSubview(bottomDividerView)
         
         bottomDividerView.anchor(top: locationView.bottomAnchor, left: leftAnchor, bottom: nil, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0.5)
-        
-        
-        
         
         setupActionButtons()
         

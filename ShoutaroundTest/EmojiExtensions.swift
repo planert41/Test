@@ -34,7 +34,7 @@ extension UnicodeScalar {
         switch value {
         case 0x1F600...0x1F64F: // Emoticons
 
-            return true
+        return true
             
         default: return false
         }
@@ -47,6 +47,19 @@ extension UnicodeScalar {
 }
 
 extension String {
+    
+    var emojilessString: String {
+        
+        let emojisString = self.emojis
+        var tempString = self
+        
+        for emojis in emojisString{
+            tempString = tempString.replacingOccurrences(of: emojis, with: "")
+        }
+        
+        return tempString
+    }
+    
     
     var glyphCount: Int {
         

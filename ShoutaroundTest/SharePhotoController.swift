@@ -405,7 +405,7 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         imageView.anchor(top: containerView.topAnchor, left: containerView.leftAnchor, bottom: containerView.bottomAnchor, right: nil, paddingTop: 8, paddingLeft: 8, paddingBottom: 8, paddingRight: 0, width: 84, height: 0)
         
         view.addSubview(emojiCancelButton)
-        emojiCancelButton.anchor(top: nil, left: nil, bottom: containerView.bottomAnchor, right: containerView.rightAnchor, paddingTop: 4, paddingLeft: 0, paddingBottom: 5, paddingRight: 5, width: 10, height: 10)
+        emojiCancelButton.anchor(top: nil, left: nil, bottom: containerView.bottomAnchor, right: containerView.rightAnchor, paddingTop: 4, paddingLeft: 0, paddingBottom: 5, paddingRight: 5, width: 15, height: 15)
         emojiCancelButton.centerYAnchor.constraint(equalTo: emojiTextView.centerYAnchor)
         emojiCancelButton.alpha = 0
         
@@ -524,7 +524,12 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
 //        
 //    }
     
+        var savedWords = [String]()
+        var deletedWords = [String]()
+        var deletedWord = ""
+    
     func textView(_ textView: UITextView, shouldChangeTextIn range: NSRange, replacementText text: String) -> Bool {
+
 
         let char = text.cString(using: String.Encoding.utf8)!
         let isBackSpace = strcmp(char, "\\b")
@@ -569,8 +574,13 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         // Detect Backspace = isBackSpace == -92
         
             else if (text == " ") {
-                let words = textView.text!.components(separatedBy: " ")
-                let lastWord = words[words.endIndex - 1]
+                
+                //print("Deleted Word",self.deletedWord)
+                
+                self.savedWords = textView.text!.components(separatedBy: " ")
+//                print(self.savedWords)
+                
+                let lastWord = savedWords[savedWords.endIndex - 1].emojilessString
                 var emojiLookup = EmojiDictionary.key(forValue: lastWord.lowercased())
                 
                 // Only check text for emoji if emoji does not already exist in selected emoji
@@ -578,7 +588,39 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
                     self.emojiCheck(emojiLookup)
                 }
                 
+                // Check for deleted Text
+                
+                if self.deletedWord != "" && emojiLookup != nil && self.selectedEmojis.contains(emojiLookup!) && textView.text!.contains(emojiLookup!) == true {
+                    self.deletedWord = ""
+                    self.emojiCheck(emojiLookup)
+                }
+                
+                
             }
+            
+        // When hit backspace, compare new words to prev saved words. if deleted string matches an emoji, then we take emoji out
+                
+            else if (isBackSpace == -92) {
+                    deletedWords = textView.text!.components(separatedBy: " ")
+                let deletedWordArray = Array(Set(self.savedWords).subtracting(self.deletedWords))
+//                print(savedWords)
+//                print(newWords)
+                
+                if deletedWordArray.count != 0 {
+                    self.deletedWord = deletedWordArray[0]
+                    print("Deleted Word",self.deletedWord)
+                    
+                }
+                
+                var emojiLookup = EmojiDictionary.key(forValue: self.deletedWord.lowercased())
+                if emojiLookup != nil && self.selectedEmojis.contains(emojiLookup!) && textView.text!.contains(emojiLookup!) == false {
+                    self.deletedWord = ""
+                    self.emojiCheck(emojiLookup)
+                }
+
+                
+            }
+            
             return true
             
             }
