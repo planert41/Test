@@ -18,6 +18,7 @@ import Alamofire
 class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout, UICollectionViewDelegate,UICollectionViewDataSource, UITextViewDelegate, CLLocationManagerDelegate, LocationSearchControllerDelegate, UIGestureRecognizerDelegate {
    
     let locationManager = CLLocationManager()
+    let emojiCollectionViewRows: Int = 5
     
     
     func didUpdate(lat: Double?, long: Double?, locationAdress: String?, locationName: String?, locationGooglePlaceID: String?) {
@@ -463,8 +464,10 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         
         view.addSubview(EmojiContainerView)
 //        EmojiContainerView.anchor(top: LocationContainerView.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 1, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: (EmojiSize.width + 2) * 4)
- 
-        EmojiContainerView.anchor(top: LocationContainerView.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 1, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height:(EmojiSize.width + 2) * 4 + 10 )
+        
+        let emojiContainerHeight: Int = (Int(EmojiSize.width) + 2) * self.emojiCollectionViewRows + 10
+
+        EmojiContainerView.anchor(top: LocationContainerView.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 1, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: CGFloat(emojiContainerHeight))
         
         
         view.addSubview(EmojiCollectionView)
@@ -836,7 +839,13 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         if collectionView == EmojiCollectionView {
                 let cell = collectionView.dequeueReusableCell(withReuseIdentifier: emojiCellID, for: indexPath) as! UploadEmojiCell
             
-                    cell.uploadEmojis.text = EmoticonArray[(indexPath as IndexPath).section][(indexPath as IndexPath).row]
+                let columns = collectionView.numberOfItems(inSection: indexPath.section) / emojiCollectionViewRows
+                let i = indexPath.item / emojiCollectionViewRows
+                let j = indexPath.item % emojiCollectionViewRows
+                let newIndex = j*columns+i
+            
+            
+                    cell.uploadEmojis.text = EmoticonArray[(indexPath as IndexPath).section][newIndex]
             
                     if self.selectedEmojis.contains(cell.uploadEmojis.text!){
                         cell.backgroundColor = UIColor.rgb(red: 149, green: 204, blue: 244)
