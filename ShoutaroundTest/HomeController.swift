@@ -395,6 +395,8 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
             self.allPosts.sort(by: { (p1, p2) -> Bool in
                 return p1.creationDate.compare(p2.creationDate) == .orderedDescending
              })
+            
+            print(fetchedPosts)
             self.filteredPosts = self.allPosts
             self.collectionView?.reloadData()
         }
@@ -473,6 +475,28 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         messageController.post = post
         
         navigationController?.pushViewController(messageController, animated: true)
+        
+    }
+    
+    func deletePost(post:Post){
+        
+        let deleteAlert = UIAlertController(title: "Delete", message: "All data will be lost.", preferredStyle: UIAlertControllerStyle.alert)
+        
+        deleteAlert.addAction(UIAlertAction(title: "Ok", style: .default, handler: { (action: UIAlertAction!) in
+            
+            
+            Database.database().reference().child("posts").child(post.id!).removeValue()
+            Database.database().reference().child("postlocations").child(post.id!).removeValue()
+            Database.database().reference().child("userposts").child(post.creatorUID!).child(post.id!).removeValue()
+        
+        }))
+        
+        deleteAlert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: { (action: UIAlertAction!) in
+            print("Handle Cancel Logic here")
+        }))
+        
+        present(deleteAlert, animated: true, completion: nil)
+        
         
     }
     

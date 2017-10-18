@@ -11,6 +11,8 @@ import UIKit
 
 class BookmarkPhotoCell: UICollectionViewCell {
     
+    let adressLabelSize = 12 as CGFloat
+    
     var post: Post? {
         didSet {
             
@@ -34,7 +36,7 @@ class BookmarkPhotoCell: UICollectionViewCell {
         
         guard let post = self.post else {return}
         
-        let attributedText = NSMutableAttributedString(string: post.locationName.truncate(length: 20), attributes: [NSFontAttributeName: UIFont.boldSystemFont(ofSize: 12)])
+        let attributedText = NSMutableAttributedString(string: post.locationName.truncate(length: 20), attributes: [NSFontAttributeName: UIFont.boldSystemFont(ofSize: adressLabelSize)])
         
         if post.distance != nil && post.locationGPS?.coordinate.longitude != 0 && post.locationGPS?.coordinate.latitude != 0 {
             
@@ -43,7 +45,7 @@ class BookmarkPhotoCell: UICollectionViewCell {
             // Convert to M to KM
             let locationDistance = post.distance!/1000
             
-            attributedText.append(NSAttributedString(string: " \(locationDistance.format(f: distanceformat)) KM", attributes: [NSFontAttributeName: UIFont.systemFont(ofSize: 10),NSForegroundColorAttributeName: UIColor.gray]))
+            attributedText.append(NSAttributedString(string: " \(locationDistance.format(f: distanceformat)) KM", attributes: [NSFontAttributeName: UIFont.systemFont(ofSize: adressLabelSize),NSForegroundColorAttributeName: UIColor.gray]))
         }
         
         self.locationNameLabel.attributedText = attributedText
@@ -82,7 +84,7 @@ class BookmarkPhotoCell: UICollectionViewCell {
         label.text = "Emojis"
         label.font = UIFont.boldSystemFont(ofSize: 20)
         label.textAlignment = NSTextAlignment.left
-        label.backgroundColor = UIColor.yellow
+        label.backgroundColor = UIColor.white
         return label
         
     }()
@@ -105,8 +107,7 @@ class BookmarkPhotoCell: UICollectionViewCell {
     
     let captionLabel: UILabel = {
         let label = UILabel()
-        
-        label.numberOfLines = 0
+        label.numberOfLines = 2
         return label
     }()
     
@@ -124,22 +125,21 @@ class BookmarkPhotoCell: UICollectionViewCell {
         let stackview = UIStackView()
         stackview.axis = .vertical
         stackview.distribution = .fillEqually
-        stackview.insertArrangedSubview(emojiLabel, at: 0)
+        stackview.insertArrangedSubview(usernameRow, at: 0)
         stackview.insertArrangedSubview(locationNameLabel, at: 1)
         stackview.insertArrangedSubview(locationAdressLabel, at: 2)
-        stackview.insertArrangedSubview(usernameRow, at: 3)
-        stackview.insertArrangedSubview(captionLabel, at: 4)
+        stackview.insertArrangedSubview(captionLabel, at: 3)
         
         addSubview(stackview)
         stackview.anchor(top: topAnchor, left: photoImageView.rightAnchor, bottom: bottomAnchor, right: rightAnchor, paddingTop: 2, paddingLeft: 2, paddingBottom: 2, paddingRight: 2, width: 0, height: 0)
         
         usernameRow.addSubview(userProfileImageView)
-        usernameRow.addSubview(usernameLabel)
+        usernameRow.addSubview(emojiLabel)
         
         userProfileImageView.anchor(top: usernameRow.topAnchor, left: usernameRow.leftAnchor, bottom: usernameRow.bottomAnchor, right: nil, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
         userProfileImageView.widthAnchor.constraint(equalTo: userProfileImageView.heightAnchor, multiplier: 1).isActive = true
         
-        usernameLabel.anchor(top: usernameRow.topAnchor, left: userProfileImageView.rightAnchor, bottom: usernameRow.bottomAnchor, right: nil, paddingTop: 0, paddingLeft: 10, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
+        emojiLabel.anchor(top: usernameRow.topAnchor, left: userProfileImageView.rightAnchor, bottom: usernameRow.bottomAnchor, right: nil, paddingTop: 0, paddingLeft: 10, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
         
         let topDividerView = UIView()
         topDividerView.backgroundColor = UIColor.lightGray

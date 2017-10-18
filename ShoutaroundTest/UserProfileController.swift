@@ -118,6 +118,29 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
         navigationController?.pushViewController(messageController, animated: true)
     }
     
+    func deletePost(post:Post){
+        
+        let deleteAlert = UIAlertController(title: "Delete", message: "All data will be lost.", preferredStyle: UIAlertControllerStyle.alert)
+        
+        deleteAlert.addAction(UIAlertAction(title: "Ok", style: .default, handler: { (action: UIAlertAction!) in
+            
+            
+            
+            Database.database().reference().child("posts").child(post.id!).removeValue()
+            Database.database().reference().child("postlocations").child(post.id!).removeValue()
+            Database.database().reference().child("userposts").child(post.creatorUID!).child(post.id!).removeValue()
+            
+        }))
+        
+        deleteAlert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: { (action: UIAlertAction!) in
+            print("Handle Cancel Logic here")
+        }))
+        
+        present(deleteAlert, animated: true, completion: nil)
+        
+        
+    }
+    
     
 
     

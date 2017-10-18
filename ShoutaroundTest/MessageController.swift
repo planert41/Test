@@ -230,7 +230,7 @@ class MessageController: UIViewController, UICollectionViewDataSource, UICollect
                 var trimmedusername = CurrentUser.username!.replacingOccurrences(of: " ", with: "")
                     trimmedusername = trimmedusername.replacingOccurrences(of: "@", with: "")
                 
-                fromLabel = fromInput.text!.replacingOccurrences(of: "@", with: "") + ", <" + trimmedusername + "@shoutaround.com>"
+                fromLabel = fromInput.text!.replacingOccurrences(of: "@", with: "") + "<" + trimmedusername + "@shoutaround.com>"
             }
             
             var toLabel: String?

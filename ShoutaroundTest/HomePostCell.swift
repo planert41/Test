@@ -17,6 +17,7 @@ protocol HomePostCellDelegate {
     func didTapLocation(post:Post)
     func didTapMessage(post:Post)
     func refreshPost(post:Post)
+    func deletePost(post:Post)
     
 //    func didSendMessage(post:Post)
 //    func didLike(for cell: HomePostCell)
@@ -72,6 +73,11 @@ class HomePostCell: UICollectionViewCell {
 
             }
 
+            if post?.creatorUID == Auth.auth().currentUser?.uid {
+                deleteButton.isHidden = false
+            } else {
+                deleteButton.isHidden = true
+            }
             
            // setupAttributedLocationName()
             
@@ -323,6 +329,28 @@ class HomePostCell: UICollectionViewCell {
         
     }
     
+// Delete Post
+    
+    lazy var deleteButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setImage(#imageLiteral(resourceName: "Trash").withRenderingMode(.alwaysOriginal), for: .normal)
+        button.addTarget(self, action: #selector(deletePost), for: .touchUpInside)
+        return button
+        
+    }()
+    
+    func deletePost(){
+        
+        guard let post = post else {return}
+        delegate?.deletePost(post: post)
+
+        
+//        guard let post = post else {return}
+//        delegate?.didTapMessage(post: post)
+        
+    }
+    
+    
     
     
 //    func handleMessage(){
@@ -384,7 +412,7 @@ class HomePostCell: UICollectionViewCell {
 //        locationLabel.anchor(top: usernameLabel.bottomAnchor, left: userProfileImageView.rightAnchor, bottom: photoImageView.topAnchor, right: emojiLabel.leftAnchor, paddingTop: 0, paddingLeft: 8, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
         
         
-        userProfileImageView.anchor(top: topAnchor, left: leftAnchor, bottom: nil, right: nil, paddingTop: 1, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 40, height: 40)
+        userProfileImageView.anchor(top: topAnchor, left: leftAnchor, bottom: nil, right: nil, paddingTop: 5, paddingLeft: 5, paddingBottom: 0, paddingRight: 0, width: 40, height: 40)
         userProfileImageView.layer.cornerRadius = 40/2
         
         photoImageView.anchor(top: userProfileImageView.bottomAnchor, left: leftAnchor, bottom: nil, right: rightAnchor, paddingTop: 8, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
@@ -427,13 +455,19 @@ class HomePostCell: UICollectionViewCell {
     fileprivate func setupActionButtons() {
         
         let stackView = UIStackView(arrangedSubviews: [likeButton, commentButton, sendMessageButton])
+        
+//        if post?.creatorUID == Auth.auth().currentUser?.uid {
+//            deleteButton.isHidden = false
+//        } else {
+//            deleteButton.isHidden = true
+//        }
         stackView.distribution = .fillEqually
         
         addSubview(stackView)
         stackView.anchor(top: locationView.bottomAnchor, left: leftAnchor, bottom: nil, right: nil, paddingTop: 0, paddingLeft: 8, paddingBottom: 0, paddingRight: 0, width: 120, height: 50)
+        addSubview(deleteButton)
+        deleteButton.anchor(top: locationView.bottomAnchor, left: stackView.rightAnchor, bottom: nil, right: nil, paddingTop: 0, paddingLeft: 8, paddingBottom: 0, paddingRight: 0, width: 40, height: 50)
 
-        
-        
     }
     
     required init?(coder aDecoder: NSCoder) {

@@ -112,7 +112,7 @@ class LoginController: UIViewController, FBSDKLoginButtonDelegate   {
         }
         
         print("Successfully logged back in with user:", user?.uid ?? "")
-            self.alert(message: "Successfully Login")
+        //    self.alert(message: "Successfully Login")
         self.successfulLogin()
         }
         

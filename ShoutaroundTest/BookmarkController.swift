@@ -147,8 +147,6 @@ class BookMarkController: UIViewController, UICollectionViewDelegate, UICollecti
         stackView.axis = .horizontal
         stackView.distribution = .fillEqually
         
-        
-        
         let topDividerView = UIView()
         topDividerView.backgroundColor = UIColor.lightGray
         
