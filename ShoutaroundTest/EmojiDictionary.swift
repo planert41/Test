@@ -67,6 +67,11 @@
 import Foundation
 
 
+struct Emoji {
+    let emoji : String
+    let name : String?
+}
+
 var Ratings: [String] = [
     
     "😡","😩","😓","😕","😋","😍","💯"
@@ -211,6 +216,10 @@ var EmojiDictionary: [String:String] =
     "🍷":"wine",
     "🍦":"icecream",
     "🍰":"cake",
+    "🍢":"skewer",
+    "🍪":"cookie",
+    "🍧":"shavedice",
+    "🍭":"candy",
 
     "🍳":"breakfast",
     "🍱":"lunch",

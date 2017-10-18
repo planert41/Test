@@ -14,12 +14,14 @@ import CoreGraphics
 import CoreLocation
 
 
-class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLayout, HomePostCellDelegate, UISearchBarDelegate, UIPickerViewDelegate, UIPickerViewDataSource, CLLocationManagerDelegate  {
+class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLayout, HomePostCellDelegate, UISearchBarDelegate, UIPickerViewDelegate, UIPickerViewDataSource, CLLocationManagerDelegate, UISearchControllerDelegate, HomePostSearchDelegate  {
     
     let cellId = "cellId"
     var allPosts = [Post]()
     var filteredPosts = [Post]()
     
+    var resultSearchController:UISearchController? = nil
+
     let locationManager = CLLocationManager()
     
     // GeoPickerData 1st element should always be default ALL
@@ -49,6 +51,12 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         filterBar.isHidden = true
         filterBar.addSubview(dummyTextView)
 
+        
+        view.addSubview(filtertableview)
+        filtertableview.anchor(top: filterBar.bottomAnchor, left: view.leftAnchor, bottom: view.bottomAnchor, right: view.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
+        filtertableview.isHidden = true
+        
+
         geoFilterButton.anchor(top: filterBar.topAnchor, left: nil, bottom: filterBar.bottomAnchor, right: filterBar.rightAnchor, paddingTop: 10, paddingLeft: 0, paddingBottom: 10, paddingRight: 10, width: 100, height: 0)
         
         searchBar.anchor(top: filterBar.topAnchor, left: filterBar.leftAnchor, bottom: filterBar.bottomAnchor, right: geoFilterButton.leftAnchor, paddingTop: 8, paddingLeft: 8, paddingBottom: 8, paddingRight: 8, width: 0, height: 0)
@@ -61,6 +69,19 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         collectionView?.refreshControl = refreshControl
         collectionView?.alwaysBounceVertical = true
         collectionView?.keyboardDismissMode = .onDrag
+        
+        let homePostSearchResults = HomePostSearch()
+        homePostSearchResults.delegate = self
+        resultSearchController = UISearchController(searchResultsController: homePostSearchResults)
+        resultSearchController?.searchResultsUpdater = homePostSearchResults
+        resultSearchController?.delegate = self
+        let testsearchBar = resultSearchController?.searchBar
+        navigationItem.titleView = testsearchBar
+        testsearchBar?.delegate = homePostSearchResults
+        
+        resultSearchController?.hidesNavigationBarDuringPresentation = false
+        resultSearchController?.dimsBackgroundDuringPresentation = true
+        definesPresentationContext = true
         
         setupNavigationItems()
         fetchAllPosts()
@@ -78,6 +99,17 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         }
         
     }
+    
+    func searchBarShouldBeginEditing(_ searchBar: UISearchBar) -> Bool {
+        self.resultSearchController?.searchBar.sizeToFit()
+        return true
+    }
+    
+    func didPresentSearchController(_ searchController: UISearchController) {
+        resultSearchController?.searchResultsController?.view.isHidden = false
+    }
+    
+
     
 
     
@@ -97,9 +129,18 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     func hideHeader(){
         
         self.filterBar.isHidden = (self.filterBar.isHidden == true) ? false : true
+        self.filtertableview.isHidden = (self.filtertableview.isHidden == true) ? false : true
         self.collectionView?.reloadData()
         
     }
+    
+    lazy var filtertableview: UITableView = {
+        let sb = UITableView()
+        sb.backgroundColor = UIColor.lightGray
+        return sb
+    }()
+    
+    
     
     
 // Setup for Geo Range Button, Dummy TextView and UIPicker
@@ -124,6 +165,14 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         button.layer.borderWidth = 1
         button.layer.borderColor = UIColor.black.cgColor
         return button
+    }()
+    
+    let radiusLabel: UILabel = {
+        let label = UILabel()
+        label.text = "5"
+        label.font = UIFont.boldSystemFont(ofSize: 10)
+        label.textColor = UIColor.black
+        return label
     }()
     
     
@@ -192,6 +241,15 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     }
 
 
+// Delegate For Search
+    
+    func filterPost(caption: String?) {
+        self.resultSearchController?.searchBar.text = caption
+        filterPostByCaption(self.resultSearchController?.searchBar.text)
+        filterNearbyPost()
+        self.collectionView?.reloadData()
+    }
+    
     
 // Setup for Search Button
     
@@ -309,9 +367,10 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         
 //        navigationItem.leftBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "camera3").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(handleCamera))
         
-        navigationItem.leftBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "search_selected").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(hideHeader))
+        navigationItem.leftBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "Globe").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(hideHeader))
         
-        navigationItem.rightBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "FilterHere").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(filterHere))
+        
+        navigationItem.rightBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "GeoFence").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(filterHere))
         
     }
     
