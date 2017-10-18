@@ -34,7 +34,7 @@ class HomePostSearch : UITableViewController, UISearchResultsUpdating, UISearchC
         tableView.register(EmojiCell.self, forCellReuseIdentifier: EmojiCellId)
         
         
-        for emoji in Emote2Init {
+        for emoji in defaultEmojiSelection {
             
             let tempEmoji = Emoji(emoji: emoji, name: EmojiDictionary[emoji])
             defaultEmojis.append(tempEmoji)

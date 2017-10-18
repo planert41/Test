@@ -8,11 +8,13 @@
 
 import UIKit
 import Firebase
+import FBSDKLoginKit
 import IQKeyboardManagerSwift
 
 protocol UserProfileHeaderDelegate {
     func didChangeToListView()
     func didChangeToGridView()
+    func didSignOut()
 }
 
 
@@ -148,6 +150,13 @@ class UserProfileHeader: UICollectionViewCell, UITextFieldDelegate  {
         let button = UIButton(type: .system)
         button.setImage(#imageLiteral(resourceName: "grid"), for: .normal)
         button.addTarget(self, action: #selector(handleChangetoGridView), for: .touchUpInside)
+        return button
+    }()
+    
+    lazy var logOutButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setImage(#imageLiteral(resourceName: "gear").withRenderingMode(.alwaysOriginal), for: .normal)
+        button.addTarget(self, action: #selector(handleLogOut), for: .touchUpInside)
         return button
     }()
     
@@ -310,7 +319,7 @@ class UserProfileHeader: UICollectionViewCell, UITextFieldDelegate  {
         let bottomDividerView = UIView()
         bottomDividerView.backgroundColor = UIColor.lightGray
         
-        let stackView = UIStackView(arrangedSubviews: [gridButton, listButton, bookmarkButton])
+        let stackView = UIStackView(arrangedSubviews: [gridButton, listButton, logOutButton])
         
         stackView.axis = .horizontal
         stackView.distribution = .fillEqually
@@ -333,7 +342,9 @@ class UserProfileHeader: UICollectionViewCell, UITextFieldDelegate  {
         
     }
     
-
+    func handleLogOut() {
+        delegate?.didSignOut()
+    }
     
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")

@@ -16,12 +16,15 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
     let cellId = "cellId"
     let homePostCellId = "homePostCellId"
     
-    var posts = [Post]()
+    var allPosts = [Post]()
+    var filteredPosts = [Post]()
     var isFinishedPaging = false
     
     var userId:String?
     
     var isGridView = true
+    
+// UserProfileHeader Delegate Methods
     
     func didChangeToGridView() {
         isGridView = true
@@ -33,6 +36,9 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
         collectionView?.reloadData()
     }
 
+    func didSignOut(){
+        self.handleLogOut()
+    }
     
     override func viewDidLoad() {
         
@@ -50,11 +56,10 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
         collectionView?.alwaysBounceVertical = true
         collectionView?.keyboardDismissMode = .onDrag
         
-        setupLogOutButton()
         fetchUser()
-        
         IQKeyboardManager.sharedManager().enable = false
         
+        //        setupLogOutButton()
         
     }
 
@@ -69,7 +74,7 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
         // RemoveAll so that when user follow/unfollows it updates
         
         self.isFinishedPaging = false
-        posts.removeAll()
+        allPosts.removeAll()
         fetchUser()
         self.collectionView?.refreshControl?.endRefreshing()
         print("Refresh Profile Page")
@@ -100,12 +105,12 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
     }
     
     func refreshPost(post: Post) {
-        let index = posts.index { (filteredpost) -> Bool in
+        let index = allPosts.index { (filteredpost) -> Bool in
         filteredpost.id  == post.id
             
     }
         let filteredindexpath = IndexPath(row:index!, section: 0)
-        self.posts[index!] = post
+        self.allPosts[index!] = post
         //        self.collectionView?.reloadItems(at: [filteredindexpath])
         
     }
@@ -123,8 +128,6 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
         let deleteAlert = UIAlertController(title: "Delete", message: "All data will be lost.", preferredStyle: UIAlertControllerStyle.alert)
         
         deleteAlert.addAction(UIAlertAction(title: "Ok", style: .default, handler: { (action: UIAlertAction!) in
-            
-            
             
             Database.database().reference().child("posts").child(post.id!).removeValue()
             Database.database().reference().child("postlocations").child(post.id!).removeValue()
@@ -151,9 +154,9 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
         //var query = ref.queryOrderedByKey()
         var query = ref.queryOrdered(byChild: "creationDate")
         
-        print(posts.count)
-        if posts.count > 0 {
-            let value = posts.last?.creationDate.timeIntervalSince1970
+        print(allPosts.count)
+        if allPosts.count > 0 {
+            let value = allPosts.last?.creationDate.timeIntervalSince1970
             print(value)
             query = query.queryEnding(atValue: value)
         }
@@ -170,7 +173,7 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
             }
             print(allPostIds)
             
-            if self.posts.count > 0 && allPostIds.count > 0 {
+            if self.allPosts.count > 0 && allPostIds.count > 0 {
                 print("before delete", allPostIds.count)
                 
                 let intIndex = allPostIds.count // where intIndex < myDictionary.count
@@ -188,7 +191,7 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
                 
                 Database.fetchPostWithUIDAndPostID(creatoruid: user.uid, postId: key, completion: { (fetchedPost) in
 
-                self.posts.append(fetchedPost)
+                self.allPosts.append(fetchedPost)
                 thisGroup.leave()
                     
                 })
@@ -196,15 +199,15 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
             })
             
             thisGroup.notify(queue: .main) {
-                print(self.posts.count)
-                self.posts.sort(by: { (p1, p2) -> Bool in
+                print(self.allPosts.count)
+                self.allPosts.sort(by: { (p1, p2) -> Bool in
                     return p1.creationDate.compare(p2.creationDate) == .orderedDescending })
                 
                 self.collectionView?.reloadData()
             }
         
          
-            self.posts.forEach({ (post) in
+            self.allPosts.forEach({ (post) in
                 print(post.id ?? "")
 
             })
@@ -335,7 +338,7 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
             let post = Post(user: user, dictionary: dictionary)
 
 //            Helps insert new photos at the front
-            self.posts.insert(post, at: 0)
+            self.allPosts.insert(post, at: 0)
 //            self.posts.append(post)
 
             self.collectionView?.reloadData()
@@ -351,6 +354,7 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
     fileprivate func setupLogOutButton() {
         navigationItem.rightBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "gear").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(handleLogOut))
     }
+
     
     func handleLogOut() {
         
@@ -358,13 +362,10 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
         
         alertController.addAction(UIAlertAction(title: "Log Out", style: .destructive, handler: { (_) in
             
-            
             do {
                 try Auth.auth().signOut()
-                
                 let manager = FBSDKLoginManager()
                 try manager.logOut()
-                
                 let loginController = LoginController()
                 let navController = UINavigationController( rootViewController: loginController)
                 self.present(navController, animated: true, completion: nil)
@@ -372,15 +373,12 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
             } catch let signOutErr {
                 print("Failed to sign out:", signOutErr)
             }
-            
 
-            
         }))
         
         alertController.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
     
         present(alertController, animated: true, completion: nil)
-    
     
     }
     
@@ -388,15 +386,15 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
     
     
     override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return posts.count
+        return allPosts.count
     }
     
     override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         
-        print("collectionview post count", self.posts.count)
+        print("collectionview post count", self.allPosts.count)
         print("isfinishedpaging",self.isFinishedPaging)
         print(indexPath.item)
-        if indexPath.item == self.posts.count - 1 && !isFinishedPaging{
+        if indexPath.item == self.allPosts.count - 1 && !isFinishedPaging{
             
             paginatePosts()
         }
@@ -404,11 +402,11 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
         
         if isGridView {
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: cellId, for: indexPath) as! UserProfilePhotoCell
-            cell.post = posts[indexPath.item]
+            cell.post = allPosts[indexPath.item]
             return cell
         } else {
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: homePostCellId, for: indexPath) as! HomePostCell
-            cell.post = posts[indexPath.item]
+            cell.post = allPosts[indexPath.item]
             cell.delegate = self
             return cell
         }

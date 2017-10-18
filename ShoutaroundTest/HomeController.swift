@@ -48,9 +48,6 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     var resultSearchController:UISearchController? = nil
 
     let locationManager = CLLocationManager()
-    
-    // GeoPickerData 1st element should always be default ALL
-
 
     override func viewDidLayoutSubviews() {
         
@@ -81,19 +78,8 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         collectionView?.alwaysBounceVertical = true
         collectionView?.keyboardDismissMode = .onDrag
         
-        let homePostSearchResults = HomePostSearch()
-        homePostSearchResults.delegate = self
-        resultSearchController = UISearchController(searchResultsController: homePostSearchResults)
-        resultSearchController?.searchResultsUpdater = homePostSearchResults
-        resultSearchController?.delegate = self
-        let searchBar = resultSearchController?.searchBar
-        navigationItem.titleView = searchBar
-        searchBar?.delegate = homePostSearchResults
-        
-        resultSearchController?.hidesNavigationBarDuringPresentation = false
-        resultSearchController?.dimsBackgroundDuringPresentation = true
-        definesPresentationContext = true
-        
+// Search Controller
+        setupSearchController()
         setupNavigationItems()
         fetchAllPosts()
         setupGeoPicker()
@@ -119,13 +105,8 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
 // Setup for Geo Range Button, Dummy TextView and UIPicker
     
     lazy var dummyTextView: UITextView = {
-        let button = UITextView()
-        button.text = "1000"
-        button.backgroundColor = .blue
-        button.layer.cornerRadius = 5
-        button.layer.borderWidth = 1
-        button.layer.borderColor = UIColor.black.cgColor
-        return button
+        let tv = UITextView()
+        return tv
     }()
     
     var noResultsLabel: UILabel = {
@@ -138,6 +119,20 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         return label
     }()
     
+    func setupSearchController() {
+        let homePostSearchResults = HomePostSearch()
+        homePostSearchResults.delegate = self
+        resultSearchController = UISearchController(searchResultsController: homePostSearchResults)
+        resultSearchController?.searchResultsUpdater = homePostSearchResults
+        resultSearchController?.delegate = self
+        let searchBar = resultSearchController?.searchBar
+        navigationItem.titleView = searchBar
+        searchBar?.delegate = homePostSearchResults
+        
+        resultSearchController?.hidesNavigationBarDuringPresentation = false
+        resultSearchController?.dimsBackgroundDuringPresentation = true
+        definesPresentationContext = true
+    }
     
     func setupGeoPicker() {
 
@@ -169,7 +164,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     func donePicker(){
         dummyTextView.resignFirstResponder()
         filterPostByCaption(self.resultSearchController?.searchBar.text)
-        filterNearbyPost()
+        filterPostByLocation()
         
     }
     
@@ -198,7 +193,6 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     }
     
     func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
-        
         // If Select some number
         if row > 0 {
         filterRange = Double(geoFilterRange[row])
@@ -213,8 +207,17 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     func filterPost(caption: String?) {
         self.resultSearchController?.searchBar.text = caption
         filterPostByCaption(self.resultSearchController?.searchBar.text)
-        filterNearbyPost()
+        filterPostByLocation()
         self.collectionView?.reloadData()
+    }
+    
+    func filterHere(){
+        
+        self.filterRange = Double(geoFilterRange[2])
+        self.filterPostByLocation()
+        let indexPath = IndexPath(item: 0, section: 0)
+        self.collectionView?.scrollToItem(at: indexPath, at: .bottom, animated: true)
+        
     }
 
     func filterPostByCaption(_ string: String?) {
@@ -225,6 +228,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
             self.collectionView?.reloadData()
             return
         }
+        
         if searchedText.isEmpty || searchedText == "" {
             filteredPosts = allPosts
             print("No Search Term")
@@ -235,26 +239,15 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
             filteredPosts = self.allPosts.filter { (post) -> Bool in
                 return post.caption.lowercased().contains(searchedText.lowercased()) || post.emoji.contains(searchedText.lowercased()) || post.locationName.contains(searchedText.lowercased()) || post.locationAdress.contains(searchedText.lowercased())
             }
+            collectionView?.reloadData()
         }
     }
     
-    
-    func filterHere(){
-        
-        self.filterRange = Double(geoFilterRange[2])
-        self.filterNearbyPost()
-        let indexPath = IndexPath(item: 0, section: 0)
-        self.collectionView?.scrollToItem(at: indexPath, at: .bottom, animated: true)
-        
-    }
-    
-    func filterNearbyPost(){
+    func filterPostByLocation(){
         
         let ref = Database.database().reference().child("postlocations")
         let geoFire = GeoFire(firebaseRef: ref)
         //     let currentLocation = CLLocation(latitude: 41.973735, longitude: -87.667751)
-        
-        
         
         var geoFilteredPosts = [Post]()
         
@@ -270,7 +263,6 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
             print("Current User Location Used for Post Filtering", CurrentUser.currentLocation)
             let circleQuery = geoFire?.query(at: CurrentUser.currentLocation, withRadius: filterDistance)
             circleQuery?.observe(.keyEntered, with: { (key, location) in
-//                print(key)
                 var geoFilteredPost: [Post] = self.filteredPosts.filter { (post) -> Bool in
                     return post.id == key
                 }
@@ -279,10 +271,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
                     geoFilteredPost[0].locationGPS = location
                     geoFilteredPost[0].distance = Double((location?.distance(from: CurrentUser.currentLocation!))!)
                 }
-                
-//                print(geoFilteredPost)
                 geoFilteredPosts += geoFilteredPost
-                
             })
             
             circleQuery?.observeReady({
@@ -290,16 +279,12 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
                     p1.distance!.isLess(than: p2.distance!)
                 })
                 
-                
                 if self.collectionView?.numberOfItems(inSection: 0) != 0 {
                     let indexPath = IndexPath(item: 0, section: 0)
                     self.collectionView?.scrollToItem(at: indexPath, at: .bottom, animated: true)
                 }
                 self.collectionView?.reloadData()
-                
             })
-            
-            
         }
     }
     
@@ -510,10 +495,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         if CLLocationManager.locationServicesEnabled() {
             locationManager.startUpdatingLocation()
         }
-        
     }
-    
-
     
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         let userLocation:CLLocation = locations[0] as CLLocation
@@ -523,7 +505,6 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
             CurrentUser.currentLocation = userLocation
             manager.stopUpdatingLocation()
         }
-        
     }
     
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {

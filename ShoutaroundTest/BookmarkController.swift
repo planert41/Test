@@ -12,11 +12,28 @@ import Firebase
 import CoreGraphics
 import GeoFire
 
-class BookMarkController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, UISearchBarDelegate, UIPickerViewDelegate, UIPickerViewDataSource {
+class BookMarkController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, UISearchBarDelegate, UIPickerViewDelegate, UIPickerViewDataSource, UISearchControllerDelegate, HomePostSearchDelegate {
     let bookmarkCellId = "bookmarkCellId"
     let homePostCellId = "homePostCellId"
     
-    let geoFilterRange = ["ALL","500", "1000", "2500", "5000"]
+    let locationManager = CLLocationManager()
+    
+    let geoFilterRange = ["WorldWide", "0.5","1.0", "2.0", "5.0", "20.0"]
+    let geoFilterImage:[UIImage] = [#imageLiteral(resourceName: "Globe"),#imageLiteral(resourceName: "0Distance"),#imageLiteral(resourceName: "1Distance"),#imageLiteral(resourceName: "2Distance"),#imageLiteral(resourceName: "5Distance"),#imageLiteral(resourceName: "20Distance")]
+    
+    var filterRange: Double?{
+        didSet{
+            print(filterRange)
+            if filterRange == nil {
+                navigationItem.leftBarButtonItem?.image = self.geoFilterImage[0].withRenderingMode(.alwaysOriginal)
+                
+            } else {
+                print(String(format:"%.1f", self.filterRange!))
+                let rangeIndex = self.geoFilterRange.index(of: String(format:"%.1f", self.filterRange!))
+                navigationItem.leftBarButtonItem?.image = geoFilterImage[rangeIndex!].withRenderingMode(.alwaysOriginal)
+            }
+        }
+    }
     let searchBarPlaceholderText = "Search for Caption or Emoji 😍🐮🍔🇺🇸🔥"
     let currentLocation: CLLocation? = CLLocation(latitude: 41.973735, longitude: -87.667751)
     
@@ -25,21 +42,16 @@ class BookMarkController: UIViewController, UICollectionViewDelegate, UICollecti
     var allPosts = [Post]()
     var filteredPosts = [Post]()
     
+    
     var isGridView = true
-    
-    
-    lazy var filterBar: UIView = {
-        let sb = UIView()
-        sb.backgroundColor = UIColor.lightGray
-        return sb
-    }()
 
-    lazy var layoutBar: UIView = {
+    lazy var actionBar: UIView = {
         let sv = UIView()
-
         return sv
     }()
     
+    var resultSearchController:UISearchController? = nil
+    var searchBar: UISearchBar? = nil
     
     lazy var collectionView : UICollectionView = {
         let layout = UICollectionViewFlowLayout()
@@ -82,70 +94,64 @@ class BookMarkController: UIViewController, UICollectionViewDelegate, UICollecti
         collectionView.reloadData()
     }
     
-
-
-    
     override func viewDidLoad() {
         
         super.viewDidLoad()
         view.backgroundColor = .white
+
+        setupNavigationItems()
+        setupGeoPicker()
+        view.addSubview(actionBar)
+        actionBar.anchor(top: topLayoutGuide.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 50)
+        actionBar.backgroundColor = .white
+        setupBottomToolbar()
+        
+// Setup CollectionView
+        
         collectionView.backgroundColor = .white
-        
-        //collectionView.register(BookmarkHeader.self, forSupplementaryViewOfKind: UICollectionElementKindSectionHeader, withReuseIdentifier: "bookmarkHeaderId")
-        
         collectionView.register(BookmarkPhotoCell.self, forCellWithReuseIdentifier: bookmarkCellId)
         collectionView.register(HomePostCell.self, forCellWithReuseIdentifier: homePostCellId)
         
+        view.addSubview(collectionView)
+        collectionView.anchor(top: actionBar.bottomAnchor , left: view.leftAnchor, bottom: bottomLayoutGuide.topAnchor, right: view.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
+        
+// Fetch Photos and Refresh
+        
+        fetchBookmarkPosts()
+        setupRefresh()
+        
+    }
+    
+    fileprivate func setupRefresh() {
         let refreshControl = UIRefreshControl()
         refreshControl.addTarget(self, action: #selector(handleRefresh), for: .valueChanged)
         collectionView.refreshControl = refreshControl
         collectionView.alwaysBounceVertical = true
         collectionView.keyboardDismissMode = .onDrag
-        
-        self.navigationItem.title = "Bookmarks"
-
-        view.addSubview(filterBar)
-        filterBar.anchor(top: topLayoutGuide.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 50)
-        
-        setupFilterBar()
-        setupGeoPicker()
-
-        view.addSubview(layoutBar)
-        layoutBar.anchor(top: filterBar.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 50)
-        layoutBar.backgroundColor = .white
-
-        setupBottomToolbar()
-        
-        view.addSubview(collectionView)
-        collectionView.anchor(top: layoutBar.bottomAnchor , left: view.leftAnchor, bottom: view.bottomAnchor, right: view.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
-        
-        fetchBookmarkPosts()
-        
     }
-    
-    
-    fileprivate func setupFilterBar() {
-        
 
-        filterBar.addSubview(geoFilterButton)
-        filterBar.addSubview(searchBar)
-        filterBar.addSubview(dummyTextView)
-        
-        geoFilterButton.anchor(top: filterBar.topAnchor, left: nil, bottom: filterBar.bottomAnchor, right: filterBar.rightAnchor, paddingTop: 10, paddingLeft: 0, paddingBottom: 10, paddingRight: 10, width: 100, height: 0)
-        
-        searchBar.anchor(top: filterBar.topAnchor, left: filterBar.leftAnchor, bottom: filterBar.bottomAnchor, right: geoFilterButton.leftAnchor, paddingTop: 8, paddingLeft: 8, paddingBottom: 8, paddingRight: 8, width: 0, height: 0)
-        
-    }
-    
-    
-    
     
     fileprivate func setupBottomToolbar() {
         
+        let homePostSearchResults = HomePostSearch()
+        homePostSearchResults.delegate = self
+        resultSearchController = UISearchController(searchResultsController: homePostSearchResults)
+        resultSearchController?.searchResultsUpdater = homePostSearchResults
+        resultSearchController?.delegate = self
+        searchBar = resultSearchController?.searchBar
+        navigationItem.titleView = searchBar
+        searchBar?.delegate = homePostSearchResults
+        
+        resultSearchController?.hidesNavigationBarDuringPresentation = false
+        resultSearchController?.dimsBackgroundDuringPresentation = true
+        definesPresentationContext = true
+        
+        let searchBarView = UIView()
+        let buttonView = UIView()
 
-        let stackView = UIStackView(arrangedSubviews: [gridButton, listButton])
-        stackView.axis = .horizontal
-        stackView.distribution = .fillEqually
+        let buttonStackView = UIStackView(arrangedSubviews: [gridButton, listButton])
+        buttonStackView.axis = .horizontal
+        buttonStackView.distribution = .fillEqually
         
         let topDividerView = UIView()
         topDividerView.backgroundColor = UIColor.lightGray
@@ -153,151 +159,151 @@ class BookMarkController: UIViewController, UICollectionViewDelegate, UICollecti
         let bottomDividerView = UIView()
         bottomDividerView.backgroundColor = UIColor.lightGray
         
-        view.addSubview(stackView)
+        view.addSubview(buttonStackView)
+
         view.addSubview(topDividerView)
         view.addSubview(bottomDividerView)
 
-        stackView.anchor(top: layoutBar.topAnchor, left: layoutBar.leftAnchor, bottom: layoutBar.bottomAnchor, right: layoutBar.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
+        buttonStackView.anchor(top: actionBar.topAnchor, left: actionBar.leftAnchor, bottom: actionBar.bottomAnchor, right: actionBar.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
         
-        topDividerView.anchor(top: stackView.topAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0.5)
+        topDividerView.anchor(top: buttonStackView.topAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0.5)
         
-        bottomDividerView.anchor(top: stackView.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0.5)
+        bottomDividerView.anchor(top: buttonStackView.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0.5)
+        
+    }
+    
+    fileprivate func setupNavigationItems() {
+        
+        navigationItem.leftBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "Globe").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(activateFilterRange))
+        
+        
+        navigationItem.rightBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "GeoFence").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(filterHere))
         
     }
     
     
-    // Setup for Search Button
+    // LOCATION MANAGER DELEGATE METHODS
     
-    lazy var searchBar: UISearchBar = {
-        let sb = UISearchBar()
-        sb.placeholder = self.searchBarPlaceholderText
-        sb.barTintColor = .white
-        sb.backgroundColor = .white
-        UITextField.appearance(whenContainedInInstancesOf: [UISearchBar.self]).backgroundColor = UIColor.rgb(red: 240, green: 240, blue: 240)
+    func determineCurrentLocation(){
         
-        sb.delegate = self
-        return sb
-    }()
-    
-    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
-        searchBar.resignFirstResponder()
+        CurrentUser.currentLocation = nil
+        
+        if CLLocationManager.locationServicesEnabled() {
+            locationManager.startUpdatingLocation()
+        }
     }
     
-    func searchBarTextDidEndEditing(_ searchBar: UISearchBar) {
+    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        let userLocation:CLLocation = locations[0] as CLLocation
         
-        filterPosts(searchText: searchBar.text!, range: (geoFilterButton.titleLabel?.text)!)
+        if userLocation != nil {
+            print("Current User Location", userLocation)
+            CurrentUser.currentLocation = userLocation
+            manager.stopUpdatingLocation()
+        }
     }
     
-    func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
-        
+    func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
+        print("GPS Location Not Found")
     }
     
     
-    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
-        
-        
+    // Search Delegate And Methods
+    
+    func filterPost(caption: String?) {
+        self.resultSearchController?.searchBar.text = caption
+        filterPostByCaption(self.resultSearchController?.searchBar.text)
+        filterPostByLocation()
+        self.collectionView.reloadData()
     }
     
-    func filterPosts(searchText: String?, range: String?) {
-     
-        filterPostByCaption(searchText)
-        filterNearbyPost(range)
+    func filterHere(){
+        
+        self.filterRange = Double(geoFilterRange[2])
+        self.filterPostByLocation()
+        let indexPath = IndexPath(item: 0, section: 0)
+        self.collectionView.scrollToItem(at: indexPath, at: .bottom, animated: true)
         
     }
     
     func filterPostByCaption(_ string: String?) {
         
         guard let searchedText = string else {
+            print("No Search Term")
             filteredPosts = allPosts
             self.collectionView.reloadData()
             return
         }
-        print(searchedText)
         
-        if searchedText.isEmpty {
+        if searchedText.isEmpty || searchedText == "" {
             filteredPosts = allPosts
+            print("No Search Term")
         } else {
             
+            print("Search Term Was", searchedText)
             //Makes everything case insensitive
             filteredPosts = self.allPosts.filter { (post) -> Bool in
-                return post.caption.lowercased().contains(searchedText.lowercased()) || post.emoji.contains(searchedText.lowercased())
+                return post.caption.lowercased().contains(searchedText.lowercased()) || post.emoji.contains(searchedText.lowercased()) || post.locationName.contains(searchedText.lowercased()) || post.locationAdress.contains(searchedText.lowercased())
             }
-            self.collectionView.reloadData()
+            collectionView.reloadData()
         }
     }
     
-    func filterNearbyPost(_ string: String?){
+    func filterPostByLocation(){
         
         let ref = Database.database().reference().child("postlocations")
         let geoFire = GeoFire(firebaseRef: ref)
-//        let currentLocation = CLLocation(latitude: 41.973735, longitude: -87.667751)
-        
-    
+        //     let currentLocation = CLLocation(latitude: 41.973735, longitude: -87.667751)
         
         var geoFilteredPosts = [Post]()
         
-        guard let filterDistance = Double(string!) else {
+        guard let filterDistance = self.filterRange else {
             print("No Distance Number")
             return}
         
-   //     self.determineCurrentLocation()
+        self.determineCurrentLocation()
         
-        let circleQuery = geoFire?.query(at:CurrentUser.currentLocation, withRadius: filterDistance)
-        circleQuery?.observe(.keyEntered, with: { (key, location) in
-            print(key)
-            var geoFilteredPost = self.filteredPosts.filter { (post) -> Bool in
-                return post.id == key
-            }
+        let when = DispatchTime.now() + 0.5 // change 2 to desired number of seconds
+        DispatchQueue.main.asyncAfter(deadline: when) {
             
-            if geoFilteredPost != nil && geoFilteredPost.count > 0 {
-                geoFilteredPost[0].locationGPS = location
-                geoFilteredPost[0].distance = Double((location?.distance(from: CurrentUser.currentLocation!))!)
+            print("Current User Location Used for Post Filtering", CurrentUser.currentLocation)
+            let circleQuery = geoFire?.query(at: CurrentUser.currentLocation, withRadius: filterDistance)
+            circleQuery?.observe(.keyEntered, with: { (key, location) in
+                var geoFilteredPost: [Post] = self.filteredPosts.filter { (post) -> Bool in
+                    return post.id == key
+                }
                 
-            }
-            
-            print(geoFilteredPost)
-            geoFilteredPosts += geoFilteredPost
-            
-        })
-        
-        circleQuery?.observeReady({
-            self.filteredPosts = geoFilteredPosts.sorted(by: { (p1, p2) -> Bool in
-                p1.distance!.isLess(than: p2.distance!)
+                if geoFilteredPost != nil && geoFilteredPost.count > 0 && geoFilteredPost[0].locationGPS != nil {
+                    geoFilteredPost[0].locationGPS = location
+                    geoFilteredPost[0].distance = Double((location?.distance(from: CurrentUser.currentLocation!))!)
+                }
+                geoFilteredPosts += geoFilteredPost
             })
-            self.collectionView.reloadData()
-        })
-        
+            
+            circleQuery?.observeReady({
+                self.filteredPosts = geoFilteredPosts.sorted(by: { (p1, p2) -> Bool in
+                    p1.distance!.isLess(than: p2.distance!)
+                })
+                
+                if self.collectionView.numberOfItems(inSection: 0) != 0 {
+                    let indexPath = IndexPath(item: 0, section: 0)
+                    self.collectionView.scrollToItem(at: indexPath, at: .bottom, animated: true)
+                }
+                self.collectionView.reloadData()
+            })
+        }
     }
     
+// Setup for Picker
     
-    
-    // Setup for Picker
-    
-    
-    lazy var geoFilterButton: UIButton = {
-        let button = UIButton(type: .system)
-        button.setTitle(self.geoFilterRange[0], for: .normal)
-        button.addTarget(self, action: #selector(filterRange), for: .touchUpInside)
-        button.backgroundColor = .white
-        button.layer.cornerRadius = 5
-        button.layer.borderWidth = 1
-        button.layer.borderColor = UIColor.black.cgColor
-        return button
-    }()
-    
-    func filterRange() {
+    func activateFilterRange() {
         dummyTextView.perform(#selector(becomeFirstResponder), with: nil, afterDelay: 0.1)
     }
     
     
     lazy var dummyTextView: UITextView = {
-        let button = UITextView()
-        button.text = "1000"
-        button.backgroundColor = .blue
-        button.layer.cornerRadius = 5
-        button.layer.borderWidth = 1
-        button.layer.borderColor = UIColor.black.cgColor
-        return button
+        let tv = UITextView()
+        return tv
     }()
     
     
@@ -325,12 +331,13 @@ class BookMarkController: UIViewController, UICollectionViewDelegate, UICollecti
         
         self.dummyTextView.inputView = pickerView
         self.dummyTextView.inputAccessoryView = toolBar
+        self.view.addSubview(dummyTextView)
     }
     
     func donePicker(){
         dummyTextView.resignFirstResponder()
-        filterPosts(searchText: searchBar.text!, range: (geoFilterButton.titleLabel?.text)!)
-        
+        filterPostByCaption(self.resultSearchController?.searchBar.text)
+        filterPostByLocation()
     }
     
     func cancelPicker(){
@@ -355,7 +362,12 @@ class BookMarkController: UIViewController, UICollectionViewDelegate, UICollecti
     }
     
     func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
-        self.geoFilterButton.setTitle(geoFilterRange[row], for: .normal)
+        // If Select some number
+        if row > 0 {
+            filterRange = Double(geoFilterRange[row])
+        } else {
+            filterRange = nil
+        }
     }
     
 
@@ -396,8 +408,8 @@ class BookMarkController: UIViewController, UICollectionViewDelegate, UICollecti
         
         allPosts.removeAll()
         filteredPosts.removeAll()
-        self.searchBar.text = ""
-        self.geoFilterButton.setTitle(geoFilterRange[0], for: .normal)
+        self.resultSearchController?.searchBar.text = ""
+        self.filterRange = nil
         fetchBookmarkPosts()
         self.collectionView.refreshControl?.endRefreshing()
         print("Refresh Home Feed")
