@@ -27,12 +27,20 @@ class HomePostSearch : UITableViewController, UISearchResultsUpdating, UISearchC
     var delegate: HomePostSearchDelegate?
     
     
+    let emojiDictionary: UILabel = {
+        let label = UILabel()
+        label.text = "Emoji Dictionary"
+        label.font = UIFont.boldSystemFont(ofSize: 12)
+        label.textColor = UIColor.mainBlue()
+        label.textAlignment = NSTextAlignment.center
+        return label
+    }()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = UIColor.white
         
         tableView.register(EmojiCell.self, forCellReuseIdentifier: EmojiCellId)
-        
         
         for emoji in defaultEmojiSelection {
             

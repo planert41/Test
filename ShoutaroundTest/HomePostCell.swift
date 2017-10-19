@@ -74,7 +74,7 @@ class HomePostCell: UICollectionViewCell {
             }
 
             if post?.creatorUID == Auth.auth().currentUser?.uid {
-                deleteButton.isHidden = false
+                deleteButton.isHidden = true
             } else {
                 deleteButton.isHidden = true
             }
@@ -467,6 +467,7 @@ class HomePostCell: UICollectionViewCell {
         stackView.anchor(top: locationView.bottomAnchor, left: leftAnchor, bottom: nil, right: nil, paddingTop: 0, paddingLeft: 8, paddingBottom: 0, paddingRight: 0, width: 120, height: 50)
         addSubview(deleteButton)
         deleteButton.anchor(top: locationView.bottomAnchor, left: stackView.rightAnchor, bottom: nil, right: nil, paddingTop: 0, paddingLeft: 8, paddingBottom: 0, paddingRight: 0, width: 40, height: 50)
+        deleteButton.isHidden = true
 
     }
     

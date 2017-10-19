@@ -111,7 +111,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     
     var noResultsLabel: UILabel = {
         let label = UILabel()
-        label.text = "No Posts Were Found"
+        label.text = "Loading"
         label.font = UIFont.boldSystemFont(ofSize: 20)
         label.textColor = UIColor.black
         label.isHidden = true
@@ -213,7 +213,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     
     func filterHere(){
         
-        self.filterRange = Double(geoFilterRange[2])
+        self.filterRange = Double(geoFilterRange[5])
         self.filterPostByLocation()
         let indexPath = IndexPath(item: 0, section: 0)
         self.collectionView?.scrollToItem(at: indexPath, at: .bottom, animated: true)

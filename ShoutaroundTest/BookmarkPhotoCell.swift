@@ -241,6 +241,16 @@ class BookmarkPhotoCell: UICollectionViewCell {
 
         let usernameRow = UIView()
 
+        // Setup Action Buttons
+        
+        let buttonStackView = UIStackView(arrangedSubviews: [likeButton, commentButton, sendMessageButton, bookmarkButton])
+        
+        buttonStackView.distribution = .fillEqually
+        
+        addSubview(buttonStackView)
+        buttonStackView.anchor(top: nil, left: photoImageView.rightAnchor, bottom: bottomAnchor, right: rightAnchor, paddingTop: 0, paddingLeft: 8, paddingBottom: 0, paddingRight: 0, width: 0, height: 50)
+        
+        
 // Setup Bookmark Stack View
         
         let stackview = UIStackView()
@@ -250,8 +260,9 @@ class BookmarkPhotoCell: UICollectionViewCell {
         stackview.insertArrangedSubview(locationNameLabel, at: 1)
         stackview.insertArrangedSubview(locationAdressLabel, at: 2)
         stackview.insertArrangedSubview(captionLabel, at: 3)
+        
         addSubview(stackview)
-        stackview.anchor(top: topAnchor, left: photoImageView.rightAnchor, bottom: bottomAnchor, right: rightAnchor, paddingTop: 2, paddingLeft: 2, paddingBottom: 2, paddingRight: 2, width: 0, height: 0)
+        stackview.anchor(top: topAnchor, left: photoImageView.rightAnchor, bottom: buttonStackView.topAnchor, right: rightAnchor, paddingTop: 2, paddingLeft: 2, paddingBottom: 2, paddingRight: 2, width: 0, height: 0)
 
         
         usernameRow.addSubview(userProfileImageView)
@@ -272,17 +283,7 @@ class BookmarkPhotoCell: UICollectionViewCell {
         let locationTapGesture = UITapGestureRecognizer(target: self, action: #selector(BookmarkPhotoCell.locationTap))
         locationNameLabel.addGestureRecognizer(locationTapGesture)
         locationAdressLabel.addGestureRecognizer(locationTapGesture)
-        
-        
-// Setup Action Buttons
-        
-        let buttonStackView = UIStackView(arrangedSubviews: [likeButton, commentButton, sendMessageButton])
-        
-        buttonStackView.distribution = .fillEqually
-        
-        addSubview(buttonStackView)
-        buttonStackView.anchor(top: stackview.bottomAnchor, left: leftAnchor, bottom: nil, right: nil, paddingTop: 0, paddingLeft: 8, paddingBottom: 0, paddingRight: 0, width: 120, height: 50)
-        
+
 // Setup Dividers
         
         let topDividerView = UIView()
