@@ -208,7 +208,7 @@ class BookmarkPhotoCell: UICollectionViewCell {
     
     func handleBookmark() {
         
-        //    delegate?.didBookmark(for: self)
+        //delegate?.didBookmark(for: self)
         
         guard let postId = self.post?.id else {return}
         guard let uid = Auth.auth().currentUser?.uid else {return}

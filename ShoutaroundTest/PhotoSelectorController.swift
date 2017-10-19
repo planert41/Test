@@ -28,7 +28,7 @@ class PhotoSelectorController: UICollectionViewController, UICollectionViewDeleg
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        collectionView?.backgroundColor = .yellow
+        collectionView?.backgroundColor = .white
         setupNavigationButtons()
         
         collectionView?.register(PhotoSelectorCell.self, forCellWithReuseIdentifier: cellID)

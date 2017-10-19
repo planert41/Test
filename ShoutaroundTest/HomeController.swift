@@ -252,6 +252,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         var geoFilteredPosts = [Post]()
         
         guard let filterDistance = self.filterRange else {
+            collectionView?.reloadData()
             print("No Distance Number")
             return}
         

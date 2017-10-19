@@ -42,7 +42,6 @@ class BookMarkController: UIViewController, UICollectionViewDelegate, UICollecti
     var allPosts = [Post]()
     var filteredPosts = [Post]()
     
-    
     var isGridView = true
 
     lazy var actionBar: UIView = {
@@ -281,6 +280,7 @@ class BookMarkController: UIViewController, UICollectionViewDelegate, UICollecti
         var geoFilteredPosts = [Post]()
         
         guard let filterDistance = self.filterRange else {
+            collectionView.reloadData()
             print("No Distance Number")
             return}
         
@@ -516,8 +516,15 @@ class BookMarkController: UIViewController, UICollectionViewDelegate, UICollecti
         let index = filteredPosts.index { (filteredpost) -> Bool in
             filteredpost.id  == post.id
         }
-        print(index)
+        
         let filteredindexpath = IndexPath(row:index!, section: 0)
+        print(index)
+        if post.hasBookmarked == false{
+            self.filteredPosts.remove(at: index!)
+            self.collectionView.deleteItems(at: [filteredindexpath])
+        }
+
+        
         self.filteredPosts[index!] = post
         //        self.collectionView?.reloadItems(at: [filteredindexpath])
     }
