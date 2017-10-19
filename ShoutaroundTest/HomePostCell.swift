@@ -28,7 +28,9 @@ protocol HomePostCellDelegate {
 class HomePostCell: UICollectionViewCell {
     
     var delegate: HomePostCellDelegate?
-    
+    var popView = UIView()
+    var enableDelete: Bool = false
+
     var post: Post? {
         didSet {
                 
@@ -74,16 +76,13 @@ class HomePostCell: UICollectionViewCell {
 
             }
 
-            if post?.creatorUID == Auth.auth().currentUser?.uid {
-                deleteButton.isHidden = true
+            if post?.creatorUID == Auth.auth().currentUser?.uid && enableDelete {
+                deleteButton.isHidden = false
             } else {
                 deleteButton.isHidden = true
             }
             
            // setupAttributedLocationName()
-            
-            
-                
         }
     }
 
@@ -419,6 +418,11 @@ class HomePostCell: UICollectionViewCell {
         photoImageView.anchor(top: userProfileImageView.bottomAnchor, left: leftAnchor, bottom: nil, right: rightAnchor, paddingTop: 8, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
         photoImageView.heightAnchor.constraint(equalTo: widthAnchor, multiplier: 1).isActive = true
         
+        let doubleTap = UITapGestureRecognizer(target: self, action: #selector(photoDoubleTapped))
+        doubleTap.numberOfTapsRequired = 2
+        photoImageView.addGestureRecognizer(doubleTap)
+        photoImageView.isUserInteractionEnabled = true
+        
         addSubview(locationView)
         locationView.anchor(top: photoImageView.bottomAnchor, left: leftAnchor, bottom: nil, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 40)
 //        locationView.backgroundColor = UIColor.yellow
@@ -451,6 +455,30 @@ class HomePostCell: UICollectionViewCell {
         addSubview(captionLabel)
         captionLabel.anchor(top: likeButton.bottomAnchor, left: leftAnchor, bottom: bottomAnchor, right: rightAnchor, paddingTop: 0, paddingLeft: 8, paddingBottom: 0, paddingRight: 8, width: 0, height: 0)
     
+    }
+
+    func photoDoubleTapped(){
+        self.handleLike()
+        print("Double Tap")
+
+        var origin: CGPoint = self.photoImageView.center;
+        popView.backgroundColor = UIColor.blue
+        popView = UIView(frame: CGRect(x: origin.x, y: origin.y, width: 200, height: 200))
+        popView = UIImageView(image: #imageLiteral(resourceName: "heart"))
+        popView.contentMode = .scaleToFill
+        popView.transform = CGAffineTransform(scaleX: 0.25, y: 0.25)
+        popView.frame.origin.x = origin.x
+        popView.frame.origin.y = origin.y * (1/3)
+        
+        photoImageView.addSubview(popView)
+        
+        UIView.animate(withDuration: 0.5, animations: {
+            self.popView.alpha = 1
+            self.popView.transform = CGAffineTransform(scaleX: 1.0, y: 1.0)
+        }) { (done) in
+            self.popView.alpha = 0
+        }
+
     }
     
     fileprivate func setupActionButtons() {

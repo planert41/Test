@@ -141,6 +141,14 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
             Database.database().reference().child("postlocations").child(post.id!).removeValue()
             Database.database().reference().child("userposts").child(post.creatorUID!).child(post.id!).removeValue()
             
+            let index = self.filteredPosts.index { (filteredpost) -> Bool in
+                filteredpost.id  == post.id
+            }
+            
+            let filteredindexpath = IndexPath(row:index!, section: 0)
+            self.filteredPosts.remove(at: index!)
+            self.collectionView?.deleteItems(at: [filteredindexpath])
+            
         }))
         
         deleteAlert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: { (action: UIAlertAction!) in
@@ -422,6 +430,7 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
             return cell
         } else {
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: homePostCellId, for: indexPath) as! HomePostCell
+            cell.enableDelete = true
             cell.post = allPosts[indexPath.item]
             cell.delegate = self
             return cell
