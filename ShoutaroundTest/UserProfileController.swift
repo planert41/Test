@@ -141,12 +141,12 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
             Database.database().reference().child("postlocations").child(post.id!).removeValue()
             Database.database().reference().child("userposts").child(post.creatorUID!).child(post.id!).removeValue()
             
-            let index = self.filteredPosts.index { (filteredpost) -> Bool in
+            let index = self.allPosts.index { (filteredpost) -> Bool in
                 filteredpost.id  == post.id
             }
             
             let filteredindexpath = IndexPath(row:index!, section: 0)
-            self.filteredPosts.remove(at: index!)
+            self.allPosts.remove(at: index!)
             self.collectionView?.deleteItems(at: [filteredindexpath])
             
         }))

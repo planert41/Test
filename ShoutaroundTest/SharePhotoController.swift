@@ -68,6 +68,7 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
             
             if selectedEmojis.characters.count > 0 {
                 self.emojiCancelButton.alpha = 1
+                self.captionCancelButton.alpha = 1
                 self.emojiTextView.alpha = 1
             } else {
                 self.emojiCancelButton.alpha = 0
@@ -215,6 +216,30 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
     func cancelEmoji(){
         
         emojiTextView.text = nil
+        self.resetSelectedEmojis()
+        
+    }
+    
+    let captionCancelButton: UIButton = {
+        
+        let button = UIButton(type: .system)
+        button.setImage(#imageLiteral(resourceName: "cancel_shadow").withRenderingMode(.alwaysOriginal), for: .normal)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        
+        button.backgroundColor = UIColor.gray
+        button.layer.cornerRadius = 0.5 * button.bounds.size.width
+        button.layer.masksToBounds  = true
+        button.clipsToBounds = true
+        
+        button.addTarget(self, action: #selector(cancelCaption), for: .touchUpInside)
+        return button
+        
+    } ()
+    
+    func cancelCaption(){
+        
+        captionTextView.text = nil
+        self.captionCancelButton.alpha = 0
         self.resetSelectedEmojis()
         
     }
@@ -432,6 +457,11 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         captionTextView.delegate = self
         
         
+        view.addSubview(captionCancelButton)
+        captionCancelButton.anchor(top: captionTextView.topAnchor, left: nil, bottom: nil, right: captionTextView.rightAnchor, paddingTop: 4, paddingLeft: 0, paddingBottom: 5, paddingRight: 5, width: 15, height: 15)
+//        captionCancelButton.centerYAnchor.constraint(equalTo: emojiTextView.centerYAnchor)
+        captionCancelButton.alpha = 0
+        
         
 // Location Container View
         
@@ -574,10 +604,13 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
     
     func textView(_ textView: UITextView, shouldChangeTextIn range: NSRange, replacementText text: String) -> Bool {
 
-
+        captionCancelButton.alpha = 0
         let char = text.cString(using: String.Encoding.utf8)!
         let isBackSpace = strcmp(char, "\\b")
         
+        if textView.text != ""{
+        captionCancelButton.alpha = 1
+        } 
         
         if text == "\n"  // Recognizes enter key in keyboard
         {
@@ -763,26 +796,54 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         
         
         var selectedEmojis = self.selectedEmojis
+        var ratingEmoji: String! = ""
+        var nonratingEmoji: String! = ""
+        
+        var firstEmoji: String! = ""
+        
+//        if selectedEmojis == nil || selectedEmojis == "" {
+//            selectedEmojis = emoji
+//            self.selectedEmojis = selectedEmojis
+//        }
+        if selectedEmojis != "" {
+            firstEmoji = String(selectedEmojis.characters.first!)
+        }
+        
+        
+        if firstEmoji.containsRatingEmoji {
+            ratingEmoji = firstEmoji
+            nonratingEmoji = String(selectedEmojis.characters.dropFirst())
+        } else {
+            nonratingEmoji = selectedEmojis
+        }
         
         if emoji.containsOnlyEmoji == false {
             return
         }
 
-        else if selectedEmojis == nil {
-            selectedEmojis = emoji
-            self.selectedEmojis = selectedEmojis
-        }
+
             
         else if (selectedEmojis.contains(emoji)) {
             self.selectedEmojis = selectedEmojis.replacingOccurrences(of: emoji, with: "")
         }
-        
-         else if emoji.containsOnlyEmoji && (selectedEmojis.characters.count) < self.maxEmojis {
-            selectedEmojis = emoji
-            self.selectedEmojis = self.selectedEmojis + selectedEmojis
+            
+        else  if emoji.containsRatingEmoji {
+            ratingEmoji = emoji
+            self.selectedEmojis = ratingEmoji! + nonratingEmoji!
+            
         }
+
+         else if emoji.containsOnlyEmoji && !emoji.containsRatingEmoji && (selectedEmojis.characters.count) < self.maxEmojis {
+
+            nonratingEmoji = nonratingEmoji! + emoji
+            self.selectedEmojis = ratingEmoji! + nonratingEmoji!
+        }
+
         
-        print(self.selectedEmojis)
+        print("selected emojis", self.selectedEmojis)
+        print("rating emoji", ratingEmoji)
+        print("nonrating emoji", nonratingEmoji)
+        print("first emoji", firstEmoji, firstEmoji.containsRatingEmoji)
     
     }
     
