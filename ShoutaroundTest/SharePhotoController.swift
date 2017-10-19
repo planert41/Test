@@ -14,8 +14,9 @@ import GoogleMaps
 import SwiftyJSON
 import SwiftLocation
 import Alamofire
+import GooglePlaces
 
-class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout, UICollectionViewDelegate,UICollectionViewDataSource, UITextViewDelegate, CLLocationManagerDelegate, LocationSearchControllerDelegate, UIGestureRecognizerDelegate {
+class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout, UICollectionViewDelegate,UICollectionViewDataSource, UITextViewDelegate, CLLocationManagerDelegate, LocationSearchControllerDelegate, UIGestureRecognizerDelegate, GMSAutocompleteViewControllerDelegate {
    
     let locationManager = CLLocationManager()
     let emojiCollectionViewRows: Int = 5
@@ -228,10 +229,20 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         tv.backgroundColor = UIColor(white: 0, alpha: 0.03)
         tv.layer.borderWidth = 0.5
         tv.layer.cornerRadius = 5
-
+        tv.isUserInteractionEnabled = true
+        let TapGesture = UITapGestureRecognizer(target: self, action: #selector(tapSearchBar))
+        tv.addGestureRecognizer(TapGesture)
+        
         return tv
     }()
     
+    func tapSearchBar() {
+        print("Search Bar Tapped")
+        let autocompleteController = GMSAutocompleteViewController()
+        autocompleteController.delegate = self
+        present(autocompleteController, animated: true, completion: nil)
+    }
+
     let locationIcon: UILabel = {
         let tv = UILabel()
         tv.font = UIFont.systemFont(ofSize: 30)
@@ -249,6 +260,9 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         tv.backgroundColor = UIColor(white: 0, alpha: 0.03)
         tv.layer.borderWidth = 0.5
         tv.layer.cornerRadius = 5
+        tv.isUserInteractionEnabled = true
+        let TapGesture = UITapGestureRecognizer(target: self, action: #selector(tapSearchBar))
+        tv.addGestureRecognizer(TapGesture)
         
         return tv
     }()
@@ -433,6 +447,9 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         
         view.addSubview(locationNameLabel)
         locationNameLabel.anchor(top: LocationContainerView.topAnchor, left: locationIcon.rightAnchor, bottom: nil, right: LocationContainerView.rightAnchor, paddingTop: 8, paddingLeft: 8, paddingBottom: 0, paddingRight: 8, width: 0, height: 40)
+        locationNameLabel.isUserInteractionEnabled = true
+        let TapGesture = UITapGestureRecognizer(target: self, action: #selector(tapSearchBar))
+        locationNameLabel.addGestureRecognizer(TapGesture)
 
         view.addSubview(locationCancelButton)
         locationCancelButton.anchor(top: locationNameLabel.topAnchor, left: nil, bottom: nil, right: locationNameLabel.rightAnchor, paddingTop: 10, paddingLeft: 8, paddingBottom: 0, paddingRight: 8, width: 20, height: 20)
@@ -443,6 +460,9 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         
         view.addSubview(locationAdressLabel)
         locationAdressLabel.anchor(top: locationNameLabel.bottomAnchor, left: adressIcon.rightAnchor, bottom: nil, right: LocationContainerView.rightAnchor, paddingTop: 8, paddingLeft: 8, paddingBottom: 0, paddingRight: 8, width: 0, height: 40)
+        locationAdressLabel.isUserInteractionEnabled = true
+        let TapGesture1 = UITapGestureRecognizer(target: self, action: #selector(tapSearchBar))
+        locationAdressLabel.addGestureRecognizer(TapGesture1)
         
         view.addSubview(locationSearchButton)
         locationSearchButton.anchor(top: locationAdressLabel.topAnchor, left: nil, bottom: nil, right: locationAdressLabel.rightAnchor, paddingTop: 10, paddingLeft: 8, paddingBottom: 0, paddingRight: 8, width: 20, height: 20)
@@ -523,6 +543,30 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
 //        
 //        
 //    }
+    
+// Search Location Delegates
+    
+    func viewController(_ viewController: GMSAutocompleteViewController, didAutocompleteWith place: GMSPlace) {
+        
+        print(place)
+        selectedPostLocation = CLLocation.init(latitude: place.coordinate.latitude, longitude: place.coordinate.longitude)
+        selectedPostGooglePlaceID = place.placeID
+        self.didUpdate(lat: Double(place.coordinate.latitude), long: Double(place.coordinate.longitude), locationAdress: place.formattedAddress, locationName: place.name, locationGooglePlaceID: place.placeID)
+        self.reloadInputViews()
+        dismiss(animated: true, completion: nil)
+        
+    }
+    
+    
+    func viewController(_ viewController: GMSAutocompleteViewController, didFailAutocompleteWithError error: Error) {
+        print(error)
+    }
+    
+    func wasCancelled(_ viewController: GMSAutocompleteViewController) {
+        dismiss(animated: true, completion: nil)
+    }
+
+    
     
         var savedWords = [String]()
         var deletedWords = [String]()
