@@ -11,7 +11,7 @@ import Firebase
 import FBSDKLoginKit
 import IQKeyboardManagerSwift
 
-class UserProfileController: UICollectionViewController, UICollectionViewDelegateFlowLayout, UserProfileHeaderDelegate, HomePostCellDelegate {
+class UserProfileController: UICollectionViewController, UICollectionViewDelegateFlowLayout, UserProfileHeaderDelegate, HomePostCellDelegate,BookmarkPhotoCellDelegate, UserProfilePhotoCellDelegate {
     
     let cellId = "cellId"
     let homePostCellId = "homePostCellId"
@@ -38,6 +38,13 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
 
     func didSignOut(){
         self.handleLogOut()
+    }
+    
+    
+    func handlePictureTap(post: Post){
+        let pictureController = PictureController()
+        pictureController.selectedPost = post
+        navigationController?.pushViewController(pictureController, animated: true)
     }
     
     override func viewDidLoad() {
@@ -103,6 +110,7 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
         
         navigationController?.pushViewController(locationController, animated: true)
     }
+
     
     func refreshPost(post: Post) {
         let index = allPosts.index { (filteredpost) -> Bool in
@@ -145,6 +153,13 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
     }
     
     
+    
+    func didTapPicture(post: Post) {
+        let pictureController = PictureController(collectionViewLayout: UICollectionViewFlowLayout())
+        pictureController.selectedPost = post
+        
+        navigationController?.pushViewController(pictureController, animated: true)
+    }
 
     
     fileprivate func paginatePosts(){
@@ -403,6 +418,7 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
         if isGridView {
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: cellId, for: indexPath) as! UserProfilePhotoCell
             cell.post = allPosts[indexPath.item]
+            cell.delegate = self
             return cell
         } else {
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: homePostCellId, for: indexPath) as! HomePostCell

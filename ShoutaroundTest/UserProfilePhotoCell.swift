@@ -8,8 +8,14 @@
 
 import UIKit
 
+protocol UserProfilePhotoCellDelegate {
+    func didTapPicture(post:Post)
+    
+}
+
 class UserProfilePhotoCell: UICollectionViewCell {
     
+    var delegate: UserProfilePhotoCellDelegate?
     var post: Post? {
         didSet {
             
@@ -19,6 +25,8 @@ class UserProfilePhotoCell: UICollectionViewCell {
 
         }
     }
+    
+    
     
     let photoImageView: CustomImageView = {
         let iv = CustomImageView()
@@ -33,6 +41,17 @@ class UserProfilePhotoCell: UICollectionViewCell {
         
         addSubview(photoImageView)
         photoImageView.anchor(top: topAnchor, left: leftAnchor, bottom: bottomAnchor, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
+        let TapGesture = UITapGestureRecognizer(target: self, action: #selector(UserProfilePhotoCell.handlePictureTap))
+        photoImageView.addGestureRecognizer(TapGesture)
+        photoImageView.isUserInteractionEnabled = true
+
+    }
+    
+    
+    func handlePictureTap() {
+        guard let post = post else {return}
+        print("Tap Picture")
+        delegate?.didTapPicture(post: post)
     }
     
     required init?(coder aDecoder: NSCoder) {

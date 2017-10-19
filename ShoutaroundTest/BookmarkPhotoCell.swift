@@ -17,6 +17,7 @@ protocol BookmarkPhotoCellDelegate {
     func didTapMessage(post:Post)
     func deletePost(post:Post)
     func refreshPost(post:Post)
+    func didTapPicture(post:Post)
     
 }
 
@@ -39,12 +40,33 @@ class BookmarkPhotoCell: UICollectionViewCell {
             userProfileImageView.loadImage(urlString: profileImageUrl)
             captionLabel.text = post?.caption
             
-            setupAttributedLocationName()
+       //     setupAttributedLocationName()
             
             likeButton.setImage(post?.hasLiked == true ? #imageLiteral(resourceName: "like_selected").withRenderingMode(.alwaysOriginal) : #imageLiteral(resourceName: "like_unselected").withRenderingMode(.alwaysOriginal), for: .normal)
             
             bookmarkButton.setImage(post?.hasBookmarked == true ? #imageLiteral(resourceName: "bookmark_ribbon_filled").withRenderingMode(.alwaysOriginal) : #imageLiteral(resourceName: "bookmark_ribbon_unfilled").withRenderingMode(.alwaysOriginal), for: .normal)
             
+            
+            
+            print("Post Distance is",post?.distance)
+            if post?.distance != nil && post?.locationGPS?.coordinate.longitude != 0 && post?.locationGPS?.coordinate.latitude != 0 {
+                
+                guard let postdistance = post?.distance else {return}
+                let distanceformat = ".2"
+                
+                if postdistance < 100000 {
+                // Convert to M to KM
+                let locationDistance = postdistance/1000
+                distanceLabel.text =  " \(locationDistance.format(f: distanceformat)) km"
+                }
+                
+                else if postdistance >= 100000 {
+                    // Convert to M to KM
+                    let locationDistance = postdistance/100000
+                    distanceLabel.text =  " \(locationDistance.format(f: distanceformat))K km"
+                }
+                
+            }
         }
     }
     
@@ -61,7 +83,7 @@ class BookmarkPhotoCell: UICollectionViewCell {
             // Convert to M to KM
             let locationDistance = post.distance!/1000
             
-            attributedText.append(NSAttributedString(string: " \(locationDistance.format(f: distanceformat)) KM", attributes: [NSFontAttributeName: UIFont.systemFont(ofSize: adressLabelSize),NSForegroundColorAttributeName: UIColor.gray]))
+            attributedText.append(NSAttributedString(string: " \(locationDistance.format(f: distanceformat)) KM", attributes: [NSFontAttributeName: UIFont.systemFont(ofSize: adressLabelSize),NSForegroundColorAttributeName: UIColor.mainBlue()]))
         }
         
         self.locationNameLabel.attributedText = attributedText
@@ -72,7 +94,17 @@ class BookmarkPhotoCell: UICollectionViewCell {
     let usernameLabel: UILabel = {
         let label = UILabel()
         label.text = "Username"
-        label.font = UIFont.boldSystemFont(ofSize: 14)
+        label.font = UIFont.boldSystemFont(ofSize: 9)
+        label.sizeToFit()
+        return label
+    }()
+    
+    let distanceLabel: UILabel = {
+        let label = UILabel()
+        label.text = ""
+        label.font = UIFont.boldSystemFont(ofSize: 12)
+        label.textColor = UIColor.mainBlue()
+        label.textAlignment = NSTextAlignment.right
         return label
     }()
     
@@ -98,7 +130,7 @@ class BookmarkPhotoCell: UICollectionViewCell {
     let emojiLabel: UILabel = {
         let label = UILabel()
         label.text = "Emojis"
-        label.font = UIFont.boldSystemFont(ofSize: 20)
+        label.font = UIFont.boldSystemFont(ofSize: 14)
         label.textAlignment = NSTextAlignment.left
         label.backgroundColor = UIColor.white
         return label
@@ -109,22 +141,34 @@ class BookmarkPhotoCell: UICollectionViewCell {
         let label = UILabel()
         label.text = "Location"
         label.font = UIFont.boldSystemFont(ofSize: 12)
-        label.textColor = UIColor.darkGray
+        label.textColor = UIColor.black
+        label.sizeToFit()
         return label
     }()
     
     let locationAdressLabel: UILabel = {
         let label = UILabel()
         label.text = "Location"
-        label.font = UIFont.boldSystemFont(ofSize: 12)
+        label.font = UIFont.boldSystemFont(ofSize: 10)
         label.textColor = UIColor.darkGray
+        label.numberOfLines = 0
+        label.lineBreakMode = NSLineBreakMode.byWordWrapping
         return label
     }()
     
     let captionLabel: UILabel = {
         let label = UILabel()
-        label.numberOfLines = 2
+        label.font = UIFont.boldSystemFont(ofSize: 12)
+        label.numberOfLines = 0
+        label.lineBreakMode = NSLineBreakMode.byWordWrapping
+        label.sizeToFit()
         return label
+    }()
+    
+    let captionTextView: UITextView = {
+        let tv = UITextView()
+        tv.font = UIFont.boldSystemFont(ofSize: 12)
+        return tv
     }()
     
     lazy var likeButton: UIButton = {
@@ -203,7 +247,7 @@ class BookmarkPhotoCell: UICollectionViewCell {
     
     lazy var sendMessageButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setImage(#imageLiteral(resourceName: "send2").withRenderingMode(.alwaysOriginal), for: .normal)
+        button.setImage(#imageLiteral(resourceName: "message").withRenderingMode(.alwaysOriginal), for: .normal)
         button.addTarget(self, action: #selector(handleMessage), for: .touchUpInside)
         return button
         
@@ -228,62 +272,115 @@ class BookmarkPhotoCell: UICollectionViewCell {
         guard let post = post else {return}
         delegate?.didTapLocation(post: post)
     }
-    
-    
+
+    func handlePictureTap() {
+    guard let post = post else {return}
+    delegate?.didTapPicture(post: post)
+    }
+
+
     override init(frame: CGRect) {
         super.init(frame:frame)
-        
-// Setup Photo Image View
-        
-        addSubview(photoImageView)
-        photoImageView.anchor(top: topAnchor, left: leftAnchor, bottom: bottomAnchor, right: nil, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
-        photoImageView.widthAnchor.constraint(equalTo: photoImageView.heightAnchor, multiplier: 1).isActive = true
 
-        let usernameRow = UIView()
 
-        // Setup Action Buttons
+        // Setup Action Buttons and PhotoImageView
         
         let buttonStackView = UIStackView(arrangedSubviews: [likeButton, commentButton, sendMessageButton, bookmarkButton])
         
         buttonStackView.distribution = .fillEqually
         
         addSubview(buttonStackView)
-        buttonStackView.anchor(top: nil, left: photoImageView.rightAnchor, bottom: bottomAnchor, right: rightAnchor, paddingTop: 0, paddingLeft: 8, paddingBottom: 0, paddingRight: 0, width: 0, height: 50)
+        addSubview(photoImageView)
+        photoImageView.anchor(top: topAnchor, left: nil, bottom: bottomAnchor, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
         
+        photoImageView.widthAnchor.constraint(equalTo: photoImageView.heightAnchor, multiplier: 1).isActive = true
+        
+        
+        buttonStackView.anchor(top: nil, left: leftAnchor, bottom: bottomAnchor, right: nil, paddingTop: 0, paddingLeft: 8, paddingBottom: 5, paddingRight: 0, width: 120, height: 20)
+//        buttonStackView.widthAnchor.constraint(equalTo: photoImageView.heightAnchor, multiplier: 1).isActive = true
+        
+        
+        let TapGesture = UITapGestureRecognizer(target: self, action: #selector(BookmarkPhotoCell.handlePictureTap))
+        photoImageView.addGestureRecognizer(TapGesture)
+        photoImageView.isUserInteractionEnabled = true
+        
+        let usernameRow = UIView()
         
 // Setup Bookmark Stack View
-        
-        let stackview = UIStackView()
-        stackview.axis = .vertical
-        stackview.distribution = .fillEqually
-        stackview.insertArrangedSubview(usernameRow, at: 0)
-        stackview.insertArrangedSubview(locationNameLabel, at: 1)
-        stackview.insertArrangedSubview(locationAdressLabel, at: 2)
-        stackview.insertArrangedSubview(captionLabel, at: 3)
-        
-        addSubview(stackview)
-        stackview.anchor(top: topAnchor, left: photoImageView.rightAnchor, bottom: buttonStackView.topAnchor, right: rightAnchor, paddingTop: 2, paddingLeft: 2, paddingBottom: 2, paddingRight: 2, width: 0, height: 0)
+
+        addSubview(usernameRow)
+        usernameRow.anchor(top: topAnchor, left: leftAnchor, bottom: nil, right: photoImageView.leftAnchor, paddingTop: 10, paddingLeft: 5, paddingBottom: 0, paddingRight: 5, width: 0, height: 30)
 
         
-        usernameRow.addSubview(userProfileImageView)
+        
         usernameRow.addSubview(emojiLabel)
+        emojiLabel.anchor(top: usernameRow.topAnchor, left: usernameRow.leftAnchor, bottom: usernameRow.bottomAnchor, right: usernameRow.rightAnchor, paddingTop: 5, paddingLeft: 0, paddingBottom: 5, paddingRight: 0, width: 80, height: 0)
         
-        userProfileImageView.anchor(top: usernameRow.topAnchor, left: usernameRow.leftAnchor, bottom: usernameRow.bottomAnchor, right: nil, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
-        userProfileImageView.widthAnchor.constraint(equalTo: userProfileImageView.heightAnchor, multiplier: 1).isActive = true
+        addSubview(distanceLabel)
+        distanceLabel.anchor(top: usernameRow.topAnchor, left: emojiLabel.rightAnchor, bottom: usernameRow.bottomAnchor, right: usernameRow.rightAnchor, paddingTop: 2, paddingLeft: 5, paddingBottom: 0, paddingRight: 5, width: 0, height: 15)
         
-        emojiLabel.anchor(top: usernameRow.topAnchor, left: userProfileImageView.rightAnchor, bottom: usernameRow.bottomAnchor, right: nil, paddingTop: 0, paddingLeft: 10, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
+        
+        addSubview(locationNameLabel)
+
+        locationNameLabel.anchor(top: usernameRow.bottomAnchor, left: leftAnchor, bottom: nil, right: usernameRow.rightAnchor, paddingTop: 10, paddingLeft: 5, paddingBottom: 0, paddingRight: 5, width: 0, height: 15)
+
+        addSubview(locationAdressLabel)
+        locationAdressLabel.anchor(top: locationNameLabel.bottomAnchor, left: leftAnchor, bottom: nil, right: photoImageView.leftAnchor, paddingTop: 0, paddingLeft: 5, paddingBottom: 0, paddingRight: 5, width: 0, height: 24)
+        
+        addSubview(captionLabel)
+        captionLabel.anchor(top: locationAdressLabel.bottomAnchor, left: leftAnchor, bottom: nil, right: photoImageView.leftAnchor, paddingTop: 10, paddingLeft: 5, paddingBottom: 0, paddingRight: 5, width: 0, height: 0)
+        captionLabel.sizeToFit()
+        
+        
+        
+        
+        
+        
+//        
+//        let stackview = UIStackView()
+//        
+//        stackview.axis = .vertical
+//        stackview.distribution = .fillEqually
+//        stackview.insertArrangedSubview(usernameRow, at: 0)
+//        stackview.insertArrangedSubview(locationNameLabel, at: 1)
+//        stackview.insertArrangedSubview(locationAdressLabel, at: 2)
+//       // stackview.insertArrangedSubview(captionTextView, at: 3)
+//        
+//        addSubview(stackview)
+//        stackview.anchor(top: topAnchor, left: leftAnchor, bottom: captionLabel.topAnchor, right: photoImageView.leftAnchor, paddingTop: 2, paddingLeft: 2, paddingBottom: 2, paddingRight: 2, width: 0, height: 0)
+
+        
+
+
+        
+//        usernameRow.addSubview(userProfileImageView)
+//        usernameRow.addSubview(usernameLabel)
+//        userProfileImageView.anchor(top: usernameRow.topAnchor, left: usernameRow.leftAnchor, bottom: usernameRow.bottomAnchor, right: nil, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
+//        userProfileImageView.widthAnchor.constraint(equalTo: userProfileImageView.heightAnchor, multiplier: 1).isActive = true
+//        userProfileImageView.layer.cornerRadius = 25/2
+//        
+//        usernameLabel.anchor(top: usernameRow.topAnchor, left: userProfileImageView.rightAnchor, bottom: usernameRow.bottomAnchor, right: distanceLabel.leftAnchor, paddingTop: 0, paddingLeft: 3, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
+
+        
+        
+        
         
 // Adding Gesture Recognizers
         
         userProfileImageView.isUserInteractionEnabled = true
         let usernameTap = UITapGestureRecognizer(target: self, action: #selector(BookmarkPhotoCell.usernameTap))
         userProfileImageView.addGestureRecognizer(usernameTap)
+        userProfileImageView.isUserInteractionEnabled = true
         
         
         let locationTapGesture = UITapGestureRecognizer(target: self, action: #selector(BookmarkPhotoCell.locationTap))
         locationNameLabel.addGestureRecognizer(locationTapGesture)
-        locationAdressLabel.addGestureRecognizer(locationTapGesture)
-
+        locationNameLabel.isUserInteractionEnabled = true
+        let locationTapGesture2 = UITapGestureRecognizer(target: self, action: #selector(BookmarkPhotoCell.locationTap))
+        
+        locationAdressLabel.addGestureRecognizer(locationTapGesture2)
+        locationAdressLabel.isUserInteractionEnabled = true
+        
 // Setup Dividers
         
         let topDividerView = UIView()

@@ -48,6 +48,7 @@ class HomePostCell: UICollectionViewCell {
             usernameLabel.addGestureRecognizer(usernameTap)
             
             let locationTapGesture = UITapGestureRecognizer(target: self, action: #selector(HomePostCell.locationTap))
+            let locationTapGesture2 = UITapGestureRecognizer(target: self, action: #selector(HomePostCell.locationTap))
             
             locationLabel.text = post?.locationName.truncate(length: 30)
             locationLabel.isUserInteractionEnabled = true
@@ -55,7 +56,7 @@ class HomePostCell: UICollectionViewCell {
             
             adressLabel.text = post?.locationAdress.truncate(length: 60)
             adressLabel.isUserInteractionEnabled = true
-            adressLabel.addGestureRecognizer(locationTapGesture)
+            adressLabel.addGestureRecognizer(locationTapGesture2)
             
             guard let profileImageUrl = post?.user.profileImageUrl else {return}
             
@@ -317,7 +318,7 @@ class HomePostCell: UICollectionViewCell {
     
     lazy var sendMessageButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setImage(#imageLiteral(resourceName: "send2").withRenderingMode(.alwaysOriginal), for: .normal)
+        button.setImage(#imageLiteral(resourceName: "message").withRenderingMode(.alwaysOriginal), for: .normal)
         button.addTarget(self, action: #selector(handleMessage), for: .touchUpInside)
         return button
     

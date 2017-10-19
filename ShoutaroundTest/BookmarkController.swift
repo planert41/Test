@@ -12,7 +12,7 @@ import Firebase
 import CoreGraphics
 import GeoFire
 
-class BookMarkController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, UISearchBarDelegate, UIPickerViewDelegate, UIPickerViewDataSource, UISearchControllerDelegate, HomePostSearchDelegate, BookmarkPhotoCellDelegate, HomePostCellDelegate {
+class BookMarkController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, UISearchBarDelegate, UIPickerViewDelegate, UIPickerViewDataSource, UISearchControllerDelegate, HomePostSearchDelegate, BookmarkPhotoCellDelegate, HomePostCellDelegate, CLLocationManagerDelegate {
     let bookmarkCellId = "bookmarkCellId"
     let homePostCellId = "homePostCellId"
     
@@ -94,6 +94,17 @@ class BookMarkController: UIViewController, UICollectionViewDelegate, UICollecti
         collectionView.reloadData()
     }
     
+    
+    func didTapPicture(post: Post) {
+        
+        let pictureController = PictureController(collectionViewLayout: UICollectionViewFlowLayout())
+        pictureController.selectedPost = post
+        
+        
+        navigationController?.pushViewController(pictureController, animated: true)
+    }
+    
+    
     override func viewDidLoad() {
         
         super.viewDidLoad()
@@ -119,6 +130,18 @@ class BookMarkController: UIViewController, UICollectionViewDelegate, UICollecti
         
         fetchBookmarkPosts()
         setupRefresh()
+        
+        
+        // Ask for Authorisation from the User.
+        self.locationManager.requestAlwaysAuthorization()
+        
+        // For use in foreground
+        self.locationManager.requestWhenInUseAuthorization()
+        
+        if CLLocationManager.locationServicesEnabled() {
+            locationManager.delegate = self
+            locationManager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters
+        }
         
     }
     
@@ -219,7 +242,7 @@ class BookMarkController: UIViewController, UICollectionViewDelegate, UICollecti
     
     func filterHere(){
         
-        self.filterRange = Double(geoFilterRange[2])
+        self.filterRange = Double(geoFilterRange[5])
         self.filterPostByLocation()
         let indexPath = IndexPath(item: 0, section: 0)
         self.collectionView.scrollToItem(at: indexPath, at: .bottom, animated: true)
@@ -389,6 +412,7 @@ class BookMarkController: UIViewController, UICollectionViewDelegate, UICollecti
                     if let creatorUID = dictionary["creatorUID"] as? String {
                         
                         Database.fetchPostWithUIDAndPostID(creatoruid: creatorUID, postId: key, completion: { (post) in
+
                             self.allPosts.append(post)
                             self.filteredPosts = self.allPosts
                             self.collectionView.reloadData()
@@ -406,9 +430,10 @@ class BookMarkController: UIViewController, UICollectionViewDelegate, UICollecti
         filteredPosts.removeAll()
         self.resultSearchController?.searchBar.text = ""
         self.filterRange = nil
+        collectionView.reloadData()
         fetchBookmarkPosts()
         self.collectionView.refreshControl?.endRefreshing()
-        print("Refresh Home Feed")
+        print("Refresh Bookmark Feed")
     }
     
      func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
@@ -417,16 +442,23 @@ class BookMarkController: UIViewController, UICollectionViewDelegate, UICollecti
     
      func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         
+        var displayPost = filteredPosts[indexPath.item]
+        
+        if CurrentUser.currentLocation != nil {
+            displayPost.distance = Double((displayPost.locationGPS?.distance(from: CurrentUser.currentLocation!))!)
+        }
+        
         if isGridView {
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: bookmarkCellId, for: indexPath) as! BookmarkPhotoCell
             cell.delegate = self
-            cell.post = filteredPosts[indexPath.item]
+            cell.post = displayPost
+
 
             return cell
         } else {
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: homePostCellId, for: indexPath) as! HomePostCell
             cell.delegate = self
-            cell.post = filteredPosts[indexPath.item]
+            cell.post = displayPost
             return cell
         }
         

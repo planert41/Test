@@ -42,6 +42,7 @@
 		A58477AA1F6EFFD7007DE06C /* LocationLabels.swift in Sources */ = {isa = PBXBuildFile; fileRef = A58477A91F6EFFD7007DE06C /* LocationLabels.swift */; };
 		A5AEB9721F96A82B00E88CAC /* HomePostSearch.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5AEB9711F96A82B00E88CAC /* HomePostSearch.swift */; };
 		A5AEB9741F96B00500E88CAC /* EmojiCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5AEB9731F96B00500E88CAC /* EmojiCell.swift */; };
+		A5AEB9761F986F8200E88CAC /* PictureController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5AEB9751F986F8200E88CAC /* PictureController.swift */; };
 		A5BFBB6B1F7315D200F36AF8 /* test.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5BFBB6A1F7315D200F36AF8 /* test.swift */; };
 		A5C480D01F5DCB500096E003 /* FBSDKCoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A5C480CE1F5DCB500096E003 /* FBSDKCoreKit.framework */; };
 		A5C480D11F5DCB500096E003 /* FBSDKLoginKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A5C480CF1F5DCB500096E003 /* FBSDKLoginKit.framework */; };
@@ -104,6 +105,7 @@
 		A58477A91F6EFFD7007DE06C /* LocationLabels.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LocationLabels.swift; sourceTree = "<group>"; };
 		A5AEB9711F96A82B00E88CAC /* HomePostSearch.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HomePostSearch.swift; sourceTree = "<group>"; };
 		A5AEB9731F96B00500E88CAC /* EmojiCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EmojiCell.swift; sourceTree = "<group>"; };
+		A5AEB9751F986F8200E88CAC /* PictureController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PictureController.swift; sourceTree = "<group>"; };
 		A5BFBB651F6F647100F36AF8 /* ShoutaroundTest-CBridgingHeader.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "ShoutaroundTest-CBridgingHeader.h"; sourceTree = "<group>"; };
 		A5BFBB6A1F7315D200F36AF8 /* test.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = test.swift; sourceTree = "<group>"; };
 		A5C480CE1F5DCB500096E003 /* FBSDKCoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = FBSDKCoreKit.framework; path = "ShoutaroundTest/FacebookSDKs-iOS-4.26.0/FBSDKCoreKit.framework"; sourceTree = "<group>"; };
@@ -219,7 +221,7 @@
 		A54E1D691F4E736B00C2AA77 /* ShoutaroundTest */ = {
 			isa = PBXGroup;
 			children = (
-				A5516BC01F8ED0B9003C3E22 /* Location */,
+				A5516BC01F8ED0B9003C3E22 /* ItemCells */,
 				A56868BB1F78A0E50050C406 /* Message */,
 				A57C060A1F7602F100A0568F /* Bookmark */,
 				A57941C71F6A2799004EC40D /* EmojiDictionary */,
@@ -245,12 +247,13 @@
 			path = ShoutaroundTest;
 			sourceTree = "<group>";
 		};
-		A5516BC01F8ED0B9003C3E22 /* Location */ = {
+		A5516BC01F8ED0B9003C3E22 /* ItemCells */ = {
 			isa = PBXGroup;
 			children = (
 				A5516BC11F8ED0D5003C3E22 /* LocationController.swift */,
+				A5AEB9751F986F8200E88CAC /* PictureController.swift */,
 			);
-			name = Location;
+			name = ItemCells;
 			sourceTree = "<group>";
 		};
 		A562E5141F5354980095C7C1 /* Login */ = {
@@ -569,6 +572,7 @@
 				A51C13C31F4FBF2F00CEB740 /* Extensions.swift in Sources */,
 				A5C6451F1F57B1BD00C78244 /* UserSearchCell.swift in Sources */,
 				A5C645261F5BADB000C78244 /* CustomAnimationPresentor.swift in Sources */,
+				A5AEB9761F986F8200E88CAC /* PictureController.swift in Sources */,
 				A562E51B1F53C1650095C7C1 /* PhotoSelectorCell.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

@@ -74,8 +74,8 @@ class MainTabBarController: UITabBarController, UITabBarControllerDelegate {
         let bookmarkLayout = UICollectionViewFlowLayout()
         let bookmarkController = BookMarkController()
         let bookmarkNavController = UINavigationController(rootViewController: bookmarkController)
-        bookmarkNavController.tabBarItem.image = #imageLiteral(resourceName: "like_unselected")
-        bookmarkNavController.tabBarItem.selectedImage = #imageLiteral(resourceName: "like_selected")
+        bookmarkNavController.tabBarItem.image = #imageLiteral(resourceName: "bookmark_ribbon_unfilled").withRenderingMode(.alwaysOriginal)
+        bookmarkNavController.tabBarItem.selectedImage = #imageLiteral(resourceName: "bookmark_ribbon_filled").withRenderingMode(.alwaysOriginal)
         
         
         //user profile
