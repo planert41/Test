@@ -12,7 +12,7 @@ import Firebase
 import CoreGraphics
 import GeoFire
 
-class BookMarkController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, UISearchBarDelegate, UIPickerViewDelegate, UIPickerViewDataSource, UISearchControllerDelegate, HomePostSearchDelegate {
+class BookMarkController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, UISearchBarDelegate, UIPickerViewDelegate, UIPickerViewDataSource, UISearchControllerDelegate, HomePostSearchDelegate, BookmarkPhotoCellDelegate, HomePostCellDelegate {
     let bookmarkCellId = "bookmarkCellId"
     let homePostCellId = "homePostCellId"
     
@@ -370,10 +370,6 @@ class BookMarkController: UIViewController, UICollectionViewDelegate, UICollecti
         }
     }
     
-
-    
-
-    
     func fetchBookmarkPosts() {
         
         guard let uid = Auth.auth().currentUser?.uid  else {return}
@@ -423,11 +419,13 @@ class BookMarkController: UIViewController, UICollectionViewDelegate, UICollecti
         
         if isGridView {
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: bookmarkCellId, for: indexPath) as! BookmarkPhotoCell
+            cell.delegate = self
             cell.post = filteredPosts[indexPath.item]
 
             return cell
         } else {
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: homePostCellId, for: indexPath) as! HomePostCell
+            cell.delegate = self
             cell.post = filteredPosts[indexPath.item]
             return cell
         }
@@ -457,6 +455,73 @@ class BookMarkController: UIViewController, UICollectionViewDelegate, UICollecti
         }
         
     }
+    
+    // HOME POST CELL DELEGATE METHODS
+    
+    func didTapComment(post: Post) {
+        
+        let commentsController = CommentsController(collectionViewLayout: UICollectionViewFlowLayout())
+        commentsController.post = post
+        
+        navigationController?.pushViewController(commentsController, animated: true)
+    }
+    
+    func didTapUser(post: Post) {
+        let userProfileController = UserProfileController(collectionViewLayout: UICollectionViewFlowLayout())
+        userProfileController.userId = post.user.uid
+        
+        navigationController?.pushViewController(userProfileController, animated: true)
+    }
+    
+    func didTapLocation(post: Post) {
+        let locationController = LocationController()
+        locationController.selectedPost = post
+        
+        navigationController?.pushViewController(locationController, animated: true)
+    }
+    
+    func refreshPost(post: Post) {
+        let index = filteredPosts.index { (filteredpost) -> Bool in
+            filteredpost.id  == post.id
+        }
+        print(index)
+        let filteredindexpath = IndexPath(row:index!, section: 0)
+        self.filteredPosts[index!] = post
+        //        self.collectionView?.reloadItems(at: [filteredindexpath])
+    }
+    
+    func didTapMessage(post: Post) {
+        
+        let messageController = MessageController()
+        messageController.post = post
+        
+        navigationController?.pushViewController(messageController, animated: true)
+        
+    }
+    
+    func deletePost(post:Post){
+        
+        let deleteAlert = UIAlertController(title: "Delete", message: "All data will be lost.", preferredStyle: UIAlertControllerStyle.alert)
+        
+        deleteAlert.addAction(UIAlertAction(title: "Ok", style: .default, handler: { (action: UIAlertAction!) in
+            
+            
+            Database.database().reference().child("posts").child(post.id!).removeValue()
+            Database.database().reference().child("postlocations").child(post.id!).removeValue()
+            Database.database().reference().child("userposts").child(post.creatorUID!).child(post.id!).removeValue()
+            
+        }))
+        
+        deleteAlert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: { (action: UIAlertAction!) in
+            print("Handle Cancel Logic here")
+        }))
+        
+        present(deleteAlert, animated: true, completion: nil)
+        
+        
+    }
+    
+    
     
 //     func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
 //        let header = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: "bookmarkHeaderId", for: indexPath) as! BookmarkHeader
