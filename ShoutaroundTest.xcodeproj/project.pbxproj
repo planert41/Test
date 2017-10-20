@@ -23,6 +23,7 @@
 		A54E1D781F4E736B00C2AA77 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = A54E1D761F4E736B00C2AA77 /* LaunchScreen.storyboard */; };
 		A5516BC21F8ED0D5003C3E22 /* LocationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5516BC11F8ED0D5003C3E22 /* LocationController.swift */; };
 		A552EA5F1F997973005A0977 /* Message.swift in Sources */ = {isa = PBXBuildFile; fileRef = A552EA5E1F997973005A0977 /* Message.swift */; };
+		A552EA611F99BE76005A0977 /* PhotoSelectorControllerDummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = A552EA601F99BE76005A0977 /* PhotoSelectorControllerDummy.swift */; };
 		A562E5161F5354A50095C7C1 /* LoginController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A562E5151F5354A50095C7C1 /* LoginController.swift */; };
 		A562E5191F539C040095C7C1 /* PhotoSelectorController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A562E5181F539C040095C7C1 /* PhotoSelectorController.swift */; };
 		A562E51B1F53C1650095C7C1 /* PhotoSelectorCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = A562E51A1F53C1650095C7C1 /* PhotoSelectorCell.swift */; };
@@ -89,6 +90,7 @@
 		A54E1D791F4E736B00C2AA77 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		A5516BC11F8ED0D5003C3E22 /* LocationController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LocationController.swift; sourceTree = "<group>"; };
 		A552EA5E1F997973005A0977 /* Message.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Message.swift; sourceTree = "<group>"; };
+		A552EA601F99BE76005A0977 /* PhotoSelectorControllerDummy.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PhotoSelectorControllerDummy.swift; sourceTree = "<group>"; };
 		A562E5151F5354A50095C7C1 /* LoginController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoginController.swift; sourceTree = "<group>"; };
 		A562E5181F539C040095C7C1 /* PhotoSelectorController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PhotoSelectorController.swift; sourceTree = "<group>"; };
 		A562E51A1F53C1650095C7C1 /* PhotoSelectorCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PhotoSelectorCell.swift; sourceTree = "<group>"; };
@@ -283,6 +285,7 @@
 				A57A674C1F5FA8190063D400 /* UploadLocationFlowLayout.swift */,
 				A57A674E1F5FA8CC0063D400 /* UploadLocationCell.swift */,
 				A58477A91F6EFFD7007DE06C /* LocationLabels.swift */,
+				A552EA601F99BE76005A0977 /* PhotoSelectorControllerDummy.swift */,
 			);
 			name = AddPhoto;
 			sourceTree = "<group>";
@@ -535,6 +538,7 @@
 			files = (
 				A54E1D731F4E736B00C2AA77 /* InstagramFirebase.xcdatamodeld in Sources */,
 				A5C645161F56604200C78244 /* HomePostCell.swift in Sources */,
+				A552EA611F99BE76005A0977 /* PhotoSelectorControllerDummy.swift in Sources */,
 				A5C645281F5BB25100C78244 /* CustomAnimationDismisser.swift in Sources */,
 				A5C6452E1F5C481300C78244 /* Comment.swift in Sources */,
 				A51C13CD1F51C03100CEB740 /* UserProfileHeader.swift in Sources */,

@@ -154,8 +154,15 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         view.backgroundColor = UIColor.rgb(red: 204, green: 238, blue: 255)
         navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Share", style: .plain, target: self, action: #selector(handleShare))
         
+        navigationItem.leftBarButtonItem = UIBarButtonItem(title: "Back", style: .plain, target: self, action: #selector(handleBack))
+        
         setupImageAndTextViews()
         
+    }
+    
+    func handleBack() {
+        self.dismiss(animated: true) {
+        }
     }
     
     override func viewWillAppear(_ animated: Bool) {

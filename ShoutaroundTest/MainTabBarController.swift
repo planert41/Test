@@ -8,19 +8,36 @@
 
 import UIKit
 import Firebase
+import Photos
+import CoreLocation
 
-class MainTabBarController: UITabBarController, UITabBarControllerDelegate {
+class MainTabBarController: UITabBarController, UITabBarControllerDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
+    
+
+    var imagePicker = UIImagePickerController()
+    var selectedPhotoLocation: CLLocation? = nil
+    var selectedImage: UIImage? = nil
+    var assets = [PHAsset]()
+    
     
     func tabBarController(_ tabBarController: UITabBarController, shouldSelect viewController: UIViewController) -> Bool {
         
         let index = viewControllers?.index(of: viewController)
         
         if index == 2 {
-            let layout = UICollectionViewFlowLayout()
-            let photoSelectorController = PhotoSelectorController(collectionViewLayout: layout)
-            let navController = UINavigationController(rootViewController: photoSelectorController)
+
+        let layout = UICollectionViewFlowLayout()
             
-            present(navController, animated: true, completion: nil)
+            imagePicker.allowsEditing = false
+            imagePicker.sourceType = .photoLibrary
+            imagePicker.delegate = self
+            imagePicker.modalPresentationStyle = UIModalPresentationStyle.overCurrentContext
+            present(imagePicker, animated: true, completion: nil)
+//            
+//            let photoSelectorController = PhotoSelectorControllerDummy()
+//            let navController = UINavigationController(rootViewController: photoSelectorController)
+//            
+//            present(navController, animated: true, completion: nil)
             
             return false
             
@@ -29,6 +46,72 @@ class MainTabBarController: UITabBarController, UITabBarControllerDelegate {
         return true
     }
     
+    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : Any]) {
+        picker.dismiss(animated: true, completion: { () in
+            if (picker.sourceType == .photoLibrary) {
+                
+                
+                let image = info[UIImagePickerControllerOriginalImage] as! UIImage
+                var url: NSURL = info[UIImagePickerControllerReferenceURL] as! NSURL
+                
+                self.selectedImage = image
+                
+                if let URL = info[UIImagePickerControllerReferenceURL] as? URL {
+                    let opts = PHFetchOptions()
+                    opts.fetchLimit = 1
+                    let assets = PHAsset.fetchAssets(withALAssetURLs: [URL], options: opts)
+                    let asset = assets[0]
+                    
+                    self.selectedPhotoLocation = asset.location
+                    // The location is "asset.location", as a CLLocation
+                    
+                    // ... Other stuff like dismiss omitted
+                }
+                
+                let sharePhotoController = SharePhotoController()
+                sharePhotoController.selectedImage = self.selectedImage
+                
+                if self.selectedPhotoLocation == nil {
+                    sharePhotoController.selectedImageLocation = CLLocation(latitude: 0, longitude: 0)
+                } else {
+                    sharePhotoController.selectedImageLocation  = self.selectedPhotoLocation                    
+                }
+
+                let navController = UINavigationController(rootViewController: sharePhotoController)
+
+                self.present(navController, animated: false, completion: nil)
+                
+                print("Handle Next")
+                
+            }
+        })
+    }
+    
+    func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
+        
+        self.dismiss(animated: true, completion: nil)
+        self.navigationController?.popToRootViewController(animated: true)
+        
+    }
+    
+    
+     
+//    func imagePickerController(picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : AnyObject]) {
+//        if let pickedImage = info[UIImagePickerControllerOriginalImage] as? UIImage {
+//            imageView.contentMode = .ScaleAspectFit
+//            imageView.image = pickedImage
+//        }
+//        
+//        dismissViewControllerAnimated(true, completion: nil)
+//    }    
+//    
+//    let sharePhotoController = SharePhotoController()
+//    sharePhotoController.selectedImage = header?.photoImageView.image
+//    sharePhotoController.selectedImageLocation  = selectedPhotoLocation
+//    navigationController?.pushViewController(sharePhotoController, animated: true)
+//    
+//    
+//    print("Handle Next")
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -49,12 +132,7 @@ class MainTabBarController: UITabBarController, UITabBarControllerDelegate {
     
     }
     
-    
-    
-    
 
-    
-    
     
     func setupViewControllers() {
         

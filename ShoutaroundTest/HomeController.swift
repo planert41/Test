@@ -351,7 +351,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
 //        navigationItem.leftBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "Globe").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(activateFilterRange))
         
         
-        navigationItem.leftBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "Globe").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(openInbox))
+        navigationItem.leftBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "Globe").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(activateFilterRange))
         
         navigationItem.rightBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "GeoFence").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(filterHere))
         
