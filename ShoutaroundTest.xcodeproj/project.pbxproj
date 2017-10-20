@@ -22,6 +22,7 @@
 		A54E1D751F4E736B00C2AA77 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A54E1D741F4E736B00C2AA77 /* Assets.xcassets */; };
 		A54E1D781F4E736B00C2AA77 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = A54E1D761F4E736B00C2AA77 /* LaunchScreen.storyboard */; };
 		A5516BC21F8ED0D5003C3E22 /* LocationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5516BC11F8ED0D5003C3E22 /* LocationController.swift */; };
+		A552EA5F1F997973005A0977 /* Message.swift in Sources */ = {isa = PBXBuildFile; fileRef = A552EA5E1F997973005A0977 /* Message.swift */; };
 		A562E5161F5354A50095C7C1 /* LoginController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A562E5151F5354A50095C7C1 /* LoginController.swift */; };
 		A562E5191F539C040095C7C1 /* PhotoSelectorController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A562E5181F539C040095C7C1 /* PhotoSelectorController.swift */; };
 		A562E51B1F53C1650095C7C1 /* PhotoSelectorCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = A562E51A1F53C1650095C7C1 /* PhotoSelectorCell.swift */; };
@@ -43,6 +44,8 @@
 		A5AEB9721F96A82B00E88CAC /* HomePostSearch.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5AEB9711F96A82B00E88CAC /* HomePostSearch.swift */; };
 		A5AEB9741F96B00500E88CAC /* EmojiCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5AEB9731F96B00500E88CAC /* EmojiCell.swift */; };
 		A5AEB9761F986F8200E88CAC /* PictureController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5AEB9751F986F8200E88CAC /* PictureController.swift */; };
+		A5AEB9781F9956B500E88CAC /* InboxController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5AEB9771F9956B500E88CAC /* InboxController.swift */; };
+		A5AEB97A1F99583B00E88CAC /* InboxCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5AEB9791F99583B00E88CAC /* InboxCell.swift */; };
 		A5BFBB6B1F7315D200F36AF8 /* test.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5BFBB6A1F7315D200F36AF8 /* test.swift */; };
 		A5C480D01F5DCB500096E003 /* FBSDKCoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A5C480CE1F5DCB500096E003 /* FBSDKCoreKit.framework */; };
 		A5C480D11F5DCB500096E003 /* FBSDKLoginKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A5C480CF1F5DCB500096E003 /* FBSDKLoginKit.framework */; };
@@ -85,6 +88,7 @@
 		A54E1D771F4E736B00C2AA77 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		A54E1D791F4E736B00C2AA77 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		A5516BC11F8ED0D5003C3E22 /* LocationController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LocationController.swift; sourceTree = "<group>"; };
+		A552EA5E1F997973005A0977 /* Message.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Message.swift; sourceTree = "<group>"; };
 		A562E5151F5354A50095C7C1 /* LoginController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoginController.swift; sourceTree = "<group>"; };
 		A562E5181F539C040095C7C1 /* PhotoSelectorController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PhotoSelectorController.swift; sourceTree = "<group>"; };
 		A562E51A1F53C1650095C7C1 /* PhotoSelectorCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PhotoSelectorCell.swift; sourceTree = "<group>"; };
@@ -106,6 +110,8 @@
 		A5AEB9711F96A82B00E88CAC /* HomePostSearch.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HomePostSearch.swift; sourceTree = "<group>"; };
 		A5AEB9731F96B00500E88CAC /* EmojiCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EmojiCell.swift; sourceTree = "<group>"; };
 		A5AEB9751F986F8200E88CAC /* PictureController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PictureController.swift; sourceTree = "<group>"; };
+		A5AEB9771F9956B500E88CAC /* InboxController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InboxController.swift; sourceTree = "<group>"; };
+		A5AEB9791F99583B00E88CAC /* InboxCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InboxCell.swift; sourceTree = "<group>"; };
 		A5BFBB651F6F647100F36AF8 /* ShoutaroundTest-CBridgingHeader.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "ShoutaroundTest-CBridgingHeader.h"; sourceTree = "<group>"; };
 		A5BFBB6A1F7315D200F36AF8 /* test.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = test.swift; sourceTree = "<group>"; };
 		A5C480CE1F5DCB500096E003 /* FBSDKCoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = FBSDKCoreKit.framework; path = "ShoutaroundTest/FacebookSDKs-iOS-4.26.0/FBSDKCoreKit.framework"; sourceTree = "<group>"; };
@@ -286,6 +292,8 @@
 			children = (
 				A56868BC1F78A0FA0050C406 /* MessageController.swift */,
 				A56868BE1F79C2FF0050C406 /* EmailHtmlFormat.swift */,
+				A5AEB9771F9956B500E88CAC /* InboxController.swift */,
+				A5AEB9791F99583B00E88CAC /* InboxCell.swift */,
 			);
 			name = Message;
 			sourceTree = "<group>";
@@ -314,6 +322,7 @@
 				A5C645171F57A4BF00C78244 /* User.swift */,
 				A5C6452D1F5C481300C78244 /* Comment.swift */,
 				A58477A51F6DBFDA007DE06C /* Emoji.swift */,
+				A552EA5E1F997973005A0977 /* Message.swift */,
 			);
 			name = Models;
 			sourceTree = "<group>";
@@ -541,9 +550,11 @@
 				A530FE8F1F8B17BA003C3591 /* LocationSearchController.swift in Sources */,
 				A5BFBB6B1F7315D200F36AF8 /* test.swift in Sources */,
 				A5C645111F56547300C78244 /* CustomImageView.swift in Sources */,
+				A5AEB97A1F99583B00E88CAC /* InboxCell.swift in Sources */,
 				A5C6450D1F564A4C00C78244 /* Post.swift in Sources */,
 				A57A674D1F5FA8190063D400 /* UploadLocationFlowLayout.swift in Sources */,
 				A57C060E1F7611A000A0568F /* BookmarkController.swift in Sources */,
+				A552EA5F1F997973005A0977 /* Message.swift in Sources */,
 				A5AEB9721F96A82B00E88CAC /* HomePostSearch.swift in Sources */,
 				A5516BC21F8ED0D5003C3E22 /* LocationController.swift in Sources */,
 				A57941C41F6A2092004EC40D /* UploadEmojiFlowLayout.swift in Sources */,
@@ -552,6 +563,7 @@
 				A57C060C1F76037C00A0568F /* BookmarkPhotoCell.swift in Sources */,
 				A5C6451D1F57AE5A00C78244 /* UserSearchController.swift in Sources */,
 				A5C6452C1F5C459500C78244 /* CommentCell.swift in Sources */,
+				A5AEB9781F9956B500E88CAC /* InboxController.swift in Sources */,
 				A57941C61F6A225D004EC40D /* UploadEmojiCell.swift in Sources */,
 				A58477AA1F6EFFD7007DE06C /* LocationLabels.swift in Sources */,
 				A5C6450A1F54F68800C78244 /* SharePhotoController.swift in Sources */,

@@ -103,7 +103,6 @@ class MessageController: UIViewController, UICollectionViewDataSource, UICollect
         return tf
     }()
     
-    
     override func viewDidLoad() {
         
         super.viewDidLoad()
@@ -213,7 +212,53 @@ class MessageController: UIViewController, UICollectionViewDataSource, UICollect
     }
     
     
-    func handleSend(){
+    func handleSend() {
+     
+        guard let toText = toInput.text else {return}
+        
+        if toText.isUsername{
+            handleSendMessage()
+        }
+        else if toText.isValidEmail {
+            handleSendEmail()
+        } else{
+            alert(message: "Not a valid receipient")
+        }
+    }
+    
+    func handleSendMessage() {
+        
+        guard let toText = toInput.text else {return}
+        Database.fetchUserWithUsername(username: toText) { (user) in
+        
+            
+            guard let senderUID = Auth.auth().currentUser?.uid else {return}
+            guard let postId = self.post?.id else {return}
+            guard let message = self.messageInput.text else {return}
+            let uploadTime = Date().timeIntervalSince1970
+            let receiverUID = user.uid
+            
+            let databaseRef = Database.database().reference().child("messages").child(receiverUID)
+            let userMessageRef = databaseRef.childByAutoId()
+            
+            let values = ["postUID": postId, "senderUID": senderUID, "message": message, "creationDate": uploadTime] as [String:Any]
+            userMessageRef.updateChildValues(values) { (err, ref) in
+                if let err = err {
+                    self.navigationItem.rightBarButtonItem?.isEnabled = true
+                    print("Failed to save message to DB", err)
+                    return
+                }
+                
+                print("Successfully save message to DB")
+                self.navigationController?.popViewController(animated: true)
+
+            }
+        }
+    }
+    
+    
+    
+    func handleSendEmail(){
             
             view.endEditing(true)
             

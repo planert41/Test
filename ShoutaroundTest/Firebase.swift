@@ -154,6 +154,38 @@ extension Database{
 //            })
 //        }
     
+    static func fetchUserWithUsername( username: String, completion: @escaping (User) -> ()) {
+    
+        let myGroup = DispatchGroup()
+        
+        var query = Database.database().reference().child("users").queryOrdered(byChild: "username").queryEqual(toValue: username)
+        
+        var user: User?
+        
+        query.observe(.value, with: { (snapshot) in
+            
+            guard let queryUsers = snapshot.value as? [String: Any] else {return}
+            
+            queryUsers.forEach({ (key,value) in
+                
+                myGroup.enter()
+                guard let dictionary = value as? [String: Any] else {return}
+              
+                user = User(uid: key, dictionary: dictionary)
+                myGroup.leave()
+
+            })
+            myGroup.notify(queue: .main) {
+                completion(user!)
+            }
+        }) { (err) in
+            print("Failed to fetch post for Google Place ID", err)
+        }
+        
+        
+    }
+    
+    
     static func fetchAllPostWithUID(creatoruid: String, completion: @escaping ([Post]) -> ()) {
         
         
@@ -200,44 +232,36 @@ extension Database{
     static func fetchAllPostWithGooglePlaceID(googlePlaceId: String, completion: @escaping ([Post]) -> ()) {
         
         let myGroup = DispatchGroup()
-        
         var query = Database.database().reference().child("posts").queryOrdered(byChild: "googlePlaceID").queryEqual(toValue: googlePlaceId)
-        
         var fetchedPosts = [] as [Post]
         
         query.observe(.value, with: { (snapshot) in
            
             guard let locationPosts = snapshot.value as? [String: Any] else {return}
             
-            
             locationPosts.forEach({ (key,value) in
                 
             myGroup.enter()
-
             guard let dictionary = value as? [String: Any] else {return}
             let creatorUID = dictionary["creatorUID"] as? String ?? ""
             
             Database.fetchUserWithUID(uid: creatorUID) { (user) in
             
-            var post = Post(user: user, dictionary: dictionary)
-            post.id = key
+                var post = Post(user: user, dictionary: dictionary)
+                post.id = key
             
 
                 Database.checkPostForLikesAndBookmarks(post: post, completion: { (post) in
-                    fetchedPosts.append(post)
-                    fetchedPosts.sort(by: { (p1, p2) -> Bool in
-                        return p1.creationDate.compare(p2.creationDate) == .orderedDescending })
-                    myGroup.leave()
+                fetchedPosts.append(post)
+                fetchedPosts.sort(by: { (p1, p2) -> Bool in
+                return p1.creationDate.compare(p2.creationDate) == .orderedDescending })
+                myGroup.leave()
                 })
             }
-
             })
-            
             myGroup.notify(queue: .main) {
                 completion(fetchedPosts)
             }
-            
-            
         }) { (err) in
             print("Failed to fetch post for Google Place ID", err)
         }
@@ -267,6 +291,51 @@ extension Database{
         })
     
     }
+    
+    static func fetchMessageForUID( userUID: String, completion: @escaping ([Message]) -> ()) {
+        
+        let myGroup = DispatchGroup()
+        var messages = [] as [Message]
+        let ref = Database.database().reference().child("messages").child(userUID)
+        
+        ref.observeSingleEvent(of: .value, with: {(snapshot) in
+            
+            print(snapshot.value)
+            guard let userposts = snapshot.value as? [String:Any]  else {return}
+            
+            userposts.forEach({ (key,value) in
+            myGroup.enter()
+                
+                
+            guard let messageDetails = value as? [String: Any] else {return}
+            guard let senderUserUID = messageDetails["senderUID"] as? String else {return}
+            guard let postID = messageDetails["postUID"] as? String else {return}
+                
+            Database.fetchUserWithUID(uid: senderUserUID, completion: { (senderUser) in
+                
+            Database.fetchPostWithPostID(postId: postID, completion: { (post) in
+                
+                
+                let tempMessage = Message.init(uid: key, senderUser: senderUser, sendPost: post, dictionary: messageDetails)
+                
+                messages.append(tempMessage)
+                myGroup.leave()
+            })
+
+            })
+
+            })
+            
+            myGroup.notify(queue: .main) {
+                messages.sort(by: { (p1, p2) -> Bool in
+                    return p1.creationDate.compare(p2.creationDate) == .orderedDescending
+                })
+                completion(messages)
+            }
+            
+            })
+    }
+    
     
     static func fetchAllPostWithLocation(location: CLLocation, distance: Double, completion: @escaping ([Post]) -> ()) {
 

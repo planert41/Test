@@ -94,16 +94,6 @@ class BookMarkController: UIViewController, UICollectionViewDelegate, UICollecti
     }
     
     
-    func didTapPicture(post: Post) {
-        
-        let pictureController = PictureController(collectionViewLayout: UICollectionViewFlowLayout())
-        pictureController.selectedPost = post
-        
-        
-        navigationController?.pushViewController(pictureController, animated: true)
-    }
-    
-    
     override func viewDidLoad() {
         
         super.viewDidLoad()
@@ -489,6 +479,16 @@ class BookMarkController: UIViewController, UICollectionViewDelegate, UICollecti
     }
     
     // HOME POST CELL DELEGATE METHODS
+    
+    func didTapPicture(post: Post) {
+        
+        let pictureController = PictureController(collectionViewLayout: UICollectionViewFlowLayout())
+        pictureController.selectedPost = post
+        
+        
+        navigationController?.pushViewController(pictureController, animated: true)
+    }
+    
     
     func didTapComment(post: Post) {
         

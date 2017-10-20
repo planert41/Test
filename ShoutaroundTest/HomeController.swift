@@ -348,8 +348,10 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         
 //        navigationItem.leftBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "camera3").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(handleCamera))
         
-        navigationItem.leftBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "Globe").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(activateFilterRange))
+//        navigationItem.leftBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "Globe").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(activateFilterRange))
         
+        
+        navigationItem.leftBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "Globe").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(openInbox))
         
         navigationItem.rightBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "GeoFence").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(filterHere))
         
@@ -360,6 +362,13 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     func handleCamera() {
         let cameraController = CameraController()
         present(cameraController, animated: true, completion: nil)
+        
+    }
+    
+    func openInbox() {
+        
+        let inboxController = InboxController(collectionViewLayout: UICollectionViewFlowLayout())
+        navigationController?.pushViewController(inboxController, animated: true)
         
     }
     
