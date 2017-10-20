@@ -12,28 +12,65 @@ import Firebase
 import CoreGraphics
 import GeoFire
 
-class BookMarkController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, UISearchBarDelegate, UIPickerViewDelegate, UIPickerViewDataSource, UISearchControllerDelegate, HomePostSearchDelegate, BookmarkPhotoCellDelegate, HomePostCellDelegate, CLLocationManagerDelegate {
+class BookMarkController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, UISearchBarDelegate, UIPickerViewDelegate, UIPickerViewDataSource, UISearchControllerDelegate, HomePostSearchDelegate, BookmarkPhotoCellDelegate, HomePostCellDelegate, CLLocationManagerDelegate, UIGestureRecognizerDelegate {
     let bookmarkCellId = "bookmarkCellId"
     let homePostCellId = "homePostCellId"
     
     let locationManager = CLLocationManager()
     
-    let geoFilterRange = ["WorldWide", "0.5","1.0", "2.0", "5.0", "20.0"]
-    let geoFilterImage:[UIImage] = [#imageLiteral(resourceName: "Globe"),#imageLiteral(resourceName: "0Distance"),#imageLiteral(resourceName: "1Distance"),#imageLiteral(resourceName: "2Distance"),#imageLiteral(resourceName: "5Distance"),#imageLiteral(resourceName: "20Distance")]
+    // Geo Filter Variables
+    
+    let geoFilterRange = geoFilterRangeDefault
+    let geoFilterImage:[UIImage] = geoFilterImageDefault
     
     var filterRange: Double?{
         didSet{
             print(filterRange)
             if filterRange == nil {
-                navigationItem.leftBarButtonItem?.image = self.geoFilterImage[0].withRenderingMode(.alwaysOriginal)
+                rangeImageButton.image = self.geoFilterImage[0].withRenderingMode(.alwaysOriginal)
+                rangeImageButton.addGestureRecognizer(singleTap)
+                rangeImageButton.addGestureRecognizer(longPressGesture)
+                navigationItem.rightBarButtonItem = UIBarButtonItem.init(customView: rangeImageButton)
                 
             } else {
                 print(String(format:"%.1f", self.filterRange!))
                 let rangeIndex = self.geoFilterRange.index(of: String(format:"%.1f", self.filterRange!))
-                navigationItem.leftBarButtonItem?.image = geoFilterImage[rangeIndex!].withRenderingMode(.alwaysOriginal)
+                
+                rangeImageButton.image = geoFilterImage[rangeIndex!].withRenderingMode(.alwaysOriginal)
+                rangeImageButton.addGestureRecognizer(singleTap)
+                rangeImageButton.addGestureRecognizer(longPressGesture)
+                navigationItem.rightBarButtonItem = UIBarButtonItem.init(customView: rangeImageButton)
+                
+                
             }
         }
     }
+    
+    
+    var rangeImageButton: UIImageView = {
+        let view = UIImageView()
+        view.image = #imageLiteral(resourceName: "Globe").withRenderingMode(.alwaysOriginal)
+        view.contentMode = .scaleAspectFit
+        view.sizeToFit()
+        view.backgroundColor = UIColor.clear
+        return view
+    }()
+    
+    lazy var singleTap: UIGestureRecognizer = {
+        
+        let tap = UITapGestureRecognizer(target: self, action: #selector(filterHere))
+        tap.delegate = self
+        return tap
+    }()
+    
+    lazy var longPressGesture: UILongPressGestureRecognizer = {
+        
+        let longPressGesture = UILongPressGestureRecognizer(target: self, action: #selector(activateFilterRange))
+        longPressGesture.minimumPressDuration = 1.0 // 1 second press
+        longPressGesture.delegate = self
+        return longPressGesture
+    }()
+
     let searchBarPlaceholderText = "Search for Caption or Emoji 😍🐮🍔🇺🇸🔥"
     let currentLocation: CLLocation? = CLLocation(latitude: 41.973735, longitude: -87.667751)
     
@@ -186,12 +223,34 @@ class BookMarkController: UIViewController, UICollectionViewDelegate, UICollecti
     
     fileprivate func setupNavigationItems() {
         
-        navigationItem.leftBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "Globe").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(activateFilterRange))
+        navigationItem.leftBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "mailbox").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(openInbox))
+        
+        //        navigationItem.rightBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "GeoFence").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(filterHere))
+        
+        var rangeImageButton = UIImageView()
+        rangeImageButton.image = #imageLiteral(resourceName: "Globe").withRenderingMode(.alwaysOriginal)
+        rangeImageButton.contentMode = .scaleAspectFit
+        rangeImageButton.sizeToFit()
+        rangeImageButton.backgroundColor = UIColor.clear
         
         
-        navigationItem.rightBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "GeoFence").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(filterHere))
+        rangeImageButton.addGestureRecognizer(singleTap)
+        rangeImageButton.addGestureRecognizer(longPressGesture)
+        
+        let rangeBarButton = UIBarButtonItem.init(customView: rangeImageButton)
+        //        rangeBarButton.image = #imageLiteral(resourceName: "Globe").withRenderingMode(.alwaysOriginal)
+        
+        
+        navigationItem.rightBarButtonItem = rangeBarButton
         
     }
+
+func openInbox() {
+    
+    let inboxController = InboxController(collectionViewLayout: UICollectionViewFlowLayout())
+    navigationController?.pushViewController(inboxController, animated: true)
+    
+}
     
     
     // LOCATION MANAGER DELEGATE METHODS

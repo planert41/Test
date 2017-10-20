@@ -38,6 +38,8 @@ class InboxCell: UICollectionViewCell {
     var cellMessage: Message? {
         didSet {
             
+            print(cellMessage?.senderUser)
+            
             post = cellMessage?.sendPost
             self.senderUsernameLabel.text = cellMessage?.senderUser?.username
             self.senderMessageLabel.text = cellMessage?.senderMessage
@@ -46,7 +48,7 @@ class InboxCell: UICollectionViewCell {
             senderUserProfileImageView.loadImage(urlString: imageUrl)
             
             let timeAgoDisplay = cellMessage?.creationDate.timeAgoDisplay()
-            let attributedText = NSMutableAttributedString(string: timeAgoDisplay!, attributes: [NSFontAttributeName: UIFont.boldSystemFont(ofSize: 14),NSForegroundColorAttributeName: UIColor.gray])
+            let attributedText = NSMutableAttributedString(string: timeAgoDisplay!, attributes: [NSFontAttributeName: UIFont.boldSystemFont(ofSize: 12),NSForegroundColorAttributeName: UIColor.darkGray])
             
             self.senderMessageDate.attributedText = attributedText
             
@@ -126,7 +128,6 @@ class InboxCell: UICollectionViewCell {
         let iv = CustomImageView()
         iv.contentMode = .scaleAspectFill
         iv.clipsToBounds = true
-        iv.backgroundColor = .blue
         return iv
         
     }()
@@ -134,8 +135,7 @@ class InboxCell: UICollectionViewCell {
     let senderUsernameLabel: UILabel = {
         let label = UILabel()
         label.text = "Username"
-        label.font = UIFont.boldSystemFont(ofSize: 9)
-        label.sizeToFit()
+        label.font = UIFont.boldSystemFont(ofSize: 12)
         return label
     }()
     
@@ -143,7 +143,7 @@ class InboxCell: UICollectionViewCell {
     let senderMessageLabel: UILabel = {
         let label = UILabel()
         label.text = "Username"
-        label.font = UIFont.boldSystemFont(ofSize: 12)
+        label.font = UIFont.boldSystemFont(ofSize: 13)
         label.sizeToFit()
         return label
     }()
@@ -322,30 +322,38 @@ class InboxCell: UICollectionViewCell {
         override init(frame: CGRect) {
         super.init(frame:frame)
         var senderView = UIView()
+            senderView.backgroundColor = UIColor.rgb(red: 149, green: 204, blue: 244)
+            senderMessageLabel.backgroundColor = senderView.backgroundColor
             
         addSubview(senderView)
-        senderView.anchor(top: topAnchor, left: leftAnchor, bottom: nil, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 30)
+        senderView.anchor(top: nil, left: leftAnchor, bottom: bottomAnchor, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 55)
+            
+            
+        addSubview(senderMessageLabel)
+        senderMessageLabel.anchor(top: nil, left: nil, bottom: senderView.bottomAnchor, right: rightAnchor, paddingTop: 0, paddingLeft: 5, paddingBottom: 0, paddingRight: 0, width: 0, height: 25)
+
 
             
-        senderView.addSubview(senderUserProfileImageView)
+
         senderView.addSubview(senderUsernameLabel)
         senderView.addSubview(senderMessageDate)
-        addSubview(senderMessageLabel)
+        senderView.addSubview(senderUserProfileImageView)
+
             
-        senderMessageLabel.anchor(top: senderView.bottomAnchor, left: leftAnchor, bottom: nil, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 20)
-            
-        senderUserProfileImageView.anchor(top: senderView.topAnchor, left: senderView.leftAnchor, bottom: senderView.bottomAnchor, right: nil, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
+        senderUserProfileImageView.anchor(top: senderView.topAnchor, left: senderView.leftAnchor, bottom: senderView.bottomAnchor, right: nil, paddingTop: 3, paddingLeft: 3, paddingBottom: 3, paddingRight: 3, width: 0, height: 0)
         senderUserProfileImageView.widthAnchor.constraint(equalTo: senderUserProfileImageView.heightAnchor, multiplier: 1).isActive = true
         senderUserProfileImageView.layer.cornerRadius = 25/2
             
-        senderMessageDate.anchor(top: senderView.topAnchor, left: nil, bottom: senderView.bottomAnchor, right: senderView.rightAnchor, paddingTop: 0, paddingLeft: 3, paddingBottom: 0, paddingRight: 0, width: 40, height: 0)
+        senderMessageLabel.anchor(top: nil, left: senderUserProfileImageView.rightAnchor, bottom: senderView.bottomAnchor, right: rightAnchor, paddingTop: 0, paddingLeft: 5, paddingBottom: 0, paddingRight: 0, width: 0, height: 25)
             
-        senderUsernameLabel.anchor(top: senderView.topAnchor, left: senderUserProfileImageView.rightAnchor, bottom: senderView.bottomAnchor, right: senderMessageLabel.leftAnchor, paddingTop: 0, paddingLeft: 3, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
+        senderMessageDate.anchor(top: senderView.topAnchor, left: nil, bottom: senderMessageLabel.topAnchor, right: senderView.rightAnchor, paddingTop: 0, paddingLeft: 3, paddingBottom: 0, paddingRight: 0, width: 100, height: 0)
+            
+        senderUsernameLabel.anchor(top: senderView.topAnchor, left: senderUserProfileImageView.rightAnchor, bottom: senderMessageLabel.topAnchor, right: senderMessageDate.leftAnchor, paddingTop: 0, paddingLeft: 5, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
             
             let senderBottomDividerView = UIView()
             senderBottomDividerView.backgroundColor = UIColor.lightGray
         addSubview(senderBottomDividerView)
-            senderBottomDividerView.anchor(top: senderMessageLabel.bottomAnchor, left: leftAnchor, bottom: nil, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0.5)
+            senderBottomDividerView.anchor(top: senderView.bottomAnchor, left: leftAnchor, bottom: nil, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0.5)
             
             
         // Setup Action Buttons and PhotoImageView
@@ -354,10 +362,10 @@ class InboxCell: UICollectionViewCell {
         
         addSubview(buttonStackView)
         addSubview(photoImageView)
-        photoImageView.anchor(top: senderMessageLabel.bottomAnchor, left: nil, bottom: bottomAnchor, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
+        photoImageView.anchor(top: topAnchor, left: nil, bottom: senderView.topAnchor, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
         photoImageView.widthAnchor.constraint(equalTo: photoImageView.heightAnchor, multiplier: 1).isActive = true
         
-        buttonStackView.anchor(top: nil, left: leftAnchor, bottom: bottomAnchor, right: nil, paddingTop: 0, paddingLeft: 8, paddingBottom: 5, paddingRight: 0, width: 120, height: 20)
+        buttonStackView.anchor(top: nil, left: leftAnchor, bottom: senderView.topAnchor, right: nil, paddingTop: 0, paddingLeft: 8, paddingBottom: 5, paddingRight: 0, width: 120, height: 25)
         //        buttonStackView.widthAnchor.constraint(equalTo: photoImageView.heightAnchor, multiplier: 1).isActive = true
         
         
@@ -370,7 +378,7 @@ class InboxCell: UICollectionViewCell {
         // Setup Bookmark Stack View
         
         addSubview(emojiRow)
-        emojiRow.anchor(top: senderMessageLabel.bottomAnchor, left: leftAnchor, bottom: nil, right: photoImageView.leftAnchor, paddingTop: 10, paddingLeft: 5, paddingBottom: 0, paddingRight: 5, width: 0, height: 30)
+        emojiRow.anchor(top: topAnchor, left: leftAnchor, bottom: nil, right: photoImageView.leftAnchor, paddingTop: 10, paddingLeft: 5, paddingBottom: 0, paddingRight: 5, width: 0, height: 30)
         
         emojiRow.addSubview(emojiLabel)
         emojiLabel.anchor(top: emojiRow.topAnchor, left: emojiRow.leftAnchor, bottom: emojiRow.bottomAnchor, right: emojiRow.rightAnchor, paddingTop: 5, paddingLeft: 0, paddingBottom: 5, paddingRight: 0, width: 80, height: 0)
@@ -419,7 +427,7 @@ class InboxCell: UICollectionViewCell {
         addSubview(bottomDividerView)
         
         topDividerView.anchor(top: topAnchor, left: leftAnchor, bottom: nil, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0.5)
-        bottomDividerView.anchor(top: bottomAnchor, left: leftAnchor, bottom: nil, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0.5)
+        bottomDividerView.anchor(top: photoImageView.bottomAnchor, left: leftAnchor, bottom: nil, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0.5)
     }
 
     required init?(coder aDecoder: NSCoder) {

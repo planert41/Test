@@ -18,10 +18,11 @@ class InboxController: UICollectionViewController,UICollectionViewDelegateFlowLa
     override func viewDidLoad() {
         super.viewDidLoad()
     
-        navigationController?.title = "Inbox"
+        navigationItem.title = "Inbox"
         collectionView?.register(InboxCell.self, forCellWithReuseIdentifier: inboxCellId)
         fetchBookmarks()
         collectionView?.backgroundColor = UIColor.white
+        
     
     }
     
@@ -149,7 +150,7 @@ class InboxController: UICollectionViewController,UICollectionViewDelegateFlowLa
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         
-            return CGSize(width: view.frame.width, height: 190)
+            return CGSize(width: view.frame.width, height: 220)
         
     }
     
