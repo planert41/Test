@@ -296,7 +296,7 @@ class BookmarkPhotoCell: UICollectionViewCell {
         photoImageView.widthAnchor.constraint(equalTo: photoImageView.heightAnchor, multiplier: 1).isActive = true
         
         
-        buttonStackView.anchor(top: nil, left: leftAnchor, bottom: bottomAnchor, right: nil, paddingTop: 0, paddingLeft: 8, paddingBottom: 5, paddingRight: 0, width: 120, height: 20)
+        buttonStackView.anchor(top: nil, left: leftAnchor, bottom: bottomAnchor, right: nil, paddingTop: 0, paddingLeft: 8, paddingBottom: 5, paddingRight: 0, width: 120, height: 30)
 //        buttonStackView.widthAnchor.constraint(equalTo: photoImageView.heightAnchor, multiplier: 1).isActive = true
         
         

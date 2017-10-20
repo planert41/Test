@@ -101,9 +101,7 @@ class UserProfileHeader: UICollectionViewCell, UITextFieldDelegate  {
                     print("Failed to unfollow user:", err)
                     return
                 }
-                
                 print("Successfully unfollowed user", self.user?.username ?? "")
-                
                 self.setupFollowStyle()
                 
             })
@@ -113,7 +111,7 @@ class UserProfileHeader: UICollectionViewCell, UITextFieldDelegate  {
             let ref = Database.database().reference().child("following").child(currentLoggedInUserId)
             
             let values = [userId: 1]
-            
+
             ref.updateChildValues(values) { (err, ref) in
                 if let err = err {
                     

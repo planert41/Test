@@ -73,6 +73,8 @@ class InboxCell: UICollectionViewCell {
             
             bookmarkButton.setImage(post?.hasBookmarked == true ? #imageLiteral(resourceName: "bookmark_ribbon_filled").withRenderingMode(.alwaysOriginal) : #imageLiteral(resourceName: "bookmark_ribbon_unfilled").withRenderingMode(.alwaysOriginal), for: .normal)
             
+            bookmarkButtonAdd.setImage(post?.hasBookmarked == true ? #imageLiteral(resourceName: "bookmark_ribbon_filled").withRenderingMode(.alwaysOriginal) : #imageLiteral(resourceName: "bookmark_ribbon_unfilled").withRenderingMode(.alwaysOriginal), for: .normal)
+            
 
             print("Post Distance is",post?.distance)
             if post?.distance != nil && post?.locationGPS?.coordinate.longitude != 0 && post?.locationGPS?.coordinate.latitude != 0 {
@@ -245,6 +247,14 @@ class InboxCell: UICollectionViewCell {
         
     }()
     
+    lazy var bookmarkButtonAdd: UIButton = {
+        let button = UIButton(type: .system)
+        button.setImage(#imageLiteral(resourceName: "ribbon").withRenderingMode(.alwaysOriginal), for: .normal)
+        button.addTarget(self, action: #selector(handleBookmark), for: .touchUpInside)
+        return button
+        
+    }()
+    
     func handleBookmark() {
         
         //delegate?.didBookmark(for: self)
@@ -347,6 +357,10 @@ class InboxCell: UICollectionViewCell {
         senderMessageLabel.anchor(top: nil, left: senderUserProfileImageView.rightAnchor, bottom: senderView.bottomAnchor, right: rightAnchor, paddingTop: 0, paddingLeft: 5, paddingBottom: 0, paddingRight: 0, width: 0, height: 25)
             
         senderMessageDate.anchor(top: senderView.topAnchor, left: nil, bottom: senderMessageLabel.topAnchor, right: senderView.rightAnchor, paddingTop: 0, paddingLeft: 3, paddingBottom: 0, paddingRight: 0, width: 100, height: 0)
+            
+        addSubview(bookmarkButtonAdd)
+        bookmarkButtonAdd.anchor(top: senderMessageLabel.topAnchor, left: nil, bottom: senderMessageLabel.bottomAnchor, right: senderView.rightAnchor, paddingTop: 1, paddingLeft: 0, paddingBottom: 1, paddingRight: 20, width: 15, height: 0)
+            
             
         senderUsernameLabel.anchor(top: senderView.topAnchor, left: senderUserProfileImageView.rightAnchor, bottom: senderMessageLabel.topAnchor, right: senderMessageDate.leftAnchor, paddingTop: 0, paddingLeft: 5, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
             

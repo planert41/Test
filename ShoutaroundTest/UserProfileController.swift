@@ -21,8 +21,23 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
     var isFinishedPaging = false
     
     var userId:String?
+    var isGroup: Bool = false {
+        didSet{
+            if isGroup {
+                self.navigationItem.rightBarButtonItem?.image = #imageLiteral(resourceName: "starfilled").withRenderingMode(.alwaysOriginal)
+            } else {
+                self.navigationItem.rightBarButtonItem?.image = #imageLiteral(resourceName: "starunfill").withRenderingMode(.alwaysOriginal)
+                
+            }
+        }
+    }
+    var user: User?
     
     var isGridView = true
+    
+    var groupSelections:[String] = ["Family","Friends","Foodie","Group1", "Group2"]
+    var unGroupSelections:[String] = ["Delete"]
+    
     
 // UserProfileHeader Delegate Methods
     
@@ -47,9 +62,19 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
         navigationController?.pushViewController(pictureController, animated: true)
     }
     
+    
+    lazy var dummyTextView: UITextView = {
+        let tv = UITextView()
+        return tv
+    }()
+    
     override func viewDidLoad() {
         
         super.viewDidLoad()
+        self.navigationItem.rightBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "starunfill").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(self.handleGroupOrUngroup))
+        
+ 
+        
         collectionView?.backgroundColor = .white
         
         collectionView?.register(UserProfileHeader.self, forSupplementaryViewOfKind: UICollectionElementKindSectionHeader, withReuseIdentifier: "headerId")
@@ -63,11 +88,94 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
         collectionView?.alwaysBounceVertical = true
         collectionView?.keyboardDismissMode = .onDrag
         
+        view.addSubview(dummyTextView)
+        
         fetchUser()
         IQKeyboardManager.sharedManager().enable = false
         
         //        setupLogOutButton()
         
+    }
+    
+    func handleGroupOrUngroup(){
+        guard let currentLoggedInUserId = Auth.auth().currentUser?.uid else {return}
+        
+        guard let userId = user?.uid else {return}
+        
+        if currentLoggedInUserId == userId {return}
+
+        if isGroup {
+            
+            Database.database().reference().child("group").child(currentLoggedInUserId).child(userId).removeValue(completionBlock: { (err, ref) in
+                if let err = err {
+                    print("Failed to ungroup user:", err)
+                    return
+                }
+                print("Successfully group user", self.user?.username ?? "")
+                self.isGroup = false
+            //    self.setupFollowStyle()
+                
+            })
+            
+        }   else {
+            
+            let ref = Database.database().reference().child("group").child(currentLoggedInUserId)
+            
+            let values = [userId: 1]
+            
+            ref.updateChildValues(values) { (err, ref) in
+                if let err = err {
+                    
+                    print("Failed to Group User", err)
+                    return
+                }
+                print("Successfully Group user: ", self.user?.username ?? "")
+                self.isGroup = true
+                
+            }
+        }
+
+    }
+    
+    
+    fileprivate func setupGroupButton() {
+        guard let currentLoggedInUserID = Auth.auth().currentUser?.uid else {return}
+        guard let userId = user?.uid else {return}
+        
+        self.navigationItem.rightBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "starunfill").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(self.handleGroupOrUngroup))
+        
+        if currentLoggedInUserID == userId {
+            //                Edit Profile
+            self.navigationItem.rightBarButtonItem?.isEnabled = false
+        
+        }else {
+            
+            self.navigationItem.rightBarButtonItem?.isEnabled = true
+            
+            
+            // check if following
+            
+            Database.database().reference().child("group").child(currentLoggedInUserID).child(userId).observeSingleEvent(of: .value, with: { (snapshot) in
+                
+                if let isGroupVal = snapshot.value as? Int, isGroupVal == 1 {
+                    self.isGroup = true
+                    
+                } else{
+                    self.isGroup = false
+                }
+                
+                if self.isGroup {
+                    self.navigationItem.rightBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "starfilled").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(self.handleGroupOrUngroup))} else {
+                    self.navigationItem.rightBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "starunfill").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(self.handleGroupOrUngroup))
+                }
+                
+            }, withCancel: { (err) in
+                
+                print("Failed to check if group", err)
+                
+            })
+            
+        }
     }
 
     override func viewWillDisappear(_ animated: Bool) {
@@ -479,7 +587,6 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
         return CGSize(width: view.frame.width, height: 200)
     }
     
-    var user: User?
     
     fileprivate func fetchUser() {
 
@@ -492,8 +599,9 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
         Database.fetchUserWithUID(uid: uid) { (user) in
             self.user = user
             self.navigationItem.title = self.user?.username
-            self.collectionView?.reloadData()
+            self.setupGroupButton()
             
+            self.collectionView?.reloadData()
             self.paginatePosts()
             
         }

@@ -188,6 +188,7 @@ class BookMarkController: UIViewController, UICollectionViewDelegate, UICollecti
         resultSearchController?.searchResultsUpdater = homePostSearchResults
         resultSearchController?.delegate = self
         searchBar = resultSearchController?.searchBar
+        searchBar?.backgroundColor = UIColor.white
         navigationItem.titleView = searchBar
         searchBar?.delegate = homePostSearchResults
         
