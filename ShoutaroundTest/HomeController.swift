@@ -28,6 +28,33 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         }
     }
     
+    var isGroupUserFiltering: Bool = false {
+        
+        didSet{
+            if isGroupUserFiltering {
+                self.navigationItem.leftBarButtonItem?.image = #imageLiteral(resourceName: "redstar").withRenderingMode(.alwaysOriginal)
+                
+                self.filterPostByGroup()
+                
+                
+            } else {
+                self.navigationItem.leftBarButtonItem?.image = #imageLiteral(resourceName: "home").withRenderingMode(.alwaysOriginal)
+                self.filterPost(caption: self.resultSearchController?.searchBar.text)
+                
+            }
+        }
+    }
+    
+    var groupUsersFilter: [String] = []{
+        didSet{
+            if groupUsersFilter.count > 0 {
+                isGroupUserFiltering = true
+            } else {
+                isGroupUserFiltering = false
+            }
+        }
+    }
+    
 // Geo Filter Variables
     
     let geoFilterRange = geoFilterRangeDefault
@@ -260,6 +287,22 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         
     }
 
+    
+    func filterPostByGroup() {
+        
+       var groupFilteredPost: [Post] = []
+        
+        for userUid in self.groupUsersFilter{
+            
+            groupFilteredPost = self.filteredPosts.filter { (post) -> Bool in
+                return post.creatorUID == userUid
+            }
+            groupFilteredPost += groupFilteredPost
+        }
+        self.filteredPosts = groupFilteredPost
+        self.collectionView?.reloadData()
+    }
+    
     func filterPostByCaption(_ string: String?) {
         
         guard let searchedText = string else {
@@ -356,7 +399,9 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     
     fileprivate func fetchAllPosts() {
 
-        fetchPosts()
+        if !isGroupUserFiltering {
+            fetchPosts()
+        }
         fetchFollowingUserIds()
         filteredPosts = allPosts
         collectionView?.reloadData()
@@ -371,15 +416,52 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
             
             guard let userIdsDictionary = snapshot.value as? [String: Any] else {return}
             userIdsDictionary.forEach({ (key,value) in
-                Database.fetchUserWithUID(uid: key, completion: { (user) in
+                
+                if self.groupUsersFilter.count > 0 && self.isGroupUserFiltering {
+                    print(self.groupUsersFilter)
+                    print(key,value)
+                    if self.groupUsersFilter.contains(key){
+                        Database.fetchUserWithUID(uid: key, completion: { (user) in
+                            self.fetchPostsWithUser(user: user)
+                        })
+                    }
+                }
+                else {
+                
+                    Database.fetchUserWithUID(uid: key, completion: { (user) in
                     self.fetchPostsWithUser(user: user)
-                })
+                    })
+                }
+                
+                
             })
             
         }) { (err) in
             print("Failed to fetch following user ids:", err)
         }
 
+    }
+
+    
+    
+    fileprivate func fetchGroupUserIds() {
+        
+        guard let uid = Auth.auth().currentUser?.uid else {return}
+        
+        Database.database().reference().child("group").child(uid).observeSingleEvent(of: .value, with: { (snapshot) in
+            
+            guard let userIdsDictionary = snapshot.value as? [String: Any] else {return}
+            var groupUsers: [String] = []
+            
+            userIdsDictionary.forEach({ (key,value) in
+                groupUsers.append(key)
+            })
+            self.groupUsersFilter = groupUsers
+            
+        }) { (err) in
+            print("Failed to fetch following user ids:", err)
+        }
+        
     }
     
     fileprivate func setupNavigationItems() {
@@ -388,7 +470,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
 //        navigationItem.leftBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "Globe").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(activateFilterRange))
         
         
-        navigationItem.leftBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "mailbox").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(openInbox))
+        navigationItem.leftBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "Globe").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(filterGroup))
         
 //        navigationItem.rightBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "GeoFence").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(filterHere))
         
@@ -411,6 +493,14 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     }
 
 
+    func filterGroup(){
+        if self.groupUsersFilter.count == 0 && self.isGroupUserFiltering == false {
+            fetchGroupUserIds()
+        } else {
+            self.groupUsersFilter.removeAll()
+        }
+    }
+    
     func openInbox() {
     
     let inboxController = InboxController(collectionViewLayout: UICollectionViewFlowLayout())

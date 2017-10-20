@@ -24,7 +24,7 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
     var isGroup: Bool = false {
         didSet{
             if isGroup {
-                self.navigationItem.rightBarButtonItem?.image = #imageLiteral(resourceName: "starfilled").withRenderingMode(.alwaysOriginal)
+                self.navigationItem.rightBarButtonItem?.image = #imageLiteral(resourceName: "redstar").withRenderingMode(.alwaysOriginal)
             } else {
                 self.navigationItem.rightBarButtonItem?.image = #imageLiteral(resourceName: "starunfill").withRenderingMode(.alwaysOriginal)
                 
@@ -165,7 +165,7 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
                 }
                 
                 if self.isGroup {
-                    self.navigationItem.rightBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "starfilled").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(self.handleGroupOrUngroup))} else {
+                    self.navigationItem.rightBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "redstar").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(self.handleGroupOrUngroup))} else {
                     self.navigationItem.rightBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "starunfill").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(self.handleGroupOrUngroup))
                 }
                 
