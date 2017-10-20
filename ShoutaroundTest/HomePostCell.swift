@@ -25,11 +25,13 @@ protocol HomePostCellDelegate {
 
 }
 
-class HomePostCell: UICollectionViewCell {
+class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
     
     var delegate: HomePostCellDelegate?
     var popView = UIView()
     var enableDelete: Bool = false
+    var isZooming = false
+
 
     var post: Post? {
         didSet {
@@ -164,7 +166,7 @@ class HomePostCell: UICollectionViewCell {
         label.text = "Emojis"
         label.font = UIFont.boldSystemFont(ofSize: 20)
         label.textAlignment = NSTextAlignment.right
-        label.backgroundColor = UIColor.white
+        label.backgroundColor = UIColor.clear
         return label
         
     }()
@@ -423,6 +425,14 @@ class HomePostCell: UICollectionViewCell {
         photoImageView.addGestureRecognizer(doubleTap)
         photoImageView.isUserInteractionEnabled = true
         
+        
+        let pinch = UIPinchGestureRecognizer(target: self, action: #selector(self.pinch(sender:)))
+        pinch.delegate = self
+        self.photoImageView.addGestureRecognizer(pinch)
+        let pan = UIPanGestureRecognizer(target: self, action: #selector(self.pan(sender:)))
+        pan.delegate = self
+        self.photoImageView.addGestureRecognizer(pan)
+        
         addSubview(locationView)
         locationView.anchor(top: photoImageView.bottomAnchor, left: leftAnchor, bottom: nil, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 40)
 //        locationView.backgroundColor = UIColor.yellow
@@ -456,7 +466,63 @@ class HomePostCell: UICollectionViewCell {
         captionLabel.anchor(top: likeButton.bottomAnchor, left: leftAnchor, bottom: bottomAnchor, right: rightAnchor, paddingTop: 0, paddingLeft: 8, paddingBottom: 0, paddingRight: 8, width: 0, height: 0)
     
     }
-
+    
+    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+        return true
+    }
+    
+    var originalImageCenter:CGPoint?
+    
+    func pan(sender: UIPanGestureRecognizer) {
+        if self.isZooming && sender.state == .began {
+            self.originalImageCenter = sender.view?.center
+        } else if self.isZooming && sender.state == .changed {
+            let translation = sender.translation(in: self)
+            if let view = sender.view {
+                view.center = CGPoint(x:view.center.x + translation.x,
+                                      y:view.center.y + translation.y)
+            }
+            sender.setTranslation(CGPoint.zero, in: self.photoImageView.superview)
+        }
+    }
+    
+    func pinch(sender:UIPinchGestureRecognizer) {
+        if sender.state == .began {
+            let currentScale = self.photoImageView.frame.size.width / self.photoImageView.bounds.size.width
+            let newScale = currentScale*sender.scale
+            if newScale > 1 {
+                self.isZooming = true
+            }
+        } else if sender.state == .changed {
+            guard let view = sender.view else {return}
+            let pinchCenter = CGPoint(x: sender.location(in: view).x - view.bounds.midX,
+                                      y: sender.location(in: view).y - view.bounds.midY)
+            let transform = view.transform.translatedBy(x: pinchCenter.x, y: pinchCenter.y)
+                .scaledBy(x: sender.scale, y: sender.scale)
+                .translatedBy(x: -pinchCenter.x, y: -pinchCenter.y)
+            let currentScale = self.photoImageView.frame.size.width / self.photoImageView.bounds.size.width
+            var newScale = currentScale*sender.scale
+            if newScale < 1 {
+                newScale = 1
+                let transform = CGAffineTransform(scaleX: newScale, y: newScale)
+                self.photoImageView.transform = transform
+                sender.scale = 1
+            }else {
+                view.transform = transform
+                sender.scale = 1
+            }
+        } else if sender.state == .ended || sender.state == .failed || sender.state == .cancelled {
+            guard let center = self.originalImageCenter else {return}
+            UIView.animate(withDuration: 0.3, animations: {
+                self.photoImageView.transform = CGAffineTransform.identity
+                self.photoImageView.center = center
+                self.superview?.bringSubview(toFront: self.photoImageView)
+            }, completion: { _ in
+                self.isZooming = false
+            })
+        }
+    }
+    
     func photoDoubleTapped(){
         self.handleLike()
         print("Double Tap")
