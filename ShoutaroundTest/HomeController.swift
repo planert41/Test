@@ -33,12 +33,10 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         didSet{
             if isGroupUserFiltering {
                 self.navigationItem.leftBarButtonItem?.image = #imageLiteral(resourceName: "redstar").withRenderingMode(.alwaysOriginal)
-                
                 self.filterPostByGroup()
                 
-                
             } else {
-                self.navigationItem.leftBarButtonItem?.image = #imageLiteral(resourceName: "home").withRenderingMode(.alwaysOriginal)
+                self.navigationItem.leftBarButtonItem?.image = #imageLiteral(resourceName: "Globe").withRenderingMode(.alwaysOriginal)
                 self.filterPost(caption: self.resultSearchController?.searchBar.text)
                 
             }
@@ -68,6 +66,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
                 rangeImageButton.addGestureRecognizer(singleTap)
                 rangeImageButton.addGestureRecognizer(longPressGesture)
                 navigationItem.rightBarButtonItem = UIBarButtonItem.init(customView: rangeImageButton)
+                self.isRangeFiltering = false
 
             } else {
                 print(String(format:"%.1f", self.filterRange!))
@@ -77,16 +76,19 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
                 rangeImageButton.addGestureRecognizer(singleTap)
                 rangeImageButton.addGestureRecognizer(longPressGesture)
                 navigationItem.rightBarButtonItem = UIBarButtonItem.init(customView: rangeImageButton)
+                self.isRangeFiltering = true
                 
                 
             }
         }
     }
     
+    var isRangeFiltering: Bool = false
+    
     
     var rangeImageButton: UIImageView = {
         let view = UIImageView()
-        view.image = #imageLiteral(resourceName: "Globe").withRenderingMode(.alwaysOriginal)
+        view.image = #imageLiteral(resourceName: "GeoFence").withRenderingMode(.alwaysOriginal)
         view.contentMode = .scaleAspectFit
         view.sizeToFit()
         view.backgroundColor = UIColor.clear
@@ -300,7 +302,14 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     
     func filterHere(){
         
-        self.filterRange = Double(geoFilterRange[5])
+        if self.isRangeFiltering == true {
+            self.filterRange = Double(geoFilterRange[0])
+
+        } else {
+            self.filterRange = Double(geoFilterRange[5])
+
+        }
+        
         self.filterPostByLocation()
         let indexPath = IndexPath(item: 0, section: 0)
         self.collectionView?.scrollToItem(at: indexPath, at: .bottom, animated: true)
@@ -355,6 +364,8 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         var geoFilteredPosts = [Post]()
         
         guard let filterDistance = self.filterRange else {
+            // Unfilter for location
+            filterPostByCaption(self.resultSearchController?.searchBar.text)
             collectionView?.reloadData()
             print("No Distance Number")
             return}
@@ -374,6 +385,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
                 if geoFilteredPost != nil && geoFilteredPost.count > 0 && geoFilteredPost[0].locationGPS != nil {
                     geoFilteredPost[0].locationGPS = location
                     geoFilteredPost[0].distance = Double((location?.distance(from: CurrentUser.currentLocation!))!)
+                    geoFilteredPost[0].id = key
                 }
                 geoFilteredPosts += geoFilteredPost
             })
@@ -490,12 +502,12 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
 //        navigationItem.leftBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "Globe").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(activateFilterRange))
         
         
-        navigationItem.leftBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "home").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(filterGroup))
+        navigationItem.leftBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "Globe").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(filterGroup))
         
 //        navigationItem.rightBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "GeoFence").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(filterHere))
         
         var rangeImageButton = UIImageView(frame: CGRectMake(0, 0, 20, 20))
-        rangeImageButton.image = #imageLiteral(resourceName: "Globe").withRenderingMode(.alwaysOriginal)
+        rangeImageButton.image = #imageLiteral(resourceName: "GeoFence").withRenderingMode(.alwaysOriginal)
         rangeImageButton.contentMode = .scaleAspectFit
         rangeImageButton.sizeToFit()
         rangeImageButton.backgroundColor = UIColor.clear

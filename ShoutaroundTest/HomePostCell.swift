@@ -181,6 +181,18 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
     
     let locationView: UIView = {
         let uv = UIView()
+        let tap = UITapGestureRecognizer(target: self, action: #selector(locationTap))
+        uv.addGestureRecognizer(tap)
+        uv.isUserInteractionEnabled = true
+        return uv
+    }()
+    
+    let headerView: UIView = {
+        let uv = UIView()
+        let tap = UITapGestureRecognizer(target: self, action: #selector(usernameTap))
+        uv.addGestureRecognizer(tap)
+        uv.isUserInteractionEnabled = true
+        uv.backgroundColor = UIColor.clear
         return uv
     }()
     
@@ -211,7 +223,7 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
     
     lazy var locationButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setImage(#imageLiteral(resourceName: "map_marker").withRenderingMode(.alwaysOriginal), for: .normal)
+        button.backgroundColor = UIColor.clear
         button.addTarget(self, action: #selector(locationTap), for: .touchUpInside)
         return button
         
@@ -395,11 +407,10 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
     override init(frame: CGRect) {
         super.init(frame: frame)
         
+        addSubview(headerView)
         addSubview(photoImageView)
         addSubview(userProfileImageView)
         addSubview(usernameLabel)
-        addSubview(locationLabel)
-//
         addSubview(emojiLabel)
 
 
@@ -407,24 +418,28 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
 //        addSubview(optionsButton)
 //        optionsButton.anchor(top: topAnchor, left: nil, bottom: photoImageView.topAnchor, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 44, height: 0)
         
+        
+        
+        headerView.anchor(top: topAnchor, left: leftAnchor, bottom: nil, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 50)
+        
         emojiLabel.anchor(top: topAnchor, left: nil, bottom: photoImageView.topAnchor, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 140, height: 0)
         
         usernameLabel.anchor(top: topAnchor, left: userProfileImageView.rightAnchor, bottom: photoImageView.topAnchor, right: emojiLabel.leftAnchor, paddingTop: 0, paddingLeft: 8, paddingBottom: 0, paddingRight: 0, width: 0, height: userProfileImageView.frame.height)
 
 //        locationLabel.anchor(top: usernameLabel.bottomAnchor, left: userProfileImageView.rightAnchor, bottom: photoImageView.topAnchor, right: emojiLabel.leftAnchor, paddingTop: 0, paddingLeft: 8, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
-        
+
         
         userProfileImageView.anchor(top: topAnchor, left: leftAnchor, bottom: nil, right: nil, paddingTop: 5, paddingLeft: 5, paddingBottom: 0, paddingRight: 0, width: 40, height: 40)
         userProfileImageView.layer.cornerRadius = 40/2
         
-        photoImageView.anchor(top: userProfileImageView.bottomAnchor, left: leftAnchor, bottom: nil, right: rightAnchor, paddingTop: 8, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
+        photoImageView.anchor(top: headerView.bottomAnchor, left: leftAnchor, bottom: nil, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
         photoImageView.heightAnchor.constraint(equalTo: widthAnchor, multiplier: 1).isActive = true
+ 
         
         let doubleTap = UITapGestureRecognizer(target: self, action: #selector(photoDoubleTapped))
         doubleTap.numberOfTapsRequired = 2
         photoImageView.addGestureRecognizer(doubleTap)
         photoImageView.isUserInteractionEnabled = true
-        
         
         let pinch = UIPinchGestureRecognizer(target: self, action: #selector(self.pinch(sender:)))
         pinch.delegate = self
@@ -437,22 +452,24 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         locationView.anchor(top: photoImageView.bottomAnchor, left: leftAnchor, bottom: nil, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 40)
 //        locationView.backgroundColor = UIColor.yellow
         
-        addSubview(locationButton)
+//        addSubview(locationButton)
         addSubview(locationLabel)
         addSubview(adressLabel)
         addSubview(locationDistanceLabel)
-        
-        
         addSubview(bookmarkButton)
         bookmarkButton.anchor(top: locationView.bottomAnchor, left: nil, bottom: nil, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 40, height: 50)
         
         locationDistanceLabel.anchor(top: photoImageView.bottomAnchor, left: nil, bottom: nil, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 5, width: 75, height: 50)
         
-        locationButton.anchor(top: locationView.topAnchor, left: locationView.leftAnchor, bottom: locationView.bottomAnchor, right: nil, paddingTop: 5, paddingLeft: 8, paddingBottom: 5, paddingRight: 0, width: 30, height: 30)
+//        locationButton.anchor(top: locationView.topAnchor, left: locationView.leftAnchor, bottom: locationView.bottomAnchor, right: nil, paddingTop: 5, paddingLeft: 8, paddingBottom: 5, paddingRight: 0, width: 30, height: 30)
         
-        locationLabel.anchor(top: locationView.topAnchor, left: locationButton.rightAnchor, bottom: nil, right: bookmarkButton.leftAnchor, paddingTop: 5, paddingLeft: 15, paddingBottom: 0, paddingRight: 0, width: 0, height: 15)
+        locationLabel.anchor(top: locationView.topAnchor, left: leftAnchor, bottom: nil, right: bookmarkButton.leftAnchor, paddingTop: 5, paddingLeft: 15, paddingBottom: 0, paddingRight: 0, width: 0, height: 15)
         
-        adressLabel.anchor(top: locationLabel.bottomAnchor, left: locationButton.rightAnchor, bottom: locationView.bottomAnchor, right: bookmarkButton.leftAnchor, paddingTop: 2, paddingLeft: 15, paddingBottom: 5, paddingRight: 0, width: 0, height: 0)
+        adressLabel.anchor(top: locationLabel.bottomAnchor, left: leftAnchor, bottom: locationView.bottomAnchor, right: bookmarkButton.leftAnchor, paddingTop: 2, paddingLeft: 15, paddingBottom: 5, paddingRight: 0, width: 0, height: 0)
+        
+        addSubview(locationButton)
+        locationButton.anchor(top: locationView.topAnchor, left: locationView.leftAnchor, bottom: locationView.bottomAnchor, right: locationView.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
+        
         
         let bottomDividerView = UIView()
         bottomDividerView.backgroundColor = UIColor.lightGray
