@@ -184,6 +184,15 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         return label
     }()
     
+    
+    var pickerView: UIPickerView = {
+        let pv = UIPickerView()
+        pv.backgroundColor = .white
+        pv.showsSelectionIndicator = true
+
+        return pv
+    }()
+    
     func setupSearchController() {
         let homePostSearchResults = HomePostSearch()
         homePostSearchResults.delegate = self
@@ -202,11 +211,6 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     
     func setupGeoPicker() {
 
-        let pickerView = UIPickerView()
-        pickerView.backgroundColor = .white
-        pickerView.showsSelectionIndicator = true
-        pickerView.dataSource = self
-        pickerView.delegate = self
         
         var toolBar = UIToolbar()
         toolBar.barStyle = UIBarStyle.default
@@ -224,9 +228,12 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         toolBar.setItems([cancelButton, spaceButton, doneButton], animated: false)
         toolBar.isUserInteractionEnabled = true
         
+        pickerView.delegate = self
+        pickerView.dataSource = self
         self.dummyTextView.inputView = pickerView
         self.dummyTextView.inputAccessoryView = toolBar
     }
+    
     
     func donePicker(){
         dummyTextView.resignFirstResponder()
@@ -240,6 +247,11 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     }
     
     func activateFilterRange() {
+
+        if self.filterRange != nil {
+            let rangeIndex = self.geoFilterRange.index(of: String(format:"%.1f", self.filterRange!))
+            pickerView.selectRow(rangeIndex!, inComponent: 0, animated: false)
+        }
         dummyTextView.perform(#selector(becomeFirstResponder), with: nil, afterDelay: 0.1)
     }
     
@@ -256,6 +268,13 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     // UIPicker Delegate
     
     func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
+        
+        if self.filterRange == Double(geoFilterRange[row]) {
+            
+            let rangeIndex = self.geoFilterRange.index(of: String(format:"%.1f", self.filterRange!))
+            pickerView.selectRow(rangeIndex!, inComponent: 0, animated: false)
+        }
+        
         return geoFilterRange[row]
     }
     
@@ -266,6 +285,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         } else {
         filterRange = nil
         }
+        
     }
 
 

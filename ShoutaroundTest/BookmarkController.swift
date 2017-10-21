@@ -370,6 +370,11 @@ func openInbox() {
 // Setup for Picker
     
     func activateFilterRange() {
+        
+        if self.filterRange != nil {
+            let rangeIndex = self.geoFilterRange.index(of: String(format:"%.1f", self.filterRange!))
+            pickerView.selectRow(rangeIndex!, inComponent: 0, animated: false)
+        }
         dummyTextView.perform(#selector(becomeFirstResponder), with: nil, afterDelay: 0.1)
     }
     
@@ -380,10 +385,18 @@ func openInbox() {
     }()
     
     
+    
+    var pickerView: UIPickerView = {
+        let pv = UIPickerView()
+        pv.backgroundColor = .white
+        pv.showsSelectionIndicator = true
+        
+        return pv
+    }()
+    
+    
     func setupGeoPicker() {
-        var pickerView = UIPickerView()
-        pickerView.backgroundColor = .white
-        pickerView.showsSelectionIndicator = true
+
         pickerView.dataSource = self
         pickerView.delegate = self
         

@@ -28,7 +28,7 @@ class MainTabBarController: UITabBarController, UITabBarControllerDelegate, UIIm
 
         let layout = UICollectionViewFlowLayout()
             
-            imagePicker.allowsEditing = false
+            imagePicker.allowsEditing = true
             imagePicker.sourceType = .photoLibrary
             imagePicker.delegate = self
             imagePicker.modalPresentationStyle = UIModalPresentationStyle.overCurrentContext
@@ -50,8 +50,9 @@ class MainTabBarController: UITabBarController, UITabBarControllerDelegate, UIIm
         picker.dismiss(animated: true, completion: { () in
             if (picker.sourceType == .photoLibrary) {
                 
-                
-                let image = info[UIImagePickerControllerOriginalImage] as! UIImage
+                let image = info[UIImagePickerControllerEditedImage] as! UIImage
+
+//                let image = info[UIImagePickerControllerOriginalImage] as! UIImage
                 var url: NSURL = info[UIImagePickerControllerReferenceURL] as! NSURL
                 
                 self.selectedImage = image
