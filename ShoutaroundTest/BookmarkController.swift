@@ -95,7 +95,7 @@ class BookMarkController: UIViewController, UICollectionViewDelegate, UICollecti
         cv.translatesAutoresizingMaskIntoConstraints = false
         cv.delegate = self
         cv.dataSource = self
-        cv.backgroundColor = .yellow
+        cv.backgroundColor = .white
         return cv
     }()
     
@@ -188,7 +188,7 @@ class BookMarkController: UIViewController, UICollectionViewDelegate, UICollecti
         resultSearchController?.searchResultsUpdater = homePostSearchResults
         resultSearchController?.delegate = self
         searchBar = resultSearchController?.searchBar
-        searchBar?.backgroundColor = UIColor.white
+        searchBar?.backgroundColor = UIColor.clear
         navigationItem.titleView = searchBar
         searchBar?.delegate = homePostSearchResults
         

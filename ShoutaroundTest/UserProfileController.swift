@@ -55,9 +55,14 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
         self.handleLogOut()
     }
     
+    func didTapPicture(post: Post){
+        let pictureController = PictureController(collectionViewLayout: UICollectionViewFlowLayout())
+        pictureController.selectedPost = post
+        navigationController?.pushViewController(pictureController, animated: true)
+    }
     
     func handlePictureTap(post: Post){
-        let pictureController = PictureController()
+        let pictureController = PictureController(collectionViewLayout: UICollectionViewFlowLayout())
         pictureController.selectedPost = post
         navigationController?.pushViewController(pictureController, animated: true)
     }
@@ -268,16 +273,6 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
         
     }
     
-    
-    
-    func didTapPicture(post: Post) {
-        let pictureController = PictureController(collectionViewLayout: UICollectionViewFlowLayout())
-        pictureController.selectedPost = post
-        
-        navigationController?.pushViewController(pictureController, animated: true)
-    }
-
-    
     fileprivate func paginatePosts(){
         
         guard let uid = self.user?.uid else {return}
@@ -288,7 +283,8 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
         print(allPosts.count)
         if allPosts.count > 0 {
             let value = allPosts.last?.creationDate.timeIntervalSince1970
-            print(value)
+            let queryEnd = allPosts.last?.id
+            print("Query Ending", allPosts.last?.id)
             query = query.queryEnding(atValue: value)
         }
         
@@ -302,15 +298,22 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
             if allPostIds.count < 4 {
                 self.isFinishedPaging = true
             }
-            print(allPostIds)
+            
+//            allPostIds.sorted(by: { $0["creationDate"] > $1["creationDate] })
+            print("allpostIds Queried",allPostIds)
+            
             
             if self.allPosts.count > 0 && allPostIds.count > 0 {
                 print("before delete", allPostIds.count)
                 
                 let intIndex = allPostIds.count // where intIndex < myDictionary.count
                 let index = allPostIds.index(allPostIds.startIndex, offsetBy: intIndex - 1)
+                let testindex = allPostIds.index(allPostIds.startIndex, offsetBy: 1)
+                let deleteindex = allPostIds.index(forKey: (self.allPosts.last?.id)!)
                 
-                allPostIds.remove(at: allPostIds.startIndex)
+                print("DeletedUID ",allPostIds[deleteindex!])
+                
+                allPostIds.remove(at: deleteindex!)
                 print("after delete", allPostIds.count)
             }
             
@@ -323,6 +326,7 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
                 Database.fetchPostWithUIDAndPostID(creatoruid: user.uid, postId: key, completion: { (fetchedPost) in
 
                 self.allPosts.append(fetchedPost)
+                    print(self.allPosts.count, fetchedPost.id)
                 thisGroup.leave()
                     
                 })

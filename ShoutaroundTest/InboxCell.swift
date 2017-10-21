@@ -359,7 +359,7 @@ class InboxCell: UICollectionViewCell {
         senderMessageDate.anchor(top: senderView.topAnchor, left: nil, bottom: senderMessageLabel.topAnchor, right: senderView.rightAnchor, paddingTop: 0, paddingLeft: 3, paddingBottom: 0, paddingRight: 0, width: 100, height: 0)
             
         addSubview(bookmarkButtonAdd)
-        bookmarkButtonAdd.anchor(top: senderMessageLabel.topAnchor, left: nil, bottom: senderMessageLabel.bottomAnchor, right: senderView.rightAnchor, paddingTop: 1, paddingLeft: 0, paddingBottom: 1, paddingRight: 20, width: 15, height: 0)
+        bookmarkButtonAdd.anchor(top: senderMessageLabel.topAnchor, left: nil, bottom: senderMessageLabel.bottomAnchor, right: senderView.rightAnchor, paddingTop: 1, paddingLeft: 0, paddingBottom: 1, paddingRight: 20, width: 25, height: 0)
             
             
         senderUsernameLabel.anchor(top: senderView.topAnchor, left: senderUserProfileImageView.rightAnchor, bottom: senderMessageLabel.topAnchor, right: senderMessageDate.leftAnchor, paddingTop: 0, paddingLeft: 5, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)

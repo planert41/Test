@@ -103,7 +103,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     lazy var longPressGesture: UILongPressGestureRecognizer = {
         
         let longPressGesture = UILongPressGestureRecognizer(target: self, action: #selector(activateFilterRange))
-        longPressGesture.minimumPressDuration = 1.0 // 1 second press
+        longPressGesture.minimumPressDuration = 0.5 // 1 second press
         longPressGesture.delegate = self
         return longPressGesture
     }()
@@ -123,7 +123,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     override func viewDidLoad() {
         super.viewDidLoad()
         self.fetchCurrentUser()
-        self.navigationController?.navigationBar.backgroundColor = UIColor.white
+        self.navigationController?.navigationBar.backgroundColor = UIColor.clear
         
 //        self.automaticallyAdjustsScrollViewInsets = false
         
@@ -191,7 +191,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         resultSearchController?.searchResultsUpdater = homePostSearchResults
         resultSearchController?.delegate = self
         let searchBar = resultSearchController?.searchBar
-        searchBar?.backgroundColor = UIColor.white
+        searchBar?.backgroundColor = UIColor.clear
         navigationItem.titleView = searchBar
         searchBar?.delegate = homePostSearchResults
         
@@ -470,7 +470,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
 //        navigationItem.leftBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "Globe").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(activateFilterRange))
         
         
-        navigationItem.leftBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "Globe").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(filterGroup))
+        navigationItem.leftBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "home").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(filterGroup))
         
 //        navigationItem.rightBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "GeoFence").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(filterHere))
         
