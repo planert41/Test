@@ -301,18 +301,23 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     }
     
     func filterHere(){
-        
-        if self.isRangeFiltering == true {
-            self.filterRange = Double(geoFilterRange[0])
 
-        } else {
-            self.filterRange = Double(geoFilterRange[5])
-
-        }
+        let filterController = FilterController()
         
-        self.filterPostByLocation()
-        let indexPath = IndexPath(item: 0, section: 0)
-        self.collectionView?.scrollToItem(at: indexPath, at: .bottom, animated: true)
+        self.navigationController?.pushViewController(filterController, animated: true)
+        
+//        if self.isRangeFiltering == true {
+//            self.filterRange = Double(geoFilterRange[0])
+//
+//        } else {
+//            self.filterRange = Double(geoFilterRange[5])
+//
+//        }
+//        
+//        self.filterPostByLocation()
+//        let indexPath = IndexPath(item: 0, section: 0)
+//        self.collectionView?.scrollToItem(at: indexPath, at: .bottom, animated: true)
+        
         
     }
 
@@ -464,17 +469,12 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
                     self.fetchPostsWithUser(user: user)
                     })
                 }
-                
-                
             })
-            
         }) { (err) in
             print("Failed to fetch following user ids:", err)
         }
-
     }
 
-    
     
     fileprivate func fetchGroupUserIds() {
         
@@ -507,7 +507,10 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
 //        navigationItem.rightBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "GeoFence").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(filterHere))
         
         var rangeImageButton = UIImageView(frame: CGRectMake(0, 0, 20, 20))
-        rangeImageButton.image = #imageLiteral(resourceName: "GeoFence").withRenderingMode(.alwaysOriginal)
+//        rangeImageButton.image = #imageLiteral(resourceName: "GeoFence").withRenderingMode(.alwaysOriginal)
+//
+//        let image = #imageLiteral(resourceName: "shoutaround").withRenderingMode(.alwaysOriginal).resizeImageWith(newSize: CGSize(width: 20, height: 20))
+        rangeImageButton.image = #imageLiteral(resourceName: "filter").withRenderingMode(.alwaysOriginal)
         rangeImageButton.contentMode = .scaleAspectFit
         rangeImageButton.sizeToFit()
         rangeImageButton.backgroundColor = UIColor.clear

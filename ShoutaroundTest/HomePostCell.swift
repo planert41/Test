@@ -74,7 +74,9 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
                 
                 // Convert to M to KM
                 let locationDistance = (post?.distance)!/1000
-                locationDistanceLabel.text = String(locationDistance.format(f: distanceformat)) + "KM"
+                if locationDistance < 1000 {
+                    locationDistanceLabel.text = String(locationDistance.format(f: distanceformat)) + "KM"
+                }
 
             }
 

@@ -43,6 +43,7 @@
 		A58477A61F6DBFDA007DE06C /* Emoji.swift in Sources */ = {isa = PBXBuildFile; fileRef = A58477A51F6DBFDA007DE06C /* Emoji.swift */; };
 		A58477A81F6EB720007DE06C /* EmojiExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = A58477A71F6EB720007DE06C /* EmojiExtensions.swift */; };
 		A58477AA1F6EFFD7007DE06C /* LocationLabels.swift in Sources */ = {isa = PBXBuildFile; fileRef = A58477A91F6EFFD7007DE06C /* LocationLabels.swift */; };
+		A5A17BAB1FA582B4001F227D /* FilterController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5A17BAA1FA582B4001F227D /* FilterController.swift */; };
 		A5AEB9721F96A82B00E88CAC /* HomePostSearch.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5AEB9711F96A82B00E88CAC /* HomePostSearch.swift */; };
 		A5AEB9741F96B00500E88CAC /* EmojiCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5AEB9731F96B00500E88CAC /* EmojiCell.swift */; };
 		A5AEB9761F986F8200E88CAC /* PictureController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5AEB9751F986F8200E88CAC /* PictureController.swift */; };
@@ -111,6 +112,7 @@
 		A58477A51F6DBFDA007DE06C /* Emoji.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Emoji.swift; sourceTree = "<group>"; };
 		A58477A71F6EB720007DE06C /* EmojiExtensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EmojiExtensions.swift; sourceTree = "<group>"; };
 		A58477A91F6EFFD7007DE06C /* LocationLabels.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LocationLabels.swift; sourceTree = "<group>"; };
+		A5A17BAA1FA582B4001F227D /* FilterController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FilterController.swift; sourceTree = "<group>"; };
 		A5AEB9711F96A82B00E88CAC /* HomePostSearch.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HomePostSearch.swift; sourceTree = "<group>"; };
 		A5AEB9731F96B00500E88CAC /* EmojiCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EmojiCell.swift; sourceTree = "<group>"; };
 		A5AEB9751F986F8200E88CAC /* PictureController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PictureController.swift; sourceTree = "<group>"; };
@@ -240,7 +242,7 @@
 				A51C13C61F51B59900CEB740 /* MainTabBarController.swift */,
 				A5C645121F565E7E00C78244 /* Home */,
 				A5C6451B1F57AE4800C78244 /* Search */,
-				A57941C71F6A2799004EC40D /* Common */,
+				A57941C71F6A2799004EC40D /* Shared */,
 				A5C6450B1F564A4000C78244 /* Models */,
 				A562E5171F539BF50095C7C1 /* AddPhoto */,
 				A562E5141F5354980095C7C1 /* Login */,
@@ -303,13 +305,13 @@
 			name = Message;
 			sourceTree = "<group>";
 		};
-		A57941C71F6A2799004EC40D /* Common */ = {
+		A57941C71F6A2799004EC40D /* Shared */ = {
 			isa = PBXGroup;
 			children = (
 				A57941C81F6A27A6004EC40D /* EmojiDictionary.swift */,
 				A552EA621F9A49EA005A0977 /* CommonSettings.swift */,
 			);
-			name = Common;
+			name = Shared;
 			sourceTree = "<group>";
 		};
 		A57C060A1F7602F100A0568F /* Bookmark */ = {
@@ -353,6 +355,7 @@
 				A530FE8E1F8B17BA003C3591 /* LocationSearchController.swift */,
 				A5AEB9711F96A82B00E88CAC /* HomePostSearch.swift */,
 				A5AEB9731F96B00500E88CAC /* EmojiCell.swift */,
+				A5A17BAA1FA582B4001F227D /* FilterController.swift */,
 			);
 			name = Search;
 			sourceTree = "<group>";
@@ -566,6 +569,7 @@
 				A5516BC21F8ED0D5003C3E22 /* LocationController.swift in Sources */,
 				A57941C41F6A2092004EC40D /* UploadEmojiFlowLayout.swift in Sources */,
 				A51C13C91F51B6FD00CEB740 /* UserProfileController.swift in Sources */,
+				A5A17BAB1FA582B4001F227D /* FilterController.swift in Sources */,
 				A51C13C71F51B59900CEB740 /* MainTabBarController.swift in Sources */,
 				A57C060C1F76037C00A0568F /* BookmarkPhotoCell.swift in Sources */,
 				A5C6451D1F57AE5A00C78244 /* UserSearchController.swift in Sources */,

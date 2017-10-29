@@ -131,11 +131,16 @@ class HomePostSearch : UITableViewController, UISearchResultsUpdating, UISearchC
     }
   
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
-        print("test")
-        self.dismiss(animated: true) { 
-        
-        
+        self.delegate?.filterPost(caption: searchBar.text)
+        self.dismiss(animated: true) {
         }
+    }
+    
+    func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
+        self.delegate?.filterPost(caption: searchBar.text)
+        self.dismiss(animated: true) {
+        }
+
     }
     
     

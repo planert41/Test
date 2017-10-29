@@ -581,7 +581,7 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
 //        
 //    }
     
-// Search Location Delegates
+// Google Search Location Delegates
     
     func viewController(_ viewController: GMSAutocompleteViewController, didAutocompleteWith place: GMSPlace) {
         
