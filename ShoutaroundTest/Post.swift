@@ -15,8 +15,9 @@ struct PostId {
     var id: String
     var creatorUID: String?
     var creationDate: Date
+    var distance: Double? = nil
     
-    init(id: String, creatorUID: String, fetchedDate: Double) {
+    init(id: String, creatorUID: String, fetchedDate: Double, distance: Double?) {
         
         self.id = id
         self.creatorUID = creatorUID

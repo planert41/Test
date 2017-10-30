@@ -32,8 +32,6 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     var followingUsersUids: [String] = []
     var fetchPostIds: [PostId] = [] {
         didSet{
-            print("Fetched Post Ids :", fetchPostIds.count)
-            print(fetchPostIds)
         }
     }
     
@@ -41,6 +39,10 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     
     let geoFilterRange = geoFilterRangeDefault
     let geoFilterImage:[UIImage] = geoFilterImageDefault
+    
+// Pagination Variables
+    var isFinishedPaging = false
+    var postIdPaginateIndex = 0
     
     
 // Filter Variables
@@ -105,6 +107,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         
         NotificationCenter.default.addObserver(self, selector: #selector(handleUpdateFeedWithFilter), name: FilterController.updateFeedWithFilterNotificationName, object: nil)
         
+        NotificationCenter.default.addObserver(self, selector: #selector(paginatePosts), name: HomeController.finishFetchingPostIdsNotificationName, object: nil)
 
         view.addSubview(noResultsLabel)
         noResultsLabel.anchor(top: topLayoutGuide.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 50)
@@ -339,9 +342,14 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     func handleRefresh() {
 
         // RemoveAll so that when user follow/unfollows it updates
+        postIdPaginateIndex = 0
+        isFinishedPaging = false
         clearFilter()
+        
+        fetchPostIds.removeAll()
         fetchedPosts.removeAll()
         displayedPosts.removeAll()
+        
         fetchAllPosts()
         
         self.collectionView?.refreshControl?.endRefreshing()
@@ -350,13 +358,16 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     
     fileprivate func fetchAllPosts() {
 
-        fetchUserPosts()
-        fetchFollowingUserIds()
-        fetchGroupUserIds()
-        displayedPosts = fetchedPosts
+//        fetchUserPosts()
+//        fetchFollowingUserIds()
+//        fetchGroupUserIds()
         
         fetchAllPostIds()
+//        self.paginatePosts()
+//        displayedPosts = fetchedPosts
         
+
+        print("Fetched Post Ids :", fetchPostIds.count)
         collectionView?.reloadData()
     }
     
@@ -397,22 +408,34 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         }
     }
     
+    
+    static let finishFetchingPostIdsNotificationName = NSNotification.Name(rawValue: "FinishFetchingPostIds")
+    
+    
     fileprivate func fetchFollowingUserPostIds(){
         
+        let thisGroup = DispatchGroup()
         guard let uid = Auth.auth().currentUser?.uid else {return}
         Database.database().reference().child("following").child(uid).observeSingleEvent(of: .value, with: { (snapshot) in
             
             guard let userIdsDictionary = snapshot.value as? [String: Any] else {return}
             userIdsDictionary.forEach({ (key,value) in
-                
+                thisGroup.enter()
                 Database.fetchAllPostIDWithCreatorUID(creatoruid: key) { (postIds) in
                     self.fetchPostIds = self.fetchPostIds + postIds
                     self.fetchPostIds.sort(by: { (p1, p2) -> Bool in
                         return p1.creationDate.compare(p2.creationDate) == .orderedDescending
                     })
+                    thisGroup.leave()
                     
                 }
             })
+            
+            thisGroup.notify(queue: .main) {
+                print(self.fetchPostIds.count)
+                NotificationCenter.default.post(name: HomeController.finishFetchingPostIdsNotificationName, object: nil)
+            }
+            
             
         }) { (err) in
             print("Failed to fetch following user post ids:", err)
@@ -423,13 +446,39 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         fetchUserPostIds()
         fetchFollowingUserPostIds()
         
-
-        print("Fetched Post Ids", self.fetchPostIds)
-        
     }
     
     
     
+    func paginatePosts(){
+        
+        var paginateTotalDisplayedPosts = min(self.postIdPaginateIndex + 4, self.fetchPostIds.count - 1)
+        for i in self.postIdPaginateIndex ..< paginateTotalDisplayedPosts  {
+
+            print("Current number: ", i, "to ",paginateTotalDisplayedPosts)
+            let fetchPostId = fetchPostIds[i]
+            
+            Database.fetchPostWithPostID(postId: fetchPostId.id, completion: { (post) in
+                self.displayedPosts += [post]
+                print("Displayed Post Count: ", self.displayedPosts.count)
+                if self.displayedPosts.count == paginateTotalDisplayedPosts {
+                    self.collectionView?.reloadData()
+                }
+            })
+            
+            // Reset Pagination Index
+            
+            if i == paginateTotalDisplayedPosts - 1 {
+                self.postIdPaginateIndex = i + 1
+            }
+            
+            if i == (self.fetchPostIds.count - 1) {
+                self.isFinishedPaging = true
+                
+            }
+            
+        }
+    }
     
 
     
@@ -551,6 +600,11 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     }
     
     override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        
+        if indexPath.item == self.displayedPosts.count - 1 && !isFinishedPaging{
+            
+            paginatePosts()
+        }
         
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: cellId, for: indexPath) as! HomePostCell
         cell.post = displayedPosts[indexPath.item]

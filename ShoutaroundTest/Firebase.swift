@@ -205,7 +205,7 @@ extension Database{
                 let dictionary = value as? [String: Any]
                 let secondsFrom1970 = dictionary?["creationDate"] as? Double ?? 0
                 
-                let tempID = PostId.init(id: key, creatorUID: creatoruid, fetchedDate: secondsFrom1970)
+                let tempID = PostId.init(id: key, creatorUID: creatoruid, fetchedDate: secondsFrom1970, distance: nil)
                 fetchedPostIds.append(tempID)
                 
                 myGroup.leave()
