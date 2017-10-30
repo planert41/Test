@@ -30,6 +30,12 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
 
     var groupUsersUids: [String] = []
     var followingUsersUids: [String] = []
+    var fetchPostIds: [PostId] = [] {
+        didSet{
+            print("Fetched Post Ids :", fetchPostIds.count)
+            print(fetchPostIds)
+        }
+    }
     
 // Geo Filter Variables
     
@@ -344,10 +350,12 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     
     fileprivate func fetchAllPosts() {
 
-        fetchPosts()
+        fetchUserPosts()
         fetchFollowingUserIds()
         fetchGroupUserIds()
         displayedPosts = fetchedPosts
+        
+        fetchAllPostIds()
         
         collectionView?.reloadData()
     }
@@ -368,6 +376,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
                     self.fetchPostsWithUser(user: user)
                 })
             })
+            
             self.followingUsersUids = followingUsers
             CurrentUser.followingUids = followingUsers
             
@@ -375,6 +384,53 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
             print("Failed to fetch following user ids:", err)
         }
     }
+    
+    fileprivate func fetchUserPostIds(){
+        
+        guard let uid = Auth.auth().currentUser?.uid else {return}
+
+        Database.fetchAllPostIDWithCreatorUID(creatoruid: uid) { (postIds) in
+            self.fetchPostIds = self.fetchPostIds + postIds
+            self.fetchPostIds.sort(by: { (p1, p2) -> Bool in
+                return p1.creationDate.compare(p2.creationDate) == .orderedDescending
+            })
+        }
+    }
+    
+    fileprivate func fetchFollowingUserPostIds(){
+        
+        guard let uid = Auth.auth().currentUser?.uid else {return}
+        Database.database().reference().child("following").child(uid).observeSingleEvent(of: .value, with: { (snapshot) in
+            
+            guard let userIdsDictionary = snapshot.value as? [String: Any] else {return}
+            userIdsDictionary.forEach({ (key,value) in
+                
+                Database.fetchAllPostIDWithCreatorUID(creatoruid: key) { (postIds) in
+                    self.fetchPostIds = self.fetchPostIds + postIds
+                    self.fetchPostIds.sort(by: { (p1, p2) -> Bool in
+                        return p1.creationDate.compare(p2.creationDate) == .orderedDescending
+                    })
+                    
+                }
+            })
+            
+        }) { (err) in
+            print("Failed to fetch following user post ids:", err)
+        }
+    }
+    
+    fileprivate func fetchAllPostIds(){
+        fetchUserPostIds()
+        fetchFollowingUserPostIds()
+        
+
+        print("Fetched Post Ids", self.fetchPostIds)
+        
+    }
+    
+    
+    
+    
 
     
     fileprivate func fetchGroupUserIds() {
@@ -397,6 +453,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
             print("Failed to fetch group user ids:", err)
         }
     }
+    
     
     fileprivate func setupNavigationItems() {
         
@@ -451,7 +508,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     }
 
     
-    fileprivate func fetchPosts() {
+    fileprivate func fetchUserPosts() {
         
         guard let uid = Auth.auth().currentUser?.uid  else {return}
         
@@ -470,7 +527,6 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
                 return p1.creationDate.compare(p2.creationDate) == .orderedDescending
              })
             
-            print(fetchedPosts)
             self.displayedPosts = self.fetchedPosts
             self.collectionView?.reloadData()
         }

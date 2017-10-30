@@ -185,6 +185,39 @@ extension Database{
         
     }
     
+    static func fetchAllPostIDWithCreatorUID(creatoruid: String, completion: @escaping ([PostId]) -> ()) {
+        
+        let myGroup = DispatchGroup()
+        var fetchedPostIds = [] as [PostId]
+        
+        let ref = Database.database().reference().child("userposts").child(creatoruid)
+        
+        ref.observeSingleEvent(of: .value, with: {(snapshot) in
+            
+            guard let userposts = snapshot.value as? [String: Any] else {return}
+            
+            userposts.forEach({ (key,value) in
+                
+                myGroup.enter()
+                
+//                print("Key \(key), Value: \(value)")
+                
+                let dictionary = value as? [String: Any]
+                let secondsFrom1970 = dictionary?["creationDate"] as? Double ?? 0
+                
+                let tempID = PostId.init(id: key, creatorUID: creatoruid, fetchedDate: secondsFrom1970)
+                fetchedPostIds.append(tempID)
+                
+                myGroup.leave()
+                
+            })
+            
+            myGroup.notify(queue: .main) {
+                completion(fetchedPostIds)
+            }
+        })
+    }
+    
     
     static func fetchAllPostWithUID(creatoruid: String, completion: @escaping ([Post]) -> ()) {
         
@@ -203,7 +236,14 @@ extension Database{
                     
                     myGroup.enter()
                     
-                    //ƒ            print("Key \(key), Value: \(value)")
+                    print("Key \(key), Value: \(value)")
+                    
+                    let dictionary = value as? [String: Any]
+                    let secondsFrom1970 = dictionary?["creationDate"] as? Double ?? 0
+                    let creationDate = Date(timeIntervalSince1970: secondsFrom1970)
+                    print("PostId: ", key,"Creation Date: ", creationDate)
+                    
+                    
                     
                     print(user.uid, key)
                     Database.fetchPostWithUIDAndPostID(creatoruid: user.uid, postId: key, completion: { (post) in

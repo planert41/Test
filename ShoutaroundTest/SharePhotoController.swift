@@ -1202,7 +1202,7 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
             
             let geofireRef = Database.database().reference().child("postlocations")
             guard let geoFire = GeoFire(firebaseRef: geofireRef) else {return}
-
+//            let geofirekeytest = uid+","+postref
             
             geoFire.setLocation(self.selectedPostLocation, forKey: postref) { (error) in
                 if (error != nil) {

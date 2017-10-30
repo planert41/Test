@@ -9,6 +9,22 @@
 import Foundation
 import CoreLocation
 
+
+struct PostId {
+    
+    var id: String
+    var creatorUID: String?
+    var creationDate: Date
+    
+    init(id: String, creatorUID: String, fetchedDate: Double) {
+        
+        self.id = id
+        self.creatorUID = creatorUID
+        self.creationDate = Date(timeIntervalSince1970: fetchedDate)
+        
+    }
+}
+
 struct Post {
     
     let imageUrl: String
