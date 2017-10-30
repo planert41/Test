@@ -53,16 +53,13 @@ class UserProfileHeader: UICollectionViewCell, UITextFieldDelegate  {
         }else {
         
             // check if following
-            
             Database.database().reference().child("following").child(currentLoggedInUserID).child(userId).observeSingleEvent(of: .value, with: { (snapshot) in
                 
                 if let isFollowing = snapshot.value as? Int, isFollowing == 1 {
                     
                     self.editProfileFollowButton.setTitle("Unfollow", for: .normal)
                     
-                    
                 } else{
-                    
                     self.setupFollowStyle()
 
                 }

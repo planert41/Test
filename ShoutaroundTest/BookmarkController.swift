@@ -282,7 +282,7 @@ func openInbox() {
     
     // Search Delegate And Methods
     
-    func filterPost(caption: String?) {
+    func filterCaptionSelected(caption: String?) {
         self.resultSearchController?.searchBar.text = caption
         filterPostByCaption(self.resultSearchController?.searchBar.text)
         filterPostByLocation()

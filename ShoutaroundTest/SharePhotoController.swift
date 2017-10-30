@@ -1213,12 +1213,8 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
             }
             
             self.dismiss(animated: true, completion: nil)
-            
-            
             NotificationCenter.default.post(name: SharePhotoController.updateFeedNotificationName, object: nil)
         }
-        
-        
     }
     
     override var prefersStatusBarHidden: Bool {

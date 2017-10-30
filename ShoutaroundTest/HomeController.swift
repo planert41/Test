@@ -14,101 +14,65 @@ import CoreGraphics
 import CoreLocation
 
 
-class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLayout, HomePostCellDelegate, UIPickerViewDelegate, UIPickerViewDataSource, CLLocationManagerDelegate, UISearchControllerDelegate, HomePostSearchDelegate, UIGestureRecognizerDelegate  {
+class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLayout, HomePostCellDelegate, CLLocationManagerDelegate, UISearchControllerDelegate, HomePostSearchDelegate, UIGestureRecognizerDelegate, FilterControllerDelegate  {
     
     let cellId = "cellId"
-    var allPosts = [Post]()
-    var filteredPosts = [Post](){
+    var fetchedPosts = [Post]()
+    var displayedPosts = [Post](){
         didSet{
-            if filteredPosts.count == 0 {
+            if displayedPosts.count == 0 {
                 self.noResultsLabel.isHidden = false
             } else {
                 self.noResultsLabel.isHidden = true
             }
         }
     }
-    
-    var isGroupUserFiltering: Bool = false {
-        
-        didSet{
-            if isGroupUserFiltering {
-                self.navigationItem.leftBarButtonItem?.image = #imageLiteral(resourceName: "redstar").withRenderingMode(.alwaysOriginal)
-                self.filterPostByGroup()
-                
-            } else {
-                self.navigationItem.leftBarButtonItem?.image = #imageLiteral(resourceName: "Globe").withRenderingMode(.alwaysOriginal)
-                self.filterPost(caption: self.resultSearchController?.searchBar.text)
-                
-            }
-        }
-    }
-    
-    var groupUsersFilter: [String] = []{
-        didSet{
-            if groupUsersFilter.count > 0 {
-                isGroupUserFiltering = true
-            } else {
-                isGroupUserFiltering = false
-            }
-        }
-    }
+
+    var groupUsersUids: [String] = []
+    var followingUsersUids: [String] = []
     
 // Geo Filter Variables
     
     let geoFilterRange = geoFilterRangeDefault
     let geoFilterImage:[UIImage] = geoFilterImageDefault
     
-    var filterRange: Double?{
+    
+// Filter Variables
+    
+    let defaultRange = "All"
+    let defaultGroup = "All"
+    
+    var filterCaption: String? = nil
+    var filterLocation: CLLocation? = nil
+    var filterGroup: String? {
         didSet{
-            print(filterRange)
-            if filterRange == nil {
-                rangeImageButton.image = self.geoFilterImage[0].withRenderingMode(.alwaysOriginal)
-                rangeImageButton.addGestureRecognizer(singleTap)
-                rangeImageButton.addGestureRecognizer(longPressGesture)
-                navigationItem.rightBarButtonItem = UIBarButtonItem.init(customView: rangeImageButton)
-                self.isRangeFiltering = false
-
-            } else {
-                print(String(format:"%.1f", self.filterRange!))
-                let rangeIndex = self.geoFilterRange.index(of: String(format:"%.1f", self.filterRange!))
-
-                rangeImageButton.image = geoFilterImage[rangeIndex!].withRenderingMode(.alwaysOriginal)
-                rangeImageButton.addGestureRecognizer(singleTap)
-                rangeImageButton.addGestureRecognizer(longPressGesture)
-                navigationItem.rightBarButtonItem = UIBarButtonItem.init(customView: rangeImageButton)
-                self.isRangeFiltering = true
-                
-                
-            }
+            setupNavigationItems()
         }
     }
+    var filterRange: String? {
+        didSet{
+            setupNavigationItems()
+        }
+    }
+
     
-    var isRangeFiltering: Bool = false
-    
-    
-    var rangeImageButton: UIImageView = {
+    var filterButton: UIImageView = {
         let view = UIImageView()
-        view.image = #imageLiteral(resourceName: "GeoFence").withRenderingMode(.alwaysOriginal)
+        view.image = #imageLiteral(resourceName: "filter").withRenderingMode(.alwaysOriginal)
         view.contentMode = .scaleAspectFit
         view.sizeToFit()
+        view.layer.cornerRadius = 5
+        view.layer.masksToBounds = true
         view.backgroundColor = UIColor.clear
         return view
     }()
     
     lazy var singleTap: UIGestureRecognizer = {
-        
-        let tap = UITapGestureRecognizer(target: self, action: #selector(filterHere))
+        let tap = UITapGestureRecognizer(target: self, action: #selector(activateFilter))
         tap.delegate = self
         return tap
     }()
-    
-    lazy var longPressGesture: UILongPressGestureRecognizer = {
-        
-        let longPressGesture = UILongPressGestureRecognizer(target: self, action: #selector(activateFilterRange))
-        longPressGesture.minimumPressDuration = 0.5 // 1 second press
-        longPressGesture.delegate = self
-        return longPressGesture
-    }()
+
     
     var resultSearchController:UISearchController? = nil
 
@@ -124,16 +88,20 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        self.clearFilter()
         self.fetchCurrentUser()
         self.navigationController?.navigationBar.backgroundColor = UIColor.clear
         
 //        self.automaticallyAdjustsScrollViewInsets = false
         
         NotificationCenter.default.addObserver(self, selector: #selector(handleUpdateFeed), name: SharePhotoController.updateFeedNotificationName, object: nil)
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(handleUpdateFeedWithFilter), name: FilterController.updateFeedWithFilterNotificationName, object: nil)
+        
 
         view.addSubview(noResultsLabel)
         noResultsLabel.anchor(top: topLayoutGuide.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 50)
-        view.addSubview(dummyTextView)
         collectionView?.backgroundColor = .white
         collectionView?.register(HomePostCell.self, forCellWithReuseIdentifier: cellId)
         
@@ -144,10 +112,10 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         collectionView?.keyboardDismissMode = .onDrag
         
 // Search Controller
+        
         setupSearchController()
         setupNavigationItems()
         fetchAllPosts()
-        setupGeoPicker()
         
         // Ask for Authorisation from the User.
         self.locationManager.requestAlwaysAuthorization()
@@ -159,22 +127,14 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
             locationManager.delegate = self
             locationManager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters
         }
-        
     }
     
     func CGRectMake(_ x: CGFloat, _ y: CGFloat, _ width: CGFloat, _ height: CGFloat) -> CGRect {
         return CGRect(x: x, y: y, width: width, height: height)
     }
     
-
-    
     
 // Setup for Geo Range Button, Dummy TextView and UIPicker
-    
-    lazy var dummyTextView: UITextView = {
-        let tv = UITextView()
-        return tv
-    }()
     
     var noResultsLabel: UILabel = {
         let label = UILabel()
@@ -185,15 +145,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         label.textAlignment = NSTextAlignment.center
         return label
     }()
-    
-    
-    var pickerView: UIPickerView = {
-        let pv = UIPickerView()
-        pv.backgroundColor = .white
-        pv.showsSelectionIndicator = true
 
-        return pv
-    }()
     
     func setupSearchController() {
         let homePostSearchResults = HomePostSearch()
@@ -211,179 +163,108 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         definesPresentationContext = true
     }
     
-    func setupGeoPicker() {
-
-        
-        var toolBar = UIToolbar()
-        toolBar.barStyle = UIBarStyle.default
-        toolBar.isTranslucent = true
-        
-        toolBar.tintColor = UIColor(red: 76/255, green: 217/255, blue: 100/255, alpha: 1)
-        toolBar.sizeToFit()
-        
-        
-        let doneButton = UIBarButtonItem(title: "Done", style: UIBarButtonItemStyle.bordered, target: self, action: Selector("donePicker"))
-        let spaceButton = UIBarButtonItem(barButtonSystemItem: UIBarButtonSystemItem.flexibleSpace, target: nil, action: nil)
-        spaceButton.title = "Filter Range"
-        let cancelButton = UIBarButtonItem(title: "Cancel", style: UIBarButtonItemStyle.bordered, target: self, action: Selector("cancelPicker"))
-        
-        toolBar.setItems([cancelButton, spaceButton, doneButton], animated: false)
-        toolBar.isUserInteractionEnabled = true
-        
-        pickerView.delegate = self
-        pickerView.dataSource = self
-        self.dummyTextView.inputView = pickerView
-        self.dummyTextView.inputAccessoryView = toolBar
-    }
     
-    
-    func donePicker(){
-        dummyTextView.resignFirstResponder()
-        filterPostByCaption(self.resultSearchController?.searchBar.text)
-        filterPostByLocation()
-        
-    }
-    
-    func cancelPicker(){
-        dummyTextView.resignFirstResponder()
-    }
-    
-    func activateFilterRange() {
-
-        if self.filterRange != nil {
-            let rangeIndex = self.geoFilterRange.index(of: String(format:"%.1f", self.filterRange!))
-            pickerView.selectRow(rangeIndex!, inComponent: 0, animated: false)
-        }
-        dummyTextView.perform(#selector(becomeFirstResponder), with: nil, afterDelay: 0.1)
-    }
-    
-    // UIPicker DataSource
-    func numberOfComponents(in pickerView: UIPickerView) -> Int {
-        
-        return 1
-        
-    }
-    func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
-        return geoFilterRange.count
-    }
-    
-    // UIPicker Delegate
-    
-    func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
-        
-        if self.filterRange == Double(geoFilterRange[row]) {
-            
-            let rangeIndex = self.geoFilterRange.index(of: String(format:"%.1f", self.filterRange!))
-            pickerView.selectRow(rangeIndex!, inComponent: 0, animated: false)
-        }
-        
-        return geoFilterRange[row]
-    }
-    
-    func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
-        // If Select some number
-        if row > 0 {
-        filterRange = Double(geoFilterRange[row])
-        } else {
-        filterRange = nil
-        }
-        
-    }
-
-
 // Search Delegate And Methods
-    
-    func filterPost(caption: String?) {
-        self.resultSearchController?.searchBar.text = caption
-        filterPostByCaption(self.resultSearchController?.searchBar.text)
-        filterPostByLocation()
-        self.collectionView?.reloadData()
-    }
-    
-    func filterHere(){
 
+    func activateFilter(){
         let filterController = FilterController()
-        
+        filterController.delegate = self
+        filterController.selectedRange = self.filterRange
+        filterController.selectedGroup = self.filterGroup
         self.navigationController?.pushViewController(filterController, animated: true)
-        
-//        if self.isRangeFiltering == true {
-//            self.filterRange = Double(geoFilterRange[0])
-//
-//        } else {
-//            self.filterRange = Double(geoFilterRange[5])
-//
-//        }
-//        
-//        self.filterPostByLocation()
-//        let indexPath = IndexPath(item: 0, section: 0)
-//        self.collectionView?.scrollToItem(at: indexPath, at: .bottom, animated: true)
-        
-        
     }
 
     
-    func filterPostByGroup() {
+// Filter Delegates
+    
+    func filterControllerFinished(selectedRange: String?, selectedLocation: CLLocation?, selectedGooglePlaceID: String?, selectedGroup: String?){
         
-       var groupFilteredPost: [Post] = []
-        
-        for userUid in self.groupUsersFilter{
-            
-            groupFilteredPost = self.filteredPosts.filter { (post) -> Bool in
-                return post.creatorUID == userUid
-            }
-            groupFilteredPost += groupFilteredPost
-        }
-        self.filteredPosts = groupFilteredPost
-        self.collectionView?.reloadData()
+        self.filterRange = selectedRange
+        self.filterLocation = selectedLocation
+        self.filterGroup = selectedGroup
+    
     }
     
-    func filterPostByCaption(_ string: String?) {
+    func filterCaptionSelected(caption: String?){
+        self.filterCaption = caption
+        finalFilterPost(filterString: self.filterCaption, filterLocation: self.filterLocation, filterRange: self.filterRange, filterGroup: self.filterGroup)
+        
+    }
+    
+    
+    
+// Filter Functions
+    
+    func finalFilterPost(filterString: String?, filterLocation: CLLocation?, filterRange: String?, filterGroup: String?){
+        
+        
+        self.resultSearchController?.searchBar.text = filterString
+        
+        self.filterPostByCaption(filterString?.removeDuplicates){
+           
+            self.filterPostByLocation(filterLocation: filterLocation, filterRange: filterRange){
+                    self.filterPostByGroup(filterGroup: self.filterGroup!){
+                        self.collectionView?.reloadData()
+                        }
+                    }
+                }
+        
+        if self.collectionView?.numberOfItems(inSection: 0) != 0 {
+            let indexPath = IndexPath(item: 0, section: 0)
+            self.collectionView?.scrollToItem(at: indexPath, at: .bottom, animated: true)
+            self.noResultsLabel.text = "Loading"
+            
+        } else {
+            self.noResultsLabel.text = "No Results"
+        }
+    }
+
+    func filterPostByCaption(_ string: String?, completion: () -> ()) {
         
         guard let searchedText = string else {
+            displayedPosts = fetchedPosts
             print("No Search Term")
-            filteredPosts = allPosts
-            self.collectionView?.reloadData()
+            completion()
             return
         }
         
         if searchedText.isEmpty || searchedText == "" {
-            filteredPosts = allPosts
+            displayedPosts = fetchedPosts
             print("No Search Term")
+            completion()
+            return
         } else {
             
             print("Search Term Was", searchedText)
             //Makes everything case insensitive
-            filteredPosts = self.allPosts.filter { (post) -> Bool in
+            displayedPosts = self.fetchedPosts.filter { (post) -> Bool in
                 return post.caption.lowercased().contains(searchedText.lowercased()) || post.emoji.contains(searchedText.lowercased()) || post.locationName.contains(searchedText.lowercased()) || post.locationAdress.contains(searchedText.lowercased())
             }
-            collectionView?.reloadData()
+                completion()
+//            collectionView?.reloadData()
         }
     }
     
-    func filterPostByLocation(){
+    func filterPostByLocation(filterLocation: CLLocation?, filterRange: String?, completion: @escaping () -> ()){
         
         let ref = Database.database().reference().child("postlocations")
         let geoFire = GeoFire(firebaseRef: ref)
-        //     let currentLocation = CLLocation(latitude: 41.973735, longitude: -87.667751)
         
         var geoFilteredPosts = [Post]()
         
-        guard let filterDistance = self.filterRange else {
-            // Unfilter for location
-            filterPostByCaption(self.resultSearchController?.searchBar.text)
-            collectionView?.reloadData()
-            print("No Distance Number")
-            return}
+        let filterRangeCheck = Double(filterRange!)
+        guard let filterDistance = filterRangeCheck else {
+            print("Invalid Distance Number or Non Distance")
+            return
+        }
         
-        self.determineCurrentLocation()
-        
-        let when = DispatchTime.now() + 0.5 // change 2 to desired number of seconds
-        DispatchQueue.main.asyncAfter(deadline: when) {
+//        let when = DispatchTime.now() + 0.5 // change 2 to desired number of seconds
+//        DispatchQueue.main.asyncAfter(deadline: when) {
             
-            print("Current User Location Used for Post Filtering", CurrentUser.currentLocation)
-            let circleQuery = geoFire?.query(at: CurrentUser.currentLocation, withRadius: filterDistance)
+            print("Current User Location Used for Post Filtering", filterLocation)
+            let circleQuery = geoFire?.query(at: filterLocation, withRadius: filterDistance)
             circleQuery?.observe(.keyEntered, with: { (key, location) in
-                var geoFilteredPost: [Post] = self.filteredPosts.filter { (post) -> Bool in
+                var geoFilteredPost: [Post] = self.displayedPosts.filter { (post) -> Bool in
                     return post.id == key
                 }
                 
@@ -396,39 +277,66 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
             })
             
             circleQuery?.observeReady({
-                self.filteredPosts = geoFilteredPosts.sorted(by: { (p1, p2) -> Bool in
+                self.displayedPosts = geoFilteredPosts.sorted(by: { (p1, p2) -> Bool in
                     p1.distance!.isLess(than: p2.distance!)
                 })
-                
-                if self.collectionView?.numberOfItems(inSection: 0) != 0 {
-                    let indexPath = IndexPath(item: 0, section: 0)
-                    self.collectionView?.scrollToItem(at: indexPath, at: .bottom, animated: true)
-                }
-                self.collectionView?.reloadData()
+                completion()
             })
-        }
+//        }
+    }
+    
+    
+    func filterPostByGroup(filterGroup: String, completion: () -> ()) {
+        
+        if filterGroup != self.defaultGroup {
+            var groupFilteredPost: [Post] = []
+            for userUid in self.groupUsersUids{
+                groupFilteredPost = self.displayedPosts.filter { (post) -> Bool in
+                    return post.creatorUID == userUid
+                }
+                groupFilteredPost += groupFilteredPost
+                }
+                self.displayedPosts = groupFilteredPost
+            }
+        
+        completion()
     }
     
     
     
 // Handle Update
     
+    
+    func clearFilter(){
+        
+        self.resultSearchController?.searchBar.text = nil
+        self.filterCaption = nil
+        self.filterLocation = nil
+        self.filterGroup = defaultGroup
+        self.filterRange = defaultRange
+    }
+    
     func handleUpdateFeed() {
         handleRefresh()
     }
     
-    // IOS9 - let refreshControl = UIRefreshControl()
+    func handleUpdateFeedWithFilter() {
+        displayedPosts.removeAll()
+        self.collectionView?.reloadData()
+        
+        finalFilterPost(filterString: self.filterCaption, filterLocation: self.filterLocation, filterRange: self.filterRange, filterGroup: self.filterGroup)
+        self.collectionView?.refreshControl?.endRefreshing()
+        print("Refresh Home Feed With Filter")
+        
+    }
     
     func handleRefresh() {
 
         // RemoveAll so that when user follow/unfollows it updates
-        
-        allPosts.removeAll()
-        filteredPosts.removeAll()
+        clearFilter()
+        fetchedPosts.removeAll()
+        displayedPosts.removeAll()
         fetchAllPosts()
-        
-        self.resultSearchController?.searchBar.text = ""
-        self.filterRange = nil
         
         self.collectionView?.refreshControl?.endRefreshing()
         print("Refresh Home Feed")
@@ -436,40 +344,33 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     
     fileprivate func fetchAllPosts() {
 
-        if !isGroupUserFiltering {
-            fetchPosts()
-        }
+        fetchPosts()
         fetchFollowingUserIds()
-        filteredPosts = allPosts
+        fetchGroupUserIds()
+        displayedPosts = fetchedPosts
+        
         collectionView?.reloadData()
     }
-    
     
     fileprivate func fetchFollowingUserIds() {
         
         guard let uid = Auth.auth().currentUser?.uid else {return}
         
         Database.database().reference().child("following").child(uid).observeSingleEvent(of: .value, with: { (snapshot) in
-            
+        
+            var followingUsers: [String] = []
+
             guard let userIdsDictionary = snapshot.value as? [String: Any] else {return}
             userIdsDictionary.forEach({ (key,value) in
                 
-                if self.groupUsersFilter.count > 0 && self.isGroupUserFiltering {
-                    print(self.groupUsersFilter)
-                    print(key,value)
-                    if self.groupUsersFilter.contains(key){
-                        Database.fetchUserWithUID(uid: key, completion: { (user) in
-                            self.fetchPostsWithUser(user: user)
-                        })
-                    }
-                }
-                else {
-                
-                    Database.fetchUserWithUID(uid: key, completion: { (user) in
+                followingUsers.append(key)
+                Database.fetchUserWithUID(uid: key, completion: { (user) in
                     self.fetchPostsWithUser(user: user)
-                    })
-                }
+                })
             })
+            self.followingUsersUids = followingUsers
+            CurrentUser.followingUids = followingUsers
+            
         }) { (err) in
             print("Failed to fetch following user ids:", err)
         }
@@ -488,53 +389,59 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
             userIdsDictionary.forEach({ (key,value) in
                 groupUsers.append(key)
             })
-            self.groupUsersFilter = groupUsers
+            self.groupUsersUids = groupUsers
+            CurrentUser.groupUids = groupUsers
+            
             
         }) { (err) in
-            print("Failed to fetch following user ids:", err)
+            print("Failed to fetch group user ids:", err)
         }
-        
     }
     
     fileprivate func setupNavigationItems() {
         
+        navigationItem.leftBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "mailbox").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(openInbox))
         
-//        navigationItem.leftBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "Globe").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(activateFilterRange))
-        
-        
-        navigationItem.leftBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "Globe").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(filterGroup))
-        
-//        navigationItem.rightBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "GeoFence").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(filterHere))
-        
-        var rangeImageButton = UIImageView(frame: CGRectMake(0, 0, 20, 20))
+
 //        rangeImageButton.image = #imageLiteral(resourceName: "GeoFence").withRenderingMode(.alwaysOriginal)
 //
 //        let image = #imageLiteral(resourceName: "shoutaround").withRenderingMode(.alwaysOriginal).resizeImageWith(newSize: CGSize(width: 20, height: 20))
-        rangeImageButton.image = #imageLiteral(resourceName: "filter").withRenderingMode(.alwaysOriginal)
-        rangeImageButton.contentMode = .scaleAspectFit
-        rangeImageButton.sizeToFit()
-        rangeImageButton.backgroundColor = UIColor.clear
         
+//        var rangeImageButton = UIImageView(frame: CGRectMake(0, 0, 20, 20))
+//        rangeImageButton.image = #imageLiteral(resourceName: "filter").withRenderingMode(.alwaysOriginal)
+//        rangeImageButton.contentMode = .scaleAspectFit
+//        rangeImageButton.sizeToFit()
+//        rangeImageButton.backgroundColor = UIColor.clear
+//        
+//        rangeImageButton.addGestureRecognizer(singleTap)
+        
+        
+        if self.filterGroup != "All" && self.filterGroup != nil{
+            filterButton.backgroundColor = UIColor.orange
+        } else {
+            filterButton.backgroundColor = UIColor.clear
+        }
+        
+        if self.filterRange == nil || self.filterRange == geoFilterRange[geoFilterRange.endIndex - 1] {
+            filterButton.image = geoFilterImage[geoFilterImage.endIndex - 1].withRenderingMode(.alwaysOriginal)
+            filterButton.addGestureRecognizer(singleTap)
+        } else {
+            let rangeIndex = geoFilterRange.index(of: self.filterRange!)
+            filterButton.image = geoFilterImage[rangeIndex!].withRenderingMode(.alwaysOriginal)
+            filterButton.addGestureRecognizer(singleTap)
+        }
 
-        rangeImageButton.addGestureRecognizer(singleTap)
-        rangeImageButton.addGestureRecognizer(longPressGesture)
+        if self.filterGroup == defaultGroup && self.filterRange == defaultRange {
+            filterButton.image = #imageLiteral(resourceName: "filter").withRenderingMode(.alwaysOriginal)
+            filterButton.backgroundColor = UIColor.clear
+        }
         
-        let rangeBarButton = UIBarButtonItem.init(customView: rangeImageButton)
-//        rangeBarButton.image = #imageLiteral(resourceName: "Globe").withRenderingMode(.alwaysOriginal)
         
-    
+        let rangeBarButton = UIBarButtonItem.init(customView: filterButton)
         navigationItem.rightBarButtonItem = rangeBarButton
         
     }
 
-
-    func filterGroup(){
-        if self.groupUsersFilter.count == 0 && self.isGroupUserFiltering == false {
-            fetchGroupUserIds()
-        } else {
-            self.groupUsersFilter.removeAll()
-        }
-    }
     
     func openInbox() {
     
@@ -543,11 +450,6 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     
     }
 
-    func handleCamera() {
-        let cameraController = CameraController()
-        present(cameraController, animated: true, completion: nil)
-        
-    }
     
     fileprivate func fetchPosts() {
         
@@ -563,13 +465,13 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     fileprivate func fetchPostsWithUser(user: User){
     
         Database.fetchAllPostWithUID(creatoruid: user.uid) { (fetchedPosts) in
-            self.allPosts = self.allPosts + fetchedPosts
-            self.allPosts.sort(by: { (p1, p2) -> Bool in
+            self.fetchedPosts = self.fetchedPosts + fetchedPosts
+            self.fetchedPosts.sort(by: { (p1, p2) -> Bool in
                 return p1.creationDate.compare(p2.creationDate) == .orderedDescending
              })
             
             print(fetchedPosts)
-            self.filteredPosts = self.allPosts
+            self.displayedPosts = self.fetchedPosts
             self.collectionView?.reloadData()
         }
 
@@ -589,20 +491,20 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         
 
-        return filteredPosts.count
+        return displayedPosts.count
     }
     
     override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: cellId, for: indexPath) as! HomePostCell
-        cell.post = filteredPosts[indexPath.item]
+        cell.post = displayedPosts[indexPath.item]
         cell.delegate = self
         
         return cell
     }
     
     override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        print(filteredPosts[indexPath.item])
+        print(displayedPosts[indexPath.item])
     }
     
     
@@ -632,12 +534,12 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     }
     
     func refreshPost(post: Post) {
-        let index = filteredPosts.index { (filteredpost) -> Bool in
+        let index = displayedPosts.index { (filteredpost) -> Bool in
             filteredpost.id  == post.id
         }
         print(index)
         let filteredindexpath = IndexPath(row:index!, section: 0)
-        self.filteredPosts[index!] = post
+        self.displayedPosts[index!] = post
 //        self.collectionView?.reloadItems(at: [filteredindexpath])
     }
     

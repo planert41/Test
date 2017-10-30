@@ -12,52 +12,64 @@ import Firebase
 
 class InboxController: UICollectionViewController,UICollectionViewDelegateFlowLayout, InboxCellDelegate {
     
-    var messages = [Message]()
+    var messages = [Message](){
+        didSet{
+            self.updateCounts()
+        }
+    }
     let inboxCellId = "inboxCellId"
+
+    var noResultsLabel: UILabel = {
+        let label = UILabel()
+        label.text = "No Messages"
+        label.font = UIFont.boldSystemFont(ofSize: 20)
+        label.textColor = UIColor.black
+        label.isHidden = true
+        label.textAlignment = NSTextAlignment.center
+        return label
+    }()
+    
+    
+    
     
     override func viewDidLoad() {
         super.viewDidLoad()
     
-        navigationItem.title = "Inbox"
-        collectionView?.register(InboxCell.self, forCellWithReuseIdentifier: inboxCellId)
-        fetchBookmarks()
-        collectionView?.backgroundColor = UIColor.white
+        navigationItem.title = "Inbox (" + String(messages.count) + ")"
+        navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Bookmarks", style: .plain, target: self, action: #selector(toBookmarks))
         
+        collectionView?.register(InboxCell.self, forCellWithReuseIdentifier: inboxCellId)
+        fetchMessages()
+        collectionView?.backgroundColor = UIColor.white
+        view.addSubview(noResultsLabel)
+        noResultsLabel.anchor(top: topLayoutGuide.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 5, paddingLeft: 5, paddingBottom: 5, paddingRight: 5, width: 0, height: 50)
+        noResultsLabel.isHidden = true
     
     }
     
-    func fetchBookmarks(){
-        
-        let myGroup = DispatchGroup()
+    func updateCounts(){
+        navigationItem.title = "Inbox (" + String(messages.count) + ")"
+        if messages.count == 0 {
+            noResultsLabel.isHidden = false
+        } else {
+            noResultsLabel.isHidden = true
+        }
+    }
+    
+    func toBookmarks(){
+        tabBarController?.selectedIndex = 3
+    }
+    
+    
+    func fetchMessages(){
         
         guard let currentUserUID = Auth.auth().currentUser?.uid else {return}
         
         Database.fetchMessageForUID(userUID: currentUserUID) { (fetchedMessages) in
+
             self.messages = fetchedMessages
             self.collectionView?.reloadData()
-//            self.messages.forEach({ messageSingle in
-//                
-//                
-//                
-//                
-////                guard let dictionary = value as? [String: Any] else {return}
-////                guard let senderUID = dictionary["senderUID"] else {return}
-////                guard let postID = dictionary["postUID"] else {return}
-////                guard let message = dictionary["message"] else {return}
-////                guard let creationTime = dictionary["creationDate"] else {return}
-//                myGroup.enter()
-//                Database.fetchPostWithPostID(postId: messageSingle.postId, completion: { (post) in
-//                    self.messagesPost.append(post)
-//                    myGroup.leave()
-//                })
-//                
-//                Database.fetchUserWithUID(uid: messageSingle.senderUID, completion: { (user) in
-//                    self.senderUser.append(user)
-//                    myGroup.leave()
-//                })
-//            })
         }
-
     }
     
     // HOME POST CELL DELEGATE METHODS

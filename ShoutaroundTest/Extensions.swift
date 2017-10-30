@@ -130,11 +130,16 @@ extension String {
         } else {
             return self
         }
+        }
+    
+    func removingWhitespaces() -> String {
+        return components(separatedBy: .whitespaces).joined()
     }
     
-            func removingWhitespaces() -> String {
-            return components(separatedBy: .whitespaces).joined()
-        }
+    var removeDuplicates: String {
+        var set = Set<Character>()
+        return String(characters.filter{ set.insert($0).inserted })
+    }
     
 }
 

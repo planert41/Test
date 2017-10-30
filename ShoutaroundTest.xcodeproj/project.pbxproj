@@ -44,6 +44,7 @@
 		A58477A81F6EB720007DE06C /* EmojiExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = A58477A71F6EB720007DE06C /* EmojiExtensions.swift */; };
 		A58477AA1F6EFFD7007DE06C /* LocationLabels.swift in Sources */ = {isa = PBXBuildFile; fileRef = A58477A91F6EFFD7007DE06C /* LocationLabels.swift */; };
 		A5A17BAB1FA582B4001F227D /* FilterController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5A17BAA1FA582B4001F227D /* FilterController.swift */; };
+		A5A17BB01FA6497F001F227D /* UIPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5A17BAF1FA6497E001F227D /* UIPicker.swift */; };
 		A5AEB9721F96A82B00E88CAC /* HomePostSearch.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5AEB9711F96A82B00E88CAC /* HomePostSearch.swift */; };
 		A5AEB9741F96B00500E88CAC /* EmojiCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5AEB9731F96B00500E88CAC /* EmojiCell.swift */; };
 		A5AEB9761F986F8200E88CAC /* PictureController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5AEB9751F986F8200E88CAC /* PictureController.swift */; };
@@ -113,6 +114,7 @@
 		A58477A71F6EB720007DE06C /* EmojiExtensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EmojiExtensions.swift; sourceTree = "<group>"; };
 		A58477A91F6EFFD7007DE06C /* LocationLabels.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LocationLabels.swift; sourceTree = "<group>"; };
 		A5A17BAA1FA582B4001F227D /* FilterController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FilterController.swift; sourceTree = "<group>"; };
+		A5A17BAF1FA6497E001F227D /* UIPicker.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIPicker.swift; sourceTree = "<group>"; };
 		A5AEB9711F96A82B00E88CAC /* HomePostSearch.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HomePostSearch.swift; sourceTree = "<group>"; };
 		A5AEB9731F96B00500E88CAC /* EmojiCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EmojiCell.swift; sourceTree = "<group>"; };
 		A5AEB9751F986F8200E88CAC /* PictureController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PictureController.swift; sourceTree = "<group>"; };
@@ -233,6 +235,7 @@
 		A54E1D691F4E736B00C2AA77 /* ShoutaroundTest */ = {
 			isa = PBXGroup;
 			children = (
+				A5A17BAE1FA6496B001F227D /* OLD */,
 				A5516BC01F8ED0B9003C3E22 /* ItemCells */,
 				A56868BB1F78A0E50050C406 /* Message */,
 				A57C060A1F7602F100A0568F /* Bookmark */,
@@ -321,6 +324,14 @@
 				A57C060B1F76037C00A0568F /* BookmarkPhotoCell.swift */,
 			);
 			name = Bookmark;
+			sourceTree = "<group>";
+		};
+		A5A17BAE1FA6496B001F227D /* OLD */ = {
+			isa = PBXGroup;
+			children = (
+				A5A17BAF1FA6497E001F227D /* UIPicker.swift */,
+			);
+			name = OLD;
 			sourceTree = "<group>";
 		};
 		A5C6450B1F564A4000C78244 /* Models */ = {
@@ -552,6 +563,7 @@
 				A54E1D6D1F4E736B00C2AA77 /* SignUpController.swift in Sources */,
 				A5C6452A1F5BB84200C78244 /* CommentsController.swift in Sources */,
 				A58477A81F6EB720007DE06C /* EmojiExtensions.swift in Sources */,
+				A5A17BB01FA6497F001F227D /* UIPicker.swift in Sources */,
 				A53E7E171F5E46DB0011C1CA /* GooglePlaces.swift in Sources */,
 				A5C6451A1F57AB0000C78244 /* Firebase.swift in Sources */,
 				A562E5191F539C040095C7C1 /* PhotoSelectorController.swift in Sources */,

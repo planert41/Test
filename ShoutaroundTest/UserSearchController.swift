@@ -82,10 +82,17 @@ class UserSearchController: UICollectionViewController, UICollectionViewDelegate
                 
                 }
                 
-                
                 guard let userDictionary = value as? [String: Any] else {return}
                 
-                let user = User(uid: key, dictionary: userDictionary)
+                var user = User(uid: key, dictionary: userDictionary)
+                
+                
+                if CurrentUser.followingUids.contains(key){
+                    user.isFollowing = true
+                } else {
+                    user.isFollowing = false
+                }
+                
                 self.users.append(user)
             })
             
