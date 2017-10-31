@@ -9,12 +9,13 @@
 import Firebase
 import GeoFire
 
+var postCache = [String: Post]()
 
 extension Database{
     
     static func fetchUserWithUID(uid: String, completion: @escaping (User) -> ()) {
         
-        print("Fetching uid", uid)
+//        print("Fetching uid", uid)
         
         Database.database().reference().child("users").child(uid).observeSingleEvent(of: .value, with: { (snapshot) in
             
@@ -310,6 +311,10 @@ extension Database{
     
     static func fetchPostWithPostID( postId: String, completion: @escaping (Post) -> ()) {
         
+            if let cachedPost = postCache[postId] {
+                completion(cachedPost)
+                return
+            }
         
             let ref = Database.database().reference().child("posts").child(postId)
             
@@ -325,6 +330,7 @@ extension Database{
             post.id = postId
             
            checkPostForLikesAndBookmarks(post: post, completion: { (post) in
+                postCache[postId] = post
                 completion(post)
             })
            })
@@ -340,7 +346,7 @@ extension Database{
         
         ref.observeSingleEvent(of: .value, with: {(snapshot) in
             
-            print(snapshot.value)
+//            print(snapshot.value)
             guard let userposts = snapshot.value as? [String:Any]  else {return}
             
             userposts.forEach({ (key,value) in

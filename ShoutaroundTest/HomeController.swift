@@ -41,8 +41,18 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     let geoFilterImage:[UIImage] = geoFilterImageDefault
     
 // Pagination Variables
-    var isFinishedPaging = false
-    var postIdPaginateIndex = 0
+    var isFinishedPaging = false {
+        didSet{
+            if isFinishedPaging == true {
+                print("Finished Paging :", self.fetchedPostCount)
+            }
+        }
+    }
+    var fetchedPostCount = 0
+    var fetchedPostIndex = 0
+    
+    static let finishFetchingPostIdsNotificationName = NSNotification.Name(rawValue: "FinishFetchingPostIds")
+    static let finishPaginationNotificationName = NSNotification.Name(rawValue: "FinishPagination")
     
     
 // Filter Variables
@@ -50,7 +60,11 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     let defaultRange = "All"
     let defaultGroup = "All"
     
-    var filterCaption: String? = nil
+    var filterCaption: String? = nil{
+        didSet{
+
+        }
+    }
     var filterLocation: CLLocation? = nil
     var filterGroup: String? {
         didSet{
@@ -62,7 +76,6 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
             setupNavigationItems()
         }
     }
-
     
     var filterButton: UIImageView = {
         let view = UIImageView()
@@ -108,6 +121,8 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         NotificationCenter.default.addObserver(self, selector: #selector(handleUpdateFeedWithFilter), name: FilterController.updateFeedWithFilterNotificationName, object: nil)
         
         NotificationCenter.default.addObserver(self, selector: #selector(paginatePosts), name: HomeController.finishFetchingPostIdsNotificationName, object: nil)
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(finishPaginationCheck), name: HomeController.finishPaginationNotificationName, object: nil)
 
         view.addSubview(noResultsLabel)
         noResultsLabel.anchor(top: topLayoutGuide.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 50)
@@ -194,18 +209,40 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     
     }
     
-    func filterCaptionSelected(caption: String?){
-        self.filterCaption = caption
-        finalFilterPost(filterString: self.filterCaption, filterLocation: self.filterLocation, filterRange: self.filterRange, filterGroup: self.filterGroup)
+    func filterCaptionSelected(searchedText: String?){
+        self.filterCaption = searchedText
+        self.resultSearchController?.searchBar.text = searchedText
+        self.refreshPagination()
+        self.displayedPosts.removeAll()
         
-    }
+        self.paginatePosts()
+        
+//        guard let searchedText = searchedText else {
+//            print("No Search Term")
+//            self.paginatePosts()
+//            return
+//        }
+//        
+//        if searchedText.isEmpty || searchedText == "" {
+//            print("No Search Term")
+//            self.paginatePosts()
+//            return
+//        } else {
+//        
+//            self.paginatePosts()
+//
+//            }
+        
+        }
+    
+//        finalFilterPost(filterString: self.filterCaption, filterLocation: self.filterLocation, filterRange: self.filterRange, filterGroup: self.filterGroup)
+    
     
     
     
 // Filter Functions
     
     func finalFilterPost(filterString: String?, filterLocation: CLLocation?, filterRange: String?, filterGroup: String?){
-        
         
         self.resultSearchController?.searchBar.text = filterString
         
@@ -342,8 +379,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     func handleRefresh() {
 
         // RemoveAll so that when user follow/unfollows it updates
-        postIdPaginateIndex = 0
-        isFinishedPaging = false
+        refreshPagination()
         clearFilter()
         
         fetchPostIds.removeAll()
@@ -409,7 +445,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     }
     
     
-    static let finishFetchingPostIdsNotificationName = NSNotification.Name(rawValue: "FinishFetchingPostIds")
+
     
     
     fileprivate func fetchFollowingUserPostIds(){
@@ -449,36 +485,72 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     }
     
     
+    func refreshPagination(){
+        
+        self.isFinishedPaging = false
+        self.fetchedPostCount = 0
+        self.fetchedPostIndex = 0
+        
+    }
+    
+    func finishPaginationCheck(){
+        
+        if self.displayedPosts.count < 1 && self.isFinishedPaging != true {
+            self.paginatePosts()
+        } else {
+            DispatchQueue.main.async(execute: { self.collectionView?.reloadData() })
+        }
+        
+    }
+    
     
     func paginatePosts(){
         
-        var paginateTotalDisplayedPosts = min(self.postIdPaginateIndex + 4, self.fetchPostIds.count - 1)
-        for i in self.postIdPaginateIndex ..< paginateTotalDisplayedPosts  {
+        print("Start Paginate Loop FetchPostCount: ", self.fetchedPostCount)
+        let paginateFetchPostSize = 4
+        var paginateFetchPostsLimit = min(self.fetchedPostCount + paginateFetchPostSize, self.fetchPostIds.count)
+        
+        for i in self.fetchedPostCount ..< paginateFetchPostsLimit  {
 
-            print("Current number: ", i, "to ",paginateTotalDisplayedPosts)
+            if i < self.fetchedPostCount {
+                print("STOP")
+            }
+            
+            print("Current number: ", i, "from", self.fetchedPostCount, " to ",paginateFetchPostsLimit)
             let fetchPostId = fetchPostIds[i]
             
             Database.fetchPostWithPostID(postId: fetchPostId.id, completion: { (post) in
-                self.displayedPosts += [post]
-                print("Displayed Post Count: ", self.displayedPosts.count)
-                if self.displayedPosts.count == paginateTotalDisplayedPosts {
-                    self.collectionView?.reloadData()
-                }
-            })
-            
-            // Reset Pagination Index
-            
-            if i == paginateTotalDisplayedPosts - 1 {
-                self.postIdPaginateIndex = i + 1
-            }
-            
-            if i == (self.fetchPostIds.count - 1) {
-                self.isFinishedPaging = true
+                self.fetchedPostCount += 1
+                self.fetchedPostIndex += 1
                 
+                var tempPost = [post]
+                
+                if self.filterCaption != nil && self.filterCaption != "" {
+                    guard let searchedText = self.filterCaption else {return}
+                    tempPost = tempPost.filter { (post) -> Bool in
+                    return post.caption.lowercased().contains(searchedText.lowercased()) || post.emoji.contains(searchedText.lowercased()) || post.locationName.contains(searchedText.lowercased()) || post.locationAdress.contains(searchedText.lowercased())
+                    }
+                }
+                
+                if tempPost.count > 0 {print("Adding Temp Post id: ", tempPost[0].id)}
+                
+                self.displayedPosts += tempPost
+
+                print("Current: ", i, "fetchedPostCount: ", self.fetchedPostCount, "Total: ", self.fetchPostIds.count, "Display: ", self.displayedPosts.count, "finished: ", self.isFinishedPaging, "paginate:", paginateFetchPostsLimit)
+                
+                if self.fetchedPostCount == paginateFetchPostsLimit {
+                    
+                        if self.fetchedPostCount == (self.fetchPostIds.count) {
+                            self.isFinishedPaging = true
+                        }
+                print("Finish Paging")
+                NotificationCenter.default.post(name: HomeController.finishPaginationNotificationName, object: nil)
+                    
+                    }
+                })
             }
-            
+
         }
-    }
     
 
     
@@ -602,7 +674,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         
         if indexPath.item == self.displayedPosts.count - 1 && !isFinishedPaging{
-            
+            print("collectionView Paginate")
             paginatePosts()
         }
         

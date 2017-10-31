@@ -10,7 +10,7 @@ import Foundation
 import UIKit
 
 protocol HomePostSearchDelegate {
-    func filterCaptionSelected(caption: String?)
+    func filterCaptionSelected(searchedText: String?)
     
 }
 
@@ -89,7 +89,7 @@ class HomePostSearch : UITableViewController, UISearchResultsUpdating, UISearchC
         }
         
         let filterText = emojiSelected?.emoji
-        self.delegate?.filterCaptionSelected(caption: filterText)
+        self.delegate?.filterCaptionSelected(searchedText: filterText)
         
         self.dismiss(animated: true) { 
         }
@@ -131,13 +131,13 @@ class HomePostSearch : UITableViewController, UISearchResultsUpdating, UISearchC
     }
   
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
-        self.delegate?.filterCaptionSelected(caption: searchBar.text)
+        self.delegate?.filterCaptionSelected(searchedText: searchBar.text)
         self.dismiss(animated: true) {
         }
     }
     
     func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
-        self.delegate?.filterCaptionSelected(caption: searchBar.text)
+        self.delegate?.filterCaptionSelected(searchedText: searchBar.text)
         self.dismiss(animated: true) {
         }
 
