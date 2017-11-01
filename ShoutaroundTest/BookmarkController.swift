@@ -76,7 +76,6 @@ class BookMarkController: UIViewController, UICollectionViewDelegate, UICollecti
         return tap
     }()
     
-    let searchBarPlaceholderText = "Search for Caption or Emoji 😍🐮🍔🇺🇸🔥"
 //    let currentLocation: CLLocation? = CLLocation(latitude: 41.973735, longitude: -87.667751)
     
     
@@ -212,6 +211,7 @@ class BookMarkController: UIViewController, UICollectionViewDelegate, UICollecti
         resultSearchController?.delegate = self
         searchBar = resultSearchController?.searchBar
         searchBar?.backgroundColor = UIColor.clear
+        searchBar?.placeholder =  searchBarPlaceholderText
         navigationItem.titleView = searchBar
         searchBar?.delegate = homePostSearchResults
         
@@ -249,22 +249,22 @@ class BookMarkController: UIViewController, UICollectionViewDelegate, UICollecti
         navigationItem.leftBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "mailbox").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(openInbox))
         
         if self.filterGroup != "All" && self.filterGroup != nil{
-            filterButton.backgroundColor = UIColor.orange
+            filterButton.backgroundColor = UIColor.mainBlue()
         } else {
             filterButton.backgroundColor = UIColor.clear
         }
         
         if self.filterRange == nil || self.filterRange == geoFilterRange[geoFilterRange.endIndex - 1] {
-            filterButton.image = geoFilterImage[geoFilterImage.endIndex - 1].withRenderingMode(.alwaysOriginal)
+            filterButton.image = #imageLiteral(resourceName: "filter").withRenderingMode(.alwaysOriginal)
             filterButton.addGestureRecognizer(singleTap)
         } else {
             let rangeIndex = geoFilterRange.index(of: self.filterRange!)
-            filterButton.image = geoFilterImage[rangeIndex!].withRenderingMode(.alwaysOriginal)
+            filterButton.image = #imageLiteral(resourceName: "filter").withRenderingMode(.alwaysOriginal)
             filterButton.addGestureRecognizer(singleTap)
         }
         
         if self.filterGroup == defaultGroup && self.filterRange == defaultRange {
-            filterButton.image = #imageLiteral(resourceName: "filter").withRenderingMode(.alwaysOriginal)
+            filterButton.image = #imageLiteral(resourceName: "filter_unselected").withRenderingMode(.alwaysOriginal)
             filterButton.backgroundColor = UIColor.clear
         }
         

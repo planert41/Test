@@ -21,7 +21,12 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         didSet{
             if displayedPosts.count == 0 {
                 self.noResultsLabel.isHidden = false
-                self.noResultsLabel.text = "Sorry, No Results"
+                self.noResultsLabel.text = "Loading"
+                let when = DispatchTime.now() + 5 // change 2 to desired number of seconds
+                DispatchQueue.main.asyncAfter(deadline: when) {
+                    self.noResultsLabel.text = "Sorry, No Results"
+                }
+                
             } else {
                 self.noResultsLabel.isHidden = true
                 self.noResultsLabel.text = "Loading"
@@ -198,6 +203,10 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         resultSearchController?.delegate = self
         let searchBar = resultSearchController?.searchBar
         searchBar?.backgroundColor = UIColor.clear
+        let placeholderText = "Search for 😍🐮🍔🇺🇸🔥"
+        
+        searchBar?.placeholder =  searchBarPlaceholderText
+        
         navigationItem.titleView = searchBar
         searchBar?.delegate = homePostSearchResults
         
@@ -286,6 +295,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         self.resultSearchController?.searchBar.text = searchedText
         self.refreshPagination()
         self.displayedPosts.removeAll()
+        self.collectionView?.reloadData()
         
         self.paginatePosts()
         
@@ -542,22 +552,22 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         
         
         if self.filterGroup != "All" && self.filterGroup != nil{
-            filterButton.backgroundColor = UIColor.orange
+            filterButton.backgroundColor = UIColor.mainBlue()
         } else {
             filterButton.backgroundColor = UIColor.clear
         }
         
         if self.filterRange == nil || self.filterRange == geoFilterRange[geoFilterRange.endIndex - 1] {
-            filterButton.image = geoFilterImage[geoFilterImage.endIndex - 1].withRenderingMode(.alwaysOriginal)
+            filterButton.image = #imageLiteral(resourceName: "filter").withRenderingMode(.alwaysOriginal)
             filterButton.addGestureRecognizer(singleTap)
         } else {
             let rangeIndex = geoFilterRange.index(of: self.filterRange!)
-            filterButton.image = geoFilterImage[rangeIndex!].withRenderingMode(.alwaysOriginal)
+            filterButton.image = #imageLiteral(resourceName: "filter").withRenderingMode(.alwaysOriginal)
             filterButton.addGestureRecognizer(singleTap)
         }
 
         if self.filterGroup == defaultGroup && self.filterRange == defaultRange {
-            filterButton.image = #imageLiteral(resourceName: "filter").withRenderingMode(.alwaysOriginal)
+            filterButton.image = #imageLiteral(resourceName: "filter_unselected").withRenderingMode(.alwaysOriginal)
             filterButton.backgroundColor = UIColor.clear
         }
         

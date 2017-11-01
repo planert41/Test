@@ -17,3 +17,5 @@ import UIKit
 var FilterSortDefault:[String] = ["Latest", "Oldest", "Nearest"]
 
 var defaultPhotoResize = CGSize(width: 500, height: 500)
+
+var searchBarPlaceholderText = "Search 🍩🍔🍜🇲🇾🔥"
