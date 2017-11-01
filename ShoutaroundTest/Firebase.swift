@@ -50,34 +50,6 @@ extension Database{
                         completion(post)
                     })
                 })
-                
-//                Database.database().reference().child("likes").child(uid).child(postId).observeSingleEvent(of: .value, with: { (snapshot) in
-//                    
-//                    if let value = snapshot.value as? Int, value == 1 {
-//                        post.hasLiked = true
-//                    } else {
-//                        post.hasLiked = false
-//                    }
-//                    
-//                    Database.database().reference().child("bookmarks").child(uid).child(postId).observeSingleEvent(of: .value, with: { (snapshot) in
-//                        
-//                        let dictionaries = snapshot.value as? [String: Any]
-//                        
-//                        if let value = dictionaries?["bookmarked"] as? Int, value == 1 {
-//                            post.hasBookmarked = true
-//                        } else {
-//                            post.hasBookmarked = false
-//                        }
-//                        
-//                        completion(post)
-//                        
-//                    }, withCancel: { (err) in
-//                        print("Failed to fetch bookmark info for post:", err)
-//                    })
-//                    
-//                }, withCancel: { (err) in
-//                    print("Failed to fetch like info for post:", err)
-//                })
             
         }) { (err) in print("Failed to fetchposts:", err) }
         
@@ -133,27 +105,6 @@ extension Database{
     
     
     }
-    
-//    static func fetchAllPostIDWithUID(creatoruid: String, completion: @escaping ([String]) -> ()) {
-//            let myGroup = DispatchGroup()
-//            let ref = Database.database().reference().child("userposts").child(creatoruid)
-//        
-//            ref.observeSingleEvent(of: .value, with: {(snapshot) in
-//            
-//            guard let userposts = snapshot.value as? [String: Any] else {return}
-//            var tempPostUIDs = [] as [String]
-//            userposts.forEach({ (key,value) in
-//                myGroup.enter()
-//                tempPostUIDs.append(key)
-//                myGroup.leave()
-//                })
-//                
-//                myGroup.notify(queue: .main) {
-//                    print(tempPostUIDs)
-//                    completion(tempPostUIDs)
-//                }
-//            })
-//        }
     
     static func fetchUserWithUsername( username: String, completion: @escaping (User) -> ()) {
     
@@ -256,9 +207,7 @@ extension Database{
                         myGroup.leave()
                         
                     })
-
                     })
-                    
                 })
                 
                 myGroup.notify(queue: .main) {
@@ -331,6 +280,7 @@ extension Database{
             
            checkPostForLikesAndBookmarks(post: post, completion: { (post) in
                 postCache[postId] = post
+//                print(post)
                 completion(post)
             })
            })
@@ -385,16 +335,16 @@ extension Database{
     
     static func fetchAllPostWithLocation(location: CLLocation, distance: Double, completion: @escaping ([Post]) -> ()) {
 
+        var fetchedPosts = [] as [Post]
+        
         let myGroup = DispatchGroup()
         let ref = Database.database().reference().child("postlocations")
         let geoFire = GeoFire(firebaseRef: ref)
-        var fetchedPosts = [] as [Post]
-
         let circleQuery = geoFire?.query(at: location, withRadius: distance)
         
             myGroup.enter()
         circleQuery?.observe(.keyEntered, with: { (key, location) in
-            print(key)
+//            print(key)
 
             myGroup.enter()
             Database.fetchPostWithPostID(postId: key!, completion: { (post) in
@@ -402,13 +352,11 @@ extension Database{
                 fetchedPosts.append(post)
                 myGroup.leave()
             })
-            
         })
         
         circleQuery?.observeReady({
                 myGroup.leave()
         })
-        
         
         myGroup.notify(queue: .main) {
             fetchedPosts.sort(by: { (p1, p2) -> Bool in
@@ -416,7 +364,64 @@ extension Database{
             })
             completion(fetchedPosts)
         }
+    }
 
+    static func fetchPostIDDetails(postId: String, completion: @escaping (PostId) -> ()) {
+        
+        var fetchedPostID: PostId? = nil
+        
+        let ref = Database.database().reference().child("posts").child(postId)
+        
+        ref.observeSingleEvent(of: .value, with: {(snapshot) in
+            
+            guard let dictionary = snapshot.value as? [String: Any] else {return}
+            let creatorUID = dictionary["creatorUID"] as? String ?? ""
+            let secondsFrom1970 = dictionary["creationDate"] as? Double ?? 0
+            
+            let tempID = PostId.init(id: postId, creatorUID: creatorUID, fetchedDate: secondsFrom1970, distance: nil)
+            completion(tempID)
+            
+        })
+    }
+    
+    
+    
+    static func fetchAllPostIDWithinLocation(selectedLocation: CLLocation, distance: Double, completion: @escaping ([PostId]) -> ()) {
+        
+        let myGroup = DispatchGroup()
+        var fetchedPostIds = [] as [PostId]
+        
+        let ref = Database.database().reference().child("postlocations")
+        let geoFire = GeoFire(firebaseRef: ref)
+        let circleQuery = geoFire?.query(at: selectedLocation, withRadius: distance)
+        
+        myGroup.enter()
+        circleQuery?.observe(.keyEntered, with: { (key, firebaseLocation) in
+            print(key)
+            
+            myGroup.enter()
+            
+            Database.fetchPostIDDetails(postId: key!, completion: { (fetchPostId) in
+                var tempPostId = fetchPostId
+                tempPostId.distance = firebaseLocation?.distance(from: selectedLocation)
+                fetchedPostIds.append(tempPostId)
+                myGroup.leave()
+            })
+        })
+        
+        circleQuery?.observeReady({
+            myGroup.leave()
+        })
+        
+        myGroup.notify(queue: .main) {
+            fetchedPostIds.sort(by: { (p1, p2) -> Bool in
+                return (p1.distance! < p2.distance!)
+            })
+            print("Geofire Fetched Posts: ", fetchedPostIds.count )
+            completion(fetchedPostIds)
+            
+        }
+        
     }
 
 }

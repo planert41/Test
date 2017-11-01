@@ -28,8 +28,6 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         }
     }
 
-    var groupUsersUids: [String] = []
-    var followingUsersUids: [String] = []
     var fetchPostIds: [PostId] = [] {
         didSet{
         }
@@ -49,7 +47,6 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         }
     }
     var fetchedPostCount = 0
-    var fetchedPostIndex = 0
     
     static let finishFetchingPostIdsNotificationName = NSNotification.Name(rawValue: "FinishFetchingPostIds")
     static let finishPaginationNotificationName = NSNotification.Name(rawValue: "FinishPagination")
@@ -110,8 +107,6 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        self.clearFilter()
-        self.fetchCurrentUser()
         self.navigationController?.navigationBar.backgroundColor = UIColor.clear
         
 //        self.automaticallyAdjustsScrollViewInsets = false
@@ -135,22 +130,32 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         collectionView?.alwaysBounceVertical = true
         collectionView?.keyboardDismissMode = .onDrag
         
-// Search Controller
         
-        setupSearchController()
-        setupNavigationItems()
-        fetchAllPosts()
-        
-        // Ask for Authorisation from the User.
+// Ask for Authorisation from the User.
         self.locationManager.requestAlwaysAuthorization()
         
-        // For use in foreground
+// For use in foreground
         self.locationManager.requestWhenInUseAuthorization()
         
         if CLLocationManager.locationServicesEnabled() {
             locationManager.delegate = self
             locationManager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters
         }
+
+
+// Fetch Post Informations
+        
+        self.clearFilter()
+        self.refreshPagination()
+        
+        fetchAllPostIds()
+        fetchGroupUserIds()
+        
+        // Search Controller
+        
+        setupSearchController()
+        setupNavigationItems()
+
     }
     
     func CGRectMake(_ x: CGFloat, _ y: CGFloat, _ width: CGFloat, _ height: CGFloat) -> CGRect {
@@ -199,7 +204,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     }
 
     
-// Filter Delegates
+// Search Delegates
     
     func filterControllerFinished(selectedRange: String?, selectedLocation: CLLocation?, selectedGooglePlaceID: String?, selectedGroup: String?){
         
@@ -207,6 +212,19 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         self.filterLocation = selectedLocation
         self.filterGroup = selectedGroup
     
+        guard let filterDistance = Double(self.filterRange!) else {
+                    print("Invalid Distance Number or Non Distance")
+                    self.fetchAllPostIds()
+                    return
+        }
+        Database.fetchAllPostIDWithinLocation(selectedLocation: self.filterLocation!, distance: filterDistance) { (firebasePostIds) in
+            self.fetchPostIds = firebasePostIds
+            print("Geofire Filtered Posts: ", self.fetchPostIds.count)
+            self.refreshPagination()
+            self.displayedPosts.removeAll()
+            self.paginatePosts()
+        }
+        
     }
     
     func filterCaptionSelected(searchedText: String?){
@@ -217,136 +235,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         
         self.paginatePosts()
         
-//        guard let searchedText = searchedText else {
-//            print("No Search Term")
-//            self.paginatePosts()
-//            return
-//        }
-//        
-//        if searchedText.isEmpty || searchedText == "" {
-//            print("No Search Term")
-//            self.paginatePosts()
-//            return
-//        } else {
-//        
-//            self.paginatePosts()
-//
-//            }
-        
         }
-    
-//        finalFilterPost(filterString: self.filterCaption, filterLocation: self.filterLocation, filterRange: self.filterRange, filterGroup: self.filterGroup)
-    
-    
-    
-    
-// Filter Functions
-    
-    func finalFilterPost(filterString: String?, filterLocation: CLLocation?, filterRange: String?, filterGroup: String?){
-        
-        self.resultSearchController?.searchBar.text = filterString
-        
-        self.filterPostByCaption(filterString?.removeDuplicates){
-           
-            self.filterPostByLocation(filterLocation: filterLocation, filterRange: filterRange){
-                    self.filterPostByGroup(filterGroup: self.filterGroup!){
-                        self.collectionView?.reloadData()
-                        }
-                    }
-                }
-        
-        if self.collectionView?.numberOfItems(inSection: 0) != 0 {
-            let indexPath = IndexPath(item: 0, section: 0)
-            self.collectionView?.scrollToItem(at: indexPath, at: .bottom, animated: true)
-            self.noResultsLabel.text = "Loading"
-            
-        } else {
-            self.noResultsLabel.text = "No Results"
-        }
-    }
-
-    func filterPostByCaption(_ string: String?, completion: () -> ()) {
-        
-        guard let searchedText = string else {
-            displayedPosts = fetchedPosts
-            print("No Search Term")
-            completion()
-            return
-        }
-        
-        if searchedText.isEmpty || searchedText == "" {
-            displayedPosts = fetchedPosts
-            print("No Search Term")
-            completion()
-            return
-        } else {
-            
-            print("Search Term Was", searchedText)
-            //Makes everything case insensitive
-            displayedPosts = self.fetchedPosts.filter { (post) -> Bool in
-                return post.caption.lowercased().contains(searchedText.lowercased()) || post.emoji.contains(searchedText.lowercased()) || post.locationName.contains(searchedText.lowercased()) || post.locationAdress.contains(searchedText.lowercased())
-            }
-                completion()
-//            collectionView?.reloadData()
-        }
-    }
-    
-    func filterPostByLocation(filterLocation: CLLocation?, filterRange: String?, completion: @escaping () -> ()){
-        
-        let ref = Database.database().reference().child("postlocations")
-        let geoFire = GeoFire(firebaseRef: ref)
-        
-        var geoFilteredPosts = [Post]()
-        
-        let filterRangeCheck = Double(filterRange!)
-        guard let filterDistance = filterRangeCheck else {
-            print("Invalid Distance Number or Non Distance")
-            return
-        }
-        
-//        let when = DispatchTime.now() + 0.5 // change 2 to desired number of seconds
-//        DispatchQueue.main.asyncAfter(deadline: when) {
-            
-            print("Current User Location Used for Post Filtering", filterLocation)
-            let circleQuery = geoFire?.query(at: filterLocation, withRadius: filterDistance)
-            circleQuery?.observe(.keyEntered, with: { (key, location) in
-                var geoFilteredPost: [Post] = self.displayedPosts.filter { (post) -> Bool in
-                    return post.id == key
-                }
-                
-                if geoFilteredPost != nil && geoFilteredPost.count > 0 && geoFilteredPost[0].locationGPS != nil {
-                    geoFilteredPost[0].locationGPS = location
-                    geoFilteredPost[0].distance = Double((location?.distance(from: CurrentUser.currentLocation!))!)
-                    geoFilteredPost[0].id = key
-                }
-                geoFilteredPosts += geoFilteredPost
-            })
-            
-            circleQuery?.observeReady({
-                self.displayedPosts = geoFilteredPosts.sorted(by: { (p1, p2) -> Bool in
-                    p1.distance!.isLess(than: p2.distance!)
-                })
-                completion()
-            })
-//        }
-    }
-    
-    
-    func filterPostByGroup(filterGroup: String, completion: () -> ()) {
-        
-        if filterGroup != self.defaultGroup {
-            var groupFilteredPost: [Post] = []
-            for userUid in self.groupUsersUids{
-                groupFilteredPost = self.displayedPosts.filter { (post) -> Bool in
-                    return post.creatorUID == userUid
-                }
-                groupFilteredPost += groupFilteredPost
-                }
-                self.displayedPosts = groupFilteredPost
-            }
-        
-        completion()
-    }
     
     
     
@@ -362,6 +251,14 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         self.filterRange = defaultRange
     }
     
+    
+    func refreshPagination(){
+        
+        self.isFinishedPaging = false
+        self.fetchedPostCount = 0
+        
+    }
+    
     func handleUpdateFeed() {
         handleRefresh()
     }
@@ -369,9 +266,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     func handleUpdateFeedWithFilter() {
         displayedPosts.removeAll()
         self.collectionView?.reloadData()
-        
-        finalFilterPost(filterString: self.filterCaption, filterLocation: self.filterLocation, filterRange: self.filterRange, filterGroup: self.filterGroup)
-        self.collectionView?.refreshControl?.endRefreshing()
+        self.paginatePosts()
         print("Refresh Home Feed With Filter")
         
     }
@@ -386,50 +281,18 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         fetchedPosts.removeAll()
         displayedPosts.removeAll()
         
-        fetchAllPosts()
+        fetchAllPostIds()
         
         self.collectionView?.refreshControl?.endRefreshing()
         print("Refresh Home Feed")
     }
+
+// Post ID Fetching
     
-    fileprivate func fetchAllPosts() {
-
-//        fetchUserPosts()
-//        fetchFollowingUserIds()
-//        fetchGroupUserIds()
-        
-        fetchAllPostIds()
-//        self.paginatePosts()
-//        displayedPosts = fetchedPosts
-        
-
-        print("Fetched Post Ids :", fetchPostIds.count)
-        collectionView?.reloadData()
-    }
     
-    fileprivate func fetchFollowingUserIds() {
-        
-        guard let uid = Auth.auth().currentUser?.uid else {return}
-        
-        Database.database().reference().child("following").child(uid).observeSingleEvent(of: .value, with: { (snapshot) in
-        
-            var followingUsers: [String] = []
-
-            guard let userIdsDictionary = snapshot.value as? [String: Any] else {return}
-            userIdsDictionary.forEach({ (key,value) in
-                
-                followingUsers.append(key)
-                Database.fetchUserWithUID(uid: key, completion: { (user) in
-                    self.fetchPostsWithUser(user: user)
-                })
-            })
-            
-            self.followingUsersUids = followingUsers
-            CurrentUser.followingUids = followingUsers
-            
-        }) { (err) in
-            print("Failed to fetch following user ids:", err)
-        }
+    fileprivate func fetchAllPostIds(){
+        fetchUserPostIds()
+        fetchFollowingUserPostIds()
     }
     
     fileprivate func fetchUserPostIds(){
@@ -441,21 +304,25 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
             self.fetchPostIds.sort(by: { (p1, p2) -> Bool in
                 return p1.creationDate.compare(p2.creationDate) == .orderedDescending
             })
+            print("Current User Posts: ", self.fetchPostIds.count)
         }
     }
-    
-    
 
-    
     
     fileprivate func fetchFollowingUserPostIds(){
         
         let thisGroup = DispatchGroup()
         guard let uid = Auth.auth().currentUser?.uid else {return}
+        
+        var followingUsers: [String] = []
+        
         Database.database().reference().child("following").child(uid).observeSingleEvent(of: .value, with: { (snapshot) in
             
             guard let userIdsDictionary = snapshot.value as? [String: Any] else {return}
             userIdsDictionary.forEach({ (key,value) in
+
+                followingUsers.append(key)
+                
                 thisGroup.enter()
                 Database.fetchAllPostIDWithCreatorUID(creatoruid: key) { (postIds) in
                     self.fetchPostIds = self.fetchPostIds + postIds
@@ -463,12 +330,14 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
                         return p1.creationDate.compare(p2.creationDate) == .orderedDescending
                     })
                     thisGroup.leave()
-                    
                 }
             })
             
             thisGroup.notify(queue: .main) {
-                print(self.fetchPostIds.count)
+                
+                CurrentUser.followingUids = followingUsers
+                print("Current User And Following Posts: ", self.fetchPostIds.count)
+                print("Number of Following: ",CurrentUser.followingUids.count)
                 NotificationCenter.default.post(name: HomeController.finishFetchingPostIdsNotificationName, object: nil)
             }
             
@@ -477,30 +346,27 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
             print("Failed to fetch following user post ids:", err)
         }
     }
+
     
-    fileprivate func fetchAllPostIds(){
-        fetchUserPostIds()
-        fetchFollowingUserPostIds()
-        
-    }
-    
-    
-    func refreshPagination(){
-        
-        self.isFinishedPaging = false
-        self.fetchedPostCount = 0
-        self.fetchedPostIndex = 0
-        
-    }
+// Pagination
+
     
     func finishPaginationCheck(){
         
         if self.displayedPosts.count < 1 && self.isFinishedPaging != true {
+            print("No Display Pagination Check Paginate")
             self.paginatePosts()
         } else {
             DispatchQueue.main.async(execute: { self.collectionView?.reloadData() })
+//            if self.collectionView?.numberOfItems(inSection: 0) != 0 {
+//                let indexPath = IndexPath(item: 0, section: 0)
+//                self.collectionView?.scrollToItem(at: indexPath, at: .bottom, animated: true)
+//                self.noResultsLabel.text = "Loading"
+//                
+//            } else {
+//                self.noResultsLabel.text = "No Results"
+//            }
         }
-        
     }
     
     
@@ -511,26 +377,36 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         var paginateFetchPostsLimit = min(self.fetchedPostCount + paginateFetchPostSize, self.fetchPostIds.count)
         
         for i in self.fetchedPostCount ..< paginateFetchPostsLimit  {
-
-            if i < self.fetchedPostCount {
-                print("STOP")
-            }
             
             print("Current number: ", i, "from", self.fetchedPostCount, " to ",paginateFetchPostsLimit)
             let fetchPostId = fetchPostIds[i]
             
+            // Filter Group
+            
+            if self.filterGroup != self.defaultGroup{
+                if CurrentUser.groupUids.contains(fetchPostId.creatorUID!){
+                } else {
+                    // Skip Post if not in group
+                    self.fetchedPostCount += 1
+                    continue
+                }
+            }
+            
             Database.fetchPostWithPostID(postId: fetchPostId.id, completion: { (post) in
                 self.fetchedPostCount += 1
-                self.fetchedPostIndex += 1
                 
                 var tempPost = [post]
+                
+                // Filter Caption
                 
                 if self.filterCaption != nil && self.filterCaption != "" {
                     guard let searchedText = self.filterCaption else {return}
                     tempPost = tempPost.filter { (post) -> Bool in
-                    return post.caption.lowercased().contains(searchedText.lowercased()) || post.emoji.contains(searchedText.lowercased()) || post.locationName.contains(searchedText.lowercased()) || post.locationAdress.contains(searchedText.lowercased())
+                    return post.caption.lowercased().contains(searchedText.lowercased()) || post.emoji.contains(searchedText.lowercased()) || post.locationName.lowercased().contains(searchedText.lowercased()) || post.locationAdress.lowercased().contains(searchedText.lowercased())
                     }
                 }
+
+
                 
                 if tempPost.count > 0 {print("Adding Temp Post id: ", tempPost[0].id)}
                 
@@ -549,7 +425,6 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
                     }
                 })
             }
-
         }
     
 
@@ -566,9 +441,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
             userIdsDictionary.forEach({ (key,value) in
                 groupUsers.append(key)
             })
-            self.groupUsersUids = groupUsers
             CurrentUser.groupUids = groupUsers
-            
             
         }) { (err) in
             print("Failed to fetch group user ids:", err)
@@ -614,7 +487,6 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
             filterButton.backgroundColor = UIColor.clear
         }
         
-        
         let rangeBarButton = UIBarButtonItem.init(customView: filterButton)
         navigationItem.rightBarButtonItem = rangeBarButton
         
@@ -622,10 +494,8 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
 
     
     func openInbox() {
-    
-    let inboxController = InboxController(collectionViewLayout: UICollectionViewFlowLayout())
-    navigationController?.pushViewController(inboxController, animated: true)
-    
+        let inboxController = InboxController(collectionViewLayout: UICollectionViewFlowLayout())
+        navigationController?.pushViewController(inboxController, animated: true)
     }
 
     
@@ -674,7 +544,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         
         if indexPath.item == self.displayedPosts.count - 1 && !isFinishedPaging{
-            print("collectionView Paginate")
+            print("CollectionView Paginate")
             paginatePosts()
         }
         
