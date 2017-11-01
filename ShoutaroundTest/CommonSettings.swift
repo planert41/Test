@@ -15,3 +15,5 @@ import UIKit
  var geoFilterRangeDefault:[String] = ["5", "25", "100","250", "All"]
 
 var FilterSortDefault:[String] = ["Latest", "Oldest", "Nearest"]
+
+var defaultPhotoResize = CGSize(width: 500, height: 500)

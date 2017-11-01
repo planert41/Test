@@ -39,7 +39,7 @@ class CustomImageView: UIImageView {
             }
             
             guard let imageData = data else {return}
-            let photoImage = UIImage(data: imageData)?.resizeImageWith(newSize: CGSize(width: 200, height: 200))
+            let photoImage = UIImage(data: imageData)?.resizeImageWith(newSize: defaultPhotoResize)
             imageCache[url.absoluteString] = photoImage
             
             

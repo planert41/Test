@@ -261,8 +261,10 @@ extension Database{
     static func fetchPostWithPostID( postId: String, completion: @escaping (Post) -> ()) {
         
             if let cachedPost = postCache[postId] {
+                if cachedPost != nil {
                 completion(cachedPost)
                 return
+                }
             }
         
             let ref = Database.database().reference().child("posts").child(postId)

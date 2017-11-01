@@ -22,8 +22,11 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         didSet{
             if displayedPosts.count == 0 {
                 self.noResultsLabel.isHidden = false
+                self.noResultsLabel.text = "Sorry, No Results"
             } else {
                 self.noResultsLabel.isHidden = true
+                self.noResultsLabel.text = "Loading"
+                
             }
         }
     }
@@ -166,6 +169,9 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         return CGRect(x: x, y: y, width: width, height: height)
     }
     
+    func clearPostIds(){
+        self.fetchPostIds.removeAll()
+    }
     
     func finishFetchingPosts(){
         self.sortFetchPostIds()
@@ -224,15 +230,34 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         self.filterSort = selectedSort
         self.refreshPagination()
         self.displayedPosts.removeAll()
+        self.collectionView?.reloadData()
     
+        // No Distance Filter is Selected
+        
         guard let filterDistance = Double(self.filterRange!) else {
                     print("Invalid Distance Number or Non Distance")
+                    self.clearPostIds()
                     self.fetchAllPostIds()
-            
                     return
         }
+        
+        // Distance Filter is Selected
+        
         Database.fetchAllPostIDWithinLocation(selectedLocation: self.filterLocation!, distance: filterDistance) { (firebasePostIds) in
-            self.fetchPostIds = firebasePostIds
+            
+            let currentUserUid = Auth.auth().currentUser?.uid
+            var tempPostIds = firebasePostIds
+            
+            // Check for User UID
+            
+            for (i,str) in firebasePostIds.enumerated().reversed() {
+                if CurrentUser.followingUids.contains(str.creatorUID!) || str.creatorUID! == currentUserUid! {
+                } else {
+                    tempPostIds.remove(at: i)
+                }
+            }
+            self.fetchPostIds = tempPostIds
+            
             self.sortFetchPostIds()
             print("Geofire Filtered Posts: ", self.fetchPostIds.count)
             self.paginatePosts()
@@ -326,11 +351,31 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         fetchFollowingUserPostIds()
     }
     
+    
+    fileprivate func checkDisplayPostIdForDups( postIds : [PostId]){
+        
+        
+        for postId in postIds {
+            
+            let postIdCheck = postId.id
+            if let dupIndex = self.fetchPostIds.index(where: { (item) -> Bool in
+                item.id == postIdCheck
+            }) {
+                self.fetchPostIds.remove(at: dupIndex)
+                print("Deleted from fetchPostIds Dup Post ID: ", postIdCheck)
+                
+            }
+        }
+    }
+    
     fileprivate func fetchUserPostIds(){
         
         guard let uid = Auth.auth().currentUser?.uid else {return}
 
         Database.fetchAllPostIDWithCreatorUID(creatoruid: uid) { (postIds) in
+            
+            self.checkDisplayPostIdForDups(postIds: postIds)
+            
             self.fetchPostIds = self.fetchPostIds + postIds
             self.fetchPostIds.sort(by: { (p1, p2) -> Bool in
                 return p1.creationDate.compare(p2.creationDate) == .orderedDescending
@@ -356,6 +401,8 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
                 
                 thisGroup.enter()
                 Database.fetchAllPostIDWithCreatorUID(creatoruid: key) { (postIds) in
+                    
+                    self.checkDisplayPostIdForDups(postIds: postIds)
                     self.fetchPostIds = self.fetchPostIds + postIds
                     self.fetchPostIds.sort(by: { (p1, p2) -> Bool in
                         return p1.creationDate.compare(p2.creationDate) == .orderedDescending
@@ -624,6 +671,11 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         let filteredindexpath = IndexPath(row:index!, section: 0)
         self.displayedPosts[index!] = post
 //        self.collectionView?.reloadItems(at: [filteredindexpath])
+        
+        // Remove From Cache
+        
+        let postId = post.id
+        postCache[postId!] = post
     }
     
     func didTapMessage(post: Post) {

@@ -50,7 +50,7 @@
 		A5AEB9761F986F8200E88CAC /* PictureController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5AEB9751F986F8200E88CAC /* PictureController.swift */; };
 		A5AEB9781F9956B500E88CAC /* InboxController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5AEB9771F9956B500E88CAC /* InboxController.swift */; };
 		A5AEB97A1F99583B00E88CAC /* InboxCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5AEB9791F99583B00E88CAC /* InboxCell.swift */; };
-		A5BFBB6B1F7315D200F36AF8 /* test.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5BFBB6A1F7315D200F36AF8 /* test.swift */; };
+		A5BC59491FAA112200BEAD1C /* GoogleMaps.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A5BC59481FAA112200BEAD1C /* GoogleMaps.framework */; };
 		A5C480D01F5DCB500096E003 /* FBSDKCoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A5C480CE1F5DCB500096E003 /* FBSDKCoreKit.framework */; };
 		A5C480D11F5DCB500096E003 /* FBSDKLoginKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A5C480CF1F5DCB500096E003 /* FBSDKLoginKit.framework */; };
 		A5C6450A1F54F68800C78244 /* SharePhotoController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5C645091F54F68800C78244 /* SharePhotoController.swift */; };
@@ -120,8 +120,8 @@
 		A5AEB9751F986F8200E88CAC /* PictureController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PictureController.swift; sourceTree = "<group>"; };
 		A5AEB9771F9956B500E88CAC /* InboxController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InboxController.swift; sourceTree = "<group>"; };
 		A5AEB9791F99583B00E88CAC /* InboxCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InboxCell.swift; sourceTree = "<group>"; };
+		A5BC59481FAA112200BEAD1C /* GoogleMaps.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GoogleMaps.framework; path = Pods/GoogleMaps/Maps/Frameworks/GoogleMaps.framework; sourceTree = "<group>"; };
 		A5BFBB651F6F647100F36AF8 /* ShoutaroundTest-CBridgingHeader.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "ShoutaroundTest-CBridgingHeader.h"; sourceTree = "<group>"; };
-		A5BFBB6A1F7315D200F36AF8 /* test.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = test.swift; sourceTree = "<group>"; };
 		A5C480CE1F5DCB500096E003 /* FBSDKCoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = FBSDKCoreKit.framework; path = "ShoutaroundTest/FacebookSDKs-iOS-4.26.0/FBSDKCoreKit.framework"; sourceTree = "<group>"; };
 		A5C480CF1F5DCB500096E003 /* FBSDKLoginKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = FBSDKLoginKit.framework; path = "ShoutaroundTest/FacebookSDKs-iOS-4.26.0/FBSDKLoginKit.framework"; sourceTree = "<group>"; };
 		A5C645091F54F68800C78244 /* SharePhotoController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SharePhotoController.swift; sourceTree = "<group>"; };
@@ -154,6 +154,7 @@
 			files = (
 				A5C480D01F5DCB500096E003 /* FBSDKCoreKit.framework in Frameworks */,
 				A5C480D11F5DCB500096E003 /* FBSDKLoginKit.framework in Frameworks */,
+				A5BC59491FAA112200BEAD1C /* GoogleMaps.framework in Frameworks */,
 				B1A3AC30339B082041E14A20 /* Pods_ShoutaroundTest.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -175,6 +176,7 @@
 		3EA73406772E99D3B47B94DF /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				A5BC59481FAA112200BEAD1C /* GoogleMaps.framework */,
 				A5C480CE1F5DCB500096E003 /* FBSDKCoreKit.framework */,
 				A5C480CF1F5DCB500096E003 /* FBSDKLoginKit.framework */,
 				B65B7D125931B939429672C6 /* Pods_ShoutaroundTest.framework */,
@@ -350,7 +352,6 @@
 			isa = PBXGroup;
 			children = (
 				A5C645131F565E8800C78244 /* HomeController.swift */,
-				A5BFBB6A1F7315D200F36AF8 /* test.swift */,
 				A5C645151F56604200C78244 /* HomePostCell.swift */,
 				A5C645291F5BB84200C78244 /* CommentsController.swift */,
 				A5C6452B1F5C459500C78244 /* CommentCell.swift */,
@@ -570,7 +571,6 @@
 				A56868BF1F79C2FF0050C406 /* EmailHtmlFormat.swift in Sources */,
 				A5C645221F5B5F2700C78244 /* CameraController.swift in Sources */,
 				A530FE8F1F8B17BA003C3591 /* LocationSearchController.swift in Sources */,
-				A5BFBB6B1F7315D200F36AF8 /* test.swift in Sources */,
 				A5C645111F56547300C78244 /* CustomImageView.swift in Sources */,
 				A5AEB97A1F99583B00E88CAC /* InboxCell.swift in Sources */,
 				A5C6450D1F564A4C00C78244 /* Post.swift in Sources */,
@@ -738,6 +738,7 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/ShoutaroundTest/FacebookSDKs-iOS-4.26.0",
+					"$(PROJECT_DIR)/Pods/GoogleMaps/Maps/Frameworks",
 				);
 				INFOPLIST_FILE = ShoutaroundTest/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
@@ -757,6 +758,7 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/ShoutaroundTest/FacebookSDKs-iOS-4.26.0",
+					"$(PROJECT_DIR)/Pods/GoogleMaps/Maps/Frameworks",
 				);
 				INFOPLIST_FILE = ShoutaroundTest/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";

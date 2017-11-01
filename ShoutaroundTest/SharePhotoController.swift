@@ -1104,12 +1104,9 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
     
     func handleShare() {
         
-        guard let image = selectedImage else { return }
+        guard let image = selectedImage?.resizeImageWith(newSize: defaultPhotoResize) else { return }
         guard let uploadData = UIImageJPEGRepresentation(image, 0.5) else {return}
         guard let caption = captionTextView.text, caption.characters.count > 0 else {return}
-        
-
-        
         
         navigationItem.rightBarButtonItem?.isEnabled = false
         
