@@ -26,6 +26,12 @@ class BookmarkPhotoCell: UICollectionViewCell {
     let adressLabelSize = 12 as CGFloat
     var delegate: BookmarkPhotoCellDelegate?
     
+    var bookmarkDate: Date?{
+        didSet{
+            let timeAgoDisplay = bookmarkDate?.timeAgoDisplay()
+            captionLabel.text = timeAgoDisplay
+        }
+    }
     var post: Post? {
         didSet {
             
@@ -38,7 +44,6 @@ class BookmarkPhotoCell: UICollectionViewCell {
             
             guard let profileImageUrl = post?.user.profileImageUrl else {return}
             userProfileImageView.loadImage(urlString: profileImageUrl)
-            captionLabel.text = post?.caption
             
        //     setupAttributedLocationName()
             
@@ -61,12 +66,16 @@ class BookmarkPhotoCell: UICollectionViewCell {
                 }
                 
                 else if postdistance >= 100000 {
+                    
                     // Convert to M to KM
                     let locationDistance = postdistance/100000
                     distanceLabel.text =  " \(locationDistance.format(f: distanceformat))K km"
                 }
-                
+            } else {
+                    distanceLabel.text = ""
             }
+            
+            
         }
     }
     

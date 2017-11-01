@@ -17,7 +17,6 @@ import CoreLocation
 class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLayout, HomePostCellDelegate, CLLocationManagerDelegate, UISearchControllerDelegate, HomePostSearchDelegate, UIGestureRecognizerDelegate, FilterControllerDelegate  {
     
     let cellId = "cellId"
-    var fetchedPosts = [Post]()
     var displayedPosts = [Post](){
         didSet{
             if displayedPosts.count == 0 {
@@ -334,13 +333,12 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         clearFilter()
         
         fetchPostIds.removeAll()
-        fetchedPosts.removeAll()
         displayedPosts.removeAll()
         
         fetchAllPostIds()
         
         self.collectionView?.refreshControl?.endRefreshing()
-        print("Refresh Home Feed")
+        print("Refresh Home Feed. FetchPostIds: ", self.fetchPostIds.count, " DisplayedPost: ", self.displayedPosts.count)
     }
 
 // Post ID Fetching
@@ -350,23 +348,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         fetchUserPostIds()
         fetchFollowingUserPostIds()
     }
-    
-    
-    fileprivate func checkDisplayPostIdForDups( postIds : [PostId]){
-        
-        
-        for postId in postIds {
-            
-            let postIdCheck = postId.id
-            if let dupIndex = self.fetchPostIds.index(where: { (item) -> Bool in
-                item.id == postIdCheck
-            }) {
-                self.fetchPostIds.remove(at: dupIndex)
-                print("Deleted from fetchPostIds Dup Post ID: ", postIdCheck)
-                
-            }
-        }
-    }
+
     
     fileprivate func fetchUserPostIds(){
         
@@ -375,7 +357,6 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         Database.fetchAllPostIDWithCreatorUID(creatoruid: uid) { (postIds) in
             
             self.checkDisplayPostIdForDups(postIds: postIds)
-            
             self.fetchPostIds = self.fetchPostIds + postIds
             self.fetchPostIds.sort(by: { (p1, p2) -> Bool in
                 return p1.creationDate.compare(p2.creationDate) == .orderedDescending
@@ -391,7 +372,6 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         guard let uid = Auth.auth().currentUser?.uid else {return}
         
         var followingUsers: [String] = []
-        
         Database.database().reference().child("following").child(uid).observeSingleEvent(of: .value, with: { (snapshot) in
             
             guard let userIdsDictionary = snapshot.value as? [String: Any] else {return}
@@ -419,9 +399,25 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
                 NotificationCenter.default.post(name: HomeController.finishFetchingPostIdsNotificationName, object: nil)
             }
             
-            
         }) { (err) in
             print("Failed to fetch following user post ids:", err)
+        }
+    }
+    
+    
+    
+    fileprivate func checkDisplayPostIdForDups( postIds : [PostId]){
+        
+        
+        for postId in postIds {
+            
+            let postIdCheck = postId.id
+            if let dupIndex = self.fetchPostIds.index(where: { (item) -> Bool in
+                item.id == postIdCheck
+            }) {
+                self.fetchPostIds.remove(at: dupIndex)
+                print("Deleted from fetchPostIds Dup Post ID: ", postIdCheck)
+            }
         }
     }
 
@@ -576,31 +572,6 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         navigationController?.pushViewController(inboxController, animated: true)
     }
 
-    
-    fileprivate func fetchUserPosts() {
-        
-        guard let uid = Auth.auth().currentUser?.uid  else {return}
-        
-        Database.fetchUserWithUID(uid: uid) { (user) in
-            self.fetchPostsWithUser(user: user)
-        }
-
-    }
-    
-
-    fileprivate func fetchPostsWithUser(user: User){
-    
-        Database.fetchAllPostWithUID(creatoruid: user.uid) { (fetchedPosts) in
-            self.fetchedPosts = self.fetchedPosts + fetchedPosts
-            self.fetchedPosts.sort(by: { (p1, p2) -> Bool in
-                return p1.creationDate.compare(p2.creationDate) == .orderedDescending
-             })
-            
-            self.displayedPosts = self.fetchedPosts
-            self.collectionView?.reloadData()
-        }
-
-    }
 
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         
@@ -608,6 +579,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         height += view.frame.width
         height += 50
         height += 60
+        height += 20
         
         return CGSize(width: view.frame.width, height: height)
     }
@@ -626,8 +598,15 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
             paginatePosts()
         }
         
+
+        
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: cellId, for: indexPath) as! HomePostCell
         cell.post = displayedPosts[indexPath.item]
+        
+        if self.filterLocation != nil {
+            cell.post?.distance = Double((cell.post?.locationGPS?.distance(from: self.filterLocation!))!)
+        }
+        
         cell.delegate = self
         
         return cell
@@ -672,7 +651,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         self.displayedPosts[index!] = post
 //        self.collectionView?.reloadItems(at: [filteredindexpath])
         
-        // Remove From Cache
+        // Update Cache
         
         let postId = post.id
         postCache[postId!] = post

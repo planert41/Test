@@ -123,7 +123,7 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         
         
         let timeAgoDisplay = post.creationDate.timeAgoDisplay()
-        attributedText.append(NSAttributedString(string: timeAgoDisplay, attributes: [NSFontAttributeName: UIFont.systemFont(ofSize: 14),NSForegroundColorAttributeName: UIColor.gray]))
+        attributedText.append(NSAttributedString(string: timeAgoDisplay, attributes: [NSFontAttributeName: UIFont.systemFont(ofSize: 12),NSForegroundColorAttributeName: UIColor.gray]))
         
         self.captionLabel.attributedText = attributedText
         
@@ -304,7 +304,9 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         
         guard let postId = self.post?.id else {return}
         guard let uid = Auth.auth().currentUser?.uid else {return}
-        let values = ["bookmarked": self.post?.hasBookmarked == true ? 0 : 1, "creatorUID": post?.creatorUID] as [String : Any]
+        let bookmarkTime = Date().timeIntervalSince1970
+        
+        let values = ["bookmarked": self.post?.hasBookmarked == true ? 0 : 1, "creatorUID": post?.creatorUID, "bookmarkDate": bookmarkTime] as [String : Any]
         
         Database.database().reference().child("bookmarks").child(uid).child(postId).updateChildValues(values) { (err, ref) in
             if let err = err {
@@ -472,7 +474,7 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         addSubview(adressLabel)
         addSubview(locationDistanceLabel)
         addSubview(bookmarkButton)
-        bookmarkButton.anchor(top: locationView.bottomAnchor, left: nil, bottom: nil, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 40, height: 50)
+        bookmarkButton.anchor(top: locationView.bottomAnchor, left: nil, bottom: nil, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 40, height: 40)
         
         locationDistanceLabel.anchor(top: photoImageView.bottomAnchor, left: nil, bottom: nil, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 5, width: 75, height: 50)
         
@@ -496,6 +498,7 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         
         addSubview(captionLabel)
         captionLabel.anchor(top: likeButton.bottomAnchor, left: leftAnchor, bottom: bottomAnchor, right: rightAnchor, paddingTop: 0, paddingLeft: 8, paddingBottom: 0, paddingRight: 8, width: 0, height: 0)
+//        captionLabel.backgroundColor = UIColor.blue
     
     }
     
@@ -591,9 +594,9 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         stackView.distribution = .fillEqually
         
         addSubview(stackView)
-        stackView.anchor(top: locationView.bottomAnchor, left: leftAnchor, bottom: nil, right: nil, paddingTop: 0, paddingLeft: 8, paddingBottom: 0, paddingRight: 0, width: 120, height: 50)
+        stackView.anchor(top: locationView.bottomAnchor, left: leftAnchor, bottom: nil, right: nil, paddingTop: 0, paddingLeft: 8, paddingBottom: 0, paddingRight: 0, width: 120, height: 40)
         addSubview(deleteButton)
-        deleteButton.anchor(top: locationView.bottomAnchor, left: stackView.rightAnchor, bottom: nil, right: nil, paddingTop: 0, paddingLeft: 8, paddingBottom: 0, paddingRight: 0, width: 40, height: 50)
+        deleteButton.anchor(top: locationView.bottomAnchor, left: stackView.rightAnchor, bottom: nil, right: nil, paddingTop: 0, paddingLeft: 8, paddingBottom: 0, paddingRight: 0, width: 40, height: 40)
         deleteButton.isHidden = false
 
     }

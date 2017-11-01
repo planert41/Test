@@ -12,6 +12,7 @@
 		A51C13C71F51B59900CEB740 /* MainTabBarController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A51C13C61F51B59900CEB740 /* MainTabBarController.swift */; };
 		A51C13C91F51B6FD00CEB740 /* UserProfileController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A51C13C81F51B6FD00CEB740 /* UserProfileController.swift */; };
 		A51C13CD1F51C03100CEB740 /* UserProfileHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = A51C13CC1F51C03100CEB740 /* UserProfileHeader.swift */; };
+		A52912451FAA62620063901B /* Bookmark.swift in Sources */ = {isa = PBXBuildFile; fileRef = A52912441FAA62620063901B /* Bookmark.swift */; };
 		A530FE8F1F8B17BA003C3591 /* LocationSearchController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A530FE8E1F8B17BA003C3591 /* LocationSearchController.swift */; };
 		A53E7E171F5E46DB0011C1CA /* GooglePlaces.swift in Sources */ = {isa = PBXBuildFile; fileRef = A53E7E161F5E46DB0011C1CA /* GooglePlaces.swift */; };
 		A53E7E1B1F5E4A4B0011C1CA /* GoogleDataProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = A53E7E1A1F5E4A4B0011C1CA /* GoogleDataProvider.swift */; };
@@ -80,6 +81,7 @@
 		A51C13C61F51B59900CEB740 /* MainTabBarController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MainTabBarController.swift; sourceTree = "<group>"; };
 		A51C13C81F51B6FD00CEB740 /* UserProfileController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserProfileController.swift; sourceTree = "<group>"; };
 		A51C13CC1F51C03100CEB740 /* UserProfileHeader.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserProfileHeader.swift; sourceTree = "<group>"; };
+		A52912441FAA62620063901B /* Bookmark.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Bookmark.swift; sourceTree = "<group>"; };
 		A530FE8E1F8B17BA003C3591 /* LocationSearchController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LocationSearchController.swift; sourceTree = "<group>"; };
 		A53E7E161F5E46DB0011C1CA /* GooglePlaces.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GooglePlaces.swift; sourceTree = "<group>"; };
 		A53E7E1A1F5E4A4B0011C1CA /* GoogleDataProvider.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GoogleDataProvider.swift; sourceTree = "<group>"; };
@@ -344,6 +346,7 @@
 				A5C6452D1F5C481300C78244 /* Comment.swift */,
 				A58477A51F6DBFDA007DE06C /* Emoji.swift */,
 				A552EA5E1F997973005A0977 /* Message.swift */,
+				A52912441FAA62620063901B /* Bookmark.swift */,
 			);
 			name = Models;
 			sourceTree = "<group>";
@@ -592,6 +595,7 @@
 				A552EA631F9A49EA005A0977 /* CommonSettings.swift in Sources */,
 				A5C6450A1F54F68800C78244 /* SharePhotoController.swift in Sources */,
 				A57941C91F6A27A6004EC40D /* EmojiDictionary.swift in Sources */,
+				A52912451FAA62620063901B /* Bookmark.swift in Sources */,
 				A562E51D1F53C67B0095C7C1 /* PhotoSelectorHeader.swift in Sources */,
 				A58477A61F6DBFDA007DE06C /* Emoji.swift in Sources */,
 				A5C645241F5B6DBB00C78244 /* PreviewPhotoContainerView.swift in Sources */,

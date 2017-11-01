@@ -15,13 +15,15 @@ struct PostId {
     var id: String
     var creatorUID: String?
     var creationDate: Date
-    var distance: Double? = nil
+    var distance: Double? = 99999999
+    var postGPS: String? = nil
     
-    init(id: String, creatorUID: String, fetchedDate: Double, distance: Double?) {
+    init(id: String, creatorUID: String, fetchedDate: Double, distance: Double?, postGPS: String?) {
         
         self.id = id
         self.creatorUID = creatorUID
         self.creationDate = Date(timeIntervalSince1970: fetchedDate)
+        self.postGPS = postGPS
         
     }
 }

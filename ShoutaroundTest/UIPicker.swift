@@ -5,14 +5,74 @@
 //  Created by Wei Zou Ang on 10/29/17.
 //  Copyright © 2017 Wei Zou Ang. All rights reserved.
 //
+//
+//import Foundation
+//
+//
+//    func fetchBookmarkPosts() {
+//
+//        guard let uid = Auth.auth().currentUser?.uid  else {return}
+//        let ref = Database.database().reference().child("bookmarks").child(uid)
+//
+//        ref.observeSingleEvent(of: .value, with: {(snapshot) in
+//            //print(snapshot.value)
+//
+//
+//            guard let dictionaries = snapshot.value as? [String: Any] else {return}
+//
+//            dictionaries.forEach({ (key,value) in
+//
+//                guard let dictionary = value as? [String: Any] else {return}
+//                if let value = dictionary["bookmarked"] as? Int, value == 1 {
+//
+//                    if let creatorUID = dictionary["creatorUID"] as? String {
+//
+//                        Database.fetchPostWithUIDAndPostID(creatoruid: creatorUID, postId: key, completion: { (post) in
+//
+//                            self.allBookmarks.append(post)
+//                            self.displayedBookmarks = self.allBookmarks
+//                            self.collectionView.reloadData()
+//
+//                        })
+//                    }
+//                }
+//            })
+//        })
+//    }
 
-import Foundation
+
+//
+//fileprivate func fetchUserPosts() {
+//    
+//    guard let uid = Auth.auth().currentUser?.uid  else {return}
+//    
+//    Database.fetchUserWithUID(uid: uid) { (user) in
+//        self.fetchPostsWithUser(user: user)
+//    }
+//    
+//}
+//
+//
+//fileprivate func fetchPostsWithUser(user: User){
+//    
+//    Database.fetchAllPostWithUID(creatoruid: user.uid) { (fetchedPosts) in
+//        self.fetchedPosts = self.fetchedPosts + fetchedPosts
+//        self.fetchedPosts.sort(by: { (p1, p2) -> Bool in
+//            return p1.creationDate.compare(p2.creationDate) == .orderedDescending
+//        })
+//        
+//        self.displayedPosts = self.fetchedPosts
+//        self.collectionView?.reloadData()
+//    }
+//    
+//}
+
 
 //
 //
 //
 //fileprivate func fetchFollowingUserIds() {
-//    
+//
 //    guard let uid = Auth.auth().currentUser?.uid else {return}
 //    
 //    Database.database().reference().child("following").child(uid).observeSingleEvent(of: .value, with: { (snapshot) in

@@ -157,11 +157,50 @@ extension Database{
                 let dictionary = value as? [String: Any]
                 let secondsFrom1970 = dictionary?["creationDate"] as? Double ?? 0
                 
-                let tempID = PostId.init(id: key, creatorUID: creatoruid, fetchedDate: secondsFrom1970, distance: nil)
+                let tempID = PostId.init(id: key, creatorUID: creatoruid, fetchedDate: secondsFrom1970, distance: nil, postGPS: nil)
                 fetchedPostIds.append(tempID)
                 
                 myGroup.leave()
                 
+            })
+            
+            myGroup.notify(queue: .main) {
+                completion(fetchedPostIds)
+            }
+        })
+    }
+    
+    
+    static func fetchAllBookmarksWithCreatorUID(creatoruid: String, completion: @escaping ([PostId]) -> ()) {
+        
+        let myGroup = DispatchGroup()
+        var fetchedPostIds = [] as [PostId]
+        var count = 0
+        
+        let ref = Database.database().reference().child("bookmarks").child(creatoruid)
+        
+        ref.observeSingleEvent(of: .value, with: {(snapshot) in
+            
+            guard let bookmarks = snapshot.value as? [String: Any] else {return}
+            
+            bookmarks.forEach({ (key,value) in
+                
+                myGroup.enter()
+                count += 1
+                //                print("Key \(key), Value: \(value)")
+                guard let dictionary = value as? [String: Any] else {return}
+                if let value = dictionary["bookmarked"] as? Int, value == 1 {
+                    
+                    let bookmarkTime = dictionary["bookmarkTime"] as? Double ?? 0
+                    // Substitute Post Id creation date with bookmark time
+                    
+                    Database.fetchPostIDDetails(postId: key, completion: { (fetchPostId) in
+                        let tempID = PostId.init(id: fetchPostId.id, creatorUID: fetchPostId.creatorUID!, fetchedDate: bookmarkTime, distance: nil, postGPS: fetchPostId.postGPS)
+                        fetchedPostIds.append(tempID)
+                        myGroup.leave()
+                        
+                    })
+                }
             })
             
             myGroup.notify(queue: .main) {
@@ -379,8 +418,9 @@ extension Database{
             guard let dictionary = snapshot.value as? [String: Any] else {return}
             let creatorUID = dictionary["creatorUID"] as? String ?? ""
             let secondsFrom1970 = dictionary["creationDate"] as? Double ?? 0
+            let postGPS = dictionary["postLocationGPS"] as? String ?? ""
             
-            let tempID = PostId.init(id: postId, creatorUID: creatorUID, fetchedDate: secondsFrom1970, distance: nil)
+            let tempID = PostId.init(id: postId, creatorUID: creatorUID, fetchedDate: secondsFrom1970, distance: nil, postGPS: postGPS)
             completion(tempID)
             
         })

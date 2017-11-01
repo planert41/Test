@@ -12,7 +12,7 @@ import Firebase
 import CoreGraphics
 import GeoFire
 
-class BookMarkController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, UISearchBarDelegate, UIPickerViewDelegate, UIPickerViewDataSource, UISearchControllerDelegate, HomePostSearchDelegate, BookmarkPhotoCellDelegate, HomePostCellDelegate, CLLocationManagerDelegate, UIGestureRecognizerDelegate {
+class BookMarkController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, UISearchControllerDelegate, HomePostSearchDelegate, BookmarkPhotoCellDelegate, HomePostCellDelegate, CLLocationManagerDelegate, UIGestureRecognizerDelegate, FilterControllerDelegate {
     let bookmarkCellId = "bookmarkCellId"
     let homePostCellId = "homePostCellId"
     
@@ -23,28 +23,41 @@ class BookMarkController: UIViewController, UICollectionViewDelegate, UICollecti
     let geoFilterRange = geoFilterRangeDefault
     let geoFilterImage:[UIImage] = geoFilterImageDefault
     
-    var filterRange: Double?{
+    // Filter Variables
+    
+    let defaultRange = geoFilterRangeDefault[geoFilterRangeDefault.endIndex-1]
+    let defaultGroup = "All"
+    let defaultSort = FilterSortDefault[0]
+    
+    var filterCaption: String? = nil{
         didSet{
-            print(filterRange)
-            if filterRange == nil {
-                rangeImageButton.image = self.geoFilterImage[0].withRenderingMode(.alwaysOriginal)
-                rangeImageButton.addGestureRecognizer(singleTap)
-                rangeImageButton.addGestureRecognizer(longPressGesture)
-                navigationItem.rightBarButtonItem = UIBarButtonItem.init(customView: rangeImageButton)
-                
-            } else {
-                print(String(format:"%.1f", self.filterRange!))
-                let rangeIndex = self.geoFilterRange.index(of: String(format:"%.1f", self.filterRange!))
-                
-                rangeImageButton.image = geoFilterImage[rangeIndex!].withRenderingMode(.alwaysOriginal)
-                rangeImageButton.addGestureRecognizer(singleTap)
-                rangeImageButton.addGestureRecognizer(longPressGesture)
-                navigationItem.rightBarButtonItem = UIBarButtonItem.init(customView: rangeImageButton)
-                
-                
-            }
+            
         }
     }
+    var filterLocation: CLLocation? = nil
+    var filterGroup: String? {
+        didSet{
+            setupNavigationItems()
+        }
+    }
+    var filterRange: String? {
+        didSet{
+            setupNavigationItems()
+        }
+    }
+    
+    var filterSort: String?
+    
+    var filterButton: UIImageView = {
+        let view = UIImageView()
+        view.image = #imageLiteral(resourceName: "filter").withRenderingMode(.alwaysOriginal)
+        view.contentMode = .scaleAspectFit
+        view.sizeToFit()
+        view.layer.cornerRadius = 5
+        view.layer.masksToBounds = true
+        view.backgroundColor = UIColor.clear
+        return view
+    }()
     
     
     var rangeImageButton: UIImageView = {
@@ -58,26 +71,18 @@ class BookMarkController: UIViewController, UICollectionViewDelegate, UICollecti
     
     lazy var singleTap: UIGestureRecognizer = {
         
-        let tap = UITapGestureRecognizer(target: self, action: #selector(filterHere))
+        let tap = UITapGestureRecognizer(target: self, action: #selector(activateFilter))
         tap.delegate = self
         return tap
     }()
     
-    lazy var longPressGesture: UILongPressGestureRecognizer = {
-        
-        let longPressGesture = UILongPressGestureRecognizer(target: self, action: #selector(activateFilterRange))
-        longPressGesture.minimumPressDuration = 1.0 // 1 second press
-        longPressGesture.delegate = self
-        return longPressGesture
-    }()
-
     let searchBarPlaceholderText = "Search for Caption or Emoji 😍🐮🍔🇺🇸🔥"
-    let currentLocation: CLLocation? = CLLocation(latitude: 41.973735, longitude: -87.667751)
+//    let currentLocation: CLLocation? = CLLocation(latitude: 41.973735, longitude: -87.667751)
     
     
     var userId:String?
-    var allPosts = [Post]()
-    var filteredPosts = [Post]()
+    var fetchedBookmarks = [Bookmark]()
+    var displayedBookmarks = [Bookmark]()
     
     var isGridView = true
 
@@ -137,7 +142,6 @@ class BookMarkController: UIViewController, UICollectionViewDelegate, UICollecti
         view.backgroundColor = .white
 
         setupNavigationItems()
-        setupGeoPicker()
         view.addSubview(actionBar)
         actionBar.anchor(top: topLayoutGuide.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 50)
         actionBar.backgroundColor = .white
@@ -152,12 +156,6 @@ class BookMarkController: UIViewController, UICollectionViewDelegate, UICollecti
         view.addSubview(collectionView)
         collectionView.anchor(top: actionBar.bottomAnchor , left: view.leftAnchor, bottom: bottomLayoutGuide.topAnchor, right: view.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
         
-// Fetch Photos and Refresh
-        
-        fetchBookmarkPosts()
-        setupRefresh()
-        
-        
         // Ask for Authorisation from the User.
         self.locationManager.requestAlwaysAuthorization()
         
@@ -169,7 +167,32 @@ class BookMarkController: UIViewController, UICollectionViewDelegate, UICollecti
             locationManager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters
         }
         
+        // Fetch Photos and Refresh
+
+        setupRefresh()
+        clearFilter()
+        
+        fetchBookmarkPosts()
+        
     }
+    
+    func sortBookmarks(){
+        if self.filterSort == FilterSortDefault[1] {
+            self.displayedBookmarks.sort(by: { (p1, p2) -> Bool in
+                return p1.bookmarkDate.compare(p2.bookmarkDate) == .orderedAscending
+            })
+        } else if self.filterSort == FilterSortDefault[2] {
+            
+            self.displayedBookmarks.sort(by: { (p1, p2) -> Bool in
+                return (p1.post.distance! < p2.post.distance!)
+            })
+        } else {
+            self.displayedBookmarks.sort(by: { (p1, p2) -> Bool in
+                return p1.bookmarkDate.compare(p2.bookmarkDate) == .orderedDescending
+            })
+        }
+    }
+    
     
     fileprivate func setupRefresh() {
         let refreshControl = UIRefreshControl()
@@ -196,7 +219,6 @@ class BookMarkController: UIViewController, UICollectionViewDelegate, UICollecti
         resultSearchController?.dimsBackgroundDuringPresentation = true
         definesPresentationContext = true
         
-        let searchBarView = UIView()
         let buttonView = UIView()
 
         let buttonStackView = UIStackView(arrangedSubviews: [gridButton, listButton])
@@ -226,32 +248,142 @@ class BookMarkController: UIViewController, UICollectionViewDelegate, UICollecti
         
         navigationItem.leftBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "mailbox").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(openInbox))
         
-        //        navigationItem.rightBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "GeoFence").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(filterHere))
+        if self.filterGroup != "All" && self.filterGroup != nil{
+            filterButton.backgroundColor = UIColor.orange
+        } else {
+            filterButton.backgroundColor = UIColor.clear
+        }
         
-        var rangeImageButton = UIImageView()
-        rangeImageButton.image = #imageLiteral(resourceName: "Globe").withRenderingMode(.alwaysOriginal)
-        rangeImageButton.contentMode = .scaleAspectFit
-        rangeImageButton.sizeToFit()
-        rangeImageButton.backgroundColor = UIColor.clear
+        if self.filterRange == nil || self.filterRange == geoFilterRange[geoFilterRange.endIndex - 1] {
+            filterButton.image = geoFilterImage[geoFilterImage.endIndex - 1].withRenderingMode(.alwaysOriginal)
+            filterButton.addGestureRecognizer(singleTap)
+        } else {
+            let rangeIndex = geoFilterRange.index(of: self.filterRange!)
+            filterButton.image = geoFilterImage[rangeIndex!].withRenderingMode(.alwaysOriginal)
+            filterButton.addGestureRecognizer(singleTap)
+        }
         
+        if self.filterGroup == defaultGroup && self.filterRange == defaultRange {
+            filterButton.image = #imageLiteral(resourceName: "filter").withRenderingMode(.alwaysOriginal)
+            filterButton.backgroundColor = UIColor.clear
+        }
         
-        rangeImageButton.addGestureRecognizer(singleTap)
-        rangeImageButton.addGestureRecognizer(longPressGesture)
-        
-        let rangeBarButton = UIBarButtonItem.init(customView: rangeImageButton)
-        //        rangeBarButton.image = #imageLiteral(resourceName: "Globe").withRenderingMode(.alwaysOriginal)
-        
-        
+        let rangeBarButton = UIBarButtonItem.init(customView: filterButton)
         navigationItem.rightBarButtonItem = rangeBarButton
         
     }
 
-func openInbox() {
+    // Search Delegate And Methods
     
-    let inboxController = InboxController(collectionViewLayout: UICollectionViewFlowLayout())
-    navigationController?.pushViewController(inboxController, animated: true)
+    func activateFilter(){
+        let filterController = FilterController()
+        filterController.delegate = self
+        filterController.selectedRange = self.filterRange
+        filterController.selectedGroup = self.filterGroup
+        filterController.selectedSort = self.filterSort
+        self.navigationController?.pushViewController(filterController, animated: true)
+    }
     
-}
+    
+    func openInbox() {
+    
+        let inboxController = InboxController(collectionViewLayout: UICollectionViewFlowLayout())
+        navigationController?.pushViewController(inboxController, animated: true)
+    
+    }
+    
+    
+    func finalFilterAndSort(){
+        
+        self.displayedBookmarks.removeAll()
+        self.displayedBookmarks = self.fetchedBookmarks
+        print("Before Filter Posts: ", self.displayedBookmarks.count)
+        
+        
+        self.filterbyDistance()
+        print("After Distance Filter Posts: ", self.displayedBookmarks.count)
+        
+        self.filterbyGroup()
+        print("After Group Filter Posts: ", self.displayedBookmarks.count)
+        
+        self.filterbyCaption()
+        print("After Caption Filter Posts: ", self.displayedBookmarks.count)
+        
+        self.sortBookmarks()
+        print("After All Filter Posts: ", self.displayedBookmarks.count)
+        
+        self.collectionView.reloadData()
+        
+        
+    }
+
+    func filterbyCaption(){
+        guard let searchedText = self.filterCaption else {return}
+        self.displayedBookmarks = self.displayedBookmarks.filter { (bookmark) -> Bool in
+            return bookmark.post.caption.lowercased().contains(searchedText.lowercased()) || bookmark.post.emoji.contains(searchedText.lowercased()) || bookmark.post.locationName.lowercased().contains(searchedText.lowercased()) || bookmark.post.locationAdress.lowercased().contains(searchedText.lowercased())
+        }
+        
+    }
+    
+    func filterbyGroup(){
+        
+        if self.filterGroup != self.defaultGroup{
+        self.displayedBookmarks = self.displayedBookmarks.filter { (bookmark) -> Bool in
+                return CurrentUser.groupUids.contains(bookmark.post.creatorUID!)
+            }
+        }
+    }
+    
+ 
+    
+    func filterbyDistance(){
+        
+        guard let filterDistance = Double(self.filterRange!) else {
+            print("Invalid Distance Number or Non Distance")
+            return
+        }
+        
+        guard let selectedLocation = self.filterLocation else {
+            print("Invalid Location")
+            return
+        }
+        
+        var tempBookmarks = [] as [Bookmark]
+        
+        for bookmark in self.displayedBookmarks {
+            
+            var tempBookmark = bookmark
+            if tempBookmark.post.locationGPS?.coordinate.latitude != 0 && tempBookmark.post.locationGPS?.coordinate.longitude != 0 {
+                tempBookmark.post.distance = tempBookmark.post.locationGPS?.distance(from: selectedLocation)
+                if tempBookmark.post.distance! <= filterDistance * 1000{
+                    tempBookmarks.append(tempBookmark)
+                }
+            }
+        }
+        self.displayedBookmarks = tempBookmarks
+        
+    }
+    
+    
+    func filterCaptionSelected(searchedText: String?){
+        
+        self.filterCaption = searchedText
+        self.finalFilterAndSort()
+        
+    }
+    
+    
+    func filterControllerFinished(selectedRange: String?, selectedLocation: CLLocation?, selectedGooglePlaceID: String?, selectedGroup: String?, selectedSort: String?){
+        
+        self.filterRange = selectedRange
+        self.filterLocation = selectedLocation
+        self.filterGroup = selectedGroup
+        self.filterSort = selectedSort
+        
+        self.finalFilterAndSort()
+    }
+    
+    
     
     
     // LOCATION MANAGER DELEGATE METHODS
@@ -281,247 +413,87 @@ func openInbox() {
     
     
     // Search Delegate And Methods
+
+        func fetchBookmarkPosts() {
     
-    func filterCaptionSelected(searchedText: String?) {
-        self.resultSearchController?.searchBar.text = searchedText
-        filterPostByCaption(self.resultSearchController?.searchBar.text)
-        filterPostByLocation()
-        self.collectionView.reloadData()
-    }
+            guard let uid = Auth.auth().currentUser?.uid  else {return}
+            let ref = Database.database().reference().child("bookmarks").child(uid)
     
-    func filterHere(){
-        
-        self.filterRange = Double(geoFilterRange[5])
-        self.filterPostByLocation()
-        let indexPath = IndexPath(item: 0, section: 0)
-        self.collectionView.scrollToItem(at: indexPath, at: .bottom, animated: true)
-        
-    }
+            ref.observeSingleEvent(of: .value, with: {(snapshot) in
+                //print(snapshot.value)
     
-    func filterPostByCaption(_ string: String?) {
-        
-        guard let searchedText = string else {
-            print("No Search Term")
-            filteredPosts = allPosts
-            self.collectionView.reloadData()
-            return
-        }
-        
-        if searchedText.isEmpty || searchedText == "" {
-            filteredPosts = allPosts
-            print("No Search Term")
-        } else {
-            
-            print("Search Term Was", searchedText)
-            //Makes everything case insensitive
-            filteredPosts = self.allPosts.filter { (post) -> Bool in
-                return post.caption.lowercased().contains(searchedText.lowercased()) || post.emoji.contains(searchedText.lowercased()) || post.locationName.contains(searchedText.lowercased()) || post.locationAdress.contains(searchedText.lowercased())
-            }
-            collectionView.reloadData()
-        }
-    }
+                guard let dictionaries = snapshot.value as? [String: Any] else {return}
     
-    func filterPostByLocation(){
-        
-        let ref = Database.database().reference().child("postlocations")
-        let geoFire = GeoFire(firebaseRef: ref)
-        //     let currentLocation = CLLocation(latitude: 41.973735, longitude: -87.667751)
-        
-        var geoFilteredPosts = [Post]()
-        
-        guard let filterDistance = self.filterRange else {
-            collectionView.reloadData()
-            print("No Distance Number")
-            return}
-        
-        self.determineCurrentLocation()
-        
-        let when = DispatchTime.now() + 0.5 // change 2 to desired number of seconds
-        DispatchQueue.main.asyncAfter(deadline: when) {
-            
-            print("Current User Location Used for Post Filtering", CurrentUser.currentLocation)
-            let circleQuery = geoFire?.query(at: CurrentUser.currentLocation, withRadius: filterDistance)
-            circleQuery?.observe(.keyEntered, with: { (key, location) in
-                var geoFilteredPost: [Post] = self.filteredPosts.filter { (post) -> Bool in
-                    return post.id == key
-                }
-                
-                if geoFilteredPost != nil && geoFilteredPost.count > 0 && geoFilteredPost[0].locationGPS != nil {
-                    geoFilteredPost[0].locationGPS = location
-                    geoFilteredPost[0].distance = Double((location?.distance(from: CurrentUser.currentLocation!))!)
-                }
-                geoFilteredPosts += geoFilteredPost
-            })
-            
-            circleQuery?.observeReady({
-                self.filteredPosts = geoFilteredPosts.sorted(by: { (p1, p2) -> Bool in
-                    p1.distance!.isLess(than: p2.distance!)
+                dictionaries.forEach({ (key,value) in
+    
+                    guard let dictionary = value as? [String: Any] else {return}
+                    if let value = dictionary["bookmarked"] as? Int, value == 1 {
+    
+                        let bookmarkTime = dictionary["bookmarkDate"] as? Double ?? 0
+                        if let creatorUID = dictionary["creatorUID"] as? String {
+    
+                            Database.fetchPostWithUIDAndPostID(creatoruid: creatorUID, postId: key, completion: { (post) in
+                                
+                        let tempBookmark = Bookmark.init(bookmarkCreatorUid: creatorUID, fetchedDate: bookmarkTime, post: post)
+                        self.fetchedBookmarks.append(tempBookmark)
+                        self.fetchedBookmarks.sort(by: { (p1, p2) -> Bool in
+                        return p1.bookmarkDate.compare(p2.bookmarkDate) == .orderedDescending
+                          })
+                        self.displayedBookmarks = self.fetchedBookmarks
+                        self.collectionView.reloadData()
+                                })
+                            }
+                        }
+                    })
                 })
-                
-                if self.collectionView.numberOfItems(inSection: 0) != 0 {
-                    let indexPath = IndexPath(item: 0, section: 0)
-                    self.collectionView.scrollToItem(at: indexPath, at: .bottom, animated: true)
-                }
-                self.collectionView.reloadData()
-            })
-        }
+            }
+    
+    
+    func clearFilter(){
+        
+        self.resultSearchController?.searchBar.text = nil
+        self.filterCaption = nil
+        self.filterLocation = nil
+        self.filterGroup = defaultGroup
+        self.filterRange = defaultRange
+        self.filterSort = defaultSort
     }
     
-// Setup for Picker
-    
-    func activateFilterRange() {
-        
-        if self.filterRange != nil {
-            let rangeIndex = self.geoFilterRange.index(of: String(format:"%.1f", self.filterRange!))
-            pickerView.selectRow(rangeIndex!, inComponent: 0, animated: false)
-        }
-        dummyTextView.perform(#selector(becomeFirstResponder), with: nil, afterDelay: 0.1)
-    }
-    
-    
-    lazy var dummyTextView: UITextView = {
-        let tv = UITextView()
-        return tv
-    }()
-    
-    
-    
-    var pickerView: UIPickerView = {
-        let pv = UIPickerView()
-        pv.backgroundColor = .white
-        pv.showsSelectionIndicator = true
-        
-        return pv
-    }()
-    
-    
-    func setupGeoPicker() {
-
-        pickerView.dataSource = self
-        pickerView.delegate = self
-        
-        var toolBar = UIToolbar()
-        toolBar.barStyle = UIBarStyle.default
-        toolBar.isTranslucent = true
-        
-        toolBar.tintColor = UIColor(red: 76/255, green: 217/255, blue: 100/255, alpha: 1)
-        toolBar.sizeToFit()
-        
-        
-        let doneButton = UIBarButtonItem(title: "Done", style: UIBarButtonItemStyle.bordered, target: self, action: Selector("donePicker"))
-        let spaceButton = UIBarButtonItem(barButtonSystemItem: UIBarButtonSystemItem.flexibleSpace, target: nil, action: nil)
-        let cancelButton = UIBarButtonItem(title: "Cancel", style: UIBarButtonItemStyle.bordered, target: self, action: Selector("cancelPicker"))
-        
-        toolBar.setItems([cancelButton, spaceButton, doneButton], animated: false)
-        toolBar.isUserInteractionEnabled = true
-        
-        self.dummyTextView.inputView = pickerView
-        self.dummyTextView.inputAccessoryView = toolBar
-        self.view.addSubview(dummyTextView)
-    }
-    
-    func donePicker(){
-        dummyTextView.resignFirstResponder()
-        filterPostByCaption(self.resultSearchController?.searchBar.text)
-        filterPostByLocation()
-    }
-    
-    func cancelPicker(){
-        dummyTextView.resignFirstResponder()
-    }
-    
-    
-    // UIPicker DataSource
-    func numberOfComponents(in pickerView: UIPickerView) -> Int {
-        
-        return 1
-        
-    }
-    func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
-        return geoFilterRange.count
-    }
-    
-    // UIPicker Delegate
-    
-    func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
-        return geoFilterRange[row]
-    }
-    
-    func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
-        // If Select some number
-        if row > 0 {
-            filterRange = Double(geoFilterRange[row])
-        } else {
-            filterRange = nil
-        }
-    }
-    
-    func fetchBookmarkPosts() {
-        
-        guard let uid = Auth.auth().currentUser?.uid  else {return}
-        let ref = Database.database().reference().child("bookmarks").child(uid)
-        
-        ref.observeSingleEvent(of: .value, with: {(snapshot) in
-            //print(snapshot.value)
-            
-            
-            guard let dictionaries = snapshot.value as? [String: Any] else {return}
-            
-            dictionaries.forEach({ (key,value) in
-            
-                guard let dictionary = value as? [String: Any] else {return}
-                if let value = dictionary["bookmarked"] as? Int, value == 1 {
-                
-                    if let creatorUID = dictionary["creatorUID"] as? String {
-                        
-                        Database.fetchPostWithUIDAndPostID(creatoruid: creatorUID, postId: key, completion: { (post) in
-
-                            self.allPosts.append(post)
-                            self.filteredPosts = self.allPosts
-                            self.collectionView.reloadData()
-                            
-                        })
-                    }
-                }
-            })
-        })
-    }
     
     func handleRefresh() {
-        
-        allPosts.removeAll()
-        filteredPosts.removeAll()
-        self.resultSearchController?.searchBar.text = ""
-        self.filterRange = nil
-        collectionView.reloadData()
+
+        clearFilter()
+        fetchedBookmarks.removeAll()
+        displayedBookmarks.removeAll()
         fetchBookmarkPosts()
         self.collectionView.refreshControl?.endRefreshing()
         print("Refresh Bookmark Feed")
     }
     
      func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return filteredPosts.count
+        return displayedBookmarks.count
     }
     
      func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         
-        var displayPost = filteredPosts[indexPath.item]
+        var displayPost = displayedBookmarks[indexPath.item]
         
-        if CurrentUser.currentLocation != nil {
-            displayPost.distance = Double((displayPost.locationGPS?.distance(from: CurrentUser.currentLocation!))!)
+        if self.filterLocation != nil {
+            displayPost.post.distance = Double((displayPost.post.locationGPS?.distance(from: self.filterLocation!))!)
         }
         
         if isGridView {
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: bookmarkCellId, for: indexPath) as! BookmarkPhotoCell
             cell.delegate = self
-            cell.post = displayPost
+            cell.bookmarkDate = displayPost.bookmarkDate
+            cell.post = displayPost.post
 
 
             return cell
         } else {
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: homePostCellId, for: indexPath) as! HomePostCell
             cell.delegate = self
-            cell.post = displayPost
+            cell.post = displayPost.post
             return cell
         }
         
@@ -586,19 +558,25 @@ func openInbox() {
     }
     
     func refreshPost(post: Post) {
-        let index = filteredPosts.index { (filteredpost) -> Bool in
-            filteredpost.id  == post.id
+        let index = displayedBookmarks.index { (bookmark) -> Bool in
+            bookmark.post.id == post.id
         }
         
         let filteredindexpath = IndexPath(row:index!, section: 0)
         print(index)
         if post.hasBookmarked == false{
-            self.filteredPosts.remove(at: index!)
+            self.displayedBookmarks.remove(at: index!)
             self.collectionView.deleteItems(at: [filteredindexpath])
         }
 
         
-        self.filteredPosts[index!] = post
+        self.displayedBookmarks[index!].post = post
+        
+        // Update Cache
+        
+        let postId = post.id
+        postCache[postId!] = post
+        
         //        self.collectionView?.reloadItems(at: [filteredindexpath])
     }
     
