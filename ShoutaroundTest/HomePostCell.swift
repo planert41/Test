@@ -68,6 +68,7 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
             captionLabel.text = post?.caption
             setupAttributedCaption()
             
+            
             if post?.distance != nil && post?.locationGPS?.coordinate.longitude != 0 && post?.locationGPS?.coordinate.latitude != 0 {
                 
                 let distanceformat = ".2"
@@ -81,6 +82,8 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
 
                 }
 
+            } else {
+                locationDistanceLabel.text = ""
             }
 
             if post?.creatorUID == Auth.auth().currentUser?.uid && enableDelete {

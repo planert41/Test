@@ -54,8 +54,9 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     
 // Filter Variables
     
-    let defaultRange = "All"
+    let defaultRange = geoFilterRangeDefault[geoFilterRangeDefault.endIndex-1]
     let defaultGroup = "All"
+    let defaultSort = FilterSortDefault[0]
     
     var filterCaption: String? = nil{
         didSet{
@@ -73,6 +74,9 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
             setupNavigationItems()
         }
     }
+    
+    var filterSort: String?
+    
     
     var filterButton: UIImageView = {
         let view = UIImageView()
@@ -200,31 +204,53 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         filterController.delegate = self
         filterController.selectedRange = self.filterRange
         filterController.selectedGroup = self.filterGroup
+        filterController.selectedSort = self.filterSort
         self.navigationController?.pushViewController(filterController, animated: true)
     }
 
     
 // Search Delegates
     
-    func filterControllerFinished(selectedRange: String?, selectedLocation: CLLocation?, selectedGooglePlaceID: String?, selectedGroup: String?){
+    func filterControllerFinished(selectedRange: String?, selectedLocation: CLLocation?, selectedGooglePlaceID: String?, selectedGroup: String?, selectedSort: String?){
         
         self.filterRange = selectedRange
         self.filterLocation = selectedLocation
         self.filterGroup = selectedGroup
+        self.filterSort = selectedSort
+        self.refreshPagination()
+        self.displayedPosts.removeAll()
     
         guard let filterDistance = Double(self.filterRange!) else {
                     print("Invalid Distance Number or Non Distance")
                     self.fetchAllPostIds()
+                    self.sortFetchPostIds()
+            
                     return
         }
         Database.fetchAllPostIDWithinLocation(selectedLocation: self.filterLocation!, distance: filterDistance) { (firebasePostIds) in
             self.fetchPostIds = firebasePostIds
+            self.sortFetchPostIds()
             print("Geofire Filtered Posts: ", self.fetchPostIds.count)
-            self.refreshPagination()
-            self.displayedPosts.removeAll()
             self.paginatePosts()
         }
         
+    }
+    
+    func sortFetchPostIds(){
+        if self.filterSort == FilterSortDefault[1] {
+            self.fetchPostIds.sort(by: { (p1, p2) -> Bool in
+                return p1.creationDate.compare(p2.creationDate) == .orderedAscending
+            })
+        } else if self.filterSort == FilterSortDefault[2] {
+            
+            self.fetchPostIds.sort(by: { (p1, p2) -> Bool in
+                return (p1.distance! < p2.distance!)
+            })
+        } else {
+            self.fetchPostIds.sort(by: { (p1, p2) -> Bool in
+                return p1.creationDate.compare(p2.creationDate) == .orderedDescending
+        })
+        }
     }
     
     func filterCaptionSelected(searchedText: String?){
@@ -249,6 +275,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         self.filterLocation = nil
         self.filterGroup = defaultGroup
         self.filterRange = defaultRange
+        self.filterSort = defaultSort
     }
     
     
