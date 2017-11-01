@@ -45,7 +45,7 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
             photoImageView.loadImage(urlString: imageUrl)
             usernameLabel.text = post?.user.username
 
-            emojiLabel.text = post?.emoji
+
             
             usernameLabel.isUserInteractionEnabled = true
             let usernameTap = UITapGestureRecognizer(target: self, action: #selector(HomePostCell.usernameTap))
@@ -53,6 +53,7 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
             
             let locationTapGesture = UITapGestureRecognizer(target: self, action: #selector(HomePostCell.locationTap))
             let locationTapGesture2 = UITapGestureRecognizer(target: self, action: #selector(HomePostCell.locationTap))
+
             
             locationLabel.text = post?.locationName.truncate(length: 30)
             locationLabel.isUserInteractionEnabled = true
@@ -61,6 +62,14 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
             adressLabel.text = post?.locationAdress.truncate(length: 60)
             adressLabel.isUserInteractionEnabled = true
             adressLabel.addGestureRecognizer(locationTapGesture2)
+            
+            emojiLabel.text = post?.emoji
+            emojiLabel.isUserInteractionEnabled = true
+            let emojiTap = UITapGestureRecognizer(target: self, action: #selector(HomePostCell.emojiTap))
+            usernameLabel.addGestureRecognizer(usernameTap)
+            usernameLabel.addGestureRecognizer(emojiTap)
+
+            
             
             guard let profileImageUrl = post?.user.profileImageUrl else {return}
             
@@ -107,6 +116,36 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         print("Tap location label", post?.locationName ?? "")
         guard let post = post else {return}
         delegate?.didTapLocation(post: post)
+    }
+    
+    func emojiTap(){
+     
+        print("Tap Emoji")
+        
+        if self.emojiDetailLabel.isHidden == false {
+            self.emojiDetailLabel.isHidden = true
+        }
+
+        guard let emojiString = emojiLabel.text else {return}
+        let emojiSplit = Array(emojiString.characters)
+        print(emojiSplit)
+        var emojiDetails: String = ""
+        
+        for emoji in emojiSplit {
+            if let emojiTranslate = EmojiDictionary[String(emoji)]{
+            emojiDetails = emojiDetails + " " + String(emoji) + emojiTranslate
+            }
+       }
+        
+        self.emojiDetailLabel.text = emojiDetails
+        self.emojiDetailLabel.isHidden = false
+        let when = DispatchTime.now() + 5 // change 2 to desired number of seconds
+        DispatchQueue.main.asyncAfter(deadline: when) {
+            if self.emojiDetailLabel.isHidden == false {
+            self.emojiDetailLabel.isHidden = true
+            }
+        }
+        
     }
     
     
@@ -175,6 +214,20 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         label.font = UIFont.boldSystemFont(ofSize: 20)
         label.textAlignment = NSTextAlignment.right
         label.backgroundColor = UIColor.clear
+        return label
+        
+    }()
+    
+    let emojiDetailLabel: UILabel = {
+        let label = UILabel()
+        label.text = "Emojis"
+        label.font = UIFont.boldSystemFont(ofSize: 15)
+        label.textAlignment = NSTextAlignment.center
+        label.backgroundColor = UIColor.rgb(red: 204, green: 238, blue: 255)
+        label.layer.cornerRadius = 30/2
+        label.layer.borderWidth = 0.25
+        label.layer.borderColor = UIColor.lightGray.cgColor
+        label.layer.masksToBounds = true
         return label
         
     }()
@@ -422,6 +475,7 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         addSubview(userProfileImageView)
         addSubview(usernameLabel)
         addSubview(emojiLabel)
+        addSubview(emojiDetailLabel)
 
 
 //        
@@ -435,6 +489,14 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         emojiLabel.anchor(top: topAnchor, left: leftAnchor, bottom: photoImageView.topAnchor, right: nil, paddingTop: 0, paddingLeft: 8, paddingBottom: 0, paddingRight: 0, width: 140, height: 0)
         
         emojiLabel.textAlignment = .left
+        
+        let emojiTapGesture = UITapGestureRecognizer(target: self, action: #selector(HomePostCell.emojiTap))
+        emojiLabel.isUserInteractionEnabled = true
+        emojiLabel.addGestureRecognizer(emojiTapGesture)
+        
+        emojiDetailLabel.anchor(top: topAnchor, left: nil, bottom: photoImageView.topAnchor, right: nil, paddingTop: 10, paddingLeft: 0, paddingBottom: 10, paddingRight: 0, width: 200, height: 0)
+        emojiDetailLabel.centerXAnchor.constraint(equalTo: self.centerXAnchor).isActive = true
+        emojiDetailLabel.isHidden = true
 
 //        locationLabel.anchor(top: usernameLabel.bottomAnchor, left: userProfileImageView.rightAnchor, bottom: photoImageView.topAnchor, right: emojiLabel.leftAnchor, paddingTop: 0, paddingLeft: 8, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
 

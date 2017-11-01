@@ -623,7 +623,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     }
     
     override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        print(displayedPosts[indexPath.item])
+        //print(displayedPosts[indexPath.item])
     }
     
     
