@@ -119,7 +119,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         
         NotificationCenter.default.addObserver(self, selector: #selector(handleUpdateFeedWithFilter), name: FilterController.updateFeedWithFilterNotificationName, object: nil)
         
-        NotificationCenter.default.addObserver(self, selector: #selector(paginatePosts), name: HomeController.finishFetchingPostIdsNotificationName, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(finishFetchingPosts), name: HomeController.finishFetchingPostIdsNotificationName, object: nil)
         
         NotificationCenter.default.addObserver(self, selector: #selector(finishPaginationCheck), name: HomeController.finishPaginationNotificationName, object: nil)
 
@@ -166,6 +166,11 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         return CGRect(x: x, y: y, width: width, height: height)
     }
     
+    
+    func finishFetchingPosts(){
+        self.sortFetchPostIds()
+        self.paginatePosts()
+    }
     
 // Setup for Geo Range Button, Dummy TextView and UIPicker
     
@@ -223,7 +228,6 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         guard let filterDistance = Double(self.filterRange!) else {
                     print("Invalid Distance Number or Non Distance")
                     self.fetchAllPostIds()
-                    self.sortFetchPostIds()
             
                     return
         }
