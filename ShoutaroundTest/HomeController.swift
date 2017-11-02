@@ -158,7 +158,6 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         
         self.clearFilter()
         self.refreshPagination()
-        
         fetchAllPostIds()
         fetchGroupUserIds()
         
@@ -344,6 +343,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         
         fetchPostIds.removeAll()
         displayedPosts.removeAll()
+        self.collectionView?.reloadData()
         
         fetchAllPostIds()
         
@@ -364,6 +364,14 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         
         guard let uid = Auth.auth().currentUser?.uid else {return}
 
+        Database.fetchUserWithUID(uid: uid) { (user) in
+            CurrentUser.username = user.username
+            CurrentUser.profileImageUrl = user.profileImageUrl
+            CurrentUser.uid = uid
+            CurrentUser.status = user.status
+        }
+        
+        
         Database.fetchAllPostIDWithCreatorUID(creatoruid: uid) { (postIds) in
             
             self.checkDisplayPostIdForDups(postIds: postIds)

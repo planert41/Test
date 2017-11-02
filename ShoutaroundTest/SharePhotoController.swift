@@ -35,7 +35,8 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
     let locationCellID = "locationCellID"
     let emojiCellID = "emojiCellID"
     let captionDefault = "Insert Caption Here"
-    let emojiDefault = "😍🐮🍔🇺🇸🔥"
+    let emojiDefault = ""
+  //  let emojiDefault = "😍🐮🍔🇺🇸🔥"
     
     var selectedPostLocation: CLLocation? = nil {
         
@@ -198,8 +199,10 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
     
     let emojiTextView: UITextView = {
         let tv = UITextView()
-        tv.font = UIFont.systemFont(ofSize: 20)
-        tv.textAlignment = NSTextAlignment.right
+        tv.font = UIFont.systemFont(ofSize: 18)
+        tv.textAlignment = NSTextAlignment.left
+        tv.backgroundColor = UIColor.clear
+        
         
         return tv
     }()
@@ -391,6 +394,16 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         return cv
     }()
     
+    let emojiLabel: UILabel = {
+        let tv = UILabel()
+        tv.font = UIFont.systemFont(ofSize:15)
+        tv.text = "Emoji Tags: "
+        tv.textAlignment = NSTextAlignment.left
+        tv.backgroundColor = UIColor(white: 0, alpha: 0.03)
+        tv.layer.cornerRadius = 5
+        return tv
+    }()
+    
     let EmojiCollectionView: UICollectionView = {
         
         let uploadEmojiList = UploadEmojiList()
@@ -445,22 +458,29 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
 // Photo and Caption Container View
         
         view.addSubview(containerView)
-        containerView.anchor(top: topLayoutGuide.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 100)
+        containerView.anchor(top: topLayoutGuide.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 135)
+        
+        view.addSubview(emojiLabel)
+        emojiLabel.anchor(top: containerView.topAnchor, left: containerView.leftAnchor, bottom: nil, right: containerView.rightAnchor, paddingTop: 5, paddingLeft: 8, paddingBottom: 0, paddingRight: 8, width: 100, height: 30)
         
         view.addSubview(imageView)
-        imageView.anchor(top: containerView.topAnchor, left: containerView.leftAnchor, bottom: containerView.bottomAnchor, right: nil, paddingTop: 8, paddingLeft: 8, paddingBottom: 8, paddingRight: 0, width: 84, height: 0)
+        imageView.anchor(top: emojiLabel.bottomAnchor, left: containerView.leftAnchor, bottom: containerView.bottomAnchor, right: nil, paddingTop: 8, paddingLeft: 8, paddingBottom: 8, paddingRight: 0, width: 84, height: 0)
         
         view.addSubview(emojiCancelButton)
-        emojiCancelButton.anchor(top: nil, left: nil, bottom: containerView.bottomAnchor, right: containerView.rightAnchor, paddingTop: 4, paddingLeft: 0, paddingBottom: 5, paddingRight: 5, width: 15, height: 15)
+ //       emojiCancelButton.anchor(top: nil, left: nil, bottom: containerView.bottomAnchor, right: containerView.rightAnchor, paddingTop: 4, paddingLeft: 0, paddingBottom: 5, paddingRight: 5, width: 15, height: 15)
+        emojiCancelButton.anchor(top: nil, left: nil, bottom: emojiLabel.bottomAnchor, right: containerView.rightAnchor, paddingTop: 4, paddingLeft: 0, paddingBottom: 5, paddingRight: 5, width: 15, height: 15)
+        
         emojiCancelButton.centerYAnchor.constraint(equalTo: emojiTextView.centerYAnchor)
         emojiCancelButton.alpha = 0
         
         view.addSubview(emojiTextView)
-        emojiTextView.anchor(top: nil, left: imageView.rightAnchor, bottom: containerView.bottomAnchor, right: emojiCancelButton.leftAnchor, paddingTop: 0, paddingLeft: 4, paddingBottom: 0, paddingRight: 0, width: 0, height: 30)
+//        emojiTextView.anchor(top: nil, left: imageView.rightAnchor, bottom: containerView.bottomAnchor, right: emojiCancelButton.leftAnchor, paddingTop: 0, paddingLeft: 4, paddingBottom: 0, paddingRight: 0, width: 0, height: 30)
+        emojiTextView.anchor(top: emojiLabel.topAnchor, left: imageView.rightAnchor, bottom: emojiLabel.bottomAnchor, right: emojiCancelButton.leftAnchor, paddingTop: 0, paddingLeft: 4, paddingBottom: 0, paddingRight: 0, width: 0, height: 30)
+        
         emojiTextView.delegate  = self
         
         view.addSubview(captionTextView)
-        captionTextView.anchor(top: containerView.topAnchor, left: imageView.rightAnchor, bottom: emojiTextView.topAnchor, right: containerView.rightAnchor, paddingTop: 0, paddingLeft: 4, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
+        captionTextView.anchor(top: imageView.topAnchor, left: imageView.rightAnchor, bottom: containerView.bottomAnchor, right: containerView.rightAnchor, paddingTop: 0, paddingLeft: 4, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
         captionTextView.delegate = self
         
         

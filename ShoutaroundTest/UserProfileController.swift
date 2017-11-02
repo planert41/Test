@@ -195,6 +195,7 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
         
         self.isFinishedPaging = false
         allPosts.removeAll()
+        collectionView?.reloadData()
         fetchUser()
         self.collectionView?.refreshControl?.endRefreshing()
         print("Refresh Profile Page")

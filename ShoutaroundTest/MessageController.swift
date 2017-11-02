@@ -144,6 +144,7 @@ class MessageController: UIViewController, UICollectionViewDataSource, UICollect
         
         messageInput.anchor(top: messageLabel.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 5, paddingLeft: 5, paddingBottom: 5, paddingRight: 5, width: 0, height: 150)
         
+        print(CurrentUser.username)
         fromInput.text = CurrentUser.username
         
         fromInput.tag = 0

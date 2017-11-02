@@ -111,7 +111,7 @@ class CommentsController: UICollectionViewController, UICollectionViewDelegateFl
     lazy var containerView: UIView = {
 
         let containerView = UIView()
-        containerView.backgroundColor = .white
+        containerView.backgroundColor = UIColor.lightGray
         containerView.frame = CGRect(x: 0, y: 0, width: 100, height: 50)
         
         let submitButton = UIButton(type: .system)

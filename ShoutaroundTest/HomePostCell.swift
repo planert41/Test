@@ -67,7 +67,7 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
             emojiLabel.isUserInteractionEnabled = true
             let emojiTap = UITapGestureRecognizer(target: self, action: #selector(HomePostCell.emojiTap))
             usernameLabel.addGestureRecognizer(usernameTap)
-            usernameLabel.addGestureRecognizer(emojiTap)
+            emojiLabel.addGestureRecognizer(emojiTap)
 
             
             
