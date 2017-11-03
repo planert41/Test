@@ -304,19 +304,45 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
             print("allpostIds Queried",allPostIds)
             
             
-            if self.allPosts.count > 0 && allPostIds.count > 0 {
-                print("before delete", allPostIds.count)
+
+                
                 
                 let intIndex = allPostIds.count // where intIndex < myDictionary.count
                 let index = allPostIds.index(allPostIds.startIndex, offsetBy: intIndex - 1)
                 let testindex = allPostIds.index(allPostIds.startIndex, offsetBy: 1)
-                let deleteindex = allPostIds.index(forKey: (self.allPosts.last?.id)!)
+ //               let deleteindex = allPostIds.index(forKey: (self.allPosts.last?.id)!)
                 
-                print("DeletedUID ",allPostIds[deleteindex!])
+ //               print("DeletedUID ",allPostIds[deleteindex!])
                 
-                allPostIds.remove(at: deleteindex!)
+            if self.allPosts.count > 0 && allPostIds.count > 5 {
+                print("before delete", allPostIds.count)
+                
+                let allPostCount = max(0,self.allPosts.count - 5)
+                
+                let lastSixPost =  self.allPosts.suffix(from: 6)
+  //              let lastSixPost = self.allPosts[(allPostCount-1)..<self.allPosts.count-1]
+                
+                var lastSixPostIds: [String] = []
+                
+                for post in lastSixPost{
+                    lastSixPostIds.append(post.id!)
+                }
+                
+                print("Last Six Post Ids: ",lastSixPostIds)
+
+                for post in allPostIds {
+                    print("Post Key :", post.key)
+                    if lastSixPostIds.contains(post.key){
+                    print("Deleting ", post.key)
+                    allPostIds.removeValue(forKey: post.key)
+                        
+                    }
+                }
+                
                 print("after delete", allPostIds.count)
             }
+            
+
             
             guard let user = self.user else {return}
             

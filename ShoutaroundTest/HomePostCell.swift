@@ -53,6 +53,7 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
             
             let locationTapGesture = UITapGestureRecognizer(target: self, action: #selector(HomePostCell.locationTap))
             let locationTapGesture2 = UITapGestureRecognizer(target: self, action: #selector(HomePostCell.locationTap))
+            
 
             
             locationLabel.text = post?.locationName.truncate(length: 30)
@@ -514,6 +515,9 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         photoImageView.anchor(top: headerView.bottomAnchor, left: leftAnchor, bottom: nil, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
         photoImageView.heightAnchor.constraint(equalTo: widthAnchor, multiplier: 1).isActive = true
  
+        let locationTapGesture3 = UITapGestureRecognizer(target: self, action: #selector(HomePostCell.locationTap))
+        photoImageView.addGestureRecognizer(locationTapGesture3)
+        photoImageView.isUserInteractionEnabled = true
         
         let doubleTap = UITapGestureRecognizer(target: self, action: #selector(photoDoubleTapped))
         doubleTap.numberOfTapsRequired = 2
