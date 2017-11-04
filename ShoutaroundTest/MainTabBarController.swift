@@ -17,6 +17,7 @@ class MainTabBarController: UITabBarController, UITabBarControllerDelegate, UIIm
     var imagePicker = UIImagePickerController()
     var selectedPhotoLocation: CLLocation? = nil
     var selectedImage: UIImage? = nil
+    var selectedTime: Date? = nil
     var assets = [PHAsset]()
     
     
@@ -26,7 +27,7 @@ class MainTabBarController: UITabBarController, UITabBarControllerDelegate, UIIm
         
         if index == 2 {
 
-        let layout = UICollectionViewFlowLayout()
+        _ = UICollectionViewFlowLayout()
             
             imagePicker.allowsEditing = true
             imagePicker.sourceType = .photoLibrary
@@ -63,8 +64,13 @@ class MainTabBarController: UITabBarController, UITabBarControllerDelegate, UIIm
                     let assets = PHAsset.fetchAssets(withALAssetURLs: [URL], options: opts)
                     let asset = assets[0]
                     
+                    print(asset)
                     self.selectedPhotoLocation = asset.location
+                    self.selectedTime = asset.creationDate
                     // The location is "asset.location", as a CLLocation
+                    
+                    //Read Time/Date
+                    
                     
                     // ... Other stuff like dismiss omitted
                 }
@@ -77,7 +83,8 @@ class MainTabBarController: UITabBarController, UITabBarControllerDelegate, UIIm
                 } else {
                     sharePhotoController.selectedImageLocation  = self.selectedPhotoLocation                    
                 }
-
+                sharePhotoController.selectedImageTime  = self.selectedTime
+                
                 let navController = UINavigationController(rootViewController: sharePhotoController)
 
                 self.present(navController, animated: false, completion: nil)
