@@ -45,22 +45,34 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
             ratingEmojiLabel.text = ratingEmoji
             if ratingEmoji != nil {
                 self.blankRatingEmoji.isHidden = true
+                self.emojiCancelButton.alpha = 1
             } else {
                 self.blankRatingEmoji.isHidden = false
+                if nonRatingEmoji == nil {
+                    self.emojiCancelButton.alpha = 0
+                }
             }
         }
     }
-    var nonratingEmoji: String? = nil {
+    var nonRatingEmoji: [String]? = nil {
         didSet{
-            nonRatingEmojiLabel.text = nonratingEmoji
-            if nonratingEmoji != nil {
+            nonRatingEmojiLabel.text = nonRatingEmoji?.joined()
+            if nonRatingEmoji != nil {
                 self.nonRatingEmojiStackView.isHidden = true
+                self.emojiCancelButton.alpha = 1
+                
             } else {
                 self.nonRatingEmojiStackView.isHidden = false
+                if nonRatingEmoji == nil {
+                    self.emojiCancelButton.alpha = 0
+                }
+                
             }
             
         }
     }
+
+    var nonRatingEmojiTags:[String]? = nil
     
     var nonRatingEmojiStackView: UIStackView = {
         
@@ -80,6 +92,66 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         return stackview
     }()
 
+    func emojiCheck(_ emoji: String?){
+        
+        
+        // Check if selected Emojis already have emoji
+        
+        //        print(emoji, emoji.unicodeScalars, emoji.containsRatingEmoji)
+        
+        guard let emoji = emoji else {return}
+        
+        var selectedEmojis = self.selectedEmojis
+        var firstEmoji: String! = ""
+        
+        if selectedEmojis != "" {
+            firstEmoji = String(selectedEmojis.characters.first!)
+            
+            if firstEmoji.containsRatingEmoji {
+                self.ratingEmoji = firstEmoji
+                self.nonRatingEmoji = String(selectedEmojis.characters.dropFirst())
+            } else {
+                self.nonRatingEmoji = selectedEmojis
+            }
+        }
+        
+        if emoji.containsOnlyEmoji == false {
+            return
+        }
+            
+        else if (selectedEmojis.contains(emoji)) {
+            self.selectedEmojis = selectedEmojis.replacingOccurrences(of: emoji, with: "")
+        }
+            
+        else if emoji.containsRatingEmoji {
+            if self.ratingEmoji == emoji {
+                // Remove Rating Emoji if its the same rating emoji
+                self.ratingEmoji = nil
+            } else {
+                // Replace Rating Emoji with New Rating Emoji
+                self.ratingEmoji = emoji
+            //    self.selectedEmojis = self.ratingEmoji! + self.nonratingEmoji!
+            }
+        }
+            
+        else if emoji.containsOnlyEmoji && !emoji.containsRatingEmoji && (selectedEmojis.characters.count) < self.maxEmojis {
+            if self.nonRatingEmoji == nil {
+                self.nonRatingEmoji = emoji
+            } else {
+            self.nonRatingEmoji = self.nonRatingEmoji! + emoji
+            }
+           // self.selectedEmojis = self.ratingEmoji! + self.nonratingEmoji!
+        }
+        
+        
+        print("selected emojis", self.selectedEmojis)
+        print("rating emoji", ratingEmoji)
+        print("nonrating emoji", nonRatingEmoji)
+        print("first emoji", firstEmoji, firstEmoji.containsRatingEmoji)
+        
+    }
+    
+    
   //  let emojiDefault = "😍🐮🍔🇺🇸🔥"
     
     
@@ -337,6 +409,8 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
     
     func resetSelectedEmojis(){
         self.selectedEmojis = ""
+        self.ratingEmoji = nil
+        self.nonRatingEmoji = nil
     }
     
     let locationNameLabel: UILabel = {
@@ -715,10 +789,18 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         emojiLabelContainer.anchor(top: containerView.topAnchor, left: containerView.leftAnchor, bottom: nil, right: containerView.rightAnchor, paddingTop: 5, paddingLeft: 4, paddingBottom: 0, paddingRight: 5, width: 0, height: 30)
 
         
+        view.addSubview(emojiCancelButton)
+        //       emojiCancelButton.anchor(top: nil, left: nil, bottom: containerView.bottomAnchor, right: containerView.rightAnchor, paddingTop: 4, paddingLeft: 0, paddingBottom: 5, paddingRight: 5, width: 15, height: 15)
+        emojiCancelButton.anchor(top: emojiLabelContainer.topAnchor, left: nil, bottom: emojiLabelContainer.bottomAnchor, right: emojiLabelContainer.rightAnchor, paddingTop: 5, paddingLeft: 5, paddingBottom: 5, paddingRight: 5, width: 15, height: 15)
+        
+        emojiCancelButton.centerYAnchor.constraint(equalTo: emojiLabelContainer.centerYAnchor)
+        emojiCancelButton.alpha = 0
+        
+        
   //      stackview.anchor(top: emojiLabelContainer.topAnchor, left: nil, bottom: nil, right: emojiLabelContainer.rightAnchor, paddingTop: 0, paddingLeft: 5, paddingBottom: 0, paddingRight: 5, width: DefaultEmojiLabelSize * 4, height: DefaultEmojiLabelSize)
 
         view.addSubview(nonRatingEmojiStackView)
-        nonRatingEmojiStackView.anchor(top: emojiLabelContainer.topAnchor, left: nil, bottom: nil, right: emojiLabelContainer.rightAnchor, paddingTop: 0, paddingLeft: 5, paddingBottom: 0, paddingRight: 5, width: (DefaultEmojiLabelSize + 2) * 4, height: DefaultEmojiLabelSize)
+        nonRatingEmojiStackView.anchor(top: emojiLabelContainer.topAnchor, left: nil, bottom: nil, right: emojiCancelButton.leftAnchor, paddingTop: 0, paddingLeft: 5, paddingBottom: 0, paddingRight: 5, width: (DefaultEmojiLabelSize + 2) * 4, height: DefaultEmojiLabelSize)
         
         view.addSubview(nonRatingEmojiLabel)
         nonRatingEmojiLabel.anchor(top: nonRatingEmojiStackView.topAnchor, left: nonRatingEmojiStackView.leftAnchor, bottom: nonRatingEmojiStackView.bottomAnchor, right: self.view.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
@@ -736,13 +818,7 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         
         view.addSubview(imageView)
         imageView.anchor(top: emojiLabelContainer.bottomAnchor, left: containerView.leftAnchor, bottom: containerView.bottomAnchor, right: nil, paddingTop: 8, paddingLeft: 8, paddingBottom: 8, paddingRight: 0, width: 84, height: 0)
-        
-        view.addSubview(emojiCancelButton)
- //       emojiCancelButton.anchor(top: nil, left: nil, bottom: containerView.bottomAnchor, right: containerView.rightAnchor, paddingTop: 4, paddingLeft: 0, paddingBottom: 5, paddingRight: 5, width: 15, height: 15)
-        emojiCancelButton.anchor(top: nil, left: nil, bottom: emojiLabel.bottomAnchor, right: containerView.rightAnchor, paddingTop: 4, paddingLeft: 0, paddingBottom: 5, paddingRight: 5, width: 15, height: 15)
-        
-        emojiCancelButton.centerYAnchor.constraint(equalTo: emojiTextView.centerYAnchor)
-        emojiCancelButton.alpha = 0
+
         
         view.addSubview(emojiTextView)
 //        emojiTextView.anchor(top: nil, left: imageView.rightAnchor, bottom: containerView.bottomAnchor, right: emojiCancelButton.leftAnchor, paddingTop: 0, paddingLeft: 4, paddingBottom: 0, paddingRight: 0, width: 0, height: 30)
@@ -1100,63 +1176,7 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
     }
     
     
-    func emojiCheck(_ emoji: String?){
-    
 
-        // Check if selected Emojis already have emoji
-        
-        //        print(emoji, emoji.unicodeScalars, emoji.containsRatingEmoji)
-        
-        guard let emoji = emoji else {return}
-        
-        var selectedEmojis = self.selectedEmojis
-        var firstEmoji: String! = ""
-        
-        if selectedEmojis != "" {
-            firstEmoji = String(selectedEmojis.characters.first!)
-            
-            if firstEmoji.containsRatingEmoji {
-                self.ratingEmoji = firstEmoji
-                self.nonratingEmoji = String(selectedEmojis.characters.dropFirst())
-            } else {
-                self.nonratingEmoji = selectedEmojis
-            }
-        }
-        
-
-        
-        if emoji.containsOnlyEmoji == false {
-            return
-        }
-
-        else if (selectedEmojis.contains(emoji)) {
-            self.selectedEmojis = selectedEmojis.replacingOccurrences(of: emoji, with: "")
-        }
-            
-        else if emoji.containsRatingEmoji {
-            if self.ratingEmoji == emoji {
-                // Remove Rating Emoji if its the same rating emoji
-                self.ratingEmoji = nil
-            } else {
-                // Replace Rating Emoji with New Rating Emoji
-            self.ratingEmoji = emoji
-            self.selectedEmojis = self.ratingEmoji! + self.nonratingEmoji!
-            }
-        }
-
-         else if emoji.containsOnlyEmoji && !emoji.containsRatingEmoji && (selectedEmojis.characters.count) < self.maxEmojis {
-            self.nonratingEmoji = self.nonratingEmoji! + emoji
-            self.selectedEmojis = self.ratingEmoji! + self.nonratingEmoji!
-        }
-
-        
-        print("selected emojis", self.selectedEmojis)
-        print("rating emoji", ratingEmoji)
-        print("nonrating emoji", nonratingEmoji)
-        print("first emoji", firstEmoji, firstEmoji.containsRatingEmoji)
-    
-    }
-    
     
     func handleLongPress(_ gestureReconizer: UILongPressGestureRecognizer) {
         
@@ -1304,7 +1324,7 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
             
                     cell.uploadEmojis.text = EmoticonArray[(indexPath as IndexPath).section][newIndex]
             
-                    if self.selectedEmojis.contains(cell.uploadEmojis.text!){
+            if self.selectedEmojis.contains(cell.uploadEmojis.text!){
                         cell.backgroundColor = UIColor.rgb(red: 149, green: 204, blue: 244)
                     } else {
                         cell.backgroundColor = UIColor.white

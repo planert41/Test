@@ -345,10 +345,21 @@ var EmojiDictionary: [String:String] =
     "🇯🇲":"jamaican",
     "🇳🇱":"dutch",
     "🇸🇳":"senagalese",
-    "🇷🇺":"russia"
-
+    "🇷🇺":"russian"
 
 ]
+
+var MultEmojiLookup: [String:String] =
+[
+    "vegetarian" : "❌🍖",
+    "gluten free": "❌🌽",
+    "peanut free": "❌🥜",
+    "non dairy": "❌🥛",
+    "pad thai": "🇹🇭🍝"
+    
+
+]
+
 //[
 //        "💯":"best",
 //        "😍":"amazing",
