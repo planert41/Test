@@ -48,8 +48,10 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
          
             self.ratingEmojiLabel.text = ratingEmoji
             if ratingEmoji != nil || self.nonRatingEmoji != nil {
-                self.blankRatingEmoji.isHidden = true
                 self.emojiCancelButton.alpha = 1
+            }
+            if ratingEmoji != nil {
+                self.blankRatingEmoji.isHidden = true
             } else {
                 self.blankRatingEmoji.isHidden = false
                 if nonRatingEmoji == nil {
@@ -63,9 +65,14 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
     var nonRatingEmoji: [String]? = nil {
         didSet{
             self.nonRatingEmojiLabel.text = nonRatingEmoji?.joined()
-            if self.ratingEmoji != nil || nonRatingEmoji != nil {
-                self.nonRatingEmojiStackView.isHidden = true
+            self.ratingEmojiLabel.text = ratingEmoji
+            
+            if ratingEmoji != nil || self.nonRatingEmoji != nil {
                 self.emojiCancelButton.alpha = 1
+            }
+            
+            if nonRatingEmoji != nil {
+                self.nonRatingEmojiStackView.isHidden = true
                 
             } else {
                 self.nonRatingEmojiStackView.isHidden = false
@@ -403,6 +410,7 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         navigationItem.leftBarButtonItem = UIBarButtonItem(title: "Back", style: .plain, target: self, action: #selector(handleBack))
         
         setupImageAndTextViews()
+        self.captionTextView.becomeFirstResponder()
         
     }
     
