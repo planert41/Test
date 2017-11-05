@@ -40,24 +40,30 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
     
     var emojiArray:[String]? = nil
     
+    let nonRatingEmojiLimit = 4
+    
+    var selectedEmojis = ""
     var ratingEmoji: String? = nil {
         didSet{
-            ratingEmojiLabel.text = ratingEmoji
-            if ratingEmoji != nil {
+         
+            self.ratingEmojiLabel.text = ratingEmoji
+            if ratingEmoji != nil || self.nonRatingEmoji != nil {
                 self.blankRatingEmoji.isHidden = true
                 self.emojiCancelButton.alpha = 1
             } else {
                 self.blankRatingEmoji.isHidden = false
                 if nonRatingEmoji == nil {
-                    self.emojiCancelButton.alpha = 0
+                self.emojiCancelButton.alpha = 0
                 }
             }
+            updateSelectedEmojis()
         }
     }
+    
     var nonRatingEmoji: [String]? = nil {
         didSet{
-            nonRatingEmojiLabel.text = nonRatingEmoji?.joined()
-            if nonRatingEmoji != nil {
+            self.nonRatingEmojiLabel.text = nonRatingEmoji?.joined()
+            if self.ratingEmoji != nil || nonRatingEmoji != nil {
                 self.nonRatingEmojiStackView.isHidden = true
                 self.emojiCancelButton.alpha = 1
                 
@@ -66,13 +72,20 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
                 if nonRatingEmoji == nil {
                     self.emojiCancelButton.alpha = 0
                 }
-                
             }
-            
+            updateSelectedEmojis()
         }
     }
 
     var nonRatingEmojiTags:[String]? = nil
+
+    func updateSelectedEmojis(){
+        var ratingEmojiValue = self.ratingEmojiLabel.text ?? ""
+        var nonRatingEmojiValue = self.nonRatingEmojiLabel.text ?? ""
+        self.selectedEmojis = ratingEmojiValue + nonRatingEmojiValue
+        print("Selected Emojis: ", self.selectedEmojis)
+
+    }
     
     var nonRatingEmojiStackView: UIStackView = {
         
@@ -92,72 +105,183 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         return stackview
     }()
 
-    func emojiCheck(_ emoji: String?){
+    func emojiTagUntag(emojiInput: String?, emojiInputTag: String?){
         
+        guard let emojiInput = emojiInput else {
+            print("No EmojiInput")
+            return}
         
-        // Check if selected Emojis already have emoji
-        
-        //        print(emoji, emoji.unicodeScalars, emoji.containsRatingEmoji)
-        
-        guard let emoji = emoji else {return}
-        
-        var selectedEmojis = self.selectedEmojis
-        var firstEmoji: String! = ""
-        
-        if selectedEmojis != "" {
-            firstEmoji = String(selectedEmojis.characters.first!)
-            
-            if firstEmoji.containsRatingEmoji {
-                self.ratingEmoji = firstEmoji
-                self.nonRatingEmoji = String(selectedEmojis.characters.dropFirst())
-            } else {
-                self.nonRatingEmoji = selectedEmojis
-            }
-        }
-        
-        if emoji.containsOnlyEmoji == false {
+        if emojiInput.containsOnlyEmoji == false {
+            print("Emoji Input is not emoji")
             return
         }
+        
+        var tempRatingEmoji: String? = self.ratingEmoji
+        var tempNonRatingEmoji: [String]? = self.nonRatingEmoji
+        var tempNonRatingEmojiTags: [String]? = self.nonRatingEmojiTags
+        
+        if emojiInput.containsRatingEmoji {
+                // Rating Emoji
+            if tempRatingEmoji == nil {
+                    tempRatingEmoji = emojiInput
+                print("Add Rating Emoji: ", emojiInput)
+                
+                } else {
+                if tempRatingEmoji == emojiInput{
+                    // Remove if Dup
+                    if let range = captionTextView.text.lowercased().range(of: (emojiInput)) {
+                    // Still in caption. No Delete
+                    } else {
+                        //Not in Caption anymore. Delete
+                        tempRatingEmoji = nil
+
+                    }
+                print("Remove Rating Emoji: ", emojiInput)
+                    
+                } else {
+                    // Replace if Not Dup
+                    tempRatingEmoji = emojiInput
+                print("Replace Rating Emoji: ", emojiInput)
+                    
+                }
+            }
+        } else {
+                // Non Rating Emoji
+            guard let emojiInputTag = emojiInputTag else {
+                print("No Emoji Tag for Non Rating Emoji: ", emojiInput)
+                return
+            }
             
-        else if (selectedEmojis.contains(emoji)) {
-            self.selectedEmojis = selectedEmojis.replacingOccurrences(of: emoji, with: "")
-        }
+            let dupNonRatingEmojis = tempNonRatingEmoji?.filter({ (item) -> Bool in
+                var emojiDup = item.range(of: emojiInput)
+                return emojiDup != nil ? true : false
+            })
             
-        else if emoji.containsRatingEmoji {
-            if self.ratingEmoji == emoji {
-                // Remove Rating Emoji if its the same rating emoji
-                self.ratingEmoji = nil
+            if tempNonRatingEmoji == nil {
+                tempNonRatingEmoji = [emojiInput]
+                tempNonRatingEmojiTags = [emojiInputTag]
+//                
+//                tempNonRatingEmoji?.insert(emojiInput, at: 0)
+//                tempNonRatingEmojiTags?.insert(emojiInputTag, at: 0)
+                print("Add Non Rating Emoji: ", emojiInput, emojiInputTag)
+                print(tempNonRatingEmoji, tempNonRatingEmojiTags)
+                
+            }
+                else if (dupNonRatingEmojis?.count)! > 0 {
+                // There is a duplicate Emoji
+                guard let dupNonRatingEmojiIndex = tempNonRatingEmoji?.index(of: (dupNonRatingEmojis?[0])!) else {
+                    print("Can't find Dup Emoji Index")
+                    return}
+                
+                if emojiInputTag == tempNonRatingEmojiTags?[dupNonRatingEmojiIndex] {
+                
+                    //Check to see if emoji is still in text
+                    if let range = captionTextView.text.lowercased().range(of: (emojiInput)) {
+                        } else {
+                    // Delete if NR emoji and NR emoji tag are same
+                    tempNonRatingEmoji?.remove(at: dupNonRatingEmojiIndex)
+                    tempNonRatingEmojiTags?.remove(at: dupNonRatingEmojiIndex)
+                    print("Remove Non Rating Emoji: ", emojiInput, emojiInputTag)
+                        }
+                    }
+                }
+            
+            else if (tempNonRatingEmoji?.joined().characters.count)! + emojiInput.characters.count < nonRatingEmojiLimit + 1 {
+               
+                // Check to see if selected icon is within Multi-Emoji Word. Remove prev tag
+                for emoji in self.nonRatingEmoji! {
+                    if emojiInput.contains(emoji){
+                        
+                        guard let dupNonRatingEmojiIndex = tempNonRatingEmoji?.index(of: emoji) else {
+                            print("Can't find Dup Emoji Index")
+                            return}
+                        tempNonRatingEmoji?.remove(at: dupNonRatingEmojiIndex)
+                        tempNonRatingEmojiTags?.remove(at: dupNonRatingEmojiIndex)
+                    }
+                }
+                
+                // Add if total emoji count less than limit
+                tempNonRatingEmoji?.append(emojiInput)
+                tempNonRatingEmojiTags?.append(emojiInputTag)
+                print("Add Non Rating Emoji: ", emojiInput, emojiInputTag)
             } else {
-                // Replace Rating Emoji with New Rating Emoji
-                self.ratingEmoji = emoji
-            //    self.selectedEmojis = self.ratingEmoji! + self.nonratingEmoji!
+                print("No Add - Emoji Limit", emojiInput, emojiInputTag)
             }
         }
-            
-        else if emoji.containsOnlyEmoji && !emoji.containsRatingEmoji && (selectedEmojis.characters.count) < self.maxEmojis {
-            if self.nonRatingEmoji == nil {
-                self.nonRatingEmoji = emoji
-            } else {
-            self.nonRatingEmoji = self.nonRatingEmoji! + emoji
-            }
-           // self.selectedEmojis = self.ratingEmoji! + self.nonratingEmoji!
-        }
         
+        print("Final Emoji Tags: ", self.ratingEmoji, self.nonRatingEmoji, self.nonRatingEmojiTags)
         
-        print("selected emojis", self.selectedEmojis)
-        print("rating emoji", ratingEmoji)
-        print("nonrating emoji", nonRatingEmoji)
-        print("first emoji", firstEmoji, firstEmoji.containsRatingEmoji)
+        self.ratingEmoji = tempRatingEmoji
+        self.nonRatingEmoji = tempNonRatingEmoji
+        self.nonRatingEmojiTags = tempNonRatingEmojiTags
+        
         
     }
     
     
+//    func emojiCheck(_ emojiInput: Emoji?){
+//        
+//        // print(emoji, emoji.unicodeScalars, emoji.containsRatingEmoji)
+//        // Check if selected Emojis already have emoji
+//        
+//        
+//        guard let emoji = emoji else {return}
+//        
+//        var selectedEmojis = self.selectedEmojis
+//        
+//        if selectedEmojis != nil {
+//            
+//            if (selectedEmojis?[0].containsRatingEmoji)! {
+//                self.ratingEmoji = selectedEmojis?[0]
+//                self.nonRatingEmoji = selectedEmojis
+//                self.nonRatingEmoji?.remove(at: 0)
+//            } else {
+//                self.nonRatingEmoji = selectedEmojis
+//            }
+//        }
+//        
+//        
+//        if emoji.containsOnlyEmoji == false {
+//            return
+//        }
+//            
+//        else if emoji.containsRatingEmoji {
+//            if self.ratingEmoji == emoji {
+//                // Remove Rating Emoji if its the same rating emoji
+//                self.ratingEmoji = nil
+//            } else {
+//                // Replace Rating Emoji with New Rating Emoji
+//                self.ratingEmoji = emoji
+//            //    self.selectedEmojis = self.ratingEmoji! + self.nonratingEmoji!
+//            }
+//        }
+//            
+//        else if emoji.containsOnlyEmoji && !emoji.containsRatingEmoji && (self.nonRatingEmoji?.joined().characters.count)! < self.nonRatingEmojiLimit {
+//            
+//            if self.nonRatingEmoji?.contains(emoji){
+//                self.nonRatingEmoji?.remove(at: self.nonRatingEmoji?.index(of: emoji))
+//            }
+//            
+//            
+//            if self.nonRatingEmoji == nil {
+//                self.nonRatingEmoji?.append(emoji)
+//            } else {
+//            self.nonRatingEmoji = self.nonRatingEmoji! + emoji
+//            }
+//           // self.selectedEmojis = self.ratingEmoji! + self.nonratingEmoji!
+//        }
+//        
+//        
+//        print("selected emojis", self.selectedEmojis)
+//        print("rating emoji", ratingEmoji)
+//        print("nonrating emoji", nonRatingEmoji)
+//        print("first emoji", firstEmoji, firstEmoji.containsRatingEmoji)
+//        
+//    }
+//    
+    
   //  let emojiDefault = "😍🐮🍔🇺🇸🔥"
-    
-    
-    
-    
-    
+
     var selectedPostLocation: CLLocation? = nil {
         
         didSet{
@@ -180,33 +304,7 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
     var selectedGoogleLocationIndex: Int? = nil
     
     var emojiViews: Array<UICollectionView>?
-    let maxEmojis = 5
-    
-    var selectedEmojis: String = "" {
-        
-        didSet{
-            self.emojiTextView.text = selectedEmojis
-            
-            if selectedEmojis.characters.count > 0 {
-                self.emojiCancelButton.alpha = 1
-                self.captionCancelButton.alpha = 1
-                self.emojiTextView.alpha = 1
-            } else {
-                self.emojiCancelButton.alpha = 0
-                self.emojiTextView.alpha = 0.25
-                self.resetEmojiTextView()
-            }
-        
-            
-            print(selectedEmojis)
-            
-            EmojiCollectionView.reloadData()
-            
-//            for views in emojiViews! {
-//                views.reloadData()
-//            }
-        }
-    }
+
     
     var selectedImage: UIImage? {
         didSet{
@@ -269,7 +367,6 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         didSet{
             if selectedImageTime == nil {
                 ("No Image Time, Defaulting to Current Upload Time: ")
-                self.selectedTime = Date()
             } else {
                 self.selectedTime = selectedImageTime
             }
@@ -296,13 +393,9 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         }
     }
     
-    
-    
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-
         
         view.backgroundColor = UIColor.rgb(red: 204, green: 238, blue: 255)
         navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Share", style: .plain, target: self, action: #selector(handleShare))
@@ -313,6 +406,8 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         
     }
     
+    
+
     func handleBack() {
         self.dismiss(animated: true) {
         }
@@ -348,17 +443,6 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         tv.font = UIFont.systemFont(ofSize: 14)
         return tv
     }()
-
-    
-    let emojiTextView: UITextView = {
-        let tv = UITextView()
-        tv.font = UIFont.systemFont(ofSize: 18)
-        tv.textAlignment = NSTextAlignment.left
-        tv.backgroundColor = UIColor.clear
-        
-        
-        return tv
-    }()
     
     let emojiCancelButton: UIButton = {
         
@@ -378,7 +462,6 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
     
     func cancelEmoji(){
         
-        emojiTextView.text = nil
         self.resetSelectedEmojis()
         
     }
@@ -408,9 +491,22 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
     }
     
     func resetSelectedEmojis(){
+        
+        if self.ratingEmoji != nil {
+            self.captionTextView.text = self.captionTextView.text.replacingOccurrences(of: self.ratingEmoji!, with: "")
+            self.ratingEmoji = nil
+            
+        }
+        if self.nonRatingEmoji != nil {
+            for emoji in self.nonRatingEmoji!{
+                self.captionTextView.text = self.captionTextView.text.replacingOccurrences(of: emoji, with: "")
+            }
+            self.nonRatingEmoji = nil
+        }
+        
+        
         self.selectedEmojis = ""
-        self.ratingEmoji = nil
-        self.nonRatingEmoji = nil
+        self.EmojiCollectionView.reloadData()
     }
     
     let locationNameLabel: UILabel = {
@@ -810,21 +906,9 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
 
         view.addSubview(ratingEmojiLabel)
         ratingEmojiLabel.anchor(top: blankRatingEmoji.topAnchor, left: blankRatingEmoji.leftAnchor, bottom: blankRatingEmoji.bottomAnchor, right: nonRatingEmojiLabel.leftAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
-
-        
-        
-        view.addSubview(emojiLabel)
- //       emojiLabel.anchor(top: emojiLabelContainer.topAnchor, left: emojiLabelContainer.leftAnchor, bottom: emojiLabelContainer.bottomAnchor, right: emojiLabelContainer.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
         
         view.addSubview(imageView)
         imageView.anchor(top: emojiLabelContainer.bottomAnchor, left: containerView.leftAnchor, bottom: containerView.bottomAnchor, right: nil, paddingTop: 8, paddingLeft: 8, paddingBottom: 8, paddingRight: 0, width: 84, height: 0)
-
-        
-        view.addSubview(emojiTextView)
-//        emojiTextView.anchor(top: nil, left: imageView.rightAnchor, bottom: containerView.bottomAnchor, right: emojiCancelButton.leftAnchor, paddingTop: 0, paddingLeft: 4, paddingBottom: 0, paddingRight: 0, width: 0, height: 30)
-        emojiTextView.anchor(top: emojiLabel.topAnchor, left: imageView.rightAnchor, bottom: emojiLabel.bottomAnchor, right: emojiCancelButton.leftAnchor, paddingTop: 0, paddingLeft: 4, paddingBottom: 0, paddingRight: 0, width: 0, height: 30)
-        
-        emojiTextView.delegate  = self
         
         view.addSubview(captionTextView)
         captionTextView.anchor(top: imageView.topAnchor, left: imageView.rightAnchor, bottom: containerView.bottomAnchor, right: containerView.rightAnchor, paddingTop: 0, paddingLeft: 4, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
@@ -923,7 +1007,13 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         let emojiRef = UILongPressGestureRecognizer(target: self, action: #selector(SharePhotoController.handleLongPress(_:)))
         emojiRef.minimumPressDuration = 0.5
         emojiRef.delegate = self
+        
+        let emojiDoubleTap = UITapGestureRecognizer(target: self, action: #selector(SharePhotoController.handleDoubleTap(_:)))
+        emojiDoubleTap.numberOfTapsRequired = 2
+        emojiDoubleTap.delegate = self
+        
         EmojiCollectionView.addGestureRecognizer(emojiRef)
+        EmojiCollectionView.addGestureRecognizer(emojiDoubleTap)
         
 //        view.addSubview(Emoji1CollectionView)
 //        view.addSubview(Emoji2CollectionView)
@@ -949,7 +1039,6 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
 //        }
         
         resetCaptionTextView()
-        resetEmojiTextView()
         
     }
     
@@ -994,15 +1083,83 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         var deletedWords = [String]()
         var deletedWord = ""
     
-    func textView(_ textView: UITextView, shouldChangeTextIn range: NSRange, replacementText text: String) -> Bool {
+    
+    
+    func emojiTagging(captionText: String){
+        
+        var tempCaptionText =  captionText.lowercased()
+        
+        // Add Space to last tempCaption for searching
+        var tempNonRatingEmojiTags = self.nonRatingEmojiTags
+        var tempNonRatingEmojis = self.nonRatingEmoji
+        
+        if (tempNonRatingEmojiTags != nil)  && (tempNonRatingEmojis != nil) {
+            // Loop through current Emoji Tags, check if tags exist
+            
+            if tempNonRatingEmojiTags?.count != tempNonRatingEmojis?.count {
+                print("ERROR: Non Rating Emojis Not Equal")
+            }
+            
+            for tag in tempNonRatingEmojiTags! {
+                let searchTag = tag + " "
+                if let range = tempCaptionText.lowercased().range(of: (searchTag)) {
+                    // Emoji Tag still exit in caption remove string from caption text
+                    // Using replace subrange to only remove first instance, using X to replace to prevent later search mismatch
+                    tempCaptionText.replaceSubrange(range, with: " X ")
+                } else {
+                    
+                    // Can't find Emoji Tag in Caption
+                    guard let removeIndex = nonRatingEmojiTags?.index(of: tag) else {
+                        print("Can't find delete index for: ", tag)
+                        return
+                    }
+                    
+                    // Check if emoji equivalent exist in caption
+                    if let emojiLookup = EmojiDictionary.key(forValue: tag) {
+                    if tempCaptionText.lowercased().range(of: EmojiDictionary.key(forValue: tag)!) == nil {
+                        
+                        // Emoji Tag does not exist anymore, Untag emojis and tags
+                        emojiTagUntag(emojiInput: tempNonRatingEmojis?[removeIndex], emojiInputTag: tempNonRatingEmojiTags?[removeIndex])
 
+                        } else {
+                        // Emoji still exist in caption. Leave tags alone
+                        }
+                    }
+                    }
+                }
+        }
+        
+        print(tempCaptionText)
+        
+        // Check for Complex Tags
+        var tempCaptionWords = tempCaptionText.components(separatedBy: " ")
+        
+        for i in (1...3).reversed() {
+            // Check if last n (3 to 1) words match complex dictionary
+            
+            let captionCheckArray = tempCaptionWords.suffix(i)
+            var captionCheckText = captionCheckArray.joined(separator: " ").emojilessString
+            print("Caption Check Text: ", captionCheckText)
+            
+            let emojiLookupResult = EmojiDictionary.key(forValue: captionCheckText)
+            if emojiLookupResult != nil {
+                // If there is a match add emoji and tag
+                emojiTagUntag(emojiInput: emojiLookupResult, emojiInputTag: captionCheckText)
+                break
+            }
+        }
+    }
+    
+    func textView(_ textView: UITextView, shouldChangeTextIn range: NSRange, replacementText text: String) -> Bool {
+        
         captionCancelButton.alpha = 0
         let char = text.cString(using: String.Encoding.utf8)!
         let isBackSpace = strcmp(char, "\\b")
         
+        // If caption textview is not blank
         if textView.text != ""{
-        captionCancelButton.alpha = 1
-        } 
+            captionCancelButton.alpha = 1
+        }
         
         if text == "\n"  // Recognizes enter key in keyboard
         {
@@ -1010,118 +1167,32 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
             return false
         }
         
-        if textView == emojiTextView {
-            
-            if (isBackSpace == -92){
-                return true
+        if text.isSingleEmoji == true {
+            if textView.text.contains(text){
+             //Ignore if caption text already has emoji, allows multiple emoji caption
+            } else {
+            self.emojiTagUntag(emojiInput: text, emojiInputTag: text)
+            }
             }
             
-           if (text.isSingleEmoji)
-           {
-            self.emojiCheck(text)
-            
-            return false
-           }
-           
-           else {
-            return false
-            }
-            
-        }
-        
-        
-        if textView == captionTextView {
-    
-            if text.isSingleEmoji == true {
-                if selectedEmojis.contains(text){
-                    // Do nothing if user types emoji that is already included in selected emoji label
-                } else {
-                    self.emojiCheck(text)
-                }
-            }
-        
-        // Detect Backspace = isBackSpace == -92
-        
-            else if (text == " ") {
-                
-                //print("Deleted Word",self.deletedWord)
-                
-                self.savedWords = textView.text!.components(separatedBy: " ")
-//                print(self.savedWords)
-                
-                let lastWord = savedWords[savedWords.endIndex - 1].emojilessString
-                var emojiLookup = EmojiDictionary.key(forValue: lastWord.lowercased())
-                
-                // Only check text for emoji if emoji does not already exist in selected emoji
-                if emojiLookup != nil && self.selectedEmojis.contains(emojiLookup!) == false {
-                    self.emojiCheck(emojiLookup)
-                }
-                
-                // Check for deleted Text
-                
-                if self.deletedWord != "" && emojiLookup != nil && self.selectedEmojis.contains(emojiLookup!) && textView.text!.contains(emojiLookup!) == true {
-                    self.deletedWord = ""
-                    self.emojiCheck(emojiLookup)
-                }
-                
-                
-            }
-            
-        // When hit backspace, compare new words to prev saved words. if deleted string matches an emoji, then we take emoji out
-                
-            else if (isBackSpace == -92) {
-                    deletedWords = textView.text!.components(separatedBy: " ")
-                let deletedWordArray = Array(Set(self.savedWords).subtracting(self.deletedWords))
-//                print(savedWords)
-//                print(newWords)
-                
-                if deletedWordArray.count != 0 {
-                    self.deletedWord = deletedWordArray[0]
-                    print("Deleted Word",self.deletedWord)
-                    
-                }
-                
-                var emojiLookup = EmojiDictionary.key(forValue: self.deletedWord.lowercased())
-                if emojiLookup != nil && self.selectedEmojis.contains(emojiLookup!) && textView.text!.contains(emojiLookup!) == false {
-                    self.deletedWord = ""
-                    self.emojiCheck(emojiLookup)
-                }
+            else if (text == " ") || (isBackSpace == -92){
 
-                
-            }
-            
-            return true
+                emojiTagging(captionText: textView.text)
             
             }
-        
-        else { return false }
+        return true
 
     }
     
     
-
     
     
     func textViewDidBeginEditing(_ textView: UITextView) {
         
-        if textView == captionTextView {
-            
             if textView.text == captionDefault {
                 textView.text = nil
             }
-            
             textView.textColor = UIColor.black
-        }
-        
-        if textView == emojiTextView {
-            if  emojiTextView.text == emojiDefault{
-                textView.text = nil
-                
-                
-                // Alpha Handled through Check Emoji
-            }
-
-        }
     }
     
 //    func textViewDidChange(_ textView: UITextView) {
@@ -1150,13 +1221,72 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
             }
         }
         
-        if textView == emojiTextView {
+    }
+    
+
+    func resetCaptionTextView() {
+        self.captionTextView.text = captionDefault
+        self.captionTextView.textColor = UIColor.lightGray
+        
+    }
+    
+
+    func handleDoubleTap(_ gestureReconizer: UITapGestureRecognizer) {
+
+        let p = gestureReconizer.location(in: self.view)
+
             
-            // To handle backspaces
-            self.selectedEmojis = textView.text
-            if textView.text.isEmpty {
-                self.resetEmojiTextView()
+            let point = self.EmojiCollectionView.convert(p, from:self.view)
+            let indexPath = self.EmojiCollectionView.indexPathForItem(at: point)
+            
+            print(indexPath)
+            
+            if let index = indexPath  {
+                
+                let cell = self.EmojiCollectionView.cellForItem(at: index) as! UploadEmojiCell
+                var selectedEmoji = cell.uploadEmojis.text
+                print("Double Tap Emoji: ", selectedEmoji   )
+                
+//                print(cell.uploadEmojis.text)
+                self.captionTextView.text =  self.captionTextView.text + selectedEmoji! + selectedEmoji!
+                self.emojiTagUntag(emojiInput: selectedEmoji, emojiInputTag: selectedEmoji)
+                
+                // do stuff with your cell, for example print the indexPath
+                
+                cell.backgroundColor = UIColor.rgb(red: 149, green: 204, blue: 244)
+                
+            } else {
+                print("Could not find index path")
             }
+        
+    }
+    
+    func handleTripleTap(_ gestureReconizer: UITapGestureRecognizer) {
+        
+        let p = gestureReconizer.location(in: self.view)
+        
+        
+        let point = self.EmojiCollectionView.convert(p, from:self.view)
+        let indexPath = self.EmojiCollectionView.indexPathForItem(at: point)
+        
+        print(indexPath)
+        
+        if let index = indexPath  {
+            
+            let cell = self.EmojiCollectionView.cellForItem(at: index) as! UploadEmojiCell
+            var selectedEmoji = cell.uploadEmojis.text
+            print("Double Tap Emoji: ", selectedEmoji   )
+            
+            //                print(cell.uploadEmojis.text)
+            self.captionTextView.text.replacingOccurrences(of: selectedEmoji!, with: "")
+            self.emojiTagUntag(emojiInput: selectedEmoji, emojiInputTag: selectedEmoji)
+            
+            // do stuff with your cell, for example print the indexPath
+            
+            cell.backgroundColor = UIColor.rgb(red: 149, green: 204, blue: 244)
+            
+        } else {
+            print("Could not find index path")
         }
         
     }
@@ -1164,19 +1294,6 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
     
     
     
-    func resetCaptionTextView() {
-        self.captionTextView.text = captionDefault
-        self.captionTextView.textColor = UIColor.lightGray
-        
-    }
-    
-    func resetEmojiTextView() {
-        self.emojiTextView.text = emojiDefault
-        self.emojiTextView.alpha = 0.25
-    }
-    
-    
-
     
     func handleLongPress(_ gestureReconizer: UILongPressGestureRecognizer) {
         
@@ -1194,11 +1311,19 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
                 
                 let cell = self.EmojiCollectionView.cellForItem(at: index) as! UploadEmojiCell
                 print(cell.uploadEmojis.text)
+                 let selectedEmoji = cell.uploadEmojis.text
                 
-                let topright = CGPoint(x: cell.center.x + cell.bounds.size.width/2, y: cell.center.y - cell.bounds.size.height/2-25)
-                let converttopright = self.view.convert(topright, from:self.EmojiCollectionView)
                 
-                let label = UILabel(frame: CGRect(x: converttopright.x, y: converttopright.y, width: 75, height: 25))
+                // Clear Emojis if long press and contains emoji
+                if self.captionTextView.text.contains(selectedEmoji!){
+                    self.captionTextView.text = self.captionTextView.text.replacingOccurrences(of: selectedEmoji!, with: "")
+                    self.emojiTagUntag(emojiInput: selectedEmoji, emojiInputTag: selectedEmoji)
+                }
+                
+                let topleft = CGPoint(x: cell.center.x - cell.bounds.size.width/2, y: cell.center.y - cell.bounds.size.height/2-25)
+                let converttopleft = self.view.convert(topleft, from:self.EmojiCollectionView)
+                
+                let label = UILabel(frame: CGRect(x: converttopleft.x, y: converttopleft.y, width: 75, height: 25))
                 label.backgroundColor = UIColor.rgb(red: 240, green: 240, blue: 240)
                 label.layer.cornerRadius = 5
                 label.layer.masksToBounds = true
@@ -1324,7 +1449,7 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
             
                     cell.uploadEmojis.text = EmoticonArray[(indexPath as IndexPath).section][newIndex]
             
-            if self.selectedEmojis.contains(cell.uploadEmojis.text!){
+            if (self.selectedEmojis.contains(cell.uploadEmojis.text!)||self.captionTextView.text.contains(cell.uploadEmojis.text!)){
                         cell.backgroundColor = UIColor.rgb(red: 149, green: 204, blue: 244)
                     } else {
                         cell.backgroundColor = UIColor.white
@@ -1351,23 +1476,44 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
             let cell = collectionView.cellForItem(at: indexPath) as! UploadEmojiCell
             let pressedEmoji = cell.uploadEmojis.text!
             
+        
             if self.captionTextView.text.contains(pressedEmoji) == false && self.selectedEmojis.contains(pressedEmoji) == false
             {
+                // emoji not in caption or tag
                 if self.captionTextView.text == "Insert Caption Here" {
                     self.captionTextView.text = cell.uploadEmojis.text!
+                    self.captionCancelButton.isHidden = false
+                    
 
                 } else {
                     self.captionTextView.text = self.captionTextView.text + cell.uploadEmojis.text!
                 }
                 
-            } else if self.captionTextView.text.contains(pressedEmoji) == true && self.selectedEmojis.contains(pressedEmoji) == true {
-                captionTextView.text = captionTextView.text.replacingOccurrences(of: pressedEmoji, with: "")
+            } else if self.captionTextView.text.contains(pressedEmoji) == true {
+                
+//                captionTextView.text = captionTextView.text.replacingOccurrences(of: pressedEmoji, with: "")
+                let emojiChars = captionTextView.text.indicesOf(string: pressedEmoji)
+                let lastEmojiChar = emojiChars[emojiChars.count - 1]
+                var temp =  captionTextView.text
+                let index = temp?.index((temp?.startIndex)!, offsetBy: lastEmojiChar)
+                captionTextView.text.remove(at: index!)
+            
             }
             
             // cell.contentView.backgroundColor = UIColor.blue
-            self.emojiCheck(cell.uploadEmojis.text)
+            self.emojiTagUntag(emojiInput: cell.uploadEmojis.text, emojiInputTag: cell.uploadEmojis.text)
+            
+            if let emojiChar = self.captionTextView.text.range(of: pressedEmoji) {
+                cell.backgroundColor  = UIColor.rgb(red: 149, green: 204, blue: 244)
+            }   else {
+                cell.backgroundColor = UIColor.white
+            }
+            
+            
+            
+            
         }
-        
+            
 //        if emojiViews!.contains(collectionView) {
 //
 //            let cell = collectionView.cellForItem(at: indexPath) as! UploadEmojiCell
@@ -1671,9 +1817,8 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         
         downloadRestaurantDetails(GPSLocation, searchRadius: searchRadius, searchType: searchTerm)
         
-    }
-    
-    
+        }
+
     var googlePlaceNames = [String?](){
         didSet {
         }
@@ -1682,8 +1827,7 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
     var googlePlaceIDs = [String]()
     var googlePlaceAdresses = [String]()
     var googlePlaceLocations = [CLLocation]()
-    
-    
+        
     func downloadRestaurantDetails(_ lat: CLLocation, searchRadius:Double, searchType: String ) {
         let URL_Search = "https://maps.googleapis.com/maps/api/place/search/json?"
         let API_iOSKey = GoogleAPIKey()
@@ -1701,7 +1845,6 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         self.googlePlaceIDs.removeAll()
         self.googlePlaceAdresses.removeAll()
         self.googlePlaceLocations.removeAll()
-
         
         Alamofire.request(url).responseJSON { (response) -> Void in
             
@@ -1727,15 +1870,14 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
                                     self.googlePlaceAdresses.append(locationAdress)
                                     self.googlePlaceLocations.append(locationGPStempcreate)
                                     self.placesCollectionView.reloadData()
-                                    
                             }
                         }
                     }
                 }
             }
-        
         }
-    }
+    
+        }
 
 
 

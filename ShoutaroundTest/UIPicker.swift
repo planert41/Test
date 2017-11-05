@@ -7,6 +7,89 @@
 //
 //
 //import Foundation
+
+// Detect Backspace = isBackSpace == -92
+// When hit backspace, compare new words to prev saved words. if deleted string matches an emoji, then we take emoji out
+//
+//            else if (isBackSpace == -92) {
+//                deletedWords = textView.text!.components(separatedBy: " ")
+//                let deletedWordArray = Array(Set(self.savedWords).subtracting(self.deletedWords))
+//                //                print(savedWords)
+//                //                print(newWords)
+//
+//                if deletedWordArray.count != 0 {
+//                    self.deletedWord = deletedWordArray[0]
+//                    print("Deleted Word",self.deletedWord)
+//
+//                }
+//
+//                var emojiLookup = EmojiDictionary.key(forValue: self.deletedWord.lowercased())
+//                if emojiLookup != nil && self.selectedEmojis.contains(emojiLookup!) && textView.text!.contains(emojiLookup!) == false {
+//                    self.deletedWord = ""
+//                    self.emojiCheck(emojiLookup)
+//                }
+//            }
+//
+//func emojiCheck(_ emoji: String?){
+//    
+//    
+//    // Check if selected Emojis already have emoji
+//    
+//    //        print(emoji, emoji.unicodeScalars, emoji.containsRatingEmoji)
+//    
+//    guard let emoji = emoji else {return}
+//    
+//    var selectedEmojis = self.selectedEmojis
+//    
+//    if selectedEmojis != nil {
+//        
+//        if (selectedEmojis?[0].containsRatingEmoji)! {
+//            self.ratingEmoji = selectedEmojis?[0]
+//            self.nonRatingEmoji = selectedEmojis
+//            self.nonRatingEmoji?.remove(at: 0)
+//        } else {
+//            self.nonRatingEmoji = selectedEmojis
+//        }
+//    }
+//    
+//    
+//    if emoji.containsOnlyEmoji == false {
+//        return
+//    }
+//        
+//    else if emoji.containsRatingEmoji {
+//        if self.ratingEmoji == emoji {
+//            // Remove Rating Emoji if its the same rating emoji
+//            self.ratingEmoji = nil
+//        } else {
+//            // Replace Rating Emoji with New Rating Emoji
+//            self.ratingEmoji = emoji
+//            //    self.selectedEmojis = self.ratingEmoji! + self.nonratingEmoji!
+//        }
+//    }
+//        
+//    else if emoji.containsOnlyEmoji && !emoji.containsRatingEmoji && (self.nonRatingEmoji?.joined().characters.count)! < self.nonRatingEmojiLimit {
+//        
+//        if self.nonRatingEmoji?.contains(emoji){
+//            self.nonRatingEmoji?.remove(at: self.nonRatingEmoji?.index(of: emoji))
+//        }
+//        
+//        
+//        if self.nonRatingEmoji == nil {
+//            self.nonRatingEmoji = emoji
+//        } else {
+//            self.nonRatingEmoji = self.nonRatingEmoji! + emoji
+//        }
+//        // self.selectedEmojis = self.ratingEmoji! + self.nonratingEmoji!
+//    }
+//    
+//    
+//    print("selected emojis", self.selectedEmojis)
+//    print("rating emoji", ratingEmoji)
+//    print("nonrating emoji", nonRatingEmoji)
+//    print("first emoji", firstEmoji, firstEmoji.containsRatingEmoji)
+//    
+//}
 //
 //
 //    func fetchBookmarkPosts() {

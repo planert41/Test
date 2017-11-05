@@ -141,6 +141,21 @@ extension String {
         return String(characters.filter{ set.insert($0).inserted })
     }
     
+    func indicesOf(string: String) -> [Int] {
+        var indices = [Int]()
+        var searchStartIndex = self.startIndex
+
+        while searchStartIndex < self.endIndex,
+            let range = self.range(of: string, range: searchStartIndex..<self.endIndex),
+            !range.isEmpty
+        {
+            let index = distance(from: self.startIndex, to: range.lowerBound)
+            indices.append(index)
+            searchStartIndex = range.upperBound
+        }
+
+        return indices
+    }
 }
 
 extension Int {
