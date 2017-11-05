@@ -1624,6 +1624,12 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         guard let postLocationAdress = self.selectedImageLocationAdress else {return}
         guard let uid = Auth.auth().currentUser?.uid else {return}
         
+        let ratingEmojiUpload = self.ratingEmoji ?? " "
+        let nonratingEmojiUpload = self.nonRatingEmoji ?? [" "]
+        let nonratingEmojiTagsUpload = self.nonRatingEmojiTags ?? [" "]
+
+        
+        
         var uploadedLocationGPSLatitude: String
         var uploadedlocationGPSLongitude: String
         var uploadedLocationGPS: String
@@ -1647,7 +1653,7 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         let uploadTime = Date().timeIntervalSince1970
         let tagTime = self.selectedTime?.timeIntervalSince1970
         
-        let values = ["imageUrl": imageUrl, "caption": caption, "emoji": selectedPostEmoji, "imageWidth": postImage.size.width, "imageHeight": postImage.size.height, "creationDate": uploadTime, "googlePlaceID": googlePlaceID, "locationName": postLocationName, "locationAdress": postLocationAdress, "postLocationGPS": uploadedLocationGPS, "creatorUID": uid, "tagTime": tagTime] as [String:Any]
+        let values = ["imageUrl": imageUrl, "caption": caption, "emoji": selectedPostEmoji, "imageWidth": postImage.size.width, "imageHeight": postImage.size.height, "creationDate": uploadTime, "googlePlaceID": googlePlaceID, "locationName": postLocationName, "locationAdress": postLocationAdress, "postLocationGPS": uploadedLocationGPS, "creatorUID": uid, "tagTime": tagTime,"ratingEmoji": ratingEmojiUpload, "nonratingEmoji": nonratingEmojiUpload, "nonratingEmojiTags": nonratingEmojiTagsUpload] as [String:Any]
         ref.updateChildValues(values) { (err, ref) in
             if let err = err {
                 self.navigationItem.rightBarButtonItem?.isEnabled = true
