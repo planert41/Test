@@ -465,6 +465,7 @@ class BookMarkController: UIViewController, UICollectionViewDelegate, UICollecti
         clearFilter()
         fetchedBookmarks.removeAll()
         displayedBookmarks.removeAll()
+        self.collectionView.reloadData()
         fetchBookmarkPosts()
         self.collectionView.refreshControl?.endRefreshing()
         print("Refresh Bookmark Feed")

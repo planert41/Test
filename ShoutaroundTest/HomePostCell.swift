@@ -43,7 +43,7 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
             bookmarkButton.setImage(post?.hasBookmarked == true ? #imageLiteral(resourceName: "bookmark_ribbon_filled").withRenderingMode(.alwaysOriginal) : #imageLiteral(resourceName: "bookmark_ribbon_unfilled").withRenderingMode(.alwaysOriginal), for: .normal)
                 
             photoImageView.loadImage(urlString: imageUrl)
-            usernameLabel.text = post?.user.username
+            usernameLabel.text = (post?.ratingEmoji)! + (post?.user.username)!
 
 
             
@@ -64,7 +64,9 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
             adressLabel.isUserInteractionEnabled = true
             adressLabel.addGestureRecognizer(locationTapGesture2)
             
-            emojiLabel.text = post?.emoji
+//            emojiLabel.text = post?.emoji
+            emojiLabel.text = post?.nonRatingEmoji?.joined()
+            
             emojiLabel.isUserInteractionEnabled = true
             let emojiTap = UITapGestureRecognizer(target: self, action: #selector(HomePostCell.emojiTap))
             usernameLabel.addGestureRecognizer(usernameTap)
@@ -218,6 +220,28 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         return label
         
     }()
+    
+    let ratingEmojiLabel: UILabel = {
+        let label = UILabel()
+        label.text = "Emojis"
+        label.font = UIFont.boldSystemFont(ofSize: 20)
+        label.textAlignment = NSTextAlignment.right
+        label.backgroundColor = UIColor.clear
+        return label
+        
+    }()
+    
+    let nonRatingEmojiLabel: UILabel = {
+        let label = UILabel()
+        label.text = "Emojis"
+        label.font = UIFont.boldSystemFont(ofSize: 20)
+        label.textAlignment = NSTextAlignment.right
+        label.backgroundColor = UIColor.clear
+        return label
+        
+    }()
+    
+    
     
     let emojiDetailLabel: UILabel = {
         let label = UILabel()
@@ -478,6 +502,8 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         addSubview(emojiLabel)
         addSubview(emojiDetailLabel)
 
+        addSubview(ratingEmojiLabel)
+        addSubview(nonRatingEmojiLabel)
 
 //        
 //        addSubview(optionsButton)
@@ -487,8 +513,10 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         
         headerView.anchor(top: topAnchor, left: leftAnchor, bottom: nil, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 50)
         
-        emojiLabel.anchor(top: topAnchor, left: leftAnchor, bottom: photoImageView.topAnchor, right: nil, paddingTop: 0, paddingLeft: 8, paddingBottom: 0, paddingRight: 0, width: 140, height: 0)
+//        nonRatingEmojiLabel.anchor(top: topAnchor, left: leftAnchor, bottom: nil, right: nil, paddingTop: 0, paddingLeft: 8, paddingBottom: 0, paddingRight: 0, width: 140, height: 0)
+//        nonRatingEmojiLabel.textAlignment = .left
         
+        emojiLabel.anchor(top: topAnchor, left: leftAnchor, bottom: photoImageView.topAnchor, right: nil, paddingTop: 0, paddingLeft: 8, paddingBottom: 0, paddingRight: 0, width: 140, height: 0)
         emojiLabel.textAlignment = .left
         
         let emojiTapGesture = UITapGestureRecognizer(target: self, action: #selector(HomePostCell.emojiTap))

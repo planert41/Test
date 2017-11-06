@@ -297,6 +297,41 @@ extension Database{
 
     }
     
+    static func updatePostwithPostID( postId: String, values: [String:Any]){
+        
+        Database.database().reference().child("posts").child(postId).updateChildValues(values) { (err, ref) in
+            if let err = err {
+                print("Fail to Update Post: ", postId, err)
+                return
+            }
+            print("Succesfully Updated Post: ", postId, " with: ", values)
+
+        }
+        
+    }
+    
+    static func deletePost(post: Post){
+        
+        Database.database().reference().child("posts").child(post.id!).removeValue()
+        Database.database().reference().child("postlocations").child(post.id!).removeValue()
+        Database.database().reference().child("userposts").child(post.creatorUID!).child(post.id!).removeValue()
+        Database.database().reference().child("bookmarks").child(post.creatorUID!).child(post.id!).removeValue()
+                
+        print("Post Delete @ posts, postlocations, userposts, bookmarks: ", post.id)
+
+        var deleteRef = Storage.storage().reference(forURL: post.imageUrl)
+        
+        deleteRef.delete(completion: { (error) in
+            if let error = error {
+                print("post image delete error for ", post.imageUrl)
+            } else {
+                print("Image Delete Success: ", post.imageUrl)
+            }
+            
+        })
+        
+    }
+    
     static func fetchPostWithPostID( postId: String, completion: @escaping (Post) -> ()) {
         
             if let cachedPost = postCache[postId] {

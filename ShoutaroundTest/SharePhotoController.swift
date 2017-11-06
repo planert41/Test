@@ -224,70 +224,7 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         
         
     }
-    
-    
-//    func emojiCheck(_ emojiInput: Emoji?){
-//        
-//        // print(emoji, emoji.unicodeScalars, emoji.containsRatingEmoji)
-//        // Check if selected Emojis already have emoji
-//        
-//        
-//        guard let emoji = emoji else {return}
-//        
-//        var selectedEmojis = self.selectedEmojis
-//        
-//        if selectedEmojis != nil {
-//            
-//            if (selectedEmojis?[0].containsRatingEmoji)! {
-//                self.ratingEmoji = selectedEmojis?[0]
-//                self.nonRatingEmoji = selectedEmojis
-//                self.nonRatingEmoji?.remove(at: 0)
-//            } else {
-//                self.nonRatingEmoji = selectedEmojis
-//            }
-//        }
-//        
-//        
-//        if emoji.containsOnlyEmoji == false {
-//            return
-//        }
-//            
-//        else if emoji.containsRatingEmoji {
-//            if self.ratingEmoji == emoji {
-//                // Remove Rating Emoji if its the same rating emoji
-//                self.ratingEmoji = nil
-//            } else {
-//                // Replace Rating Emoji with New Rating Emoji
-//                self.ratingEmoji = emoji
-//            //    self.selectedEmojis = self.ratingEmoji! + self.nonratingEmoji!
-//            }
-//        }
-//            
-//        else if emoji.containsOnlyEmoji && !emoji.containsRatingEmoji && (self.nonRatingEmoji?.joined().characters.count)! < self.nonRatingEmojiLimit {
-//            
-//            if self.nonRatingEmoji?.contains(emoji){
-//                self.nonRatingEmoji?.remove(at: self.nonRatingEmoji?.index(of: emoji))
-//            }
-//            
-//            
-//            if self.nonRatingEmoji == nil {
-//                self.nonRatingEmoji?.append(emoji)
-//            } else {
-//            self.nonRatingEmoji = self.nonRatingEmoji! + emoji
-//            }
-//           // self.selectedEmojis = self.ratingEmoji! + self.nonratingEmoji!
-//        }
-//        
-//        
-//        print("selected emojis", self.selectedEmojis)
-//        print("rating emoji", ratingEmoji)
-//        print("nonrating emoji", nonRatingEmoji)
-//        print("first emoji", firstEmoji, firstEmoji.containsRatingEmoji)
-//        
-//    }
-//    
-    
-  //  let emojiDefault = "😍🐮🍔🇺🇸🔥"
+
 
     var selectedPostLocation: CLLocation? = nil {
         
@@ -333,6 +270,7 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         }
     }
 
+    var defaultImageGPSName: String? = nil
     
     var selectedImageLocation:CLLocation?{
 
@@ -349,7 +287,8 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
                     self.locationNameLabel.attributedText = attributedText
                 } else{
                 
-                    self.selectedImageLocationName = "GPS: " + " (" + postLatitude + "," + postLongitude + ")"
+                    self.defaultImageGPSName = "GPS: " + " (" + postLatitude + "," + postLongitude + ")"
+                    self.selectedImageLocationName = self.defaultImageGPSName
                     self.selectedPostLocation = selectedImageLocation
                     //self.locationCancelButton.alpha = 1
                 }
@@ -361,7 +300,8 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
 
             } else {
 
-                locationNameLabel.text =  "No GPS Location"
+                self.defaultImageGPSName =  "No GPS Location"
+                self.selectedImageLocationName = self.defaultImageGPSName
                 self.selectedImageLocationAdress = ""
                 self.selectedPostLocation = nil
                 
@@ -501,13 +441,13 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
     func resetSelectedEmojis(){
         
         if self.ratingEmoji != nil {
-            self.captionTextView.text = self.captionTextView.text.replacingOccurrences(of: self.ratingEmoji!, with: "")
+         //   self.captionTextView.text = self.captionTextView.text.replacingOccurrences(of: self.ratingEmoji!, with: "")
             self.ratingEmoji = nil
             
         }
         if self.nonRatingEmoji != nil {
             for emoji in self.nonRatingEmoji!{
-                self.captionTextView.text = self.captionTextView.text.replacingOccurrences(of: emoji, with: "")
+          //      self.captionTextView.text = self.captionTextView.text.replacingOccurrences(of: emoji, with: "")
             }
             self.nonRatingEmoji = nil
         }
@@ -527,6 +467,14 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         let TapGesture = UITapGestureRecognizer(target: self, action: #selector(tapSearchBar))
         tv.addGestureRecognizer(TapGesture)
         
+        return tv
+    }()
+    
+    let emojiTagLabel: UILabel = {
+        let tv = LocationLabel()
+        tv.font = UIFont.systemFont(ofSize: 14)
+        tv.text = "Emoji Tags:"
+        tv.backgroundColor = UIColor.clear
         return tv
     }()
     
@@ -892,6 +840,9 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         view.addSubview(emojiLabelContainer)
         emojiLabelContainer.anchor(top: containerView.topAnchor, left: containerView.leftAnchor, bottom: nil, right: containerView.rightAnchor, paddingTop: 5, paddingLeft: 4, paddingBottom: 0, paddingRight: 5, width: 0, height: 30)
 
+        view.addSubview(emojiTagLabel)
+        emojiTagLabel.anchor(top: emojiLabelContainer.topAnchor, left: emojiLabelContainer.leftAnchor, bottom: emojiLabelContainer.bottomAnchor, right: nil, paddingTop: 5, paddingLeft: 0, paddingBottom: 5, paddingRight: 5, width: 100, height: 0)
+        
         
         view.addSubview(emojiCancelButton)
         //       emojiCancelButton.anchor(top: nil, left: nil, bottom: containerView.bottomAnchor, right: containerView.rightAnchor, paddingTop: 4, paddingLeft: 0, paddingBottom: 5, paddingRight: 5, width: 15, height: 15)
@@ -904,16 +855,16 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
   //      stackview.anchor(top: emojiLabelContainer.topAnchor, left: nil, bottom: nil, right: emojiLabelContainer.rightAnchor, paddingTop: 0, paddingLeft: 5, paddingBottom: 0, paddingRight: 5, width: DefaultEmojiLabelSize * 4, height: DefaultEmojiLabelSize)
 
         view.addSubview(nonRatingEmojiStackView)
-        nonRatingEmojiStackView.anchor(top: emojiLabelContainer.topAnchor, left: nil, bottom: nil, right: emojiCancelButton.leftAnchor, paddingTop: 0, paddingLeft: 5, paddingBottom: 0, paddingRight: 5, width: (DefaultEmojiLabelSize + 2) * 4, height: DefaultEmojiLabelSize)
+        nonRatingEmojiStackView.anchor(top: emojiLabelContainer.topAnchor, left: emojiTagLabel.rightAnchor, bottom: nil, right: nil, paddingTop: 0, paddingLeft: 5, paddingBottom: 0, paddingRight: 5, width: (DefaultEmojiLabelSize + 2) * 4, height: DefaultEmojiLabelSize)
         
         view.addSubview(nonRatingEmojiLabel)
         nonRatingEmojiLabel.anchor(top: nonRatingEmojiStackView.topAnchor, left: nonRatingEmojiStackView.leftAnchor, bottom: nonRatingEmojiStackView.bottomAnchor, right: self.view.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
         
         view.addSubview(blankRatingEmoji)
-        blankRatingEmoji.anchor(top: emojiLabelContainer.topAnchor, left: nil, bottom: emojiLabelContainer.bottomAnchor, right:nonRatingEmojiStackView.leftAnchor, paddingTop: 0, paddingLeft: 5, paddingBottom: 0, paddingRight: 5, width: DefaultEmojiLabelSize + 2, height: DefaultEmojiLabelSize)
+        blankRatingEmoji.anchor(top: emojiLabelContainer.topAnchor, left: nil, bottom: emojiLabelContainer.bottomAnchor, right:emojiCancelButton.leftAnchor, paddingTop: 0, paddingLeft: 5, paddingBottom: 0, paddingRight: 5, width: DefaultEmojiLabelSize + 2, height: DefaultEmojiLabelSize)
 
         view.addSubview(ratingEmojiLabel)
-        ratingEmojiLabel.anchor(top: blankRatingEmoji.topAnchor, left: blankRatingEmoji.leftAnchor, bottom: blankRatingEmoji.bottomAnchor, right: nonRatingEmojiLabel.leftAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
+        ratingEmojiLabel.anchor(top: blankRatingEmoji.topAnchor, left: blankRatingEmoji.leftAnchor, bottom: blankRatingEmoji.bottomAnchor, right: emojiLabelContainer.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
         
         view.addSubview(imageView)
         imageView.anchor(top: emojiLabelContainer.bottomAnchor, left: containerView.leftAnchor, bottom: containerView.bottomAnchor, right: nil, paddingTop: 8, paddingLeft: 8, paddingBottom: 8, paddingRight: 0, width: 84, height: 0)
@@ -1495,6 +1446,8 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
 
                 } else {
                     self.captionTextView.text = self.captionTextView.text + cell.uploadEmojis.text!
+                    self.captionCancelButton.isHidden = false
+                    
                 }
                 
             } else if self.captionTextView.text.contains(pressedEmoji) == true {
@@ -1537,7 +1490,7 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
             if self.selectedPostLocation == self.googlePlaceLocations[indexPath.item] {
 
                 self.selectedPostLocation = self.selectedImageLocation
-                self.locationNameLabel.text = self.selectedImageLocationName
+                self.locationNameLabel.text = self.defaultImageGPSName
                 self.locationAdressLabel.text = self.selectedImageLocationAdress
                 self.selectedPostGooglePlaceID = nil
                 self.selectedGoogleLocationIndex = nil
@@ -1552,6 +1505,7 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         
                 print(self.googlePlaceLocations[indexPath.item])
                 print(self.googlePlaceAdresses[indexPath.item])
+                print(self.googlePlaceNames[indexPath.item])
                 print(self.selectedPostLocation ?? nil)
                 print(self.selectedPostGooglePlaceID ?? "")
             
@@ -1620,13 +1574,15 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         let selectedPostEmoji = selectedEmojis
         let googlePlaceID = selectedPostGooglePlaceID ?? ""
         
-        guard let postLocationName = self.selectedImageLocationName else {return}
-        guard let postLocationAdress = self.selectedImageLocationAdress else {return}
+        // Upload Name Adress that matches inputs
+        
+        guard let postLocationName = self.locationNameLabel.text else {return}
+        guard let postLocationAdress = self.locationAdressLabel.text else {return}
         guard let uid = Auth.auth().currentUser?.uid else {return}
         
-        let ratingEmojiUpload = self.ratingEmoji ?? " "
-        let nonratingEmojiUpload = self.nonRatingEmoji ?? [" "]
-        let nonratingEmojiTagsUpload = self.nonRatingEmojiTags ?? [" "]
+        let ratingEmojiUpload = self.ratingEmoji
+        let nonratingEmojiUpload = self.nonRatingEmoji
+        let nonratingEmojiTagsUpload = self.nonRatingEmojiTags
 
         
         
@@ -1653,7 +1609,7 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         let uploadTime = Date().timeIntervalSince1970
         let tagTime = self.selectedTime?.timeIntervalSince1970
         
-        let values = ["imageUrl": imageUrl, "caption": caption, "emoji": selectedPostEmoji, "imageWidth": postImage.size.width, "imageHeight": postImage.size.height, "creationDate": uploadTime, "googlePlaceID": googlePlaceID, "locationName": postLocationName, "locationAdress": postLocationAdress, "postLocationGPS": uploadedLocationGPS, "creatorUID": uid, "tagTime": tagTime,"ratingEmoji": ratingEmojiUpload, "nonratingEmoji": nonratingEmojiUpload, "nonratingEmojiTags": nonratingEmojiTagsUpload] as [String:Any]
+        let values = ["imageUrl": imageUrl, "caption": caption, "imageWidth": postImage.size.width, "imageHeight": postImage.size.height, "creationDate": uploadTime, "googlePlaceID": googlePlaceID, "locationName": postLocationName, "locationAdress": postLocationAdress, "postLocationGPS": uploadedLocationGPS, "creatorUID": uid, "tagTime": tagTime,"ratingEmoji": ratingEmojiUpload, "nonratingEmoji": nonratingEmojiUpload, "nonratingEmojiTags": nonratingEmojiTagsUpload] as [String:Any]
         ref.updateChildValues(values) { (err, ref) in
             if let err = err {
                 self.navigationItem.rightBarButtonItem?.isEnabled = true

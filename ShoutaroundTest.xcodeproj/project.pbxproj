@@ -51,6 +51,7 @@
 		A5AEB9761F986F8200E88CAC /* PictureController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5AEB9751F986F8200E88CAC /* PictureController.swift */; };
 		A5AEB9781F9956B500E88CAC /* InboxController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5AEB9771F9956B500E88CAC /* InboxController.swift */; };
 		A5AEB97A1F99583B00E88CAC /* InboxCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5AEB9791F99583B00E88CAC /* InboxCell.swift */; };
+		A5BBD2881FB0A377004367E7 /* GoogleMaps.bundle in Resources */ = {isa = PBXBuildFile; fileRef = A5BBD2871FB0A377004367E7 /* GoogleMaps.bundle */; };
 		A5BC59491FAA112200BEAD1C /* GoogleMaps.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A5BC59481FAA112200BEAD1C /* GoogleMaps.framework */; };
 		A5C480D01F5DCB500096E003 /* FBSDKCoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A5C480CE1F5DCB500096E003 /* FBSDKCoreKit.framework */; };
 		A5C480D11F5DCB500096E003 /* FBSDKLoginKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A5C480CF1F5DCB500096E003 /* FBSDKLoginKit.framework */; };
@@ -122,6 +123,7 @@
 		A5AEB9751F986F8200E88CAC /* PictureController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PictureController.swift; sourceTree = "<group>"; };
 		A5AEB9771F9956B500E88CAC /* InboxController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InboxController.swift; sourceTree = "<group>"; };
 		A5AEB9791F99583B00E88CAC /* InboxCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InboxCell.swift; sourceTree = "<group>"; };
+		A5BBD2871FB0A377004367E7 /* GoogleMaps.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; name = GoogleMaps.bundle; path = Pods/GoogleMaps/Maps/Frameworks/GoogleMaps.framework/Resources/GoogleMaps.bundle; sourceTree = "<group>"; };
 		A5BC59481FAA112200BEAD1C /* GoogleMaps.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GoogleMaps.framework; path = Pods/GoogleMaps/Maps/Frameworks/GoogleMaps.framework; sourceTree = "<group>"; };
 		A5BFBB651F6F647100F36AF8 /* ShoutaroundTest-CBridgingHeader.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "ShoutaroundTest-CBridgingHeader.h"; sourceTree = "<group>"; };
 		A5C480CE1F5DCB500096E003 /* FBSDKCoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = FBSDKCoreKit.framework; path = "ShoutaroundTest/FacebookSDKs-iOS-4.26.0/FBSDKCoreKit.framework"; sourceTree = "<group>"; };
@@ -178,6 +180,7 @@
 		3EA73406772E99D3B47B94DF /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				A5BBD2871FB0A377004367E7 /* GoogleMaps.bundle */,
 				A5BC59481FAA112200BEAD1C /* GoogleMaps.framework */,
 				A5C480CE1F5DCB500096E003 /* FBSDKCoreKit.framework */,
 				A5C480CF1F5DCB500096E003 /* FBSDKLoginKit.framework */,
@@ -453,6 +456,7 @@
 				A51C13C51F51136B00CEB740 /* GoogleService-Info.plist in Resources */,
 				A54E1D751F4E736B00C2AA77 /* Assets.xcassets in Resources */,
 				A54E1D701F4E736B00C2AA77 /* Main.storyboard in Resources */,
+				A5BBD2881FB0A377004367E7 /* GoogleMaps.bundle in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

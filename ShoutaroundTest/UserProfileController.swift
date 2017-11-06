@@ -251,10 +251,7 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
         
         deleteAlert.addAction(UIAlertAction(title: "Ok", style: .default, handler: { (action: UIAlertAction!) in
             
-            Database.database().reference().child("posts").child(post.id!).removeValue()
-            Database.database().reference().child("postlocations").child(post.id!).removeValue()
-            Database.database().reference().child("userposts").child(post.creatorUID!).child(post.id!).removeValue()
-            
+            // Remove from Current View
             let index = self.allPosts.index { (filteredpost) -> Bool in
                 filteredpost.id  == post.id
             }
@@ -263,6 +260,7 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
             self.allPosts.remove(at: index!)
             self.collectionView?.deleteItems(at: [filteredindexpath])
             
+            Database.deletePost(post: post)
         }))
         
         deleteAlert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: { (action: UIAlertAction!) in
@@ -270,7 +268,6 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
         }))
         
         present(deleteAlert, animated: true, completion: nil)
-        
         
     }
     
@@ -295,7 +292,6 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
             
             guard var allPostIds = snapshot.value as? [String: Any] else {return}
             
-            
             if allPostIds.count < 4 {
                 self.isFinishedPaging = true
             }
@@ -303,10 +299,6 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
 //            allPostIds.sorted(by: { $0["creationDate"] > $1["creationDate] })
             print("allpostIds Queried",allPostIds)
             
-            
-
-                
-                
                 let intIndex = allPostIds.count // where intIndex < myDictionary.count
                 let index = allPostIds.index(allPostIds.startIndex, offsetBy: intIndex - 1)
                 let testindex = allPostIds.index(allPostIds.startIndex, offsetBy: 1)
@@ -314,19 +306,19 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
                 
  //               print("DeletedUID ",allPostIds[deleteindex!])
                 
-            if self.allPosts.count > 0 && allPostIds.count > 5 {
+            if self.allPosts.count > 0 {
                 print("before delete", allPostIds.count)
                 
-                let allPostCount = max(0,self.allPosts.count - 5)
+//                let allPostCount = max(0,self.allPosts.count - 5)
                 
-                let lastSixPost =  self.allPosts.suffix(from: 6)
+                let lastSixPost =  self.allPosts.suffix(6)
   //              let lastSixPost = self.allPosts[(allPostCount-1)..<self.allPosts.count-1]
                 
                 var lastSixPostIds: [String] = []
                 
                 for post in lastSixPost{
                     lastSixPostIds.append(post.id!)
-                }
+            }
                 
                 print("Last Six Post Ids: ",lastSixPostIds)
 
@@ -342,8 +334,6 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
                 print("after delete", allPostIds.count)
             }
             
-
-            
             guard let user = self.user else {return}
             
             allPostIds.forEach({ (key,value) in
@@ -357,7 +347,6 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
                 thisGroup.leave()
                     
                 })
-
             })
             
             thisGroup.notify(queue: .main) {
@@ -367,7 +356,6 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
                 
                 self.collectionView?.reloadData()
             }
-        
          
             self.allPosts.forEach({ (post) in
                 print(post.id ?? "")
@@ -553,9 +541,9 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
     
     override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         
-        print("collectionview post count", self.allPosts.count)
-        print("isfinishedpaging",self.isFinishedPaging)
-        print(indexPath.item)
+//        print("collectionview post count", self.allPosts.count)
+//        print("isfinishedpaging",self.isFinishedPaging)
+//        print(indexPath.item)
         if indexPath.item == self.allPosts.count - 1 && !isFinishedPaging{
             
             paginatePosts()

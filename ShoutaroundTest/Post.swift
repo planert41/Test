@@ -41,10 +41,16 @@ struct Post {
     var locationAdress: String
     var locationGooglePlaceID: String?
     var distance: Double? = nil
+    let tagTime: Date
+    
     
     var hasLiked: Bool = false
     var hasBookmarked: Bool = false
     var creatorUID: String?
+    var ratingEmoji: String?
+    var nonRatingEmoji: [String]?
+    var nonRatingEmojiTags: [String]?
+    
     
     
     init(user: User, dictionary: [String: Any]) {
@@ -56,6 +62,12 @@ struct Post {
         self.imageUrl = dictionary["imageUrl"] as? String ?? ""
         self.caption = dictionary["caption"] as? String ?? ""
         self.emoji = dictionary["emoji"] as? String ?? ""
+        self.ratingEmoji = dictionary["ratingEmoji"] as? String ?? ""
+        self.nonRatingEmoji = dictionary["nonratingEmoji"] as? [String] ?? nil
+        self.nonRatingEmojiTags = dictionary["nonratingEmojiTags"] as? [String] ?? nil
+        
+        let tagSecondsFrom1970 = dictionary["tagTime"] as? Double ?? 0
+        self.tagTime = Date(timeIntervalSince1970: tagSecondsFrom1970)
         
         let secondsFrom1970 = dictionary["creationDate"] as? Double ?? 0
         self.creationDate = Date(timeIntervalSince1970: secondsFrom1970)
