@@ -17,12 +17,14 @@ struct PostId {
     var creationDate: Date
     var distance: Double? = 99999999
     var postGPS: String? = nil
+    var tagTime: Date
     
-    init(id: String, creatorUID: String, fetchedDate: Double, distance: Double?, postGPS: String?) {
+    init(id: String, creatorUID: String, fetchedTagTime: Double, fetchedDate: Double, distance: Double?, postGPS: String?) {
         
         self.id = id
         self.creatorUID = creatorUID
         self.creationDate = Date(timeIntervalSince1970: fetchedDate)
+        self.tagTime = Date(timeIntervalSince1970: fetchedTagTime)
         self.postGPS = postGPS
         
     }

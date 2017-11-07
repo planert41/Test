@@ -14,7 +14,12 @@ import UIKit
 
  var geoFilterRangeDefault:[String] = ["5", "25", "100","250", "All"]
 
-var FilterSortDefault:[String] = ["Latest", "Oldest", "Nearest"]
+var FilterSortTimeDefault:[String] = ["Early", "Mid-Day", "Night", "All"]
+var FilterSortTimeStart:[Double] = [6,12,18,0]
+var FilterSortTimeEnd:[Double] = [12,18,23,23]
+
+
+var FilterSortDefault:[String] = ["Nearest", "Oldest", "Latest"]
 
 var defaultPhotoResize = CGSize(width: 500, height: 500)
 

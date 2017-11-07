@@ -156,8 +156,10 @@ extension Database{
                 
                 let dictionary = value as? [String: Any]
                 let secondsFrom1970 = dictionary?["creationDate"] as? Double ?? 0
+                let tagTime = dictionary?["tagTime"] as? Double ?? 0
                 
-                let tempID = PostId.init(id: key, creatorUID: creatoruid, fetchedDate: secondsFrom1970, distance: nil, postGPS: nil)
+                
+                let tempID = PostId.init(id: key, creatorUID: creatoruid, fetchedTagTime: tagTime, fetchedDate: secondsFrom1970, distance: nil, postGPS: nil)
                 fetchedPostIds.append(tempID)
                 
                 myGroup.leave()
@@ -195,7 +197,9 @@ extension Database{
                     // Substitute Post Id creation date with bookmark time
                     
                     Database.fetchPostIDDetails(postId: key, completion: { (fetchPostId) in
-                        let tempID = PostId.init(id: fetchPostId.id, creatorUID: fetchPostId.creatorUID!, fetchedDate: bookmarkTime, distance: nil, postGPS: fetchPostId.postGPS)
+                    
+                        // Tag Time is not included in the Post ID extracted from this function
+                        let tempID = PostId.init(id: fetchPostId.id, creatorUID: fetchPostId.creatorUID!, fetchedTagTime: 0, fetchedDate: bookmarkTime, distance: nil, postGPS: fetchPostId.postGPS)
                         fetchedPostIds.append(tempID)
                         myGroup.leave()
                         
@@ -310,6 +314,19 @@ extension Database{
         
     }
     
+    static func updateUserPostwithPostID(creatorId: String, postId: String, values: [String:Any]){
+        
+        Database.database().reference().child("userposts").child(creatorId).child(postId).updateChildValues(values) { (err, ref) in
+            if let err = err {
+                print("Fail to Update Post: ", postId, err)
+                return
+            }
+            print("Succesfully Updated Post: ", postId, " with: ", values)
+            
+        }
+        
+    }
+    
     static func deletePost(post: Post){
         
         Database.database().reference().child("posts").child(post.id!).removeValue()
@@ -419,13 +436,16 @@ extension Database{
         let circleQuery = geoFire?.query(at: location, withRadius: distance)
         
             myGroup.enter()
-        circleQuery?.observe(.keyEntered, with: { (key, location) in
+        circleQuery?.observe(.keyEntered, with: { (key, firebaselocation) in
 //            print(key)
 
             myGroup.enter()
             Database.fetchPostWithPostID(postId: key!, completion: { (post) in
 //                print(post)
-                fetchedPosts.append(post)
+                var tempPost = post
+                tempPost.distance = tempPost.locationGPS?.distance(from: location)
+//                print(tempPost.distance, ": ", tempPost.caption, " : ", location, " : ", tempPost.locationGPS)
+                fetchedPosts.append(tempPost)
                 myGroup.leave()
             })
         })
@@ -436,7 +456,7 @@ extension Database{
         
         myGroup.notify(queue: .main) {
             fetchedPosts.sort(by: { (p1, p2) -> Bool in
-                return p1.creationDate.compare(p2.creationDate) == .orderedDescending
+                return (p1.distance! < p2.distance!)
             })
             completion(fetchedPosts)
         }
@@ -454,8 +474,9 @@ extension Database{
             let creatorUID = dictionary["creatorUID"] as? String ?? ""
             let secondsFrom1970 = dictionary["creationDate"] as? Double ?? 0
             let postGPS = dictionary["postLocationGPS"] as? String ?? ""
+            let tagTime = dictionary["tagTime"] as? Double ?? 0
             
-            let tempID = PostId.init(id: postId, creatorUID: creatorUID, fetchedDate: secondsFrom1970, distance: nil, postGPS: postGPS)
+            let tempID = PostId.init(id: postId, creatorUID: creatorUID, fetchedTagTime: tagTime, fetchedDate: secondsFrom1970, distance: nil, postGPS: postGPS)
             completion(tempID)
             
         })

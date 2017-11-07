@@ -61,9 +61,10 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     
 // Filter Variables
     
-    let defaultRange = geoFilterRangeDefault[geoFilterRangeDefault.endIndex-1]
+    let defaultRange = geoFilterRangeDefault[geoFilterRangeDefault.endIndex - 1]
     let defaultGroup = "All"
-    let defaultSort = FilterSortDefault[0]
+    let defaultSort = FilterSortDefault[FilterSortDefault.endIndex - 1]
+    let defaultTime =  FilterSortTimeDefault[FilterSortTimeDefault.endIndex - 1]
     
     var filterCaption: String? = nil{
         didSet{
@@ -83,6 +84,11 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     }
     
     var filterSort: String?
+    var filterTime: String?{
+        didSet{
+            setupNavigationItems()
+        }
+    }
     
     
     var filterButton: UIImageView = {
@@ -90,7 +96,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         view.image = #imageLiteral(resourceName: "filter").withRenderingMode(.alwaysOriginal)
         view.contentMode = .scaleAspectFit
         view.sizeToFit()
-        view.layer.cornerRadius = 5
+        view.layer.cornerRadius = 25/2
         view.layer.masksToBounds = true
         view.backgroundColor = UIColor.clear
         return view
@@ -120,9 +126,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         let firebaseAlert = UIAlertController(title: "Firebase Update", message: "Do you want to update Firebase Data?", preferredStyle: UIAlertControllerStyle.alert)
     
         firebaseAlert.addAction(UIAlertAction(title: "Ok", style: .default, handler: { (action: UIAlertAction!) in
-            
-            
-            
+    
             let ref = Database.database().reference().child("posts")
             
             ref.observeSingleEvent(of: .value, with: {(snapshot) in
@@ -139,6 +143,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
                     var fetchedRatingEmoji = messageDetails["ratingEmoji"] as? String
                     var fetchedNonratingEmoji = messageDetails["nonRatingEmoji"] as? [String]
                     var FetchedNonratingEmojiTags = messageDetails["nonRatingEmojiTags"] as? [String]
+                    var creatorUid = messageDetails["creatorUID"] as? String
                     
                     let tempEmojis = String(selectedEmojis.characters.prefix(1))
                     var selectedEmojisSplit = selectedEmojis.characters.map { String($0) }
@@ -178,6 +183,12 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
                     
                     print("Updating PostId: ",key," Values: ", values)
                     Database.updatePostwithPostID(postId: key, values: values)
+                  
+                    // Update User Posts
+                    let userPostValues = ["tagTime": newTagTime] as [String: Any]
+                    Database.updateUserPostwithPostID(creatorId: creatorUid!, postId: key, values: userPostValues)
+                    
+                    
                 })
             })
         }))
@@ -186,12 +197,14 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
             print("Handle Cancel Logic here")
         }))
 
-    
+        self.present(firebaseAlert, animated: true)
     }
     
     override func viewDidLoad() {
         super.viewDidLoad()
 
+//        self.updateFirebaseData()
+        
         self.navigationController?.navigationBar.backgroundColor = UIColor.clear
         
 //        self.automaticallyAdjustsScrollViewInsets = false
@@ -297,18 +310,20 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         filterController.selectedRange = self.filterRange
         filterController.selectedGroup = self.filterGroup
         filterController.selectedSort = self.filterSort
+        filterController.selectedTime = self.filterTime
         self.navigationController?.pushViewController(filterController, animated: true)
     }
 
     
 // Search Delegates
     
-    func filterControllerFinished(selectedRange: String?, selectedLocation: CLLocation?, selectedGooglePlaceID: String?, selectedGroup: String?, selectedSort: String?){
+    func filterControllerFinished(selectedRange: String?, selectedLocation: CLLocation?, selectedGooglePlaceID: String?, selectedTime: String?, selectedGroup: String?, selectedSort: String?){
         
         self.filterRange = selectedRange
         self.filterLocation = selectedLocation
         self.filterGroup = selectedGroup
         self.filterSort = selectedSort
+        self.filterTime = selectedTime
         self.refreshPagination()
         self.displayedPosts.removeAll()
         self.collectionView?.reloadData()
@@ -348,15 +363,17 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     
     func sortFetchPostIds(){
         if self.filterSort == FilterSortDefault[1] {
+            // Oldest
             self.fetchPostIds.sort(by: { (p1, p2) -> Bool in
                 return p1.creationDate.compare(p2.creationDate) == .orderedAscending
             })
-        } else if self.filterSort == FilterSortDefault[2] {
-            
+        } else if self.filterSort == FilterSortDefault[0] {
+            // Nearest
             self.fetchPostIds.sort(by: { (p1, p2) -> Bool in
                 return (p1.distance! < p2.distance!)
             })
         } else {
+            //Latest
             self.fetchPostIds.sort(by: { (p1, p2) -> Bool in
                 return p1.creationDate.compare(p2.creationDate) == .orderedDescending
         })
@@ -387,6 +404,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         self.filterGroup = defaultGroup
         self.filterRange = defaultRange
         self.filterSort = defaultSort
+        self.filterTime = defaultTime
     }
     
     
@@ -519,6 +537,10 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     
     func finishPaginationCheck(){
         
+        if self.fetchedPostCount == (self.fetchPostIds.count) {
+            self.isFinishedPaging = true
+        }
+        
         if self.displayedPosts.count < 1 && self.isFinishedPaging != true {
             print("No Display Pagination Check Paginate")
             self.paginatePosts()
@@ -547,13 +569,41 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
             print("Current number: ", i, "from", self.fetchedPostCount, " to ",paginateFetchPostsLimit)
             let fetchPostId = fetchPostIds[i]
             
+            // Filter Time
+            if self.filterTime != self.defaultTime  {
+                
+                let calendar = Calendar.current
+                let tagHour = Double(calendar.component(.hour, from: fetchPostId.tagTime))
+                guard let filterIndex = FilterSortTimeDefault.index(of: self.filterTime!) else {return}
+                
+                if FilterSortTimeStart[filterIndex] > tagHour || tagHour > FilterSortTimeEnd[filterIndex] {
+                    // Skip Post If not within selected time frame
+                    print("Skipped Post: ", fetchPostId.id, " TagHour: ",tagHour, " Start: ", FilterSortTimeStart[filterIndex]," End: ",FilterSortTimeEnd[filterIndex])
+                    self.fetchedPostCount += 1
+                    if self.fetchedPostCount == paginateFetchPostsLimit {
+                        // End of loop functions are checked every iteration. Skipping iteration skipped the check
+                        print("Finish Paging @ TimeCheck")
+                        NotificationCenter.default.post(name: HomeController.finishPaginationNotificationName, object: nil)
+                    }
+                    continue
+                }
+            }
+            
+            
             // Filter Group
             
             if self.filterGroup != self.defaultGroup{
                 if CurrentUser.groupUids.contains(fetchPostId.creatorUID!){
                 } else {
                     // Skip Post if not in group
+                    print("Skipped Post: ", fetchPostId.id, " Creator Not in Group: ",fetchPostId.creatorUID!)
+                    
                     self.fetchedPostCount += 1
+                    if self.fetchedPostCount == paginateFetchPostsLimit {
+                        // End of loop functions are checked every iteration. Skipping iteration skipped the check
+                        print("Finish Paging @ GroupCheck")
+                        NotificationCenter.default.post(name: HomeController.finishPaginationNotificationName, object: nil)
+                    }
                     continue
                 }
             }
@@ -572,8 +622,6 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
                     }
                 }
 
-
-                
                 if tempPost.count > 0 {print("Adding Temp Post id: ", tempPost[0].id)}
                 
                 self.displayedPosts += tempPost
@@ -581,10 +629,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
                 print("Current: ", i, "fetchedPostCount: ", self.fetchedPostCount, "Total: ", self.fetchPostIds.count, "Display: ", self.displayedPosts.count, "finished: ", self.isFinishedPaging, "paginate:", paginateFetchPostsLimit)
                 
                 if self.fetchedPostCount == paginateFetchPostsLimit {
-                    
-                        if self.fetchedPostCount == (self.fetchPostIds.count) {
-                            self.isFinishedPaging = true
-                        }
+
                 print("Finish Paging")
                 NotificationCenter.default.post(name: HomeController.finishPaginationNotificationName, object: nil)
                     
@@ -592,6 +637,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
                 })
             }
         }
+    
     
 
     
@@ -632,26 +678,38 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
 //        
 //        rangeImageButton.addGestureRecognizer(singleTap)
         
-        
-        if self.filterGroup != "All" && self.filterGroup != nil{
+        if self.filterGroup == defaultGroup && self.filterRange == defaultRange && self.filterTime == defaultTime && self.filterGroup == "All" {
+            filterButton.image = #imageLiteral(resourceName: "filter").withRenderingMode(.alwaysOriginal)
+            filterButton.backgroundColor = UIColor.clear
+        } else {
+            filterButton.image = #imageLiteral(resourceName: "filter").withRenderingMode(.alwaysOriginal)
             filterButton.backgroundColor = UIColor.mainBlue()
-        } else {
-            filterButton.backgroundColor = UIColor.clear
+            filterButton.addGestureRecognizer(singleTap)
         }
         
-        if self.filterRange == nil || self.filterRange == geoFilterRange[geoFilterRange.endIndex - 1] {
-            filterButton.image = #imageLiteral(resourceName: "filter").withRenderingMode(.alwaysOriginal)
-            filterButton.addGestureRecognizer(singleTap)
-        } else {
-            let rangeIndex = geoFilterRange.index(of: self.filterRange!)
-            filterButton.image = #imageLiteral(resourceName: "filter").withRenderingMode(.alwaysOriginal)
-            filterButton.addGestureRecognizer(singleTap)
-        }
-
-        if self.filterGroup == defaultGroup && self.filterRange == defaultRange {
-            filterButton.image = #imageLiteral(resourceName: "filter_unselected").withRenderingMode(.alwaysOriginal)
-            filterButton.backgroundColor = UIColor.clear
-        }
+        
+//        if self.filterGroup != "All" && self.filterGroup != nil{
+//            filterButton.backgroundColor = UIColor.mainBlue()
+//        } else {
+//            filterButton.backgroundColor = UIColor.clear
+//        }
+        
+//        if self.filterRange == nil || self.filterRange == geoFilterRange[geoFilterRange.endIndex - 1] {
+//            filterButton.image = #imageLiteral(resourceName: "filter").withRenderingMode(.alwaysOriginal)
+//            filterButton.backgroundColor = UIColor.mainBlue()
+//            filterButton.addGestureRecognizer(singleTap)
+//        } else {
+//            let rangeIndex = geoFilterRange.index(of: self.filterRange!)
+//            filterButton.image = #imageLiteral(resourceName: "filter").withRenderingMode(.alwaysOriginal)
+//            filterButton.backgroundColor = UIColor.mainBlue()
+//            
+//            filterButton.addGestureRecognizer(singleTap)
+//        }
+//
+//        if self.filterGroup == defaultGroup && self.filterRange == defaultRange && self.filterTime == defaultTime {
+//            filterButton.image = #imageLiteral(resourceName: "filter").withRenderingMode(.alwaysOriginal)
+//            filterButton.backgroundColor = UIColor.clear
+//        }
         
         let rangeBarButton = UIBarButtonItem.init(customView: filterButton)
         navigationItem.rightBarButtonItem = rangeBarButton

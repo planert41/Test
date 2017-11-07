@@ -25,7 +25,7 @@ class PictureController: UICollectionViewController, HomePostCellDelegate, UICol
         collectionView?.register(HomePostCell.self, forCellWithReuseIdentifier: cellId)
         collectionView?.backgroundColor = UIColor.white
         
-        navigationItem.rightBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "message").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(didTapNavMessage))
+        navigationItem.rightBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "shoutaround").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(didTapNavMessage))
         
     }
     

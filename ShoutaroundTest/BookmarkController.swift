@@ -27,7 +27,9 @@ class BookMarkController: UIViewController, UICollectionViewDelegate, UICollecti
     
     let defaultRange = geoFilterRangeDefault[geoFilterRangeDefault.endIndex-1]
     let defaultGroup = "All"
-    let defaultSort = FilterSortDefault[0]
+    let defaultSort = FilterSortDefault[FilterSortDefault.endIndex - 1]
+    let defaultTime =  FilterSortTimeDefault[FilterSortTimeDefault.endIndex - 1]
+    
     
     var filterCaption: String? = nil{
         didSet{
@@ -47,6 +49,11 @@ class BookMarkController: UIViewController, UICollectionViewDelegate, UICollecti
     }
     
     var filterSort: String?
+    var filterTime: String?{
+        didSet{
+            setupNavigationItems()
+        }
+    }
     
     var filterButton: UIImageView = {
         let view = UIImageView()
@@ -180,7 +187,7 @@ class BookMarkController: UIViewController, UICollectionViewDelegate, UICollecti
             self.displayedBookmarks.sort(by: { (p1, p2) -> Bool in
                 return p1.bookmarkDate.compare(p2.bookmarkDate) == .orderedAscending
             })
-        } else if self.filterSort == FilterSortDefault[2] {
+        } else if self.filterSort == FilterSortDefault[0] {
             
             self.displayedBookmarks.sort(by: { (p1, p2) -> Bool in
                 return (p1.post.distance! < p2.post.distance!)
@@ -373,12 +380,13 @@ class BookMarkController: UIViewController, UICollectionViewDelegate, UICollecti
     }
     
     
-    func filterControllerFinished(selectedRange: String?, selectedLocation: CLLocation?, selectedGooglePlaceID: String?, selectedGroup: String?, selectedSort: String?){
+    func filterControllerFinished(selectedRange: String?, selectedLocation: CLLocation?, selectedGooglePlaceID: String?, selectedTime: String?, selectedGroup: String?, selectedSort: String?){
         
         self.filterRange = selectedRange
         self.filterLocation = selectedLocation
         self.filterGroup = selectedGroup
         self.filterSort = selectedSort
+        self.filterTime = selectedTime
         
         self.finalFilterAndSort()
     }
@@ -457,6 +465,7 @@ class BookMarkController: UIViewController, UICollectionViewDelegate, UICollecti
         self.filterGroup = defaultGroup
         self.filterRange = defaultRange
         self.filterSort = defaultSort
+        self.filterTime = defaultTime
     }
     
     
