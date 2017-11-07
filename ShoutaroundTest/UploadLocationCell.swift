@@ -26,7 +26,7 @@ class UploadLocationCell: UICollectionViewCell {
         addSubview(uploadLocations)
         uploadLocations.anchor(top: topAnchor, left: leftAnchor, bottom: bottomAnchor, right: rightAnchor, paddingTop: 5, paddingLeft: 5, paddingBottom: 5, paddingRight: 5, width: 0, height: 0)
 
-        layer.borderWidth = 2
+        layer.borderWidth = 0.5
         layer.borderColor = UIColor.black.cgColor
         layer.cornerRadius = 5
         layer.masksToBounds = true

@@ -227,16 +227,16 @@ extension Database{
                     
                     myGroup.enter()
                     
-                    print("Key \(key), Value: \(value)")
+//                    print("Key \(key), Value: \(value)")
                     
                     let dictionary = value as? [String: Any]
                     let secondsFrom1970 = dictionary?["creationDate"] as? Double ?? 0
                     let creationDate = Date(timeIntervalSince1970: secondsFrom1970)
-                    print("PostId: ", key,"Creation Date: ", creationDate)
+//                    print("PostId: ", key,"Creation Date: ", creationDate)
                     
                     
                     
-                    print(user.uid, key)
+//                    print(user.uid, key)
                     Database.fetchPostWithUIDAndPostID(creatoruid: user.uid, postId: key, completion: { (post) in
                         
                     Database.checkPostForLikesAndBookmarks(post: post, completion: { (post) in
@@ -424,7 +424,7 @@ extension Database{
 
             myGroup.enter()
             Database.fetchPostWithPostID(postId: key!, completion: { (post) in
-                print(post)
+//                print(post)
                 fetchedPosts.append(post)
                 myGroup.leave()
             })
@@ -474,7 +474,7 @@ extension Database{
         
         myGroup.enter()
         circleQuery?.observe(.keyEntered, with: { (key, firebaseLocation) in
-            print(key)
+//            print(key)
             
             myGroup.enter()
             
