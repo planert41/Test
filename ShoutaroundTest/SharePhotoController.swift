@@ -1050,14 +1050,6 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         dismiss(animated: true, completion: nil)
     }
 
-    
-    
-        var savedWords = [String]()
-        var deletedWords = [String]()
-        var deletedWord = ""
-    
-    
-    
     func emojiTagging(captionText: String){
         
         var tempCaptionText =  captionText.lowercased()
