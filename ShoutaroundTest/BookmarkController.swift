@@ -254,25 +254,14 @@ class BookMarkController: UIViewController, UICollectionViewDelegate, UICollecti
     fileprivate func setupNavigationItems() {
         
         navigationItem.leftBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "mailbox").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(openInbox))
-        
-        if self.filterGroup != "All" && self.filterGroup != nil{
+
+        if self.filterGroup == defaultGroup && self.filterRange == defaultRange && self.filterTime == defaultTime && self.filterGroup == "All" {
+            filterButton.image = #imageLiteral(resourceName: "filter").withRenderingMode(.alwaysOriginal)
+            filterButton.backgroundColor = UIColor.clear
+        } else {
+            filterButton.image = #imageLiteral(resourceName: "filter").withRenderingMode(.alwaysOriginal)
             filterButton.backgroundColor = UIColor.mainBlue()
-        } else {
-            filterButton.backgroundColor = UIColor.clear
-        }
-        
-        if self.filterRange == nil || self.filterRange == geoFilterRange[geoFilterRange.endIndex - 1] {
-            filterButton.image = #imageLiteral(resourceName: "filter").withRenderingMode(.alwaysOriginal)
             filterButton.addGestureRecognizer(singleTap)
-        } else {
-            let rangeIndex = geoFilterRange.index(of: self.filterRange!)
-            filterButton.image = #imageLiteral(resourceName: "filter").withRenderingMode(.alwaysOriginal)
-            filterButton.addGestureRecognizer(singleTap)
-        }
-        
-        if self.filterGroup == defaultGroup && self.filterRange == defaultRange {
-            filterButton.image = #imageLiteral(resourceName: "filter_unselected").withRenderingMode(.alwaysOriginal)
-            filterButton.backgroundColor = UIColor.clear
         }
         
         let rangeBarButton = UIBarButtonItem.init(customView: filterButton)
@@ -288,6 +277,7 @@ class BookMarkController: UIViewController, UICollectionViewDelegate, UICollecti
         filterController.selectedRange = self.filterRange
         filterController.selectedGroup = self.filterGroup
         filterController.selectedSort = self.filterSort
+        filterController.selectedTime = self.filterTime
         self.navigationController?.pushViewController(filterController, animated: true)
     }
     
@@ -306,6 +296,8 @@ class BookMarkController: UIViewController, UICollectionViewDelegate, UICollecti
         self.displayedBookmarks = self.fetchedBookmarks
         print("Before Filter Posts: ", self.displayedBookmarks.count)
         
+        self.filterbyTime()
+        print("After Distance Filter Posts: ", self.displayedBookmarks.count)
         
         self.filterbyDistance()
         print("After Distance Filter Posts: ", self.displayedBookmarks.count)
@@ -341,7 +333,18 @@ class BookMarkController: UIViewController, UICollectionViewDelegate, UICollecti
         }
     }
     
- 
+    func filterbyTime(){
+        if self.filterTime != self.defaultTime{
+            guard let filterIndex = FilterSortTimeDefault.index(of: self.filterTime!) else {return}
+            
+            self.displayedBookmarks = self.displayedBookmarks.filter { (bookmark) -> Bool in
+                let calendar = Calendar.current
+                let tagHour = Double(calendar.component(.hour, from: bookmark.post.tagTime))
+                return !(FilterSortTimeStart[filterIndex] > tagHour || tagHour > FilterSortTimeEnd[filterIndex])
+            }
+        }
+    }
+    
     
     func filterbyDistance(){
         
