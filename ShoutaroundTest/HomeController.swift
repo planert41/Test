@@ -117,68 +117,75 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
 
     
     func updateFirebaseData(){
-        self.alert(message: "Do you want to update Firebase Data?")
-        
-        let ref = Database.database().reference().child("posts")
-        
-        ref.observeSingleEvent(of: .value, with: {(snapshot) in
+        let firebaseAlert = UIAlertController(title: "Firebase Update", message: "Do you want to update Firebase Data?", preferredStyle: UIAlertControllerStyle.alert)
+    
+        firebaseAlert.addAction(UIAlertAction(title: "Ok", style: .default, handler: { (action: UIAlertAction!) in
             
-            guard let userposts = snapshot.value as? [String:Any]  else {return}
-          
-            userposts.forEach({ (key,value) in
-
-                guard let messageDetails = value as? [String: Any] else {return}
-                guard let selectedEmojis = messageDetails["emoji"] as? String else {return}
-                guard let creationDate = messageDetails["creationDate"] as? Double else {return}
+            
+            
+            let ref = Database.database().reference().child("posts")
+            
+            ref.observeSingleEvent(of: .value, with: {(snapshot) in
                 
-                var fetchedTagDate = messageDetails["tagTime"] as? Double
-                var fetchedRatingEmoji = messageDetails["ratingEmoji"] as? String
-                var fetchedNonratingEmoji = messageDetails["nonRatingEmoji"] as? [String]
-                var FetchedNonratingEmojiTags = messageDetails["nonRatingEmojiTags"] as? [String]
+                guard let userposts = snapshot.value as? [String:Any]  else {return}
                 
-                let tempEmojis = String(selectedEmojis.characters.prefix(1))
-                var selectedEmojisSplit = selectedEmojis.characters.map { String($0) }
-                
-                var newRatingEmoji: String? = nil
-                var newNonratingEmoji: [String]? = nil
-                var newNonratingEmojiTags: [String]? = nil
-                var newTagTime: Double? = nil
-                print(fetchedRatingEmoji)
-                
-                print("selected emoji splits: ", selectedEmojisSplit)
-                if fetchedRatingEmoji == nil && selectedEmojisSplit != [] {
-                    // Replace Rating emoji with First of NR emoji if its rating emoji
+                userposts.forEach({ (key,value) in
                     
-                    if String(selectedEmojisSplit[0]).containsRatingEmoji {
-                        print("First Emoji Char: ",tempEmojis)
+                    guard let messageDetails = value as? [String: Any] else {return}
+                    guard let selectedEmojis = messageDetails["emoji"] as? String else {return}
+                    guard let creationDate = messageDetails["creationDate"] as? Double else {return}
+                    
+                    var fetchedTagDate = messageDetails["tagTime"] as? Double
+                    var fetchedRatingEmoji = messageDetails["ratingEmoji"] as? String
+                    var fetchedNonratingEmoji = messageDetails["nonRatingEmoji"] as? [String]
+                    var FetchedNonratingEmojiTags = messageDetails["nonRatingEmojiTags"] as? [String]
+                    
+                    let tempEmojis = String(selectedEmojis.characters.prefix(1))
+                    var selectedEmojisSplit = selectedEmojis.characters.map { String($0) }
+                    
+                    var newRatingEmoji: String? = nil
+                    var newNonratingEmoji: [String]? = nil
+                    var newNonratingEmojiTags: [String]? = nil
+                    var newTagTime: Double? = nil
+                    print(fetchedRatingEmoji)
+                    
+                    print("selected emoji splits: ", selectedEmojisSplit)
+                    if fetchedRatingEmoji == nil && selectedEmojisSplit != [] {
+                        // Replace Rating emoji with First of NR emoji if its rating emoji
+                        
+                        if String(selectedEmojisSplit[0]).containsRatingEmoji {
+                            print("First Emoji Char: ",tempEmojis)
                             newRatingEmoji = String(selectedEmojisSplit[0])
                             newNonratingEmoji = Array(selectedEmojisSplit.dropFirst(1))
                             newNonratingEmojiTags = Array(selectedEmojisSplit.dropFirst(1))
-
-                    } else {
-                        newRatingEmoji = fetchedRatingEmoji
-                        newNonratingEmoji = selectedEmojisSplit
-                        newNonratingEmojiTags = selectedEmojisSplit
+                            
+                        } else {
+                            newRatingEmoji = fetchedRatingEmoji
+                            newNonratingEmoji = selectedEmojisSplit
+                            newNonratingEmojiTags = selectedEmojisSplit
+                        }
                     }
-                }
-                print("New R Emoji: ", newRatingEmoji, " New NR Emoji: ", newNonratingEmoji, " New NR Emoji Tags: ", newNonratingEmojiTags)
-                
-                if fetchedTagDate == nil {
-                    newTagTime = creationDate
-                    print("Update New Tag Time with: ", creationDate)
-                } else {
-                    newTagTime = fetchedTagDate!
-                }
-                
-                let values = ["ratingEmoji": newRatingEmoji, "nonratingEmoji": newNonratingEmoji, "nonratingEmojiTags": newNonratingEmojiTags, "tagTime": newTagTime] as [String: Any]
-                
-                
-                print("Updating PostId: ",key," Values: ", values)
-                Database.updatePostwithPostID(postId: key, values: values)
-                
+                    print("New R Emoji: ", newRatingEmoji, " New NR Emoji: ", newNonratingEmoji, " New NR Emoji Tags: ", newNonratingEmojiTags)
+                    
+                    if fetchedTagDate == nil {
+                        newTagTime = creationDate
+                        print("Update New Tag Time with: ", creationDate)
+                    } else {
+                        newTagTime = fetchedTagDate!
+                    }
+                    
+                    let values = ["ratingEmoji": newRatingEmoji, "nonratingEmoji": newNonratingEmoji, "nonratingEmojiTags": newNonratingEmojiTags, "tagTime": newTagTime] as [String: Any]
+                    
+                    print("Updating PostId: ",key," Values: ", values)
+                    Database.updatePostwithPostID(postId: key, values: values)
+                })
             })
-            
-        })
+        }))
+        
+        firebaseAlert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: { (action: UIAlertAction!) in
+            print("Handle Cancel Logic here")
+        }))
+
     
     }
     

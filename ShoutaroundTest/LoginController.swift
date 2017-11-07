@@ -107,7 +107,7 @@ class LoginController: UIViewController, FBSDKLoginButtonDelegate   {
         
         if let err = err {
             print("Failed to sign in with email:", err)
-            self.alert(message: "Failed to sign in with email: " + err.localizedDescription)
+            self.alert(title: "Sign In Error", message: "Failed to sign in with email: " + err.localizedDescription)
             return
         }
         

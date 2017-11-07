@@ -18,6 +18,7 @@ import GooglePlaces
 
 class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout, UICollectionViewDelegate,UICollectionViewDataSource, UITextViewDelegate, CLLocationManagerDelegate, LocationSearchControllerDelegate, UIGestureRecognizerDelegate, GMSAutocompleteViewControllerDelegate {
    
+    let currentDateTime = Date()
     let locationManager = CLLocationManager()
     let emojiCollectionViewRows: Int = 5
     let DefaultEmojiLabelSize = 25 as CGFloat
@@ -323,7 +324,6 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         
         didSet{
             // get the current date and time
-            let currentDateTime = Date()
             let formatter = DateFormatter()
 
             formatter.dateFormat = "MMM d YYYY, h:mm a"
@@ -475,6 +475,7 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         tv.font = UIFont.systemFont(ofSize: 14)
         tv.text = "Emoji Tags:"
         tv.backgroundColor = UIColor.clear
+        tv.textAlignment = NSTextAlignment.left
         return tv
     }()
     
@@ -488,7 +489,7 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
 
     let locationIcon: UIButton = {
         let button = UIButton()
-        button.setImage(#imageLiteral(resourceName: "gpsmarker").withRenderingMode(.alwaysOriginal), for: .normal)
+        button.setImage(#imageLiteral(resourceName: "mapcolor").withRenderingMode(.alwaysOriginal), for: .normal)
         button.addTarget(self, action: #selector(locationIconPushed), for: .touchUpInside)
         return button
     }()
@@ -515,7 +516,7 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
     
     let adressIcon: UIButton = {
         let button = UIButton()
-        button.setImage(#imageLiteral(resourceName: "adress").withRenderingMode(.alwaysOriginal), for: .normal)
+        button.setImage(#imageLiteral(resourceName: "home").withRenderingMode(.alwaysOriginal), for: .normal)
         button.addTarget(self, action: #selector(locationIconPushed), for: .touchUpInside)
         return button
     }()
@@ -537,14 +538,13 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
     
     let timeIcon: UIButton = {
         let button = UIButton()
-        button.setImage(#imageLiteral(resourceName: "time").withRenderingMode(.alwaysOriginal), for: .normal)
+        button.setImage(#imageLiteral(resourceName: "hours").withRenderingMode(.alwaysOriginal), for: .normal)
         button.addTarget(self, action: #selector(timeIconPushed), for: .touchUpInside)
         return button
     }()
     
     func timeIconPushed(){
 
-        let currentDateTime = Date()
         self.selectedTime = currentDateTime
 
         let formatter = DateFormatter()
@@ -658,9 +658,12 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
 
     
     func cancelTime(){
-        
+
+        if selectedTime != currentDateTime {
+            selectedTime = currentDateTime
+        } else {
         selectedTime = nil
-        
+        }
     }
     
     
@@ -894,6 +897,9 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         
         // Add Tag Time
 
+
+        
+        
         view.addSubview(timeIcon)
         timeIcon.anchor(top: LocationContainerView.topAnchor, left: LocationContainerView.leftAnchor, bottom: nil, right: nil, paddingTop: 10, paddingLeft: 10, paddingBottom: 10, paddingRight: 10, width: 30, height: 30)
         
@@ -902,9 +908,11 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         timeLabel.isUserInteractionEnabled = true
         let TapGestureT = UITapGestureRecognizer(target: self, action: #selector(timeInput))
         timeLabel.addGestureRecognizer(TapGestureT)
+
         
         view.addSubview(timeCancelButton)
-        timeCancelButton.anchor(top: timeLabel.topAnchor, left: nil, bottom: nil, right: timeLabel.rightAnchor, paddingTop: 15, paddingLeft: 10, paddingBottom: 15, paddingRight: 10, width: 20, height: 20)
+        timeCancelButton.anchor(top: timeLabel.topAnchor, left: nil, bottom: timeLabel.bottomAnchor, right: timeLabel.rightAnchor, paddingTop: 10, paddingLeft: 10, paddingBottom: 10, paddingRight: 10, width: 20, height: 20)
+        
         
         view.addSubview(locationIcon)
         locationIcon.anchor(top: timeLabel.bottomAnchor, left: LocationContainerView.leftAnchor, bottom: nil, right: nil, paddingTop: 10, paddingLeft: 10, paddingBottom: 10, paddingRight: 10, width: 30, height: 30)
@@ -915,8 +923,12 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         let TapGesture = UITapGestureRecognizer(target: self, action: #selector(tapSearchBar))
         locationNameLabel.addGestureRecognizer(TapGesture)
 
+
+        
         view.addSubview(locationCancelButton)
-        locationCancelButton.anchor(top: locationNameLabel.topAnchor, left: nil, bottom: nil, right: locationNameLabel.rightAnchor, paddingTop: 15, paddingLeft: 10, paddingBottom: 15, paddingRight: 10, width: 20, height: 20)
+        locationCancelButton.anchor(top: locationNameLabel.topAnchor, left: nil, bottom: locationNameLabel.bottomAnchor, right: locationNameLabel.rightAnchor, paddingTop: 10, paddingLeft: 10, paddingBottom: 10, paddingRight: 10, width: 20, height: 20)
+
+        
         
         view.addSubview(adressIcon)
         adressIcon.anchor(top: locationNameLabel.bottomAnchor, left: LocationContainerView.leftAnchor, bottom: nil, right: nil, paddingTop: 10, paddingLeft: 10, paddingBottom: 10, paddingRight: 10, width: 30, height: 30)
@@ -926,9 +938,11 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         locationAdressLabel.isUserInteractionEnabled = true
         let TapGesture1 = UITapGestureRecognizer(target: self, action: #selector(tapSearchBar))
         locationAdressLabel.addGestureRecognizer(TapGesture1)
+
         
-        view.addSubview(locationSearchButton)
-        locationSearchButton.anchor(top: locationAdressLabel.topAnchor, left: nil, bottom: nil, right: locationAdressLabel.rightAnchor, paddingTop: 15, paddingLeft: 10, paddingBottom: 15, paddingRight: 10, width: 20, height: 20)
+        
+//        view.addSubview(locationSearchButton)
+//        locationSearchButton.anchor(top: locationAdressLabel.topAnchor, left: nil, bottom: nil, right: locationAdressLabel.rightAnchor, paddingTop: 15, paddingLeft: 10, paddingBottom: 15, paddingRight: 10, width: 20, height: 20)
 
         
         view.addSubview(placesCollectionView)
@@ -1102,9 +1116,12 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
             
             let emojiLookupResult = EmojiDictionary.key(forValue: captionCheckText)
             if emojiLookupResult != nil {
-                // If there is a match add emoji and tag
-                emojiTagUntag(emojiInput: emojiLookupResult, emojiInputTag: captionCheckText)
-                break
+                // If there is a emoji match for words
+                if !(self.nonRatingEmojiTags?.contains(captionCheckText))!{
+                    // Check to see if caption tag already exist in current tags. If so ignore (double type)
+                    emojiTagUntag(emojiInput: emojiLookupResult, emojiInputTag: captionCheckText)
+                    break
+                }
             }
         }
     }
@@ -1809,7 +1826,7 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         
         //   https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=-33.8670,151.1957&radius=500&types=food&name=cruise&key=YOUR_API_KEY
         
-        // https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=41.9542116666667,-87.7055883333333&radius=100.0&rankby=distance&type=restaurant&key=AIzaSyBq2etZOLunPzzNt9rA52n3RKN-TKPLhec
+        // https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=41.9542116666667,-87.7055883333333&radius=100.0&rankby=distance&type=restaurant&key=AIzaSyAzwACZh50Qq1V5YYKpmfN21mZs8dW6210        
         
         self.googlePlaceNames.removeAll()
         self.googlePlaceIDs.removeAll()

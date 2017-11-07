@@ -30,6 +30,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         GMSPlacesClient.provideAPIKey(googlePlacesApiKey)
         GMSServices.provideAPIKey(googlePlacesApiKey)
         IQKeyboardManager.sharedManager().enable = true
+        IQKeyboardManager.sharedManager().enableAutoToolbar = false
         
         
         window = UIWindow()

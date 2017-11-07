@@ -353,7 +353,14 @@ var EmojiDictionary: [String:String] =
     "❌🥜":"peanut free",
     "❌🥛":"non dairy",
     "🇹🇭🍝":"pad thai" ,
-    "🍖🍡":"meatball"
+    "🍖🍡":"meatball",
+    
+    "🎃👻": "halloween",
+    "🐔🍗": "chicken wing",
+    "🐔🍚":"chicken rice",
+    "🐔🍛": "chicken curry",
+    "🐷🍛":"pork curry",
+    "🐟🍛":"fish curry"
     
     
 ]

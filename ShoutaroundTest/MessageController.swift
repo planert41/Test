@@ -223,7 +223,7 @@ class MessageController: UIViewController, UICollectionViewDataSource, UICollect
         else if toText.isValidEmail {
             handleSendEmail()
         } else{
-            alert(message: "Not a valid receipient")
+            alert(title: "Sending Error", message: "Not a valid receipient")
         }
     }
     

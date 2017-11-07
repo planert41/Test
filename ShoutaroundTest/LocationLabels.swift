@@ -12,7 +12,7 @@ import UIKit
 class LocationLabel: UILabel {
     
     override func drawText(in rect: CGRect) {
-        let insets: UIEdgeInsets = UIEdgeInsets(top: 0  , left: 10, bottom: 0, right: 0)
+        let insets: UIEdgeInsets = UIEdgeInsets(top: 0  , left: 10, bottom: 0, right: 5)
         super.drawText(in: UIEdgeInsetsInsetRect(rect, insets))
     }
 }
