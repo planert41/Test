@@ -200,10 +200,21 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         self.present(firebaseAlert, animated: true)
     }
     
+    var reverseEmojiSet: [String:String] = [:]
+    
+    func reverseEmoji(){
+        for (key,value) in EmojiDictionary {
+            reverseEmojiSet[value] = key
+        }
+        print(reverseEmojiSet)
+   
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
 
 //        self.updateFirebaseData()
+//          self.reverseEmoji()
         
         self.navigationController?.navigationBar.backgroundColor = UIColor.clear
         
