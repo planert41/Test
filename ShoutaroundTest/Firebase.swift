@@ -332,6 +332,8 @@ extension Database{
         Database.database().reference().child("posts").child(post.id!).removeValue()
         Database.database().reference().child("postlocations").child(post.id!).removeValue()
         Database.database().reference().child("userposts").child(post.creatorUID!).child(post.id!).removeValue()
+        
+        // Bookmarked post is deleted when user fetches for post but it isn't there
 //        Database.database().reference().child("bookmarks").child(post.creatorUID!).child(post.id!).removeValue()
         
         print("Post Delete @ posts, postlocations, userposts, bookmarks: ", post.id)
@@ -349,11 +351,11 @@ extension Database{
         
     }
     
-    static func fetchPostWithPostID( postId: String, completion: @escaping (Post) -> ()) {
+    static func fetchPostWithPostID( postId: String, completion: @escaping (Post?, Error?) -> ()) {
         
             if let cachedPost = postCache[postId] {
                 if cachedPost != nil {
-                completion(cachedPost)
+                completion(cachedPost, nil)
                 return
                 }
             }
@@ -362,7 +364,11 @@ extension Database{
             
             ref.observeSingleEvent(of: .value, with: {(snapshot) in
                 
-            guard let dictionary = snapshot.value as? [String: Any] else {return}
+            guard let dictionary = snapshot.value as? [String: Any] else {
+                print("No dictionary for post id: ", postId)
+                completion(nil,nil)
+                return
+                }
                 let creatorUID = dictionary["creatorUID"] as? String ?? ""
                 
                 
@@ -374,10 +380,14 @@ extension Database{
            checkPostForLikesAndBookmarks(post: post, completion: { (post) in
                 postCache[postId] = post
 //                print(post)
-                completion(post)
+                completion(post, nil)
             })
            })
-        })
+            }) {(err) in
+                print("Failed to fetch post for postid:",err)
+                completion(nil, err)
+        }
+        
     
     }
     
@@ -402,8 +412,12 @@ extension Database{
                 
             Database.fetchUserWithUID(uid: senderUserUID, completion: { (senderUser) in
                 
-            Database.fetchPostWithPostID(postId: postID, completion: { (post) in
+            Database.fetchPostWithPostID(postId: postID, completion: { (post, error) in
                 
+                if let error = error {
+                  print(error)
+                    return
+                }
                 
                 let tempMessage = Message.init(uid: key, senderUser: senderUser, sendPost: post, dictionary: messageDetails)
                 
@@ -440,12 +454,17 @@ extension Database{
 //            print(key)
 
             myGroup.enter()
-            Database.fetchPostWithPostID(postId: key!, completion: { (post) in
+            Database.fetchPostWithPostID(postId: key!, completion: { (post, error) in
 //                print(post)
+                if let error = error {
+                    print(error)
+                    return
+                }
+                
                 var tempPost = post
-                tempPost.distance = tempPost.locationGPS?.distance(from: location)
+                tempPost?.distance = tempPost?.locationGPS?.distance(from: location)
 //                print(tempPost.distance, ": ", tempPost.caption, " : ", location, " : ", tempPost.locationGPS)
-                fetchedPosts.append(tempPost)
+                fetchedPosts.append(tempPost!)
                 myGroup.leave()
             })
         })

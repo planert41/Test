@@ -619,16 +619,23 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
                 }
             }
             
-            Database.fetchPostWithPostID(postId: fetchPostId.id, completion: { (post) in
+            Database.fetchPostWithPostID(postId: fetchPostId.id, completion: { (post, error) in
                 self.fetchedPostCount += 1
                 
+                guard let post = post else {return}
                 var tempPost = [post]
+                
+                if let error = error {
+                    print("Failed to fetch post for: ", fetchPostId.id)
+                    return
+                }
                 
                 // Filter Caption
                 
                 if self.filterCaption != nil && self.filterCaption != "" {
                     guard let searchedText = self.filterCaption else {return}
                     tempPost = tempPost.filter { (post) -> Bool in
+                        
                     return post.caption.lowercased().contains(searchedText.lowercased()) || post.emoji.contains(searchedText.lowercased()) || post.locationName.lowercased().contains(searchedText.lowercased()) || post.locationAdress.lowercased().contains(searchedText.lowercased())
                     }
                 }

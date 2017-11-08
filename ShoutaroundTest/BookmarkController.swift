@@ -443,9 +443,34 @@ class BookMarkController: UIViewController, UICollectionViewDelegate, UICollecti
                         let bookmarkTime = dictionary["bookmarkDate"] as? Double ?? 0
                         if let creatorUID = dictionary["creatorUID"] as? String {
     
-                            Database.fetchPostWithUIDAndPostID(creatoruid: creatorUID, postId: key, completion: { (post) in
-                         
+                        Database.fetchPostWithPostID(postId: key, completion: { (post, error) in
+                        
+                            if let error = error {
+                                print("Failed to fetch post for bookmarks: ",key , error)
+                                return
+                            }
+                        
+                            guard let post = post else {
+                                print("No Result for PostId: ", key)
+                                //Delete Bookmark since post is unavailable
                                 
+                                Database.fetchUserWithUID(uid: creatorUID, completion: { (user) in
+                                    
+                                    let bookmarkDate = Date(timeIntervalSince1970: bookmarkTime)
+                                    
+                                    
+                                    let deleteAlert = UIAlertController(title: "Delete Bookmark", message: "Post Created By \(user.username) and Bookmarked on \(bookmarkDate) Was Deleted", preferredStyle: UIAlertControllerStyle.alert)
+                                    
+                                    deleteAlert.addAction(UIAlertAction(title: "Ok", style: .default, handler: { (action: UIAlertAction!) in
+                                        
+                                        Database.database().reference().child("bookmarks").child(uid).child(key).removeValue()
+                                        
+                                    }))
+                                    
+                                    self.present(deleteAlert, animated: true, completion: nil)
+                                })
+                                return}
+                            
                         let tempBookmark = Bookmark.init(bookmarkCreatorUid: creatorUID, fetchedDate: bookmarkTime, post: post)
                         self.fetchedBookmarks.append(tempBookmark)
                         self.fetchedBookmarks.sort(by: { (p1, p2) -> Bool in
