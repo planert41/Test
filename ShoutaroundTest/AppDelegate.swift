@@ -47,10 +47,28 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 //            }
 //        }
         
+        // Setup Emojis
+        
+        self.EmojiSetup()
+        
         FBSDKApplicationDelegate.sharedInstance().application(application, didFinishLaunchingWithOptions: launchOptions)
         
         return true
     }
+    
+    func EmojiSetup(){
+        for (name,emoji) in ReverseEmojiDictionary {
+            let tempEmoji = Emoji(emoji: emoji, name: name)
+            allEmojis.append(tempEmoji)
+        }
+        
+        for emoji in defaultEmojiSelection {
+            
+            let tempEmoji = Emoji(emoji: emoji, name: EmojiDictionary[emoji])
+            defaultEmojis.append(tempEmoji)
+        }
+    }
+    
     
     func application(_ app: UIApplication, open url: URL, options: [UIApplicationOpenURLOptionsKey : Any] = [:]) -> Bool {
         let handled = FBSDKApplicationDelegate.sharedInstance().application(app, open: url, sourceApplication: options[UIApplicationOpenURLOptionsKey.sourceApplication] as! String!, annotation: options[UIApplicationOpenURLOptionsKey.annotation])

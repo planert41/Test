@@ -217,23 +217,25 @@ class FilterController: UIViewController, CLLocationManagerDelegate, GMSAutocomp
         filterTimeAttributedText.append(NSMutableAttributedString(string: "   ⏰ \(hourString) ", attributes: [NSFontAttributeName: UIFont.boldSystemFont(ofSize: 14),NSForegroundColorAttributeName: UIColor.mainBlue()]))
         filterTimeLabel.attributedText = filterTimeAttributedText
         
-        view.addSubview(filterGroupLabel)
-        view.addSubview(groupSegment)
+// Remove Group Filter For now
         
-        filterGroupLabel.anchor(top: timeSegment.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 15, paddingLeft: 20, paddingBottom: 0, paddingRight: 20, width: 0, height: 30)
-        groupSegment.anchor(top: filterGroupLabel.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 1, paddingLeft: 20, paddingBottom: 0, paddingRight: 20, width: 0, height: 40)
+//        view.addSubview(filterGroupLabel)
+//        view.addSubview(groupSegment)
+//        
+//        filterGroupLabel.anchor(top: timeSegment.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 15, paddingLeft: 20, paddingBottom: 0, paddingRight: 20, width: 0, height: 30)
+//        groupSegment.anchor(top: filterGroupLabel.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 1, paddingLeft: 20, paddingBottom: 0, paddingRight: 20, width: 0, height: 40)
         
         view.addSubview(sortByLabel)
         view.addSubview(sortSegment)
         
-        sortByLabel.anchor(top: groupSegment.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 15, paddingLeft: 20, paddingBottom: 0, paddingRight: 20, width: 0, height: 30)
+        sortByLabel.anchor(top: timeSegment.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 15, paddingLeft: 20, paddingBottom: 0, paddingRight: 20, width: 0, height: 30)
         sortSegment.anchor(top: sortByLabel.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 1, paddingLeft: 20, paddingBottom: 0, paddingRight: 20, width: 0, height: 40)
         
         view.addSubview(clearFilterButton)
-        clearFilterButton.anchor(top: sortSegment.bottomAnchor, left: nil, bottom: nil, right: view.rightAnchor, paddingTop: 15 + 5, paddingLeft: 10, paddingBottom: 0, paddingRight: 20 + 10, width: 35, height: 35)
+        clearFilterButton.anchor(top: sortSegment.bottomAnchor, left: view.leftAnchor, bottom: nil, right: nil, paddingTop: 15 + 5, paddingLeft: 20, paddingBottom: 0, paddingRight: 10, width: 35, height: 35)
         
         view.addSubview(filterButton)
-        filterButton.anchor(top: sortSegment.bottomAnchor, left: view.leftAnchor, bottom: nil, right: clearFilterButton.leftAnchor, paddingTop: 15, paddingLeft: 20, paddingBottom: 0, paddingRight: 10, width: 0, height: 40)
+        filterButton.anchor(top: sortSegment.bottomAnchor, left: clearFilterButton.rightAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 15, paddingLeft: 20, paddingBottom: 0, paddingRight: 20, width: 0, height: 40)
 
         
         

@@ -1224,24 +1224,18 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
     // EmojiAutoComplete
     var emojiAutoComplete: UITableView!
     let EmojiAutoCompleteCellId = "EmojiAutoCompleteCellId"
-    var allEmojis:[Emoji] = []
     var filteredEmojis:[Emoji] = []
     var isAutocomplete: Bool = false
     
     
     func setupEmojiAutoComplete() {
         
-        for (name,emoji) in ReverseEmojiDictionary {
-            let tempEmoji = Emoji(emoji: emoji, name: name)
-            allEmojis.append(tempEmoji)
-        }
-        
         // Emoji Autocomplete View
         emojiAutoComplete = UITableView()
         emojiAutoComplete.register(EmojiCell.self, forCellReuseIdentifier: EmojiAutoCompleteCellId)
         emojiAutoComplete.delegate = self
         emojiAutoComplete.dataSource = self
-        emojiAutoComplete.contentInset = UIEdgeInsetsMake(0, 15, 0, 15)
+        emojiAutoComplete.contentInset = UIEdgeInsetsMake(0, 0, 0, 0)
         emojiAutoComplete.backgroundColor = UIColor.white
     }
     

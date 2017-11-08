@@ -66,6 +66,9 @@
 
 import Foundation
 
+var defaultEmojis:[Emoji] = []
+var allEmojis:[Emoji] = []
+
 
 struct Emoji {
     let emoji : String

@@ -16,7 +16,7 @@ protocol HomePostSearchDelegate {
 
 class HomePostSearch : UITableViewController, UISearchResultsUpdating, UISearchControllerDelegate, UISearchBarDelegate {
     
-    var defaultEmojis:[Emoji] = []
+
     var filteredEmojis:[Emoji] = []
     let EmojiCellId = "EmojiCellId"
     var isFiltering: Bool = false {
@@ -41,13 +41,6 @@ class HomePostSearch : UITableViewController, UISearchResultsUpdating, UISearchC
         view.backgroundColor = UIColor.white
         
         tableView.register(EmojiCell.self, forCellReuseIdentifier: EmojiCellId)
-        
-        for emoji in defaultEmojiSelection {
-            
-            let tempEmoji = Emoji(emoji: emoji, name: EmojiDictionary[emoji])
-            defaultEmojis.append(tempEmoji)
-        }
-        
         
     }
 
@@ -98,10 +91,15 @@ class HomePostSearch : UITableViewController, UISearchResultsUpdating, UISearchC
     
     
     func filterContentForSearchText(_ searchText: String) {
-        filteredEmojis = defaultEmojis.filter({( emoji : Emoji) -> Bool in
+        filteredEmojis = allEmojis.filter({( emoji : Emoji) -> Bool in
             
         return emoji.emoji.lowercased().contains(searchText.lowercased()) || (emoji.name?.contains(searchText.lowercased()))!
         })
+        
+        filteredEmojis.sort { (p1, p2) -> Bool in
+            ((p1.name?.hasPrefix(searchText.lowercased()))! ? 0 : 1) < ((p2.name?.hasPrefix(searchText.lowercased()))! ? 0 : 1)
+        }
+        
         tableView.reloadData()
     }
     
