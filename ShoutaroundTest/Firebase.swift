@@ -332,8 +332,8 @@ extension Database{
         Database.database().reference().child("posts").child(post.id!).removeValue()
         Database.database().reference().child("postlocations").child(post.id!).removeValue()
         Database.database().reference().child("userposts").child(post.creatorUID!).child(post.id!).removeValue()
-        Database.database().reference().child("bookmarks").child(post.creatorUID!).child(post.id!).removeValue()
-                
+//        Database.database().reference().child("bookmarks").child(post.creatorUID!).child(post.id!).removeValue()
+        
         print("Post Delete @ posts, postlocations, userposts, bookmarks: ", post.id)
 
         var deleteRef = Storage.storage().reference(forURL: post.imageUrl)

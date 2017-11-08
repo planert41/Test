@@ -444,6 +444,7 @@ class BookMarkController: UIViewController, UICollectionViewDelegate, UICollecti
                         if let creatorUID = dictionary["creatorUID"] as? String {
     
                             Database.fetchPostWithUIDAndPostID(creatoruid: creatorUID, postId: key, completion: { (post) in
+                         
                                 
                         let tempBookmark = Bookmark.init(bookmarkCreatorUid: creatorUID, fetchedDate: bookmarkTime, post: post)
                         self.fetchedBookmarks.append(tempBookmark)
