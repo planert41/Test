@@ -27,7 +27,37 @@ class PictureController: UICollectionViewController, HomePostCellDelegate, UICol
         
         navigationItem.rightBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "shoutaround").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(didTapNavMessage))
         
+        setupEmojiDetailLabel()
+        
     }
+    
+    // Emoji description
+    
+    let emojiDetailLabel: UILabel = {
+        let label = UILabel()
+        label.text = "Emojis"
+        label.font = UIFont.boldSystemFont(ofSize: 15)
+        label.textAlignment = NSTextAlignment.center
+        label.backgroundColor = UIColor.rgb(red: 255, green: 242, blue: 230)
+        label.layer.cornerRadius = 30/2
+        label.layer.borderWidth = 0.25
+        label.layer.borderColor = UIColor.black.cgColor
+        label.layer.masksToBounds = true
+        return label
+        
+    }()
+    
+    func setupEmojiDetailLabel(){
+        view.addSubview(emojiDetailLabel)
+        emojiDetailLabel.anchor(top: topLayoutGuide.bottomAnchor, left: nil, bottom: nil, right: nil, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 150, height: 25)
+        emojiDetailLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
+        emojiDetailLabel.isHidden = true
+    }
+    
+    override func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        emojiDetailLabel.isHidden = true
+    }
+    
     
 
 // Collection View Delegates
@@ -132,6 +162,12 @@ class PictureController: UICollectionViewController, HomePostCellDelegate, UICol
         
     }
     
+    func displaySelectedEmoji(emoji: String, emojitag: String) {
+        
+        emojiDetailLabel.text = emoji + " " + emojitag
+        emojiDetailLabel.isHidden = false
+        
+    }
     
     
 }

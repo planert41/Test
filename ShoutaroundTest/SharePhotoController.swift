@@ -42,7 +42,7 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
     
     var emojiArray:[String]? = nil
     
-    let nonRatingEmojiLimit = 4
+    let nonRatingEmojiLimit = 5
     
     var selectedEmojis = ""
     var ratingEmoji: String? = nil {
@@ -1780,7 +1780,7 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
             
             let postref = ref.key
             let userPostRef = Database.database().reference().child("userposts").child(uid).child(postref)
-            let values = ["creationDate": uploadTime]
+            let values = ["creationDate": uploadTime, "tagTime": tagTime, "emoji": selectedPostEmoji] as [String:Any]
 
             userPostRef.updateChildValues(values) { (err, ref) in
                 if let err = err {

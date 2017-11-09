@@ -18,6 +18,7 @@ protocol HomePostCellDelegate {
     func didTapMessage(post:Post)
     func refreshPost(post:Post)
     func deletePost(post:Post)
+    func displaySelectedEmoji(emoji: String, emojitag: String)
     
 //    func didSendMessage(post:Post)
 //    func didLike(for cell: HomePostCell)
@@ -43,10 +44,12 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
             bookmarkButton.setImage(post?.hasBookmarked == true ? #imageLiteral(resourceName: "bookmark_ribbon_filled").withRenderingMode(.alwaysOriginal) : #imageLiteral(resourceName: "bookmark_ribbon_unfilled").withRenderingMode(.alwaysOriginal), for: .normal)
                 
             photoImageView.loadImage(urlString: imageUrl)
-            usernameLabel.text = (post?.ratingEmoji)! + (post?.user.username)!
-
-
             
+            let attributedText = NSMutableAttributedString(string: (post?.ratingEmoji)!, attributes: [NSFontAttributeName: UIFont.boldSystemFont(ofSize: 20)])
+            
+            attributedText.append(NSMutableAttributedString(string: (post?.user.username)!, attributes: [NSFontAttributeName: UIFont.boldSystemFont(ofSize: 14)]))
+            
+            usernameLabel.attributedText = attributedText
             usernameLabel.isUserInteractionEnabled = true
             let usernameTap = UITapGestureRecognizer(target: self, action: #selector(HomePostCell.usernameTap))
             usernameLabel.addGestureRecognizer(usernameTap)
@@ -103,6 +106,8 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
             } else {
                 deleteButton.isHidden = true
             }
+            
+            setupNonRatingEmojiStackView()
             
            // setupAttributedLocationName()
         }
@@ -224,7 +229,7 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
     let ratingEmojiLabel: UILabel = {
         let label = UILabel()
         label.text = "Emojis"
-        label.font = UIFont.boldSystemFont(ofSize: 20)
+        label.font = UIFont.boldSystemFont(ofSize: 25)
         label.textAlignment = NSTextAlignment.right
         label.backgroundColor = UIColor.clear
         return label
@@ -241,6 +246,75 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         
     }()
     
+    lazy var nonRatingEmojiButton1: UIButton = {
+        let button = UIButton(type: .system)
+        button.tag = 0
+        button.addTarget(self, action: #selector(nonRatingEmojiSelected(_:)), for: .touchUpInside)
+        button.backgroundColor = UIColor.white
+        button.titleLabel?.font = UIFont.boldSystemFont(ofSize: 20)
+        return button
+    }()
+    
+    lazy var nonRatingEmojiButton2: UIButton = {
+        let button = UIButton(type: .system)
+        button.tag = 1
+        button.addTarget(self, action: #selector(nonRatingEmojiSelected(_:)), for: .touchUpInside)
+        button.backgroundColor = UIColor.white
+        button.titleLabel?.font = UIFont.boldSystemFont(ofSize: 20)
+        
+        return button
+    }()
+    
+    lazy var nonRatingEmojiButton3: UIButton = {
+        let button = UIButton(type: .system)
+        button.tag = 2
+        button.addTarget(self, action: #selector(nonRatingEmojiSelected(_:)), for: .touchUpInside)
+        button.backgroundColor = UIColor.white
+        button.titleLabel?.font = UIFont.boldSystemFont(ofSize: 20)
+        
+        return button
+    }()
+    
+    lazy var nonRatingEmojiButton4: UIButton = {
+        let button = UIButton(type: .system)
+        button.tag = 3
+        button.addTarget(self, action: #selector(nonRatingEmojiSelected(_:)), for: .touchUpInside)
+        button.backgroundColor = UIColor.white
+        button.titleLabel?.font = UIFont.boldSystemFont(ofSize: 20)
+        
+        return button
+    }()
+    
+    lazy var nonRatingEmojiButton5: UIButton = {
+        let button = UIButton(type: .system)
+        button.tag = 4
+        button.addTarget(self, action: #selector(nonRatingEmojiSelected(_:)), for: .touchUpInside)
+        button.backgroundColor = UIColor.white
+        button.titleLabel?.font = UIFont.boldSystemFont(ofSize: 20)
+        
+        return button
+    }()
+
+    var nonRatingEmojiButtonArray:[UIButton] = []
+    var nonRatingStackView = UIStackView()
+    
+    func nonRatingEmojiSelected(_ button: UIButton){
+        print("Non Rating Emoji Selected")
+        print(button.frame)
+        
+        let topleft = CGPoint(x: button.center.x - button.bounds.size.width/2, y: button.center.y - button.bounds.size.height/2-25)
+        let selectedEmojiIndex = button.tag
+        guard let selectedEmoji = self.post?.nonRatingEmoji?[selectedEmojiIndex] else {return}
+        guard let selectedEmojiTag = self.post?.nonRatingEmojiTags?[selectedEmojiIndex] else {return}
+        
+        var displayTag = selectedEmojiTag
+        if displayTag.isSingleEmoji{
+           displayTag = ReverseEmojiDictionary.key(forValue: displayTag)!
+        }
+        
+        self.delegate?.displaySelectedEmoji(emoji: selectedEmoji, emojitag: displayTag)
+        
+    }
     
     
     let emojiDetailLabel: UILabel = {
@@ -488,7 +562,21 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
 //    }
     
 
-    
+    func setupNonRatingEmojiStackView(){
+        
+        // Reset all button text
+        for (index, button) in nonRatingEmojiButtonArray.enumerated() {
+            button.setTitle("", for: .normal)
+        }
+        
+        if post?.nonRatingEmoji != nil {
+             for (index,emoji) in (post?.nonRatingEmoji?.enumerated())! {
+                  nonRatingEmojiButtonArray[index].setTitle(emoji, for: .normal)
+                
+                nonRatingEmojiButtonArray[index].sizeThatFits(nonRatingEmojiButtonArray[index].intrinsicContentSize)
+            }
+        }
+    }
 
     
     
@@ -505,7 +593,32 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         addSubview(ratingEmojiLabel)
         addSubview(nonRatingEmojiLabel)
 
+
+        
+        nonRatingEmojiButtonArray = [nonRatingEmojiButton1, nonRatingEmojiButton2, nonRatingEmojiButton3, nonRatingEmojiButton4, nonRatingEmojiButton5]
+        nonRatingStackView = UIStackView(arrangedSubviews: nonRatingEmojiButtonArray)
+        
+        nonRatingStackView.distribution = .fillProportionally
+        nonRatingStackView.axis = .horizontal
+        nonRatingStackView.alignment = .fill
+        nonRatingStackView.backgroundColor = UIColor.blue
+        setupNonRatingEmojiStackView()
+        
+        addSubview(nonRatingStackView)
+
+        
 //        
+//        if let NREmoji = post?.nonRatingEmoji {
+//            for (index, emoji) in NREmoji.enumerated() {
+//                nonRatingEmojiButtonArray[index].titleLabel?.text = emoji
+//                nonRatingEmojiButtonArray[index].titleLabel?.font = UIFont.boldSystemFont(ofSize: 20)
+//                nonRatingEmojiButtonArray[index].sizeToFit()
+//                print(emoji)
+//            }
+//            nonRatingEmojiButtonArray = [nonRatingEmojiButton1, nonRatingEmojiButton2, nonRatingEmojiButton3, nonRatingEmojiButton4, nonRatingEmojiButton5]
+//        }
+//        
+//
 //        addSubview(optionsButton)
 //        optionsButton.anchor(top: topAnchor, left: nil, bottom: photoImageView.topAnchor, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 44, height: 0)
         
@@ -515,13 +628,16 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         
 //        nonRatingEmojiLabel.anchor(top: topAnchor, left: leftAnchor, bottom: nil, right: nil, paddingTop: 0, paddingLeft: 8, paddingBottom: 0, paddingRight: 0, width: 140, height: 0)
 //        nonRatingEmojiLabel.textAlignment = .left
+//        
+//        emojiLabel.anchor(top: topAnchor, left: leftAnchor, bottom: photoImageView.topAnchor, right: nil, paddingTop: 0, paddingLeft: 8, paddingBottom: 0, paddingRight: 0, width: 140, height: 0)
+//        emojiLabel.textAlignment = .left
+//
+//        let emojiTapGesture = UITapGestureRecognizer(target: self, action: #selector(HomePostCell.emojiTap))
+//        emojiLabel.isUserInteractionEnabled = true
+//        emojiLabel.addGestureRecognizer(emojiTapGesture)
         
-        emojiLabel.anchor(top: topAnchor, left: leftAnchor, bottom: photoImageView.topAnchor, right: nil, paddingTop: 0, paddingLeft: 8, paddingBottom: 0, paddingRight: 0, width: 140, height: 0)
-        emojiLabel.textAlignment = .left
         
-        let emojiTapGesture = UITapGestureRecognizer(target: self, action: #selector(HomePostCell.emojiTap))
-        emojiLabel.isUserInteractionEnabled = true
-        emojiLabel.addGestureRecognizer(emojiTapGesture)
+        nonRatingStackView.anchor(top: topAnchor, left: leftAnchor, bottom: photoImageView.topAnchor, right: nil, paddingTop: 0, paddingLeft: 8, paddingBottom: 0, paddingRight: 0, width: 140, height: 0)
         
         emojiDetailLabel.anchor(top: topAnchor, left: nil, bottom: photoImageView.topAnchor, right: nil, paddingTop: 10, paddingLeft: 0, paddingBottom: 10, paddingRight: 0, width: 200, height: 0)
         emojiDetailLabel.centerXAnchor.constraint(equalTo: self.centerXAnchor).isActive = true

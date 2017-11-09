@@ -142,7 +142,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
                     var fetchedTagDate = messageDetails["tagTime"] as? Double
                     var fetchedRatingEmoji = messageDetails["ratingEmoji"] as? String
                     var fetchedNonratingEmoji = messageDetails["nonRatingEmoji"] as? [String]
-                    var FetchedNonratingEmojiTags = messageDetails["nonRatingEmojiTags"] as? [String]
+                    var fetchedNonratingEmojiTags = messageDetails["nonRatingEmojiTags"] as? [String]
                     var creatorUid = messageDetails["creatorUID"] as? String
                     
                     let tempEmojis = String(selectedEmojis.characters.prefix(1))
@@ -152,10 +152,12 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
                     var newNonratingEmoji: [String]? = nil
                     var newNonratingEmojiTags: [String]? = nil
                     var newTagTime: Double? = nil
-                    print(fetchedRatingEmoji)
                     
-                    print("selected emoji splits: ", selectedEmojisSplit)
-                    if fetchedRatingEmoji == nil && selectedEmojisSplit != [] {
+                    print("Fetched Rating Emoji: ",fetchedRatingEmoji)
+                    print("Fetched NonRating Emoji: ",fetchedNonratingEmoji)
+                    print("Selected Emoji splits: ", selectedEmojisSplit)
+                    
+                    if (fetchedRatingEmoji == nil || fetchedRatingEmoji == "" || fetchedNonratingEmoji == nil) && selectedEmojisSplit != [] {
                         // Replace Rating emoji with First of NR emoji if its rating emoji
                         
                         if String(selectedEmojisSplit[0]).containsRatingEmoji {
@@ -169,7 +171,12 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
                             newNonratingEmoji = selectedEmojisSplit
                             newNonratingEmojiTags = selectedEmojisSplit
                         }
+                    } else {
+                        newRatingEmoji = fetchedRatingEmoji
+                        newNonratingEmoji = fetchedNonratingEmoji
+                        newNonratingEmojiTags = fetchedNonratingEmojiTags
                     }
+                    
                     print("New R Emoji: ", newRatingEmoji, " New NR Emoji: ", newNonratingEmoji, " New NR Emoji Tags: ", newNonratingEmojiTags)
                     
                     if fetchedTagDate == nil {
@@ -181,11 +188,17 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
                     
                     let values = ["ratingEmoji": newRatingEmoji, "nonratingEmoji": newNonratingEmoji, "nonratingEmojiTags": newNonratingEmojiTags, "tagTime": newTagTime] as [String: Any]
                     
+                    
                     print("Updating PostId: ",key," Values: ", values)
                     Database.updatePostwithPostID(postId: key, values: values)
-                  
+                    
+                    var saveNewRatingEmoji = newRatingEmoji ?? ""
+                    var saveNewNonratingEmoji = newNonratingEmoji?.joined() ?? ""
+                    
+                    let emojiString = String(saveNewRatingEmoji + saveNewNonratingEmoji)
+                    
                     // Update User Posts
-                    let userPostValues = ["tagTime": newTagTime] as [String: Any]
+                    let userPostValues = ["tagTime": newTagTime, "emoji": emojiString] as [String: Any]
                     Database.updateUserPostwithPostID(creatorId: creatorUid!, postId: key, values: userPostValues)
                     
                     
@@ -200,15 +213,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         self.present(firebaseAlert, animated: true)
     }
     
-    var reverseEmojiSet: [String:String] = [:]
-    
-    func reverseEmoji(){
-        for (key,value) in EmojiDictionary {
-            reverseEmojiSet[value] = key
-        }
-        print(reverseEmojiSet)
-   
-    }
+
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -263,7 +268,39 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         
         setupSearchController()
         setupNavigationItems()
+        
+        setupEmojiDetailLabel()
+        
 
+    }
+
+    
+    
+    // Emoji description
+    
+    let emojiDetailLabel: UILabel = {
+        let label = UILabel()
+        label.text = "Emojis"
+        label.font = UIFont.boldSystemFont(ofSize: 15)
+        label.textAlignment = NSTextAlignment.center
+        label.backgroundColor = UIColor.rgb(red: 255, green: 242, blue: 230)
+        label.layer.cornerRadius = 30/2
+        label.layer.borderWidth = 0.25
+        label.layer.borderColor = UIColor.black.cgColor
+        label.layer.masksToBounds = true
+        return label
+        
+    }()
+    
+    func setupEmojiDetailLabel(){
+        view.addSubview(emojiDetailLabel)
+        emojiDetailLabel.anchor(top: topLayoutGuide.bottomAnchor, left: nil, bottom: nil, right: nil, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 150, height: 25)
+        emojiDetailLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
+        emojiDetailLabel.isHidden = true
+    }
+    
+    override func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        emojiDetailLabel.isHidden = true
     }
     
     func CGRectMake(_ x: CGFloat, _ y: CGFloat, _ width: CGFloat, _ height: CGFloat) -> CGRect {
@@ -278,6 +315,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         self.sortFetchPostIds()
         self.paginatePosts()
     }
+    
     
 // Setup for Geo Range Button, Dummy TextView and UIPicker
     
@@ -853,6 +891,12 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         
         present(deleteAlert, animated: true, completion: nil)
         
+    }
+    
+    func displaySelectedEmoji(emoji: String, emojitag: String) {
+        
+        emojiDetailLabel.text = emoji + " " + emojitag
+        emojiDetailLabel.isHidden = false
         
     }
     
