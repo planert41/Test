@@ -45,37 +45,33 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
                 
             photoImageView.loadImage(urlString: imageUrl)
             
-            let attributedText = NSMutableAttributedString(string: (post?.ratingEmoji)!, attributes: [NSFontAttributeName: UIFont.boldSystemFont(ofSize: 20)])
+//            let attributedText = NSMutableAttributedString(string: (post?.ratingEmoji)!, attributes: [NSFontAttributeName: UIFont.boldSystemFont(ofSize: 20)])
+//            
+//            attributedText.append(NSMutableAttributedString(string: (post?.user.username)!, attributes: [NSFontAttributeName: UIFont.boldSystemFont(ofSize: 14)]))
+//            
+//            usernameLabel.attributedText = attributedText
             
-            attributedText.append(NSMutableAttributedString(string: (post?.user.username)!, attributes: [NSFontAttributeName: UIFont.boldSystemFont(ofSize: 14)]))
+            usernameLabel.text = post?.user.username
+            usernameLabel.sizeToFit()
             
-            usernameLabel.attributedText = attributedText
             usernameLabel.isUserInteractionEnabled = true
             let usernameTap = UITapGestureRecognizer(target: self, action: #selector(HomePostCell.usernameTap))
             usernameLabel.addGestureRecognizer(usernameTap)
             
-            let locationTapGesture = UITapGestureRecognizer(target: self, action: #selector(HomePostCell.locationTap))
-            let locationTapGesture2 = UITapGestureRecognizer(target: self, action: #selector(HomePostCell.locationTap))
-            
-
-            
+            setupEmojiLabels()
             locationLabel.text = post?.locationName.truncate(length: 30)
-            locationLabel.isUserInteractionEnabled = true
-            locationLabel.addGestureRecognizer(locationTapGesture)
-            
             adressLabel.text = post?.locationAdress.truncate(length: 60)
-            adressLabel.isUserInteractionEnabled = true
-            adressLabel.addGestureRecognizer(locationTapGesture2)
             
-//            emojiLabel.text = post?.emoji
-            emojiLabel.text = post?.nonRatingEmoji?.joined()
             
-            emojiLabel.isUserInteractionEnabled = true
-            let emojiTap = UITapGestureRecognizer(target: self, action: #selector(HomePostCell.emojiTap))
-            usernameLabel.addGestureRecognizer(usernameTap)
-            emojiLabel.addGestureRecognizer(emojiTap)
-
             
+//            let locationTapGesture = UITapGestureRecognizer(target: self, action: #selector(HomePostCell.locationTap))
+//            let locationTapGesture2 = UITapGestureRecognizer(target: self, action: #selector(HomePostCell.locationTap))
+//        
+//            locationLabel.isUserInteractionEnabled = true
+//            locationLabel.addGestureRecognizer(locationTapGesture)
+//            
+//            adressLabel.isUserInteractionEnabled = true
+//            adressLabel.addGestureRecognizer(locationTapGesture2)
             
             guard let profileImageUrl = post?.user.profileImageUrl else {return}
             
@@ -102,12 +98,11 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
             }
 
             if post?.creatorUID == Auth.auth().currentUser?.uid && enableDelete {
-                deleteButton.isHidden = false
+                optionsButton.isHidden = false
             } else {
-                deleteButton.isHidden = true
+                optionsButton.isHidden = true
             }
             
-            setupNonRatingEmojiStackView()
             
            // setupAttributedLocationName()
         }
@@ -125,37 +120,6 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         guard let post = post else {return}
         delegate?.didTapLocation(post: post)
     }
-    
-    func emojiTap(){
-     
-        print("Tap Emoji")
-        
-        if self.emojiDetailLabel.isHidden == false {
-            self.emojiDetailLabel.isHidden = true
-        }
-
-        guard let emojiString = emojiLabel.text else {return}
-        let emojiSplit = Array(emojiString.characters)
-        print(emojiSplit)
-        var emojiDetails: String = ""
-        
-        for emoji in emojiSplit {
-            if let emojiTranslate = EmojiDictionary[String(emoji)]{
-            emojiDetails = emojiDetails + " " + String(emoji) + emojiTranslate
-            }
-       }
-        
-        self.emojiDetailLabel.text = emojiDetails
-        self.emojiDetailLabel.isHidden = false
-        let when = DispatchTime.now() + 5 // change 2 to desired number of seconds
-        DispatchQueue.main.asyncAfter(deadline: when) {
-            if self.emojiDetailLabel.isHidden == false {
-            self.emojiDetailLabel.isHidden = true
-            }
-        }
-        
-    }
-    
     
     fileprivate func setupAttributedCaption(){
         
@@ -212,39 +176,25 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         iv.backgroundColor = .white
         iv.contentMode = .scaleAspectFill
         iv.clipsToBounds = true
+        iv.isUserInteractionEnabled = true
+        
         return iv
         
     }()
     
-    let emojiLabel: UILabel = {
-        let label = UILabel()
-        label.text = "Emojis"
-        label.font = UIFont.boldSystemFont(ofSize: 20)
-        label.textAlignment = NSTextAlignment.right
-        label.backgroundColor = UIColor.clear
-        return label
-        
-    }()
-    
-    let ratingEmojiLabel: UILabel = {
+    lazy var ratingEmojiLabel: UILabel = {
         let label = UILabel()
         label.text = "Emojis"
         label.font = UIFont.boldSystemFont(ofSize: 25)
         label.textAlignment = NSTextAlignment.right
         label.backgroundColor = UIColor.clear
+        let tap = UITapGestureRecognizer(target: self, action: #selector(ratingEmojiSelected(_:)))
+        label.addGestureRecognizer(tap)
+        label.isUserInteractionEnabled = true
         return label
         
     }()
     
-    let nonRatingEmojiLabel: UILabel = {
-        let label = UILabel()
-        label.text = "Emojis"
-        label.font = UIFont.boldSystemFont(ofSize: 20)
-        label.textAlignment = NSTextAlignment.right
-        label.backgroundColor = UIColor.clear
-        return label
-        
-    }()
     
     lazy var nonRatingEmojiLabel1: UILabel = {
         let label = UILabel()
@@ -303,19 +253,21 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
 
     var nonRatingEmojiLabelArray:[UILabel] = []
     
-    
-    func setupNonRatingEmojiStackView(){
+    func setupEmojiLabels(){
+        
+        guard let post = post else {return}
+        
+        self.ratingEmojiLabel.text = self.post?.ratingEmoji
         
         for label in self.nonRatingEmojiLabelArray {
             label.text = ""
         }
-        
-        for (index, emoji) in (self.post?.nonRatingEmoji?.enumerated())! {
-            self.nonRatingEmojiLabelArray[index].text = emoji
-            self.nonRatingEmojiLabelArray[index].sizeToFit()
+        if self.post?.nonRatingEmoji != nil {
+            for (index, emoji) in (self.post?.nonRatingEmoji?.enumerated())! {
+                self.nonRatingEmojiLabelArray[index].text = emoji
+                self.nonRatingEmojiLabelArray[index].sizeToFit()
+            }
         }
-        
-
     }
     
     
@@ -342,6 +294,43 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
                        options: .allowUserInteraction,
                        animations: { [weak self] in
                         selectedLabel.transform = .identity
+            },
+                       completion: nil)
+        
+        self.delegate?.displaySelectedEmoji(emoji: displayEmoji!, emojitag: displayEmojiTag!)
+        
+//        var origin: CGPoint = selectedLabel.center;
+//        var topleft = CGPoint(x: selectedLabel.center.x - selectedLabel.bounds.size.width/2, y: selectedLabel.center.y - (selectedLabel.bounds.size.height / 2) - 200 )
+//        popView.backgroundColor = UIColor.blue
+//        popView = UIView(frame: CGRect(x: topleft.x, y: topleft.y, width: 200, height: 200))
+//        popView.frame.origin.x = topleft.x
+//        popView.frame.origin.y = topleft.y
+//        self.addSubview(popView)
+        
+    }
+    
+    func ratingEmojiSelected(_ sender: UIGestureRecognizer){
+        print("Rating Emoji Selected")
+        
+        guard let post = post else {return}
+        
+        var displayEmoji = self.post?.ratingEmoji
+        var displayEmojiTag = displayEmoji
+        
+        if let emojiTagLookup = ReverseEmojiDictionary.key(forValue: displayEmoji!) {
+            displayEmojiTag = emojiTagLookup
+        } else {
+        }
+        
+        self.ratingEmojiLabel.transform = CGAffineTransform(scaleX: 0.5, y: 0.5)
+        
+        UIView.animate(withDuration: 1.0,
+                       delay: 0,
+                       usingSpringWithDamping: 0.2,
+                       initialSpringVelocity: 6.0,
+                       options: .allowUserInteraction,
+                       animations: { [weak self] in
+                        self?.ratingEmojiLabel.transform = .identity
             },
                        completion: nil)
         
@@ -375,8 +364,8 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
     
     let locationView: UIView = {
         let uv = UIView()
-        let tap = UITapGestureRecognizer(target: self, action: #selector(locationTap))
-        uv.addGestureRecognizer(tap)
+        let locationTapGesture = UITapGestureRecognizer(target: self, action: #selector(locationTap))
+        uv.addGestureRecognizer(locationTapGesture)
         uv.isUserInteractionEnabled = true
         return uv
     }()
@@ -395,13 +384,17 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         label.text = "Location"
         label.font = UIFont.boldSystemFont(ofSize: 12)
         label.textColor = UIColor.black
+        let locationTapGesture = UITapGestureRecognizer(target: self, action: #selector(locationTap))
+        label.isUserInteractionEnabled = true
+        label.addGestureRecognizer(locationTapGesture)
         return label
     }()
     
     let locationDistanceLabel: UILabel = {
         let label = UILabel()
         label.text = ""
-        label.font = UIFont.boldSystemFont(ofSize: 12)
+        label.font = UIFont.boldSystemFont(ofSize: 11)
+        
         label.textColor = UIColor.mainBlue()
         label.textAlignment = NSTextAlignment.right
         return label
@@ -423,8 +416,6 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         
     }()
     
-
-    
     let captionLabel: UILabel = {
         let label = UILabel()
         
@@ -432,14 +423,32 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         return label
     }()
 
-    
-    
     let optionsButton: UIButton = {
         let button = UIButton(type: .system)
          button.setTitle("•••", for: .normal)
         button.setTitleColor(.black, for: .normal)
+        button.addTarget(self, action: #selector(handleOptions), for: .touchUpInside)
+        
         return button
     }()
+    
+    func handleOptions() {
+        
+//        let alertController = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+//        
+//        alertController.addAction(UIAlertAction(title: "Delete Post", style: .destructive, handler: { (_) in
+//            
+//            self.deletePost()
+//            
+//        }))
+//        
+//        alertController.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
+//        
+//        
+//        UIApplication.shared.keyWindow?.rootViewController?.present(alertController, animated: true, completion: nil)
+
+    }
+    
     
     lazy var likeButton: UIButton = {
         let button = UIButton(type: .system)
@@ -513,6 +522,19 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
             
         }
         
+        self.bookmarkButton.transform = CGAffineTransform(scaleX: 0.1, y: 0.1)
+        
+        
+        UIView.animate(withDuration: 1.0,
+                       delay: 0,
+                       usingSpringWithDamping: 0.2,
+                       initialSpringVelocity: 6.0,
+                       options: .allowUserInteraction,
+                       animations: { [weak self] in
+                        self?.bookmarkButton.transform = .identity
+            },
+                       completion: nil)
+    
     }
 
     
@@ -561,7 +583,6 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         
         guard let post = post else {return}
         delegate?.deletePost(post: post)
-        
     }
 
     
@@ -572,11 +593,8 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         addSubview(photoImageView)
         addSubview(userProfileImageView)
         addSubview(usernameLabel)
-        addSubview(emojiLabel)
         addSubview(emojiDetailLabel)
-
         addSubview(ratingEmojiLabel)
-        addSubview(nonRatingEmojiLabel)
 //
 //        addSubview(optionsButton)
 //        optionsButton.anchor(top: topAnchor, left: nil, bottom: photoImageView.topAnchor, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 44, height: 0)
@@ -602,6 +620,8 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         emojiDetailLabel.centerXAnchor.constraint(equalTo: self.centerXAnchor).isActive = true
         emojiDetailLabel.isHidden = true
         
+// Username Details and Rating Emojis
+        
         userProfileImageView.anchor(top: topAnchor, left: nil, bottom: nil, right: rightAnchor, paddingTop: 5, paddingLeft: 5, paddingBottom: 0, paddingRight: 5, width: 40, height: 40)
         userProfileImageView.layer.cornerRadius = 40/2
         userProfileImageView.layer.borderWidth = 0.25
@@ -611,13 +631,22 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         
         usernameLabel.textAlignment = .right
         
+        addSubview(locationDistanceLabel)
+ 
+        locationDistanceLabel.anchor(top: nil, left: nil, bottom: photoImageView.topAnchor, right: userProfileImageView.leftAnchor, paddingTop: 2, paddingLeft: 0, paddingBottom: 2, paddingRight: 10, width: 0, height: 0)
+        
+        
+        ratingEmojiLabel.anchor(top: topAnchor, left: nil, bottom: photoImageView.topAnchor, right: usernameLabel.leftAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 2, width: 0, height: 0)
+        
+// Photo Image View and Complex User Interactions
+        
         photoImageView.anchor(top: headerView.bottomAnchor, left: leftAnchor, bottom: nil, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
         photoImageView.heightAnchor.constraint(equalTo: widthAnchor, multiplier: 1).isActive = true
- 
-        let locationTapGesture3 = UITapGestureRecognizer(target: self, action: #selector(HomePostCell.locationTap))
-        photoImageView.addGestureRecognizer(locationTapGesture3)
-        photoImageView.isUserInteractionEnabled = true
+
         
+        let locationTapGesture = UITapGestureRecognizer(target: self, action: #selector(locationTap))
+        photoImageView.addGestureRecognizer(locationTapGesture)
+
         let doubleTap = UITapGestureRecognizer(target: self, action: #selector(photoDoubleTapped))
         doubleTap.numberOfTapsRequired = 2
         photoImageView.addGestureRecognizer(doubleTap)
@@ -630,6 +659,9 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         pan.delegate = self
         self.photoImageView.addGestureRecognizer(pan)
         
+        
+// Location View
+        
         addSubview(locationView)
         locationView.anchor(top: photoImageView.bottomAnchor, left: leftAnchor, bottom: nil, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 40)
 
@@ -639,7 +671,7 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         addSubview(bookmarkButton)
         bookmarkButton.anchor(top: locationView.bottomAnchor, left: nil, bottom: nil, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 40, height: 40)
         
-        locationDistanceLabel.anchor(top: photoImageView.bottomAnchor, left: nil, bottom: nil, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 5, width: 75, height: 50)
+//        locationDistanceLabel.anchor(top: photoImageView.bottomAnchor, left: nil, bottom: nil, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 5, width: 75, height: 50)
         
         locationLabel.anchor(top: locationView.topAnchor, left: leftAnchor, bottom: nil, right: bookmarkButton.leftAnchor, paddingTop: 5, paddingLeft: 15, paddingBottom: 0, paddingRight: 0, width: 0, height: 15)
         
@@ -647,6 +679,10 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         
         addSubview(locationButton)
         locationButton.anchor(top: locationView.topAnchor, left: locationView.leftAnchor, bottom: locationView.bottomAnchor, right: locationView.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
+        
+        addSubview(optionsButton)
+        optionsButton.anchor(top: locationView.topAnchor, left: nil, bottom: nil, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 40, height: 40)
+        optionsButton.isHidden = true
         
         
         let bottomDividerView = UIView()
@@ -723,7 +759,6 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         print("Double Tap")
 
         var origin: CGPoint = self.photoImageView.center;
-        popView.backgroundColor = UIColor.blue
         popView = UIView(frame: CGRect(x: origin.x, y: origin.y, width: 200, height: 200))
         popView = UIImageView(image: #imageLiteral(resourceName: "heart"))
         popView.contentMode = .scaleToFill
@@ -733,12 +768,30 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         
         photoImageView.addSubview(popView)
         
-        UIView.animate(withDuration: 0.5, animations: {
-            self.popView.alpha = 1
-            self.popView.transform = CGAffineTransform(scaleX: 1.0, y: 1.0)
-        }) { (done) in
-            self.popView.alpha = 0
-        }
+            UIView.animate(withDuration: 1.5,
+                       delay: 0,
+                       usingSpringWithDamping: 0.2,
+                       initialSpringVelocity: 6.0,
+                       options: .allowUserInteraction,
+                       animations: { [weak self] in
+                        self?.popView.transform = .identity
+                }) { (done) in
+                    self.popView.alpha = 0
+                }
+        
+        
+//        selectedLabel.transform = CGAffineTransform(scaleX: 0.5, y: 0.5)
+//        
+//        UIView.animate(withDuration: 1.0,
+//                       delay: 0,
+//                       usingSpringWithDamping: 0.2,
+//                       initialSpringVelocity: 6.0,
+//                       options: .allowUserInteraction,
+//                       animations: { [weak self] in
+//                        selectedLabel.transform = .identity
+//            },
+//                       completion: nil)
+//        
 
     }
     
@@ -755,9 +808,9 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         
         addSubview(stackView)
         stackView.anchor(top: locationView.bottomAnchor, left: leftAnchor, bottom: nil, right: nil, paddingTop: 0, paddingLeft: 8, paddingBottom: 0, paddingRight: 0, width: 120, height: 40)
-        addSubview(deleteButton)
-        deleteButton.anchor(top: locationView.bottomAnchor, left: stackView.rightAnchor, bottom: nil, right: nil, paddingTop: 0, paddingLeft: 8, paddingBottom: 0, paddingRight: 0, width: 40, height: 40)
-        deleteButton.isHidden = false
+//        addSubview(deleteButton)
+//        deleteButton.anchor(top: locationView.bottomAnchor, left: stackView.rightAnchor, bottom: nil, right: nil, paddingTop: 0, paddingLeft: 8, paddingBottom: 0, paddingRight: 0, width: 40, height: 40)
+//        deleteButton.isHidden = false
 
     }
     
