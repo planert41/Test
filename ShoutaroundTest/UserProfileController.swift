@@ -274,9 +274,29 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
     
     func deletePost(post:Post){
         
-        let deleteAlert = UIAlertController(title: "Delete", message: "All data will be lost.", preferredStyle: UIAlertControllerStyle.alert)
+        let optionsAlert = UIAlertController(title: "Options", message: "nil", preferredStyle: UIAlertControllerStyle.alert)
         
-        deleteAlert.addAction(UIAlertAction(title: "Ok", style: .default, handler: { (action: UIAlertAction!) in
+        optionsAlert.addAction(UIAlertAction(title: "Edit Post", style: .default, handler: { (action: UIAlertAction!) in
+            
+            // Allow Editing
+            let sharePhotoController = SharePhotoController()
+
+            // Pass through post details to sharePhotoController
+            //1. Image
+            
+            let index = self.allPosts.index { (filteredpost) -> Bool in
+                filteredpost.id  == post.id
+            }
+            
+            let filteredindexpath = IndexPath(row:index!, section: 0)
+            self.allPosts.remove(at: index!)
+            self.collectionView?.deleteItems(at: [filteredindexpath])
+            
+            Database.deletePost(post: post)
+        }))
+        
+        
+        optionsAlert.addAction(UIAlertAction(title: "Ok", style: .default, handler: { (action: UIAlertAction!) in
             
             // Remove from Current View
             let index = self.allPosts.index { (filteredpost) -> Bool in
@@ -290,13 +310,40 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
             Database.deletePost(post: post)
         }))
         
-        deleteAlert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: { (action: UIAlertAction!) in
-            print("Handle Cancel Logic here")
-        }))
-        
-        present(deleteAlert, animated: true, completion: nil)
+//        deleteAlert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: { (action: UIAlertAction!) in
+//            print("Handle Cancel Logic here")
+//        }))
+//        
+//        present(deleteAlert, animated: true, completion: nil)
         
     }
+    
+    
+//    func deletePost(post:Post){
+//        
+//        let deleteAlert = UIAlertController(title: "Delete", message: "All data will be lost.", preferredStyle: UIAlertControllerStyle.alert)
+//        
+//        deleteAlert.addAction(UIAlertAction(title: "Ok", style: .default, handler: { (action: UIAlertAction!) in
+//            
+//            // Remove from Current View
+//            let index = self.allPosts.index { (filteredpost) -> Bool in
+//                filteredpost.id  == post.id
+//            }
+//            
+//            let filteredindexpath = IndexPath(row:index!, section: 0)
+//            self.allPosts.remove(at: index!)
+//            self.collectionView?.deleteItems(at: [filteredindexpath])
+//            
+//            Database.deletePost(post: post)
+//        }))
+//        
+//        deleteAlert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: { (action: UIAlertAction!) in
+//            print("Handle Cancel Logic here")
+//        }))
+//        
+//        present(deleteAlert, animated: true, completion: nil)
+//        
+//    }
     
     func displaySelectedEmoji(emoji: String, emojitag: String) {
         

@@ -8,6 +8,42 @@
 //
 //
 //import Foundation
+// Detect Emojis in textview
+
+//    func textFieldDidChange(_ textField: UITextField) {
+//
+//        let strLast5 =  textView.text.characters.substring(from: min(0,textView.text.characters.count - 5))
+//
+//        textView.text.substring(from: 5)
+//
+//        print(strLast5)
+//
+//
+//    }
+
+
+//        view.addSubview(Emoji1CollectionView)
+//        view.addSubview(Emoji2CollectionView)
+//        view.addSubview(Emoji3CollectionView)
+//        view.addSubview(Emoji4CollectionView)
+//
+//
+//        emojiViews = [Emoji1CollectionView, Emoji2CollectionView, Emoji3CollectionView, Emoji4CollectionView]
+//
+//        for (index,views) in emojiViews!.enumerated() {
+//
+//            if index == 0 {
+//                views.anchor(top: EmojiContainerView.topAnchor, left: EmojiContainerView.leftAnchor, bottom: nil, right: EmojiContainerView.rightAnchor, paddingTop: 0, paddingLeft: 8, paddingBottom: 0, paddingRight: 8, width: 0, height: EmojiSize.width+2)
+//            } else {
+//                views.anchor(top: emojiViews![index-1].bottomAnchor, left: EmojiContainerView.leftAnchor, bottom: nil, right: EmojiContainerView.rightAnchor, paddingTop: 0, paddingLeft: 8, paddingBottom: 0, paddingRight: 8, width: 0, height: EmojiSize.width+2)
+//            }
+//            views.backgroundColor = UIColor.white
+//            views.register(UploadEmojiCell.self, forCellWithReuseIdentifier: emojiCellID)
+//            views.delegate = self
+//            views.dataSource = self
+//            views.allowsMultipleSelection = true
+//
+//        }
 
 
 

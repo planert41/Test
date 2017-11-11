@@ -19,8 +19,6 @@ protocol HomePostCellDelegate {
     func refreshPost(post:Post)
     func deletePost(post:Post)
     func displaySelectedEmoji(emoji: String, emojitag: String)
-    
-//    func didSendMessage(post:Post)
 //    func didLike(for cell: HomePostCell)
 //    func didBookmark(for cell: HomePostCell)
 
