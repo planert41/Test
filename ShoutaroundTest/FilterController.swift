@@ -261,8 +261,7 @@ class FilterController: UIViewController, CLLocationManagerDelegate, GMSAutocomp
             self.selectedRange = optionRanges[sender.selectedSegmentIndex]
             self.sortSegment.selectedSegmentIndex = 0
             self.selectedSort = optionSort[self.sortSegment.selectedSegmentIndex]
-            self.timeSegment.selectedSegmentIndex = self.currentTime!
-            self.selectedTime = optionTime[self.timeSegment.selectedSegmentIndex]
+
             
         case optionRanges.count - 1:
             self.selectedRange = optionRanges[sender.selectedSegmentIndex]
@@ -306,8 +305,6 @@ class FilterController: UIViewController, CLLocationManagerDelegate, GMSAutocomp
             {
                 self.selectedRange = optionRanges[0]
                 self.distanceSegment.selectedSegmentIndex = 0
-                self.timeSegment.selectedSegmentIndex = self.currentTime!
-                self.selectedTime = optionTime[self.timeSegment.selectedSegmentIndex]
                 print(self.distanceSegment.selectedSegmentIndex)
             }
         case 1...optionSort.count - 2:

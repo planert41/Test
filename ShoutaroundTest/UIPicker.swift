@@ -9,6 +9,48 @@
 //
 //import Foundation
 
+
+
+
+
+
+//    func handleMessage(){
+//        guard let post = self.post else {return}
+//
+//        print("emailtest")
+//        let mailgun = Mailgun.client(withDomain: "sandbox036bf1de5ba44e7e8ad4f19b9cc5b7d8.mailgun.org", apiKey: "key-2562988360d4f7f8a1fcc6f3647b446a")
+//
+//        let message = MGMessage(from:"Excited User <someone@sample.org>",
+//                                to:"Jay Baird <planert41@gmail.com>",
+//                                subject:"Mailgun is awesome!",
+//                                body:("<html>Inline image here: <img src=cid:image01.jpg></html>"))!
+//
+//
+//
+//        let postImage = CustomImageView()
+//        postImage.loadImage(urlString: post.imageUrl)
+//
+//        //        message.add(postImage.image, withName: "image01", type: .JPEGFileType, inline: true)
+//        message.html = "<html>Inline image here: <img src="+post.imageUrl+" width = \"25%\" height = \"25%\"/></html>"
+//
+//
+//        // someImage: UIImage
+//        // type can be either .JPEGFileType or .PNGFileType
+//        // message.add(postImage.image, withName: "image01", type:.PNGFileType)
+//
+//
+//        mailgun?.send(message, success: { (success) in
+//            print("success sending email")
+//        }, failure: { (error) in
+//            print(error)
+//        })
+//    }
+
+
+
+
+
+
 // Detect Backspace = isBackSpace == -92
 // When hit backspace, compare new words to prev saved words. if deleted string matches an emoji, then we take emoji out
 //
