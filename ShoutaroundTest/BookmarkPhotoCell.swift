@@ -40,6 +40,9 @@ class BookmarkPhotoCell: UICollectionViewCell {
             usernameLabel.text = post?.user.username
             locationNameLabel.text = post?.locationName
             locationAdressLabel.text = post?.locationAdress
+            
+            
+            
             emojiLabel.text = post?.emoji
             
             guard let profileImageUrl = post?.user.profileImageUrl else {return}
@@ -323,7 +326,7 @@ class BookmarkPhotoCell: UICollectionViewCell {
         
         
         usernameRow.addSubview(emojiLabel)
-        emojiLabel.anchor(top: usernameRow.topAnchor, left: usernameRow.leftAnchor, bottom: usernameRow.bottomAnchor, right: usernameRow.rightAnchor, paddingTop: 5, paddingLeft: 0, paddingBottom: 5, paddingRight: 0, width: 80, height: 0)
+        emojiLabel.anchor(top: usernameRow.topAnchor, left: usernameRow.leftAnchor, bottom: usernameRow.bottomAnchor, right: usernameRow.rightAnchor, paddingTop: 5, paddingLeft: 0, paddingBottom: 5, paddingRight: 0, width: 100, height: 0)
         
         addSubview(distanceLabel)
         distanceLabel.anchor(top: usernameRow.topAnchor, left: emojiLabel.rightAnchor, bottom: usernameRow.bottomAnchor, right: usernameRow.rightAnchor, paddingTop: 2, paddingLeft: 5, paddingBottom: 0, paddingRight: 5, width: 0, height: 15)

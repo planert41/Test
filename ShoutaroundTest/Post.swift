@@ -37,7 +37,6 @@ struct Post {
     let imageUrl: String
     let user: User
     let caption: String
-    let emoji: String
     let creationDate: Date
     var id: String?
     var locationGPS: CLLocation?
@@ -51,6 +50,7 @@ struct Post {
     var hasBookmarked: Bool = false
     var creatorUID: String?
     var ratingEmoji: String?
+    var emoji: String
     var nonRatingEmoji: [String]?
     var nonRatingEmojiTags: [String]?
     
@@ -64,10 +64,11 @@ struct Post {
         // ?? "" gives default value
         self.imageUrl = dictionary["imageUrl"] as? String ?? ""
         self.caption = dictionary["caption"] as? String ?? ""
-        self.emoji = dictionary["emoji"] as? String ?? ""
-        self.ratingEmoji = dictionary["ratingEmoji"] as? String ?? nil
-        self.nonRatingEmoji = dictionary["nonratingEmoji"] as? [String] ?? nil
-        self.nonRatingEmojiTags = dictionary["nonratingEmojiTags"] as? [String] ?? nil
+
+        self.ratingEmoji = dictionary["ratingEmoji"] as? String ?? ""
+        self.nonRatingEmoji = dictionary["nonratingEmoji"] as? [String] ?? []
+        self.nonRatingEmojiTags = dictionary["nonratingEmojiTags"] as? [String] ?? []
+        self.emoji = self.ratingEmoji! + (self.nonRatingEmoji?.joined())!
         
         let tagSecondsFrom1970 = dictionary["tagTime"] as? Double ?? 0
         self.tagTime = Date(timeIntervalSince1970: tagSecondsFrom1970)
