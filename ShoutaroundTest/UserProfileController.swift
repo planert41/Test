@@ -23,12 +23,13 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
     var userId:String?
     var isGroup: Bool = false {
         didSet{
-            if isGroup {
+            if (userId != Auth.auth().currentUser?.uid) {
+            if isGroup && (userId != Auth.auth().currentUser?.uid) {
                 self.navigationItem.rightBarButtonItem?.image = #imageLiteral(resourceName: "redstar").withRenderingMode(.alwaysOriginal)
             } else {
                 self.navigationItem.rightBarButtonItem?.image = #imageLiteral(resourceName: "starunfill").withRenderingMode(.alwaysOriginal)
-                
             }
+        }
         }
     }
     var user: User?
@@ -76,7 +77,6 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
     override func viewDidLoad() {
         
         super.viewDidLoad()
-        self.navigationItem.rightBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "starunfill").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(self.handleGroupOrUngroup))
         
         setupEmojiDetailLabel()
         
@@ -97,8 +97,7 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
         
         fetchUser()
         IQKeyboardManager.sharedManager().enable = false
-        
-        //        setupLogOutButton()
+        setupLogOutButton()
         
     }
     
@@ -272,31 +271,54 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
         navigationController?.pushViewController(messageController, animated: true)
     }
     
-    func deletePost(post:Post){
+    func userOptionPost(post:Post){
         
-        let optionsAlert = UIAlertController(title: "Options", message: "nil", preferredStyle: UIAlertControllerStyle.alert)
+        let optionsAlert = UIAlertController(title: "User Options", message: "", preferredStyle: UIAlertControllerStyle.alert)
         
         optionsAlert.addAction(UIAlertAction(title: "Edit Post", style: .default, handler: { (action: UIAlertAction!) in
-            
             // Allow Editing
-            let sharePhotoController = SharePhotoController()
-
-            // Pass through post details to sharePhotoController
-            //1. Image
-            
-            let index = self.allPosts.index { (filteredpost) -> Bool in
-                filteredpost.id  == post.id
-            }
-            
-            let filteredindexpath = IndexPath(row:index!, section: 0)
-            self.allPosts.remove(at: index!)
-            self.collectionView?.deleteItems(at: [filteredindexpath])
-            
-            Database.deletePost(post: post)
+            self.editPost(post: post)
         }))
         
+        optionsAlert.addAction(UIAlertAction(title: "Delete Post", style: .default, handler: { (action: UIAlertAction!) in
+            self.deletePost(post: post)
+        }))
         
-        optionsAlert.addAction(UIAlertAction(title: "Ok", style: .default, handler: { (action: UIAlertAction!) in
+        optionsAlert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: { (action: UIAlertAction!) in
+            print("Handle Cancel Logic here")
+        }))
+        
+        present(optionsAlert, animated: true, completion: nil)
+    }
+    
+    func editPost(post:Post){
+        let editPost = SharePhotoController()
+        
+        // Post Edit Inputs
+        editPost.editPost = true
+        editPost.editPostImageUrl = post.imageUrl
+        editPost.editPostId = post.id
+        
+        // Post Details
+        editPost.selectedPostGooglePlaceID = post.locationGooglePlaceID
+        editPost.selectedPostLocation = post.locationGPS
+        editPost.selectedPostLocationName = post.locationName
+        editPost.selectedPostLocationAdress = post.locationAdress
+        editPost.selectedTime = post.tagTime
+        editPost.ratingEmoji = post.ratingEmoji
+        editPost.nonRatingEmoji = post.nonRatingEmoji
+        editPost.nonRatingEmojiTags = post.nonRatingEmojiTags
+        editPost.captionTextView.text = post.caption
+        
+        let navController = UINavigationController(rootViewController: editPost)
+        self.present(navController, animated: false, completion: nil)
+    }
+    
+    
+    func deletePost(post:Post){
+        
+        let deleteAlert = UIAlertController(title: "Delete", message: "All data will be lost.", preferredStyle: UIAlertControllerStyle.alert)
+        deleteAlert.addAction(UIAlertAction(title: "Ok", style: .default, handler: { (action: UIAlertAction!) in
             
             // Remove from Current View
             let index = self.allPosts.index { (filteredpost) -> Bool in
@@ -306,44 +328,15 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
             let filteredindexpath = IndexPath(row:index!, section: 0)
             self.allPosts.remove(at: index!)
             self.collectionView?.deleteItems(at: [filteredindexpath])
-            
             Database.deletePost(post: post)
         }))
         
-//        deleteAlert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: { (action: UIAlertAction!) in
-//            print("Handle Cancel Logic here")
-//        }))
-//        
-//        present(deleteAlert, animated: true, completion: nil)
+        deleteAlert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: { (action: UIAlertAction!) in
+            print("Handle Cancel Logic here")
+        }))
+        present(deleteAlert, animated: true, completion: nil)
         
     }
-    
-    
-//    func deletePost(post:Post){
-//        
-//        let deleteAlert = UIAlertController(title: "Delete", message: "All data will be lost.", preferredStyle: UIAlertControllerStyle.alert)
-//        
-//        deleteAlert.addAction(UIAlertAction(title: "Ok", style: .default, handler: { (action: UIAlertAction!) in
-//            
-//            // Remove from Current View
-//            let index = self.allPosts.index { (filteredpost) -> Bool in
-//                filteredpost.id  == post.id
-//            }
-//            
-//            let filteredindexpath = IndexPath(row:index!, section: 0)
-//            self.allPosts.remove(at: index!)
-//            self.collectionView?.deleteItems(at: [filteredindexpath])
-//            
-//            Database.deletePost(post: post)
-//        }))
-//        
-//        deleteAlert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: { (action: UIAlertAction!) in
-//            print("Handle Cancel Logic here")
-//        }))
-//        
-//        present(deleteAlert, animated: true, completion: nil)
-//        
-//    }
     
     func displaySelectedEmoji(emoji: String, emojitag: String) {
         
@@ -586,10 +579,14 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
     
       
     fileprivate func setupLogOutButton() {
-        navigationItem.rightBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "gear").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(handleLogOut))
+        if user?.uid == Auth.auth().currentUser?.uid {
+            navigationItem.rightBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "signout").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(handleLogOut))
+        } else {
+            self.navigationItem.rightBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "starunfill").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(self.handleGroupOrUngroup))
+        }
     }
 
-    
+
     func handleLogOut() {
         
         let alertController = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
@@ -702,7 +699,11 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
         Database.fetchUserWithUID(uid: uid) { (user) in
             self.user = user
             self.navigationItem.title = self.user?.username
-            self.setupGroupButton()
+            if user.uid != Auth.auth().currentUser?.uid {
+                self.setupGroupButton()
+            } else {
+                self.setupLogOutButton()
+            }
             
             self.collectionView?.reloadData()
             self.paginatePosts()

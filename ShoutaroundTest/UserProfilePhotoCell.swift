@@ -28,7 +28,7 @@ class UserProfilePhotoCell: UICollectionViewCell {
     
     
     
-    let photoImageView: CustomImageView = {
+    var photoImageView: CustomImageView = {
         let iv = CustomImageView()
         iv.contentMode = .scaleAspectFill
         iv.clipsToBounds = true
@@ -56,6 +56,11 @@ class UserProfilePhotoCell: UICollectionViewCell {
     
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        photoImageView.image = nil
     }
     
     

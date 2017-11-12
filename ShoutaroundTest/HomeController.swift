@@ -265,13 +265,9 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         fetchGroupUserIds()
         
         // Search Controller
-        
         setupSearchController()
         setupNavigationItems()
-        
         setupEmojiDetailLabel()
-        
-
     }
 
     
@@ -435,7 +431,6 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         self.refreshPagination()
         self.displayedPosts.removeAll()
         self.collectionView?.reloadData()
-        
         self.paginatePosts()
         
         }
@@ -446,7 +441,6 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     
     
     func clearFilter(){
-        
         self.resultSearchController?.searchBar.text = nil
         self.filterCaption = nil
         self.filterLocation = nil
@@ -458,10 +452,8 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     
     
     func refreshPagination(){
-        
         self.isFinishedPaging = false
         self.fetchedPostCount = 0
-        
     }
     
     func handleUpdateFeed() {
@@ -477,17 +469,14 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     }
     
     func handleRefresh() {
-
+        
         // RemoveAll so that when user follow/unfollows it updates
         refreshPagination()
         clearFilter()
-        
         fetchPostIds.removeAll()
         displayedPosts.removeAll()
         self.collectionView?.reloadData()
-        
         fetchAllPostIds()
-        
         self.collectionView?.refreshControl?.endRefreshing()
         print("Refresh Home Feed. FetchPostIds: ", self.fetchPostIds.count, " DisplayedPost: ", self.displayedPosts.count)
     }
@@ -615,7 +604,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         
         for i in self.fetchedPostCount ..< paginateFetchPostsLimit  {
             
-            print("Current number: ", i, "from", self.fetchedPostCount, " to ",paginateFetchPostsLimit)
+//            print("Current number: ", i, "from", self.fetchedPostCount, " to ",paginateFetchPostsLimit)
             let fetchPostId = fetchPostIds[i]
             
             // Filter Time
@@ -627,11 +616,11 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
                 
                 if FilterSortTimeStart[filterIndex] > tagHour || tagHour > FilterSortTimeEnd[filterIndex] {
                     // Skip Post If not within selected time frame
-                    print("Skipped Post: ", fetchPostId.id, " TagHour: ",tagHour, " Start: ", FilterSortTimeStart[filterIndex]," End: ",FilterSortTimeEnd[filterIndex])
+//                    print("Skipped Post: ", fetchPostId.id, " TagHour: ",tagHour, " Start: ", FilterSortTimeStart[filterIndex]," End: ",FilterSortTimeEnd[filterIndex])
                     self.fetchedPostCount += 1
                     if self.fetchedPostCount == paginateFetchPostsLimit {
                         // End of loop functions are checked every iteration. Skipping iteration skipped the check
-                        print("Finish Paging @ TimeCheck")
+//                        print("Finish Paging @ TimeCheck")
                         NotificationCenter.default.post(name: HomeController.finishPaginationNotificationName, object: nil)
                     }
                     continue
@@ -645,12 +634,12 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
                 if CurrentUser.groupUids.contains(fetchPostId.creatorUID!){
                 } else {
                     // Skip Post if not in group
-                    print("Skipped Post: ", fetchPostId.id, " Creator Not in Group: ",fetchPostId.creatorUID!)
+//                    print("Skipped Post: ", fetchPostId.id, " Creator Not in Group: ",fetchPostId.creatorUID!)
                     
                     self.fetchedPostCount += 1
                     if self.fetchedPostCount == paginateFetchPostsLimit {
                         // End of loop functions are checked every iteration. Skipping iteration skipped the check
-                        print("Finish Paging @ GroupCheck")
+//                        print("Finish Paging @ GroupCheck")
                         NotificationCenter.default.post(name: HomeController.finishPaginationNotificationName, object: nil)
                     }
                     continue
@@ -664,7 +653,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
                 var tempPost = [post]
                 
                 if let error = error {
-                    print("Failed to fetch post for: ", fetchPostId.id)
+//                    print("Failed to fetch post for: ", fetchPostId.id)
                     return
                 }
                 
@@ -682,11 +671,11 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
                 
                 self.displayedPosts += tempPost
 
-                print("Current: ", i, "fetchedPostCount: ", self.fetchedPostCount, "Total: ", self.fetchPostIds.count, "Display: ", self.displayedPosts.count, "finished: ", self.isFinishedPaging, "paginate:", paginateFetchPostsLimit)
+//                print("Current: ", i, "fetchedPostCount: ", self.fetchedPostCount, "Total: ", self.fetchPostIds.count, "Display: ", self.displayedPosts.count, "finished: ", self.isFinishedPaging, "paginate:", paginateFetchPostsLimit)
                 
                 if self.fetchedPostCount == paginateFetchPostsLimit {
 
-                print("Finish Paging")
+//                print("Finish Paging")
                 NotificationCenter.default.post(name: HomeController.finishPaginationNotificationName, object: nil)
                     
                     }
@@ -804,8 +793,6 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
             paginatePosts()
         }
         
-
-        
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: cellId, for: indexPath) as! HomePostCell
         cell.post = displayedPosts[indexPath.item]
         
@@ -872,23 +859,69 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         
     }
     
+    func userOptionPost(post:Post){
+        
+        let optionsAlert = UIAlertController(title: "User Options", message: "", preferredStyle: UIAlertControllerStyle.alert)
+        
+        optionsAlert.addAction(UIAlertAction(title: "Edit Post", style: .default, handler: { (action: UIAlertAction!) in
+            // Allow Editing
+            self.editPost(post: post)
+        }))
+        
+        optionsAlert.addAction(UIAlertAction(title: "Delete Post", style: .default, handler: { (action: UIAlertAction!) in
+            self.deletePost(post: post)
+        }))
+        
+        optionsAlert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: { (action: UIAlertAction!) in
+            print("Handle Cancel Logic here")
+        }))
+        
+        present(optionsAlert, animated: true, completion: nil)
+    }
+    
+    func editPost(post:Post){
+        let editPost = SharePhotoController()
+        
+        // Post Edit Inputs
+        editPost.editPost = true
+        editPost.editPostImageUrl = post.imageUrl
+        editPost.editPostId = post.id
+        
+        // Post Details
+        editPost.selectedPostGooglePlaceID = post.locationGooglePlaceID
+        editPost.selectedPostLocation = post.locationGPS
+        editPost.selectedPostLocationName = post.locationName
+        editPost.selectedPostLocationAdress = post.locationAdress
+        editPost.selectedTime = post.tagTime
+        editPost.ratingEmoji = post.ratingEmoji
+        editPost.nonRatingEmoji = post.nonRatingEmoji
+        editPost.nonRatingEmojiTags = post.nonRatingEmojiTags
+        editPost.captionTextView.text = post.caption
+        
+        let navController = UINavigationController(rootViewController: editPost)
+        self.present(navController, animated: false, completion: nil)
+    }
+    
+    
     func deletePost(post:Post){
         
         let deleteAlert = UIAlertController(title: "Delete", message: "All data will be lost.", preferredStyle: UIAlertControllerStyle.alert)
-        
         deleteAlert.addAction(UIAlertAction(title: "Ok", style: .default, handler: { (action: UIAlertAction!) in
             
+            // Remove from Current View
+            let index = self.displayedPosts.index { (filteredpost) -> Bool in
+                filteredpost.id  == post.id
+            }
             
-            Database.database().reference().child("posts").child(post.id!).removeValue()
-            Database.database().reference().child("postlocations").child(post.id!).removeValue()
-            Database.database().reference().child("userposts").child(post.creatorUID!).child(post.id!).removeValue()
-        
+            let filteredindexpath = IndexPath(row:index!, section: 0)
+            self.displayedPosts.remove(at: index!)
+            self.collectionView?.deleteItems(at: [filteredindexpath])
+            Database.deletePost(post: post)
         }))
         
         deleteAlert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: { (action: UIAlertAction!) in
             print("Handle Cancel Logic here")
         }))
-        
         present(deleteAlert, animated: true, completion: nil)
         
     }

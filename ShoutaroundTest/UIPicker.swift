@@ -8,6 +8,34 @@
 //
 //
 //import Foundation
+
+
+
+
+//                Only Delete Last Emoji
+//                let emojiChars = captionTextView.text.indicesOf(string: pressedEmoji)
+//                let lastEmojiChar = emojiChars[emojiChars.count - 1]
+//                var temp =  captionTextView.text
+//                let index = temp?.index((temp?.startIndex)!, offsetBy: lastEmojiChar)
+//                captionTextView.text.remove(at: index!)
+
+// cell.contentView.backgroundColor = UIColor.blue
+//
+//            if let emojiChar = self.captionTextView.text.range(of: pressedEmoji) {
+//                cell.backgroundColor  = UIColor.rgb(red: 149, green: 204, blue: 244)
+//            }   else {
+//                cell.backgroundColor = UIColor.white
+//            }
+
+//        if emojiViews!.contains(collectionView) {
+//
+//            let cell = collectionView.cellForItem(at: indexPath) as! UploadEmojiCell
+//           // cell.contentView.backgroundColor = UIColor.blue
+//            self.emojiCheck(cell.uploadEmojis.text)
+//
+//        }
+
+
 // Detect Emojis in textview
 
 //    func textFieldDidChange(_ textField: UITextField) {

@@ -45,7 +45,6 @@ struct Post {
     var distance: Double? = nil
     let tagTime: Date
     
-    
     var hasLiked: Bool = false
     var hasBookmarked: Bool = false
     var creatorUID: String?
@@ -64,7 +63,7 @@ struct Post {
         self.imageUrl = dictionary["imageUrl"] as? String ?? ""
         self.caption = dictionary["caption"] as? String ?? ""
         self.emoji = dictionary["emoji"] as? String ?? ""
-        self.ratingEmoji = dictionary["ratingEmoji"] as? String ?? ""
+        self.ratingEmoji = dictionary["ratingEmoji"] as? String ?? nil
         self.nonRatingEmoji = dictionary["nonratingEmoji"] as? [String] ?? nil
         self.nonRatingEmojiTags = dictionary["nonratingEmojiTags"] as? [String] ?? nil
         

@@ -659,27 +659,73 @@ class BookMarkController: UIViewController, UICollectionViewDelegate, UICollecti
         
     }
     
+    func userOptionPost(post:Post){
+        
+        let optionsAlert = UIAlertController(title: "User Options", message: "", preferredStyle: UIAlertControllerStyle.alert)
+        
+        optionsAlert.addAction(UIAlertAction(title: "Edit Post", style: .default, handler: { (action: UIAlertAction!) in
+            // Allow Editing
+            self.editPost(post: post)
+        }))
+        
+        optionsAlert.addAction(UIAlertAction(title: "Delete Post", style: .default, handler: { (action: UIAlertAction!) in
+            self.deletePost(post: post)
+        }))
+        
+        optionsAlert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: { (action: UIAlertAction!) in
+            print("Handle Cancel Logic here")
+        }))
+        
+        present(optionsAlert, animated: true, completion: nil)
+    }
+    
+    func editPost(post:Post){
+        let editPost = SharePhotoController()
+        
+        // Post Edit Inputs
+        editPost.editPost = true
+        editPost.editPostImageUrl = post.imageUrl
+        editPost.editPostId = post.id
+        
+        // Post Details
+        editPost.selectedPostGooglePlaceID = post.locationGooglePlaceID
+        editPost.selectedPostLocation = post.locationGPS
+        editPost.selectedPostLocationName = post.locationName
+        editPost.selectedPostLocationAdress = post.locationAdress
+        editPost.selectedTime = post.tagTime
+        editPost.ratingEmoji = post.ratingEmoji
+        editPost.nonRatingEmoji = post.nonRatingEmoji
+        editPost.nonRatingEmojiTags = post.nonRatingEmojiTags
+        editPost.captionTextView.text = post.caption
+        
+        let navController = UINavigationController(rootViewController: editPost)
+        self.present(navController, animated: false, completion: nil)
+    }
+    
+    
     func deletePost(post:Post){
         
         let deleteAlert = UIAlertController(title: "Delete", message: "All data will be lost.", preferredStyle: UIAlertControllerStyle.alert)
-        
         deleteAlert.addAction(UIAlertAction(title: "Ok", style: .default, handler: { (action: UIAlertAction!) in
             
+            // Remove from Current View
+            let index = self.displayedBookmarks.index { (filteredpost) -> Bool in
+                filteredpost.post.id  == post.id
+            }
             
-            Database.database().reference().child("posts").child(post.id!).removeValue()
-            Database.database().reference().child("postlocations").child(post.id!).removeValue()
-            Database.database().reference().child("userposts").child(post.creatorUID!).child(post.id!).removeValue()
-            
+            let filteredindexpath = IndexPath(row:index!, section: 0)
+            self.displayedBookmarks.remove(at: index!)
+            self.collectionView.deleteItems(at: [filteredindexpath])
+            Database.deletePost(post: post)
         }))
         
         deleteAlert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: { (action: UIAlertAction!) in
             print("Handle Cancel Logic here")
         }))
-        
         present(deleteAlert, animated: true, completion: nil)
         
-        
     }
+
     
     func displaySelectedEmoji(emoji: String, emojitag: String) {
         

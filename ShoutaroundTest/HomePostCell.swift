@@ -17,7 +17,7 @@ protocol HomePostCellDelegate {
     func didTapLocation(post:Post)
     func didTapMessage(post:Post)
     func refreshPost(post:Post)
-    func deletePost(post:Post)
+    func userOptionPost(post:Post)
     func displaySelectedEmoji(emoji: String, emojitag: String)
 //    func didLike(for cell: HomePostCell)
 //    func didBookmark(for cell: HomePostCell)
@@ -60,17 +60,6 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
             locationLabel.text = post?.locationName.truncate(length: 30)
             adressLabel.text = post?.locationAdress.truncate(length: 60)
             
-            
-            
-//            let locationTapGesture = UITapGestureRecognizer(target: self, action: #selector(HomePostCell.locationTap))
-//            let locationTapGesture2 = UITapGestureRecognizer(target: self, action: #selector(HomePostCell.locationTap))
-//        
-//            locationLabel.isUserInteractionEnabled = true
-//            locationLabel.addGestureRecognizer(locationTapGesture)
-//            
-//            adressLabel.isUserInteractionEnabled = true
-//            adressLabel.addGestureRecognizer(locationTapGesture2)
-            
             guard let profileImageUrl = post?.user.profileImageUrl else {return}
             
             userProfileImageView.loadImage(urlString: profileImageUrl)
@@ -82,10 +71,10 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
                 
                 let distanceformat = ".2"
                 
-                // Convert to M to KM
+                // Convert to M to KM (Temp Miles just for display)
                 let locationDistance = (post?.distance)!/1000
                 if locationDistance < 1000 {
-                    locationDistanceLabel.text = String(locationDistance.format(f: distanceformat)) + "KM"
+                    locationDistanceLabel.text = String(locationDistance.format(f: distanceformat)) + "Miles"
                 } else {
                     locationDistanceLabel.text = ""
 
@@ -95,7 +84,7 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
                 locationDistanceLabel.text = ""
             }
 
-            if post?.creatorUID == Auth.auth().currentUser?.uid && enableDelete {
+            if post?.creatorUID == Auth.auth().currentUser?.uid {
                 optionsButton.isHidden = false
             } else {
                 optionsButton.isHidden = true
@@ -421,29 +410,19 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         return label
     }()
 
-    let optionsButton: UIButton = {
+    lazy var optionsButton: UIButton = {
         let button = UIButton(type: .system)
-         button.setTitle("•••", for: .normal)
+        button.setTitle("•••", for: .normal)
         button.setTitleColor(.black, for: .normal)
         button.addTarget(self, action: #selector(handleOptions), for: .touchUpInside)
-        
+        button.isUserInteractionEnabled = true
         return button
     }()
     
     func handleOptions() {
         
-//        let alertController = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
-//        
-//        alertController.addAction(UIAlertAction(title: "Delete Post", style: .destructive, handler: { (_) in
-//            
-//            self.deletePost()
-//            
-//        }))
-//        
-//        alertController.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
-//        
-//        
-//        UIApplication.shared.keyWindow?.rootViewController?.present(alertController, animated: true, completion: nil)
+        guard let post = post else {return}
+        delegate?.userOptionPost(post: post)
 
     }
     
@@ -567,23 +546,6 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         
     }
     
-// Delete Post
-    
-    lazy var deleteButton: UIButton = {
-        let button = UIButton(type: .system)
-        button.setImage(#imageLiteral(resourceName: "Trash").withRenderingMode(.alwaysOriginal), for: .normal)
-        button.addTarget(self, action: #selector(deletePost), for: .touchUpInside)
-        return button
-        
-    }()
-    
-    func deletePost(){
-        
-        guard let post = post else {return}
-        delegate?.deletePost(post: post)
-    }
-
-    
     override init(frame: CGRect) {
         super.init(frame: frame)
         
@@ -593,9 +555,6 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         addSubview(usernameLabel)
         addSubview(emojiDetailLabel)
         addSubview(ratingEmojiLabel)
-//
-//        addSubview(optionsButton)
-//        optionsButton.anchor(top: topAnchor, left: nil, bottom: photoImageView.topAnchor, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 44, height: 0)
         
         headerView.anchor(top: topAnchor, left: leftAnchor, bottom: nil, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 50)
 
@@ -631,7 +590,7 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         
         addSubview(locationDistanceLabel)
  
-        locationDistanceLabel.anchor(top: nil, left: nil, bottom: photoImageView.topAnchor, right: userProfileImageView.leftAnchor, paddingTop: 2, paddingLeft: 0, paddingBottom: 2, paddingRight: 10, width: 0, height: 0)
+        locationDistanceLabel.anchor(top: nil, left: nil, bottom: photoImageView.topAnchor, right: userProfileImageView.leftAnchor, paddingTop: 2, paddingLeft: 0, paddingBottom: 3, paddingRight: 10, width: 0, height: 0)
         
         
         ratingEmojiLabel.anchor(top: topAnchor, left: nil, bottom: photoImageView.topAnchor, right: usernameLabel.leftAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 2, width: 0, height: 0)
@@ -662,14 +621,15 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         
         addSubview(locationView)
         locationView.anchor(top: photoImageView.bottomAnchor, left: leftAnchor, bottom: nil, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 40)
+        
+//        addSubview(optionsButton)
+//        optionsButton.anchor(top: locationView.topAnchor, left: nil, bottom: photoImageView.topAnchor, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 44, height: 0)
 
         addSubview(locationLabel)
         addSubview(adressLabel)
         addSubview(locationDistanceLabel)
         addSubview(bookmarkButton)
         bookmarkButton.anchor(top: locationView.bottomAnchor, left: nil, bottom: nil, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 40, height: 40)
-        
-//        locationDistanceLabel.anchor(top: photoImageView.bottomAnchor, left: nil, bottom: nil, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 5, width: 75, height: 50)
         
         locationLabel.anchor(top: locationView.topAnchor, left: leftAnchor, bottom: nil, right: bookmarkButton.leftAnchor, paddingTop: 5, paddingLeft: 15, paddingBottom: 0, paddingRight: 0, width: 0, height: 15)
         
@@ -679,7 +639,8 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         locationButton.anchor(top: locationView.topAnchor, left: locationView.leftAnchor, bottom: locationView.bottomAnchor, right: locationView.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
         
         addSubview(optionsButton)
-        optionsButton.anchor(top: locationView.topAnchor, left: nil, bottom: nil, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 40, height: 40)
+        optionsButton.anchor(top: locationView.topAnchor, left: nil, bottom: locationView.bottomAnchor, right: locationView.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 40, height: 40)
+        optionsButton.centerYAnchor.constraint(equalTo: locationView.centerYAnchor).isActive = true
         optionsButton.isHidden = true
         
         
