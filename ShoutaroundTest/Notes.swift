@@ -70,6 +70,8 @@ var ReverseEmojiDictionary: [String:String] =
     "british": "🇬🇧",
     "irish": "🇮🇪",
     "filipino": "🇵🇭",
+    "laos": "🇱🇦",
+    
     
     "taco": "🌮",
     "burrito": "🌯",

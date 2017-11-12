@@ -170,6 +170,7 @@ class PictureController: UICollectionViewController, HomePostCellDelegate, UICol
         
         // Post Details
         editPost.selectedPostGooglePlaceID = post.locationGooglePlaceID
+        editPost.selectedImageLocation = post.locationGPS
         editPost.selectedPostLocation = post.locationGPS
         editPost.selectedPostLocationName = post.locationName
         editPost.selectedPostLocationAdress = post.locationAdress

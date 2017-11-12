@@ -110,15 +110,23 @@ class FilterController: UIViewController, CLLocationManagerDelegate, GMSAutocomp
         button.setTitle("Filter", for: .normal)
         button.titleLabel?.textAlignment = NSTextAlignment.center
         button.addTarget(self, action: #selector(filterSelected), for: .touchUpInside)
+        button.layer.borderColor = UIColor.lightGray.cgColor
+        button.layer.borderWidth = 0.5
+        button.layer.cornerRadius = 3
+        
         return button
     }()
     
     var clearFilterButton: UIButton = {
         let button = UIButton()
-        button.backgroundColor = UIColor.white
-        button.setImage(#imageLiteral(resourceName: "filterclear").withRenderingMode(.alwaysOriginal), for: .normal)
+        button.backgroundColor = UIColor.orange
+        button.setTitle("Clear Filter", for: .normal)
+        button.titleLabel?.textAlignment = NSTextAlignment.center
         button.addTarget(self, action: #selector(refreshFilter), for: .touchUpInside)
-        button.contentMode = .scaleAspectFit
+        button.layer.borderColor = UIColor.lightGray.cgColor
+        button.layer.borderWidth = 0.5
+        button.layer.cornerRadius = 3
+        
         return button
     }()
     
@@ -159,7 +167,7 @@ class FilterController: UIViewController, CLLocationManagerDelegate, GMSAutocomp
         timeSegment = UISegmentedControl(items: optionTime)
         timeSegment.selectedSegmentIndex = optionTime.index(of: self.selectedTime!)!
         timeSegment.addTarget(self, action: #selector(selectTime), for: .valueChanged)
-        timeSegment.tintColor = UIColor.orange
+//        timeSegment.tintColor = UIColor.orange
         
         groupSegment = UISegmentedControl(items: optionGroups)
         groupSegment.selectedSegmentIndex = optionGroups.index(of: self.selectedGroup!)!
@@ -230,12 +238,13 @@ class FilterController: UIViewController, CLLocationManagerDelegate, GMSAutocomp
         
         sortByLabel.anchor(top: timeSegment.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 15, paddingLeft: 20, paddingBottom: 0, paddingRight: 20, width: 0, height: 30)
         sortSegment.anchor(top: sortByLabel.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 1, paddingLeft: 20, paddingBottom: 0, paddingRight: 20, width: 0, height: 40)
+
+        view.addSubview(filterButton)
+        filterButton.anchor(top: sortSegment.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 15, paddingLeft: 20, paddingBottom: 0, paddingRight: 20, width: 0, height: 40)
         
         view.addSubview(clearFilterButton)
-        clearFilterButton.anchor(top: sortSegment.bottomAnchor, left: view.leftAnchor, bottom: nil, right: nil, paddingTop: 15 + 5, paddingLeft: 20, paddingBottom: 0, paddingRight: 10, width: 35, height: 35)
+        clearFilterButton.anchor(top: filterButton.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 10, paddingLeft: 20, paddingBottom: 0, paddingRight: 20, width: 0, height: 40)
         
-        view.addSubview(filterButton)
-        filterButton.anchor(top: sortSegment.bottomAnchor, left: clearFilterButton.rightAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 15, paddingLeft: 20, paddingBottom: 0, paddingRight: 20, width: 0, height: 40)
 
         
         

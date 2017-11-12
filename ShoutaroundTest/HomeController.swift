@@ -92,12 +92,12 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     
     
     var filterButton: UIImageView = {
-        let view = UIImageView()
-        view.image = #imageLiteral(resourceName: "filter").withRenderingMode(.alwaysOriginal)
+        let view = UIImageView(frame: CGRect(x: 0, y: 0, width: 20, height: 20))
+        view.image = #imageLiteral(resourceName: "blankfilter").withRenderingMode(.alwaysOriginal)
         view.contentMode = .scaleAspectFit
         view.sizeToFit()
-        view.layer.cornerRadius = 25/2
-        view.layer.masksToBounds = true
+//        view.layer.cornerRadius = 25/2
+//        view.layer.masksToBounds = true
         view.backgroundColor = UIColor.clear
         return view
     }()
@@ -308,6 +308,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     }
     
     func finishFetchingPosts(){
+        print("Finish Fetching Post Ids")
         self.sortFetchPostIds()
         self.paginatePosts()
     }
@@ -457,7 +458,26 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     }
     
     func handleUpdateFeed() {
-        handleRefresh()
+        
+        // Check for new post that was edited or uploaded
+        if newPost != nil && newPostId != nil {
+            self.displayedPosts.insert(newPost!, at: 0)
+            self.fetchPostIds.insert(newPostId!, at: 0)
+            
+            newPost = nil
+            newPostId = nil
+            
+            self.collectionView?.reloadData()
+            if self.collectionView?.numberOfItems(inSection: 0) != 0 {
+                let indexPath = IndexPath(item: 0, section: 0)
+                self.collectionView?.scrollToItem(at: indexPath, at: .bottom, animated: true)
+            }
+            print("Pull in new post")
+            
+        } else {
+        self.handleRefresh()
+        }
+
     }
     
     func handleUpdateFeedWithFilter() {
@@ -499,6 +519,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
             CurrentUser.profileImageUrl = user.profileImageUrl
             CurrentUser.uid = uid
             CurrentUser.status = user.status
+            CurrentUser.user = user
         }
         
         
@@ -584,6 +605,12 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
             self.paginatePosts()
         } else {
             DispatchQueue.main.async(execute: { self.collectionView?.reloadData() })
+            
+            if self.collectionView?.numberOfItems(inSection: 0) != 0 && self.displayedPosts.count < 4{
+                let indexPath = IndexPath(item: 0, section: 0)
+                self.collectionView?.scrollToItem(at: indexPath, at: .bottom, animated: true)
+            }
+//            
 //            if self.collectionView?.numberOfItems(inSection: 0) != 0 {
 //                let indexPath = IndexPath(item: 0, section: 0)
 //                self.collectionView?.scrollToItem(at: indexPath, at: .bottom, animated: true)
@@ -724,11 +751,11 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
 //        rangeImageButton.addGestureRecognizer(singleTap)
         
         if self.filterGroup == defaultGroup && self.filterRange == defaultRange && self.filterTime == defaultTime && self.filterGroup == "All" {
-            filterButton.image = #imageLiteral(resourceName: "filter").withRenderingMode(.alwaysOriginal)
+            filterButton.image = #imageLiteral(resourceName: "blankfilter").withRenderingMode(.alwaysOriginal)
             filterButton.backgroundColor = UIColor.clear
         } else {
             filterButton.image = #imageLiteral(resourceName: "filter").withRenderingMode(.alwaysOriginal)
-            filterButton.backgroundColor = UIColor.mainBlue()
+//            filterButton.backgroundColor = UIColor.orange
             filterButton.addGestureRecognizer(singleTap)
         }
         
@@ -889,6 +916,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         
         // Post Details
         editPost.selectedPostGooglePlaceID = post.locationGooglePlaceID
+        editPost.selectedImageLocation = post.locationGPS
         editPost.selectedPostLocation = post.locationGPS
         editPost.selectedPostLocationName = post.locationName
         editPost.selectedPostLocationAdress = post.locationAdress

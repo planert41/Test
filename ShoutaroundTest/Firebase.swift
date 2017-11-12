@@ -157,9 +157,10 @@ extension Database{
                 let dictionary = value as? [String: Any]
                 let secondsFrom1970 = dictionary?["creationDate"] as? Double ?? 0
                 let tagTime = dictionary?["tagTime"] as? Double ?? 0
+                let emoji = dictionary?["emoji"] as? String ?? ""
                 
                 
-                let tempID = PostId.init(id: key, creatorUID: creatoruid, fetchedTagTime: tagTime, fetchedDate: secondsFrom1970, distance: nil, postGPS: nil)
+                let tempID = PostId.init(id: key, creatorUID: creatoruid, fetchedTagTime: tagTime, fetchedDate: secondsFrom1970, distance: nil, postGPS: nil, postEmoji: emoji)
                 fetchedPostIds.append(tempID)
                 
                 myGroup.leave()
@@ -199,7 +200,7 @@ extension Database{
                     Database.fetchPostIDDetails(postId: key, completion: { (fetchPostId) in
                     
                         // Tag Time is not included in the Post ID extracted from this function
-                        let tempID = PostId.init(id: fetchPostId.id, creatorUID: fetchPostId.creatorUID!, fetchedTagTime: 0, fetchedDate: bookmarkTime, distance: nil, postGPS: fetchPostId.postGPS)
+                        let tempID = PostId.init(id: fetchPostId.id, creatorUID: fetchPostId.creatorUID!, fetchedTagTime: 0, fetchedDate: bookmarkTime, distance: nil, postGPS: fetchPostId.postGPS, postEmoji: fetchPostId.emoji)
                         fetchedPostIds.append(tempID)
                         myGroup.leave()
                         
@@ -498,8 +499,10 @@ extension Database{
             let secondsFrom1970 = dictionary["creationDate"] as? Double ?? 0
             let postGPS = dictionary["postLocationGPS"] as? String ?? ""
             let tagTime = dictionary["tagTime"] as? Double ?? 0
+            let emoji = dictionary["emoji"] as? String ?? ""
             
-            let tempID = PostId.init(id: postId, creatorUID: creatorUID, fetchedTagTime: tagTime, fetchedDate: secondsFrom1970, distance: nil, postGPS: postGPS)
+            
+            let tempID = PostId.init(id: postId, creatorUID: creatorUID, fetchedTagTime: tagTime, fetchedDate: secondsFrom1970, distance: nil, postGPS: postGPS, postEmoji: emoji)
             completion(tempID)
             
         })

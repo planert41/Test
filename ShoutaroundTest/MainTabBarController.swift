@@ -78,11 +78,13 @@ class MainTabBarController: UITabBarController, UITabBarControllerDelegate, UIIm
                 let sharePhotoController = SharePhotoController()
                 sharePhotoController.selectedImage = self.selectedImage
                 
-                if self.selectedPhotoLocation == nil {
-                    sharePhotoController.selectedImageLocation = CLLocation(latitude: 0, longitude: 0)
-                } else {
-                    sharePhotoController.selectedImageLocation  = self.selectedPhotoLocation                    
-                }
+//                if self.selectedPhotoLocation == nil {
+//                    sharePhotoController.selectedImageLocation = CLLocation(latitude: 0, longitude: 0)
+//                } else {
+//                    sharePhotoController.selectedImageLocation  = self.selectedPhotoLocation                    
+//                }
+                
+                sharePhotoController.selectedImageLocation  = self.selectedPhotoLocation
                 sharePhotoController.selectedImageTime  = self.selectedTime
                 
                 let navController = UINavigationController(rootViewController: sharePhotoController)

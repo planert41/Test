@@ -301,6 +301,7 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
         
         // Post Details
         editPost.selectedPostGooglePlaceID = post.locationGooglePlaceID
+        editPost.selectedImageLocation = post.locationGPS
         editPost.selectedPostLocation = post.locationGPS
         editPost.selectedPostLocationName = post.locationName
         editPost.selectedPostLocationAdress = post.locationAdress

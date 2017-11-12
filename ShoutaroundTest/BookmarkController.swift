@@ -57,7 +57,7 @@ class BookMarkController: UIViewController, UICollectionViewDelegate, UICollecti
     
     var filterButton: UIImageView = {
         let view = UIImageView()
-        view.image = #imageLiteral(resourceName: "filter").withRenderingMode(.alwaysOriginal)
+        view.image = #imageLiteral(resourceName: "blankfilter").withRenderingMode(.alwaysOriginal)
         view.contentMode = .scaleAspectFit
         view.sizeToFit()
         view.layer.cornerRadius = 5
@@ -287,11 +287,11 @@ class BookMarkController: UIViewController, UICollectionViewDelegate, UICollecti
         navigationItem.leftBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "mailbox").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(openInbox))
 
         if self.filterGroup == defaultGroup && self.filterRange == defaultRange && self.filterTime == defaultTime && self.filterGroup == "All" {
-            filterButton.image = #imageLiteral(resourceName: "filter").withRenderingMode(.alwaysOriginal)
+            filterButton.image = #imageLiteral(resourceName: "blankfilter").withRenderingMode(.alwaysOriginal)
             filterButton.backgroundColor = UIColor.clear
         } else {
             filterButton.image = #imageLiteral(resourceName: "filter").withRenderingMode(.alwaysOriginal)
-            filterButton.backgroundColor = UIColor.mainBlue()
+//            filterButton.backgroundColor = UIColor.mainBlue()
             filterButton.addGestureRecognizer(singleTap)
         }
         
@@ -325,10 +325,10 @@ class BookMarkController: UIViewController, UICollectionViewDelegate, UICollecti
         
         self.displayedBookmarks.removeAll()
         self.displayedBookmarks = self.fetchedBookmarks
-        print("Before Filter Posts: ", self.displayedBookmarks.count)
+        print("Start Filter with Posts: ", self.displayedBookmarks.count)
         
         self.filterbyTime()
-        print("After Distance Filter Posts: ", self.displayedBookmarks.count)
+        print("After Time Filter Posts: ", self.displayedBookmarks.count)
         
         self.filterbyDistance()
         print("After Distance Filter Posts: ", self.displayedBookmarks.count)
@@ -349,8 +349,12 @@ class BookMarkController: UIViewController, UICollectionViewDelegate, UICollecti
 
     func filterbyCaption(){
         guard let searchedText = self.filterCaption else {return}
-        self.displayedBookmarks = self.displayedBookmarks.filter { (bookmark) -> Bool in
+        // Check if caption are not just all spaces
+        
+        if searchedText != "" {
+            self.displayedBookmarks = self.displayedBookmarks.filter { (bookmark) -> Bool in
             return bookmark.post.caption.lowercased().contains(searchedText.lowercased()) || bookmark.post.emoji.contains(searchedText.lowercased()) || bookmark.post.locationName.lowercased().contains(searchedText.lowercased()) || bookmark.post.locationAdress.lowercased().contains(searchedText.lowercased())
+            }
         }
         
     }
@@ -689,6 +693,7 @@ class BookMarkController: UIViewController, UICollectionViewDelegate, UICollecti
         
         // Post Details
         editPost.selectedPostGooglePlaceID = post.locationGooglePlaceID
+        editPost.selectedImageLocation = post.locationGPS
         editPost.selectedPostLocation = post.locationGPS
         editPost.selectedPostLocationName = post.locationName
         editPost.selectedPostLocationAdress = post.locationAdress

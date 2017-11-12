@@ -16,6 +16,9 @@ import SwiftLocation
 import Alamofire
 import GooglePlaces
 
+var newPost: Post? = nil
+var newPostId: PostId? = nil
+
 class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout, UICollectionViewDelegate,UICollectionViewDataSource, UITextViewDelegate, CLLocationManagerDelegate, LocationSearchControllerDelegate, UIGestureRecognizerDelegate, GMSAutocompleteViewControllerDelegate, UITableViewDelegate, UITableViewDataSource {
 
 // Setup Default Variables
@@ -43,10 +46,11 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
     var selectedImageLocation:CLLocation?{
         didSet{
             selectedPostLocation = selectedImageLocation
-            
             // Updates Adress and Finds Restaurants near location
-            googleReverseGPS(GPSLocation: selectedPostLocation!)
-            googleLocationSearch(GPSLocation: selectedPostLocation!)
+            if selectedPostLocation != nil && (selectedPostLocation?.coordinate.latitude != 0) && (selectedPostLocation?.coordinate.longitude != 0){
+                googleReverseGPS(GPSLocation: selectedPostLocation!)
+                googleLocationSearch(GPSLocation: selectedPostLocation!)
+            }
         }
     }
     
@@ -1473,6 +1477,7 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
     }
     
     static let updateFeedNotificationName = NSNotification.Name(rawValue: "UpdateFeed")
+    
     fileprivate func saveToDatabaseWithImageURL(imageUrl: String) {
         // SAVE POST
         
@@ -1520,6 +1525,10 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
             
             print("Successfully save post to DB")
             
+            
+            // Put new post
+            self.uploadnewPost(uid: uid,postid: ref.key, dictionary: values)
+            
             // SAVE USER AND POSTID
             
             let postref = ref.key
@@ -1553,6 +1562,25 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         }
     }
     
+    fileprivate func uploadnewPost(uid: String?, postid: String?, dictionary: [String:Any]?){
+        guard let uid = uid else {return}
+        guard let dictionary = dictionary else {return}
+        
+        if uid == CurrentUser.uid{
+            newPost = Post.init(user: CurrentUser.user!, dictionary: dictionary)
+            newPost?.id = postid
+            print("New Post Temp Uploaded: ",newPost)
+            
+            newPostId = PostId.init(id: postid!, creatorUID: CurrentUser.uid!, fetchedTagTime: 0, fetchedDate:(newPost?.creationDate.timeIntervalSince1970)!, distance: nil, postGPS: nil, postEmoji: newPost?.nonRatingEmoji?.joined())
+            
+            //Update Cache
+            postCache.removeValue(forKey: postid!)
+            imageCache[postid!] = self.selectedImage
+        } else {
+            print("Error creating temp new post")
+        }
+    }
+
     fileprivate func saveEditedPost(postId: String, imageUrl: String){
         // Edit Post
         
@@ -1597,6 +1625,10 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
             }
             
             print("Successfully save edited post to DB")
+            
+            // Put new post
+            self.uploadnewPost(uid: uid,postid: postId, dictionary: values)
+
             
             // SAVE USER AND POSTID
             

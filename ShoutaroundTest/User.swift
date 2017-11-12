@@ -34,6 +34,7 @@ struct CurrentUser {
     static var status: String?
     static var followingUids: [String] = []
     static var groupUids: [String] = []
+    static var user: User?
     
     //static var currentLocation: CLLocation? = CLLocation(latitude: 41.9735039, longitude: -87.66775139999999)
     
