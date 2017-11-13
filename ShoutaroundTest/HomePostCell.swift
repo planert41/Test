@@ -758,18 +758,11 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         
         let stackView = UIStackView(arrangedSubviews: [likeButton, commentButton, sendMessageButton])
         
-//        if post?.creatorUID == Auth.auth().currentUser?.uid {
-//            deleteButton.isHidden = false
-//        } else {
-//            deleteButton.isHidden = true
-//        }
+
         stackView.distribution = .fillEqually
         
         addSubview(stackView)
         stackView.anchor(top: locationView.bottomAnchor, left: leftAnchor, bottom: nil, right: nil, paddingTop: 0, paddingLeft: 8, paddingBottom: 0, paddingRight: 0, width: 120, height: 40)
-//        addSubview(deleteButton)
-//        deleteButton.anchor(top: locationView.bottomAnchor, left: stackView.rightAnchor, bottom: nil, right: nil, paddingTop: 0, paddingLeft: 8, paddingBottom: 0, paddingRight: 0, width: 40, height: 40)
-//        deleteButton.isHidden = false
 
     }
     

@@ -31,7 +31,8 @@ class MessageController: UIViewController, UICollectionViewDataSource, UICollect
         cv.translatesAutoresizingMaskIntoConstraints = false
         cv.delegate = self
         cv.dataSource = self
-        cv.backgroundColor = .yellow
+//        cv.layer.borderWidth = 0.5
+//        cv.layer.borderColor = UIColor.black.cgColor
         return cv
     }()
     
@@ -56,6 +57,8 @@ class MessageController: UIViewController, UICollectionViewDataSource, UICollect
         tf.layer.borderColor = UIColor.gray.cgColor
         tf.backgroundColor = UIColor(white: 0, alpha: 0.03)
         tf.font = UIFont.systemFont(ofSize: 14)
+        tf.layer.cornerRadius = 10
+        tf.layer.masksToBounds = true
         tf.delegate = self
         return tf
     }()
@@ -83,6 +86,8 @@ class MessageController: UIViewController, UICollectionViewDataSource, UICollect
         tf.layer.borderColor = UIColor.gray.cgColor
         tf.backgroundColor = UIColor(white: 0, alpha: 0.03)
         tf.font = UIFont.systemFont(ofSize: 14)
+        tf.layer.cornerRadius = 10
+        tf.layer.masksToBounds = true
         tf.delegate = self
         
         return tf
@@ -100,6 +105,7 @@ class MessageController: UIViewController, UICollectionViewDataSource, UICollect
         tf.font = UIFont.systemFont(ofSize: 14.0)
         tf.layer.borderWidth = 1
         tf.layer.borderColor = UIColor.gray.cgColor
+        tf.layer.cornerRadius = 10
         return tf
     }()
     
@@ -140,7 +146,7 @@ class MessageController: UIViewController, UICollectionViewDataSource, UICollect
         
         toInput.anchor(top: toRow.topAnchor, left: toLabel.rightAnchor, bottom: toRow.bottomAnchor, right: toRow.rightAnchor, paddingTop: 5, paddingLeft: 5, paddingBottom: 5, paddingRight: 5, width: 0, height: 0)
         
-        messageLabel.anchor(top: toRow.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 5, paddingLeft: 5, paddingBottom: 5, paddingRight: 5, width: 0, height: 50)
+        messageLabel.anchor(top: toRow.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 5, paddingLeft: 5, paddingBottom: 5, paddingRight: 5, width: 0, height: 30)
         
         messageInput.anchor(top: messageLabel.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 5, paddingLeft: 5, paddingBottom: 5, paddingRight: 5, width: 0, height: 150)
         
@@ -175,8 +181,9 @@ class MessageController: UIViewController, UICollectionViewDataSource, UICollect
     
 
     fileprivate func setupNavigationButtons() {
-            
-            navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Send", style: .plain, target: self, action: #selector(handleSend))
+        
+        navigationItem.title = "Message"
+        navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Send", style: .plain, target: self, action: #selector(handleSend))
             
         }
     
