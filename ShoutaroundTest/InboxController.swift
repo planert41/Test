@@ -92,9 +92,9 @@ class InboxController: UICollectionViewController,UICollectionViewDelegateFlowLa
         navigationController?.pushViewController(commentsController, animated: true)
     }
     
-    func didTapUser(post: Post) {
+    func didTapUser(uid: String) {
         let userProfileController = UserProfileController(collectionViewLayout: UICollectionViewFlowLayout())
-        userProfileController.userId = post.user.uid
+        userProfileController.userId = uid
         
         navigationController?.pushViewController(userProfileController, animated: true)
     }

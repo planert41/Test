@@ -144,7 +144,7 @@ class BookmarkPhotoCell: UICollectionViewCell {
     let nonRatingEmojiLabel: UILabel = {
         let label = UILabel()
         label.text = "Emojis"
-        label.font = UIFont.boldSystemFont(ofSize: 15)
+        label.font = UIFont.boldSystemFont(ofSize: 13)
         label.textAlignment = NSTextAlignment.left
         label.backgroundColor = UIColor.white
         return label

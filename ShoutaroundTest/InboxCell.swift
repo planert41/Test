@@ -21,7 +21,7 @@ import Firebase
 
 protocol InboxCellDelegate {
     func didTapComment(post:Post)
-    func didTapUser(post:Post)
+    func didTapUser(uid:String)
     func didTapLocation(post:Post)
     func didTapMessage(post:Post)
    // func deletePost(post:Post)
@@ -61,21 +61,20 @@ class InboxCell: UICollectionViewCell {
     
             guard let imageUrl = post?.imageUrl else {return}
             photoImageView.loadImage(urlString: imageUrl)
+            userProfileImageView.loadImage(urlString: (post?.user.profileImageUrl)!)
+            usernameLabel.text = post?.user.username
+    
             locationNameLabel.text = post?.locationName
             locationAdressLabel.text = post?.locationAdress
             emojiLabel.text = post?.emoji
-            
             captionLabel.text = post?.caption
+            let formatter = DateFormatter()
+            formatter.dateFormat = "MMM d YYYY"
+            postDateLabel.text = formatter.string(from: (post?.creationDate)!)
             
-            //     setupAttributedLocationName()
-            
-            likeButton.setImage(post?.hasLiked == true ? #imageLiteral(resourceName: "like_selected").withRenderingMode(.alwaysOriginal) : #imageLiteral(resourceName: "like_unselected").withRenderingMode(.alwaysOriginal), for: .normal)
             
             bookmarkButton.setImage(post?.hasBookmarked == true ? #imageLiteral(resourceName: "bookmark_ribbon_filled").withRenderingMode(.alwaysOriginal) : #imageLiteral(resourceName: "bookmark_ribbon_unfilled").withRenderingMode(.alwaysOriginal), for: .normal)
             
-            bookmarkButtonAdd.setImage(post?.hasBookmarked == true ? #imageLiteral(resourceName: "bookmark_ribbon_filled").withRenderingMode(.alwaysOriginal) : #imageLiteral(resourceName: "bookmark_ribbon_unfilled").withRenderingMode(.alwaysOriginal), for: .normal)
-            
-
             print("Post Distance is",post?.distance)
             if post?.distance != nil && post?.locationGPS?.coordinate.longitude != 0 && post?.locationGPS?.coordinate.latitude != 0 {
                 
@@ -97,11 +96,48 @@ class InboxCell: UICollectionViewCell {
         }
     }
     
+    let senderUserProfileImageView: CustomImageView = {
+        
+        let iv = CustomImageView()
+        iv.contentMode = .scaleAspectFill
+        iv.clipsToBounds = true
+        return iv
+        
+    }()
+    
+    let senderUsernameLabel: UILabel = {
+        let label = UILabel()
+        label.text = "Username"
+        label.font = UIFont.boldSystemFont(ofSize: 12)
+        label.isUserInteractionEnabled = true
+        let tap = UITapGestureRecognizer(target: self, action: #selector(senderUsernameTap))
+        label.addGestureRecognizer(tap)
+        return label
+    }()
+    
+    
+    let senderMessageLabel: UILabel = {
+        let label = UILabel()
+        label.text = "Username"
+        label.font = UIFont.boldSystemFont(ofSize: 12)
+        label.textColor = UIColor.darkGray
+        label.sizeToFit()
+        return label
+    }()
+    
+    let senderMessageDate: UILabel = {
+        let label = UILabel()
+        label.text = "Username"
+        label.textAlignment = NSTextAlignment.right
+        label.font = UIFont.boldSystemFont(ofSize: 9)
+        label.sizeToFit()
+        return label
+    }()
     
     let usernameLabel: UILabel = {
         let label = UILabel()
         label.text = "Username"
-        label.font = UIFont.boldSystemFont(ofSize: 9)
+        label.font = UIFont.boldSystemFont(ofSize: 10)
         label.sizeToFit()
         return label
     }()
@@ -124,41 +160,6 @@ class InboxCell: UICollectionViewCell {
         return iv
         
     }()
-    
-    let senderUserProfileImageView: CustomImageView = {
-        
-        let iv = CustomImageView()
-        iv.contentMode = .scaleAspectFill
-        iv.clipsToBounds = true
-        return iv
-        
-    }()
-    
-    let senderUsernameLabel: UILabel = {
-        let label = UILabel()
-        label.text = "Username"
-        label.font = UIFont.boldSystemFont(ofSize: 12)
-        return label
-    }()
-    
-    
-    let senderMessageLabel: UILabel = {
-        let label = UILabel()
-        label.text = "Username"
-        label.font = UIFont.boldSystemFont(ofSize: 13)
-        label.sizeToFit()
-        return label
-    }()
-    
-    let senderMessageDate: UILabel = {
-        let label = UILabel()
-        label.text = "Username"
-        label.textAlignment = NSTextAlignment.right
-        label.font = UIFont.boldSystemFont(ofSize: 9)
-        label.sizeToFit()
-        return label
-    }()
-    
     
     let photoImageView: CustomImageView = {
         let iv = CustomImageView()
@@ -185,6 +186,9 @@ class InboxCell: UICollectionViewCell {
         label.font = UIFont.boldSystemFont(ofSize: 12)
         label.textColor = UIColor.black
         label.sizeToFit()
+        label.isUserInteractionEnabled = true
+        let tap = UITapGestureRecognizer(target: self, action: #selector(locationTap))
+        label.addGestureRecognizer(tap)
         return label
     }()
     
@@ -195,6 +199,9 @@ class InboxCell: UICollectionViewCell {
         label.textColor = UIColor.darkGray
         label.numberOfLines = 0
         label.lineBreakMode = NSLineBreakMode.byWordWrapping
+        label.isUserInteractionEnabled = true
+        let tap = UITapGestureRecognizer(target: self, action: #selector(locationTap))
+        label.addGestureRecognizer(tap)
         return label
     }()
     
@@ -203,6 +210,14 @@ class InboxCell: UICollectionViewCell {
         label.font = UIFont.boldSystemFont(ofSize: 12)
         label.numberOfLines = 0
         label.lineBreakMode = NSLineBreakMode.byWordWrapping
+        label.sizeToFit()
+        return label
+    }()
+    
+    let postDateLabel: UILabel = {
+        let label = UILabel()
+        label.font = UIFont.boldSystemFont(ofSize: 10)
+        label.textColor = UIColor.gray
         label.sizeToFit()
         return label
     }()
@@ -241,15 +256,7 @@ class InboxCell: UICollectionViewCell {
     
     lazy var bookmarkButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setImage(#imageLiteral(resourceName: "ribbon").withRenderingMode(.alwaysOriginal), for: .normal)
-        button.addTarget(self, action: #selector(handleBookmark), for: .touchUpInside)
-        return button
-        
-    }()
-    
-    lazy var bookmarkButtonAdd: UIButton = {
-        let button = UIButton(type: .system)
-        button.setImage(#imageLiteral(resourceName: "ribbon").withRenderingMode(.alwaysOriginal), for: .normal)
+        button.setImage(#imageLiteral(resourceName: "bookmark_ribbon_unfilled").withRenderingMode(.alwaysOriginal), for: .normal)
         button.addTarget(self, action: #selector(handleBookmark), for: .touchUpInside)
         return button
         
@@ -259,9 +266,11 @@ class InboxCell: UICollectionViewCell {
         
         //delegate?.didBookmark(for: self)
         
-        guard let postId = self.cellMessage?.sendPost?.id else {return}
+        guard let postId = self.post?.id else {return}
         guard let uid = Auth.auth().currentUser?.uid else {return}
-        let values = ["bookmarked": self.cellMessage?.sendPost?.hasBookmarked == true ? 0 : 1, "creatorUID": self.cellMessage?.sendPost?.creatorUID] as [String : Any]
+        let bookmarkTime = Date().timeIntervalSince1970
+        
+        let values = ["bookmarked": self.post?.hasBookmarked == true ? 0 : 1, "creatorUID": post?.creatorUID, "bookmarkDate": bookmarkTime] as [String : Any]
         
         Database.database().reference().child("bookmarks").child(uid).child(postId).updateChildValues(values) { (err, ref) in
             if let err = err {
@@ -269,11 +278,23 @@ class InboxCell: UICollectionViewCell {
                 return
             }
             print("Succesfully Saved Bookmark")
-            var tempPost: Post? = self.cellMessage?.sendPost
             self.post?.hasBookmarked = !(self.post?.hasBookmarked)!
-            var tempMessage = self.cellMessage
+            self.delegate?.refreshPost(post: self.post!)
             
         }
+        
+        self.bookmarkButton.transform = CGAffineTransform(scaleX: 0.1, y: 0.1)
+        
+        
+        UIView.animate(withDuration: 1.0,
+                       delay: 0,
+                       usingSpringWithDamping: 0.2,
+                       initialSpringVelocity: 6.0,
+                       options: .allowUserInteraction,
+                       animations: { [weak self] in
+                        self?.bookmarkButton.transform = .identity
+            },
+                       completion: nil)
         
     }
     
@@ -314,7 +335,15 @@ class InboxCell: UICollectionViewCell {
     func usernameTap() {
         print("Tap username label", self.cellMessage?.sendPost?.user.username ?? "")
         guard let post = self.cellMessage?.sendPost else {return}
-        delegate?.didTapUser(post: post)
+        guard let uid = self.cellMessage?.sendPost?.user.uid else {return}
+        delegate?.didTapUser(uid: uid)
+    }
+    
+    func senderUsernameTap() {
+        print("Tap username label", self.cellMessage?.senderUser?.username ?? "")
+        guard let post = self.cellMessage?.sendPost else {return}
+        guard let uid = self.cellMessage?.senderUser?.uid else {return}
+        delegate?.didTapUser(uid: uid)
     }
     
     func locationTap() {
@@ -331,104 +360,117 @@ class InboxCell: UICollectionViewCell {
     
         override init(frame: CGRect) {
         super.init(frame:frame)
+            
+        // Sender View
+            
         var senderView = UIView()
-            senderView.backgroundColor = UIColor.rgb(red: 149, green: 204, blue: 244)
-            senderMessageLabel.backgroundColor = senderView.backgroundColor
+        senderView.backgroundColor = UIColor.rgb(red: 204, green: 230, blue: 255)
+        senderMessageLabel.backgroundColor = senderView.backgroundColor
             
         addSubview(senderView)
-        senderView.anchor(top: nil, left: leftAnchor, bottom: bottomAnchor, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 55)
-            
-            
+        addSubview(senderUserProfileImageView)
+        addSubview(senderUsernameLabel)
         addSubview(senderMessageLabel)
-        senderMessageLabel.anchor(top: nil, left: nil, bottom: senderView.bottomAnchor, right: rightAnchor, paddingTop: 0, paddingLeft: 5, paddingBottom: 0, paddingRight: 0, width: 0, height: 25)
-
-
+        addSubview(senderMessageDate)
+        
+        senderView.anchor(top: topAnchor, left: leftAnchor, bottom: nil, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 55)
             
-
-        senderView.addSubview(senderUsernameLabel)
-        senderView.addSubview(senderMessageDate)
-        senderView.addSubview(senderUserProfileImageView)
-
-            
-        senderUserProfileImageView.anchor(top: senderView.topAnchor, left: senderView.leftAnchor, bottom: senderView.bottomAnchor, right: nil, paddingTop: 3, paddingLeft: 3, paddingBottom: 3, paddingRight: 3, width: 0, height: 0)
+        senderUserProfileImageView.anchor(top: senderView.topAnchor, left: senderView.leftAnchor, bottom: senderView.bottomAnchor, right: nil, paddingTop: 10, paddingLeft: 10, paddingBottom: 10, paddingRight: 0, width: 40, height: 40)
         senderUserProfileImageView.widthAnchor.constraint(equalTo: senderUserProfileImageView.heightAnchor, multiplier: 1).isActive = true
-        senderUserProfileImageView.layer.cornerRadius = 25/2
+        senderUserProfileImageView.layer.cornerRadius = 40/2
+        senderUserProfileImageView.clipsToBounds = true
             
-        senderMessageLabel.anchor(top: nil, left: senderUserProfileImageView.rightAnchor, bottom: senderView.bottomAnchor, right: rightAnchor, paddingTop: 0, paddingLeft: 5, paddingBottom: 0, paddingRight: 0, width: 0, height: 25)
+        senderUsernameLabel.anchor(top: senderUserProfileImageView.topAnchor, left: senderUserProfileImageView.rightAnchor, bottom: nil, right: nil, paddingTop: 0, paddingLeft: 10, paddingBottom: 0, paddingRight: 0, width: 100, height: 15)
             
-        senderMessageDate.anchor(top: senderView.topAnchor, left: nil, bottom: senderMessageLabel.topAnchor, right: senderView.rightAnchor, paddingTop: 0, paddingLeft: 3, paddingBottom: 0, paddingRight: 0, width: 100, height: 0)
+        senderMessageLabel.anchor(top: senderUsernameLabel.bottomAnchor, left: senderUserProfileImageView.rightAnchor, bottom: senderView.bottomAnchor, right: senderView.rightAnchor, paddingTop: 2, paddingLeft: 10, paddingBottom: 2, paddingRight: 0, width: 0, height: 0)
+       
+        senderMessageDate.anchor(top: senderView.topAnchor, left: nil, bottom: senderUsernameLabel.bottomAnchor, right: senderView.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 100, height: 0)
             
-        addSubview(bookmarkButtonAdd)
-        bookmarkButtonAdd.anchor(top: senderMessageLabel.topAnchor, left: nil, bottom: senderMessageLabel.bottomAnchor, right: senderView.rightAnchor, paddingTop: 1, paddingLeft: 0, paddingBottom: 1, paddingRight: 20, width: 25, height: 0)
-            
-            
-        senderUsernameLabel.anchor(top: senderView.topAnchor, left: senderUserProfileImageView.rightAnchor, bottom: senderMessageLabel.topAnchor, right: senderMessageDate.leftAnchor, paddingTop: 0, paddingLeft: 5, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
-            
-            let senderBottomDividerView = UIView()
-            senderBottomDividerView.backgroundColor = UIColor.lightGray
+        addSubview(bookmarkButton)
+        bookmarkButton.anchor(top: senderMessageLabel.topAnchor, left: nil, bottom: senderMessageLabel.bottomAnchor, right: senderView.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 20, width: 0, height: 0)
+        bookmarkButton.widthAnchor.constraint(equalTo: bookmarkButton.heightAnchor, multiplier: 1).isActive = true
+
+        let senderBottomDividerView = UIView()
+        senderBottomDividerView.backgroundColor = UIColor.lightGray
         addSubview(senderBottomDividerView)
             senderBottomDividerView.anchor(top: senderView.bottomAnchor, left: leftAnchor, bottom: nil, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0.5)
             
-            
         // Setup Action Buttons and PhotoImageView
-        let buttonStackView = UIStackView(arrangedSubviews: [likeButton, commentButton, sendMessageButton, bookmarkButton])
-        buttonStackView.distribution = .fillEqually
         
-        addSubview(buttonStackView)
+        var postView = UIView()
+        postView.backgroundColor = UIColor.white
+        postView.isUserInteractionEnabled = true
+        let tap = UITapGestureRecognizer(target: self, action: #selector(handlePictureTap))
+        postView.addGestureRecognizer(tap)
+            
+            
+        addSubview(postView)
+        postView.anchor(top: senderView.bottomAnchor, left: leftAnchor, bottom: bottomAnchor, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
+            
         addSubview(photoImageView)
-        photoImageView.anchor(top: topAnchor, left: nil, bottom: senderView.topAnchor, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
+            
+        photoImageView.anchor(top: postView.topAnchor, left: nil, bottom: postView.bottomAnchor, right: postView.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
         photoImageView.widthAnchor.constraint(equalTo: photoImageView.heightAnchor, multiplier: 1).isActive = true
-        
-        buttonStackView.anchor(top: nil, left: leftAnchor, bottom: senderView.topAnchor, right: nil, paddingTop: 0, paddingLeft: 8, paddingBottom: 5, paddingRight: 0, width: 120, height: 25)
-        //        buttonStackView.widthAnchor.constraint(equalTo: photoImageView.heightAnchor, multiplier: 1).isActive = true
-        
         
         let TapGesture = UITapGestureRecognizer(target: self, action: #selector(BookmarkPhotoCell.handlePictureTap))
         photoImageView.addGestureRecognizer(TapGesture)
         photoImageView.isUserInteractionEnabled = true
         
-        let emojiRow = UIView()
+            
+        addSubview(userProfileImageView)
+        userProfileImageView.anchor(top: postView.topAnchor, left: postView.leftAnchor, bottom: nil, right: nil, paddingTop: 5, paddingLeft: 10, paddingBottom: 0, paddingRight: 0, width: 40, height: 40)
+        userProfileImageView.layer.cornerRadius = 40/2
+        userProfileImageView.clipsToBounds = true
+        userProfileImageView.layer.borderWidth = 0.25
+        userProfileImageView.layer.borderColor = UIColor.lightGray.cgColor
+            
+        addSubview(usernameLabel)
+        usernameLabel.anchor(top: userProfileImageView.topAnchor, left: userProfileImageView.rightAnchor, bottom: userProfileImageView.bottomAnchor, right: nil, paddingTop: 0, paddingLeft: 5, paddingBottom: 0, paddingRight: 0, width: 80, height: 0)
+            usernameLabel.centerYAnchor.constraint(equalTo: userProfileImageView.centerYAnchor).isActive = true
         
-        // Setup Bookmark Stack View
-        
-        addSubview(emojiRow)
-        emojiRow.anchor(top: topAnchor, left: leftAnchor, bottom: nil, right: photoImageView.leftAnchor, paddingTop: 10, paddingLeft: 5, paddingBottom: 0, paddingRight: 5, width: 0, height: 30)
-        
-        emojiRow.addSubview(emojiLabel)
-        emojiLabel.anchor(top: emojiRow.topAnchor, left: emojiRow.leftAnchor, bottom: emojiRow.bottomAnchor, right: emojiRow.rightAnchor, paddingTop: 5, paddingLeft: 0, paddingBottom: 5, paddingRight: 0, width: 80, height: 0)
-        
-        addSubview(distanceLabel)
-        distanceLabel.anchor(top: emojiRow.topAnchor, left: emojiLabel.rightAnchor, bottom: emojiRow.bottomAnchor, right: emojiRow.rightAnchor, paddingTop: 2, paddingLeft: 5, paddingBottom: 0, paddingRight: 5, width: 0, height: 15)
-        
+            
+        addSubview(emojiLabel)
+        emojiLabel.anchor(top: userProfileImageView.topAnchor, left: nil, bottom: userProfileImageView.bottomAnchor, right: photoImageView.leftAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 10, width: 0, height: 0)
+        emojiLabel.centerYAnchor.constraint(equalTo: userProfileImageView.centerYAnchor).isActive = true
         
         addSubview(locationNameLabel)
-        
-        locationNameLabel.anchor(top: emojiRow.bottomAnchor, left: leftAnchor, bottom: nil, right: emojiRow.rightAnchor, paddingTop: 10, paddingLeft: 5, paddingBottom: 0, paddingRight: 5, width: 0, height: 15)
-        
+        locationNameLabel.anchor(top: userProfileImageView.bottomAnchor, left: leftAnchor, bottom: nil, right: photoImageView.leftAnchor, paddingTop: 10, paddingLeft: 10, paddingBottom: 0, paddingRight: 10, width: 0, height: 15)
+            
         addSubview(locationAdressLabel)
-        locationAdressLabel.anchor(top: locationNameLabel.bottomAnchor, left: leftAnchor, bottom: nil, right: photoImageView.leftAnchor, paddingTop: 0, paddingLeft: 5, paddingBottom: 0, paddingRight: 5, width: 0, height: 24)
+        locationAdressLabel.anchor(top: locationNameLabel.bottomAnchor, left: leftAnchor, bottom: nil, right: photoImageView.leftAnchor, paddingTop: 0, paddingLeft: 10, paddingBottom: 0, paddingRight: 10, width: 0, height: 24)
         
         addSubview(captionLabel)
-        captionLabel.anchor(top: locationAdressLabel.bottomAnchor, left: leftAnchor, bottom: nil, right: photoImageView.leftAnchor, paddingTop: 10, paddingLeft: 5, paddingBottom: 0, paddingRight: 5, width: 0, height: 0)
+        captionLabel.anchor(top: locationAdressLabel.bottomAnchor, left: leftAnchor, bottom: nil, right: photoImageView.leftAnchor, paddingTop: 10, paddingLeft: 10, paddingBottom: 0, paddingRight: 5, width: 0, height: 0)
         captionLabel.sizeToFit()
-        
-        
-        // Adding Gesture Recognizers
-        
+            
+        addSubview(postDateLabel)
+        postDateLabel.anchor(top: nil, left: postView.leftAnchor, bottom: postView.bottomAnchor, right: nil, paddingTop: 0, paddingLeft: 10, paddingBottom: 5, paddingRight: 0, width: 100, height: 30)
+
+        // Add Gesture Recognizers
+        let senderTap = UITapGestureRecognizer(target: self, action: #selector(senderUsernameTap))
+        senderUserProfileImageView.isUserInteractionEnabled = true
+        senderUserProfileImageView.addGestureRecognizer(senderTap)
+            
+        let senderTap1 = UITapGestureRecognizer(target: self, action: #selector(senderUsernameTap))
+        senderUsernameLabel.isUserInteractionEnabled = true
+        senderUsernameLabel.addGestureRecognizer(senderTap1)
+            
+        let userTap = UITapGestureRecognizer(target: self, action: #selector(usernameTap))
         userProfileImageView.isUserInteractionEnabled = true
-        let usernameTap = UITapGestureRecognizer(target: self, action: #selector(BookmarkPhotoCell.usernameTap))
-        userProfileImageView.addGestureRecognizer(usernameTap)
-        userProfileImageView.isUserInteractionEnabled = true
-        
-        
-        let locationTapGesture = UITapGestureRecognizer(target: self, action: #selector(BookmarkPhotoCell.locationTap))
-        locationNameLabel.addGestureRecognizer(locationTapGesture)
+        userProfileImageView.addGestureRecognizer(userTap)
+            
+        let userTap1 = UITapGestureRecognizer(target: self, action: #selector(usernameTap))
+        usernameLabel.isUserInteractionEnabled = true
+        usernameLabel.addGestureRecognizer(userTap1)
+            
+        let locationGesture = UITapGestureRecognizer(target: self, action: #selector(locationTap))
         locationNameLabel.isUserInteractionEnabled = true
-        let locationTapGesture2 = UITapGestureRecognizer(target: self, action: #selector(BookmarkPhotoCell.locationTap))
-        
-        locationAdressLabel.addGestureRecognizer(locationTapGesture2)
+        locationNameLabel.addGestureRecognizer(locationGesture)
+
+        let locationGesture1 = UITapGestureRecognizer(target: self, action: #selector(locationTap))
         locationAdressLabel.isUserInteractionEnabled = true
-        
+        locationAdressLabel.addGestureRecognizer(locationGesture1)
+            
         // Setup Dividers
         
         let topDividerView = UIView()
@@ -440,8 +482,8 @@ class InboxCell: UICollectionViewCell {
         addSubview(topDividerView)
         addSubview(bottomDividerView)
         
-        topDividerView.anchor(top: topAnchor, left: leftAnchor, bottom: nil, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0.5)
-        bottomDividerView.anchor(top: photoImageView.bottomAnchor, left: leftAnchor, bottom: nil, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0.5)
+        topDividerView.anchor(top: postView.topAnchor, left: leftAnchor, bottom: nil, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0.5)
+        bottomDividerView.anchor(top: postView.bottomAnchor, left: leftAnchor, bottom: nil, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0.5)
     }
 
     required init?(coder aDecoder: NSCoder) {
