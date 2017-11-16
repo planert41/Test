@@ -334,7 +334,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         resultSearchController?.searchResultsUpdater = homePostSearchResults
         resultSearchController?.delegate = self
         let searchBar = resultSearchController?.searchBar
-        searchBar?.backgroundColor = UIColor.clear
+        searchBar?.backgroundColor = UIColor.white
         searchBar?.scopeButtonTitles = searchScopeButtons
         
         

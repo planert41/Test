@@ -9,6 +9,7 @@
 import Foundation
 import UIKit
 import Firebase
+import GooglePlaces
 
 protocol HomePostSearchDelegate {
     func filterCaptionSelected(searchedText: String?)
@@ -17,8 +18,8 @@ protocol HomePostSearchDelegate {
 
 class HomePostSearch : UITableViewController, UISearchResultsUpdating, UISearchControllerDelegate, UISearchBarDelegate {
     
-
     var selectedScope = 0
+    var searchTerm: String? = nil
 
     // Emojis - Pulls in Default Emojis and Emojis filtered by searchText
     let EmojiCellId = "EmojiCellId"
@@ -29,6 +30,11 @@ class HomePostSearch : UITableViewController, UISearchResultsUpdating, UISearchC
     var allUsers = [User]()
     var filteredUsers = [User]()
     
+    // Google Locations
+    let LocationCellId = "LocationCellId"
+    var placesClient = GMSPlacesClient()
+    var googleLocations: [String] = []
+    var googleLocationsId: [String] = []
     
     var isFiltering: Bool = false {
         didSet{
@@ -36,7 +42,6 @@ class HomePostSearch : UITableViewController, UISearchResultsUpdating, UISearchC
         }
     }
     var delegate: HomePostSearchDelegate?
-
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -44,12 +49,17 @@ class HomePostSearch : UITableViewController, UISearchResultsUpdating, UISearchC
         
         tableView.register(EmojiCell.self, forCellReuseIdentifier: EmojiCellId)
         tableView.register(UserCell.self, forCellReuseIdentifier: UserCellId)
+        tableView.register(LocationCell.self, forCellReuseIdentifier: LocationCellId)
+        
+        // Emojis are loaded in the emoji dictionary
         
         // Load Users
         Database.fetchUsers { (fetchedUsers) in
             self.allUsers = fetchedUsers
             self.filteredUsers = self.allUsers
         }
+        
+        // Google Locations are only loaded when Locations are selected
         
         tableView.rowHeight = UITableViewAutomaticDimension
         tableView.estimatedRowHeight = 140
@@ -78,7 +88,18 @@ class HomePostSearch : UITableViewController, UISearchResultsUpdating, UISearchC
             } else {
                 return allUsers.count
             }
-        } else {
+        }
+        
+        // Google Locations
+        else if self.selectedScope == 2 {
+            if isFiltering {
+                return googleLocations.count
+            } else {
+                return 0
+            }
+        }
+        
+        else {
             return 0
         }
     }
@@ -100,12 +121,23 @@ class HomePostSearch : UITableViewController, UISearchResultsUpdating, UISearchC
         
         else if self.selectedScope == 1 {
             let cell = tableView.dequeueReusableCell(withIdentifier: UserCellId, for: indexPath) as! UserCell
-                cell.user = filteredUsers[indexPath.item]
+            if isFiltering{
+                cell.user = filteredUsers[indexPath.row]
+            } else {
+                cell.user = allUsers[indexPath.row]
+            }
             return cell
         }
         
         // Locations
         
+        else if self.selectedScope == 2 {
+            let cell = tableView.dequeueReusableCell(withIdentifier: LocationCellId, for: indexPath) as! LocationCell
+                cell.location = googleLocations[indexPath.row]
+            return cell
+        }
+            
+        // Null
         else {
             let cell = tableView.dequeueReusableCell(withIdentifier: EmojiCellId, for: indexPath) as! EmojiCell
             return cell
@@ -133,6 +165,7 @@ class HomePostSearch : UITableViewController, UISearchResultsUpdating, UISearchC
     
     
     func filterContentForSearchText(_ searchText: String) {
+        // Filter for Emojis and Users
         
         // Emojis
         if self.selectedScope == 0 {
@@ -152,9 +185,43 @@ class HomePostSearch : UITableViewController, UISearchResultsUpdating, UISearchC
         self.tableView.reloadData()
     }
     
-    func updateSearchResults(for searchController: UISearchController) {
-        let searchBar = searchController.searchBar
+    func clearGoogleLocations(){
+        googleLocations = []
+        googleLocationsId = []
+    }
+    
+    func placeAutocomplete(searchString: String) {
         
+        
+        let myGroup = DispatchGroup()
+        let filter = GMSAutocompleteFilter()
+        filter.type = .establishment
+        placesClient.autocompleteQuery(searchString, bounds: nil, filter: filter, callback: {(results, error) -> Void in
+            if let error = error {
+                print("Autocomplete error \(error)")
+                return
+            }
+            self.clearGoogleLocations()
+            if let results = results {
+                for result in results {
+                    myGroup.enter()
+                    print(result)
+                    self.googleLocations.append(result.attributedFullText.string)
+                    self.googleLocationsId.append(result.placeID!)
+                    myGroup.leave()
+                }
+            }
+            
+            myGroup.notify(queue: .main) {
+            print("Google Search Results: ", self.googleLocations)
+            self.tableView.reloadData()
+            }
+        })
+    }
+    
+    func updateSearchResults(for searchController: UISearchController) {
+        // Updates Search Results as searchbar is populated
+        let searchBar = searchController.searchBar
         if (searchBar.text?.isEmpty)! {
             // Displays Default Search Results even if search bar is empty
             self.isFiltering = false
@@ -164,17 +231,22 @@ class HomePostSearch : UITableViewController, UISearchResultsUpdating, UISearchC
         self.isFiltering = searchController.isActive && !(searchBar.text?.isEmpty)!
         
         if self.isFiltering {
-            filterContentForSearchText(searchBar.text!)
+            if self.selectedScope == 0 || self.selectedScope == 1 {
+                filterContentForSearchText(searchBar.text!)
+            } else if self.selectedScope == 2 {
+                self.placeAutocomplete(searchString: searchBar.text!)
+            }
         }
-    
-    
     }
+    
     
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
         if (searchBar.text?.isEmpty)! {
+            self.searchTerm = nil
             self.isFiltering = false
-            self.tableView.reloadData()
-            
+        } else {
+            self.isFiltering = true
+            self.searchTerm = searchText
         }
     }
   
@@ -188,15 +260,23 @@ class HomePostSearch : UITableViewController, UISearchResultsUpdating, UISearchC
         self.delegate?.filterCaptionSelected(searchedText: searchBar.text)
         self.dismiss(animated: true) {
         }
-
     }
     
     func searchBar(_ searchBar: UISearchBar, selectedScopeButtonIndexDidChange selectedScope: Int) {
         print("Selected Scope is: ", selectedScope)
         self.selectedScope = selectedScope
-    
-        self.tableView.reloadData()
         
+        if selectedScope == 0 || selectedScope == 1 {
+            if self.isFiltering && self.searchTerm != nil {
+                filterContentForSearchText(self.searchTerm!)
+            }
+        }
+        else if selectedScope == 2 {
+            if self.isFiltering && self.searchTerm != nil {
+                self.placeAutocomplete(searchString: self.searchTerm!)
+            }
+        }
+        self.tableView.reloadData()
     }
     
     
