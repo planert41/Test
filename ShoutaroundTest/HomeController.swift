@@ -428,6 +428,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     // Home Post Search Delegates
     
     func filterCaptionSelected(searchedText: String?){
+        navigationItem.title = "Results For: " + searchedText!
         self.filterCaption = searchedText
         self.resultSearchController?.searchBar.text = searchedText
         self.refreshPagination()
@@ -506,6 +507,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     func handleRefresh() {
         
         // RemoveAll so that when user follow/unfollows it updates
+        navigationItem.title = "Shoutaround"
         refreshPagination()
         clearFilter()
         fetchPostIds.removeAll()
@@ -749,6 +751,8 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     
     
     fileprivate func setupNavigationItems() {
+        
+        navigationItem.title = "Shoutaround"
         
         navigationItem.leftBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "search_selected").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(openSearch))
         
