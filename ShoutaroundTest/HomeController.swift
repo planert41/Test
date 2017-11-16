@@ -425,6 +425,8 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         }
     }
     
+    // Home Post Search Delegates
+    
     func filterCaptionSelected(searchedText: String?){
         self.filterCaption = searchedText
         self.resultSearchController?.searchBar.text = searchedText
@@ -434,6 +436,20 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         self.paginatePosts()
         
         }
+    
+    func userSelected(uid: String?){
+        let userProfileController = UserProfileController(collectionViewLayout: UICollectionViewFlowLayout())
+        userProfileController.userId = uid
+        self.navigationController?.pushViewController(userProfileController, animated: true)
+    }
+    
+    func locationSelected(googlePlaceId: String?){
+        
+        let locationController = LocationController()
+        locationController.googlePlaceId = googlePlaceId
+        navigationController?.pushViewController(locationController, animated: true)
+        
+    }
     
     
     

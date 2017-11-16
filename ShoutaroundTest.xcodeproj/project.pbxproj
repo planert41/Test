@@ -75,7 +75,6 @@
 		A5C6452C1F5C459500C78244 /* CommentCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5C6452B1F5C459500C78244 /* CommentCell.swift */; };
 		A5C6452E1F5C481300C78244 /* Comment.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5C6452D1F5C481300C78244 /* Comment.swift */; };
 		A5F3E32E1FBD486D00A3E3A0 /* UserCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5F3E32D1FBD486D00A3E3A0 /* UserCell.swift */; };
-		A5F3E3301FBE3CE900A3E3A0 /* LocationCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5F3E32F1FBE3CE900A3E3A0 /* LocationCell.swift */; };
 		B1A3AC30339B082041E14A20 /* Pods_ShoutaroundTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B65B7D125931B939429672C6 /* Pods_ShoutaroundTest.framework */; };
 /* End PBXBuildFile section */
 
@@ -152,7 +151,6 @@
 		A5C6452B1F5C459500C78244 /* CommentCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CommentCell.swift; sourceTree = "<group>"; };
 		A5C6452D1F5C481300C78244 /* Comment.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Comment.swift; sourceTree = "<group>"; };
 		A5F3E32D1FBD486D00A3E3A0 /* UserCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserCell.swift; sourceTree = "<group>"; };
-		A5F3E32F1FBE3CE900A3E3A0 /* LocationCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LocationCell.swift; sourceTree = "<group>"; };
 		A64D6DDCD46BE134C4B0B7C6 /* Pods-InstagramFirebase.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-InstagramFirebase.release.xcconfig"; path = "Pods/Target Support Files/Pods-InstagramFirebase/Pods-InstagramFirebase.release.xcconfig"; sourceTree = "<group>"; };
 		B65B7D125931B939429672C6 /* Pods_ShoutaroundTest.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_ShoutaroundTest.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		E6A7A43430193F3A7265A821 /* Pods-ShoutaroundTest.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ShoutaroundTest.debug.xcconfig"; path = "Pods/Target Support Files/Pods-ShoutaroundTest/Pods-ShoutaroundTest.debug.xcconfig"; sourceTree = "<group>"; };
@@ -384,7 +382,6 @@
 				A5AEB9711F96A82B00E88CAC /* HomePostSearch.swift */,
 				A5AEB9731F96B00500E88CAC /* EmojiCell.swift */,
 				A5F3E32D1FBD486D00A3E3A0 /* UserCell.swift */,
-				A5F3E32F1FBE3CE900A3E3A0 /* LocationCell.swift */,
 				A5A17BAA1FA582B4001F227D /* FilterController.swift */,
 			);
 			name = Search;
@@ -621,7 +618,6 @@
 				A562E5161F5354A50095C7C1 /* LoginController.swift in Sources */,
 				A5AEB9741F96B00500E88CAC /* EmojiCell.swift in Sources */,
 				A54E1D6B1F4E736B00C2AA77 /* AppDelegate.swift in Sources */,
-				A5F3E3301FBE3CE900A3E3A0 /* LocationCell.swift in Sources */,
 				A56868BA1F7843DD0050C406 /* Conversions.swift in Sources */,
 				A5C645141F565E8800C78244 /* HomeController.swift in Sources */,
 				A5C645181F57A4BF00C78244 /* User.swift in Sources */,

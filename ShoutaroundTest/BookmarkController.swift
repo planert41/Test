@@ -411,9 +411,18 @@ class BookMarkController: UIViewController, UICollectionViewDelegate, UICollecti
     
     
     func filterCaptionSelected(searchedText: String?){
-        
         self.filterCaption = searchedText
         self.finalFilterAndSort()
+        
+    }
+    
+    func userSelected(uid: String?){
+        let userProfileController = UserProfileController(collectionViewLayout: UICollectionViewFlowLayout())
+        userProfileController.userId = uid
+        self.navigationController?.pushViewController(userProfileController, animated: true)
+    }
+    
+    func locationSelected(googlePlaceId: String?){
         
     }
     

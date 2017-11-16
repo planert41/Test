@@ -13,10 +13,12 @@ import GooglePlaces
 
 protocol HomePostSearchDelegate {
     func filterCaptionSelected(searchedText: String?)
+    func userSelected(uid: String?)
+    func locationSelected(googlePlaceId: String?)
     
 }
 
-class HomePostSearch : UITableViewController, UISearchResultsUpdating, UISearchControllerDelegate, UISearchBarDelegate {
+class HomePostSearch : UITableViewController, UISearchResultsUpdating, UISearchControllerDelegate, UISearchBarDelegate, GMSAutocompleteTableDataSourceDelegate {
     
     var selectedScope = 0
     var searchTerm: String? = nil
@@ -31,8 +33,8 @@ class HomePostSearch : UITableViewController, UISearchResultsUpdating, UISearchC
     var filteredUsers = [User]()
     
     // Google Locations
-    let LocationCellId = "LocationCellId"
-    var placesClient = GMSPlacesClient()
+    var tableDataSource: GMSAutocompleteTableDataSource?
+    var selectedGoogleId: String? = nil
     var googleLocations: [String] = []
     var googleLocationsId: [String] = []
     
@@ -43,13 +45,13 @@ class HomePostSearch : UITableViewController, UISearchResultsUpdating, UISearchC
     }
     var delegate: HomePostSearchDelegate?
     
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = UIColor.white
         
         tableView.register(EmojiCell.self, forCellReuseIdentifier: EmojiCellId)
         tableView.register(UserCell.self, forCellReuseIdentifier: UserCellId)
-        tableView.register(LocationCell.self, forCellReuseIdentifier: LocationCellId)
         
         // Emojis are loaded in the emoji dictionary
         
@@ -60,6 +62,9 @@ class HomePostSearch : UITableViewController, UISearchResultsUpdating, UISearchC
         }
         
         // Google Locations are only loaded when Locations are selected
+        
+        tableDataSource = GMSAutocompleteTableDataSource()
+        tableDataSource?.delegate = self
         
         tableView.rowHeight = UITableViewAutomaticDimension
         tableView.estimatedRowHeight = 140
@@ -90,14 +95,7 @@ class HomePostSearch : UITableViewController, UISearchResultsUpdating, UISearchC
             }
         }
         
-        // Google Locations
-        else if self.selectedScope == 2 {
-            if isFiltering {
-                return googleLocations.count
-            } else {
-                return 0
-            }
-        }
+        // Google Locations - Data source changes to Google AutoComplete
         
         else {
             return 0
@@ -131,11 +129,8 @@ class HomePostSearch : UITableViewController, UISearchResultsUpdating, UISearchC
         
         // Locations
         
-        else if self.selectedScope == 2 {
-            let cell = tableView.dequeueReusableCell(withIdentifier: LocationCellId, for: indexPath) as! LocationCell
-                cell.location = googleLocations[indexPath.row]
-            return cell
-        }
+        // Google Locations - Data source changes to Google AutoComplete
+
             
         // Null
         else {
@@ -147,20 +142,33 @@ class HomePostSearch : UITableViewController, UISearchResultsUpdating, UISearchC
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         
-        var emojiSelected: Emoji?
-        
-        if isFiltering {
-            emojiSelected = filteredEmojis[indexPath.row]
-        } else {
-            emojiSelected = defaultEmojis[indexPath.row]
+        // Emoji Selected
+        if selectedScope == 0 {
+            var emojiSelected: Emoji?
+            if isFiltering {
+                emojiSelected = filteredEmojis[indexPath.row]
+            } else {
+                emojiSelected = defaultEmojis[indexPath.row]
+            }
+            let filterText = emojiSelected?.emoji
+            self.delegate?.filterCaptionSelected(searchedText: filterText)
+            
+            self.dismiss(animated: true) {}
         }
         
-        let filterText = emojiSelected?.emoji
-        self.delegate?.filterCaptionSelected(searchedText: filterText)
-        
-        self.dismiss(animated: true) { 
+        // User Selected
+        if selectedScope == 1 {
+            var userSelected: User?
+            if isFiltering {
+                userSelected = filteredUsers[indexPath.row]
+            } else {
+                userSelected = allUsers[indexPath.row]
+            }
+            delegate?.userSelected(uid: userSelected?.uid)
+            self.dismiss(animated: true) {}
         }
-
+        
+        // Location Selected is handled by Google Autocomplete below
     }
     
     
@@ -185,40 +193,6 @@ class HomePostSearch : UITableViewController, UISearchResultsUpdating, UISearchC
         self.tableView.reloadData()
     }
     
-    func clearGoogleLocations(){
-        googleLocations = []
-        googleLocationsId = []
-    }
-    
-    func placeAutocomplete(searchString: String) {
-        
-        
-        let myGroup = DispatchGroup()
-        let filter = GMSAutocompleteFilter()
-        filter.type = .establishment
-        placesClient.autocompleteQuery(searchString, bounds: nil, filter: filter, callback: {(results, error) -> Void in
-            if let error = error {
-                print("Autocomplete error \(error)")
-                return
-            }
-            self.clearGoogleLocations()
-            if let results = results {
-                for result in results {
-                    myGroup.enter()
-                    print(result)
-                    self.googleLocations.append(result.attributedFullText.string)
-                    self.googleLocationsId.append(result.placeID!)
-                    myGroup.leave()
-                }
-            }
-            
-            myGroup.notify(queue: .main) {
-            print("Google Search Results: ", self.googleLocations)
-            self.tableView.reloadData()
-            }
-        })
-    }
-    
     func updateSearchResults(for searchController: UISearchController) {
         // Updates Search Results as searchbar is populated
         let searchBar = searchController.searchBar
@@ -234,7 +208,7 @@ class HomePostSearch : UITableViewController, UISearchResultsUpdating, UISearchC
             if self.selectedScope == 0 || self.selectedScope == 1 {
                 filterContentForSearchText(searchBar.text!)
             } else if self.selectedScope == 2 {
-                self.placeAutocomplete(searchString: searchBar.text!)
+                tableDataSource?.sourceTextHasChanged(searchBar.text!)
             }
         }
     }
@@ -267,17 +241,51 @@ class HomePostSearch : UITableViewController, UISearchResultsUpdating, UISearchC
         self.selectedScope = selectedScope
         
         if selectedScope == 0 || selectedScope == 1 {
+            self.tableView.dataSource = self
+            self.tableView.delegate = self
             if self.isFiltering && self.searchTerm != nil {
                 filterContentForSearchText(self.searchTerm!)
             }
         }
         else if selectedScope == 2 {
-            if self.isFiltering && self.searchTerm != nil {
-                self.placeAutocomplete(searchString: self.searchTerm!)
-            }
+            
+            // Changes data source to Google Location Data Source when Location is selected
+            self.tableView.dataSource = tableDataSource
+            self.tableView.delegate = tableDataSource
         }
         self.tableView.reloadData()
     }
+    
+    func didUpdateAutocompletePredictionsForTableDataSource(tableDataSource: GMSAutocompleteTableDataSource) {
+        // Turn the network activity indicator off.
+        UIApplication.shared.isNetworkActivityIndicatorVisible = false
+        // Reload table data.
+        self.tableView.reloadData()
+    }
+    
+    func didRequestAutocompletePredictionsForTableDataSource(tableDataSource: GMSAutocompleteTableDataSource) {
+        // Turn the network activity indicator on.
+        UIApplication.shared.isNetworkActivityIndicatorVisible = true
+        // Reload table data.
+        self.tableView.reloadData()
+    }
+    
+    
+    func tableDataSource(_ tableDataSource: GMSAutocompleteTableDataSource, didAutocompleteWith place: GMSPlace) {
+        // Do something with the selected place.
+        self.selectedGoogleId = place.placeID
+        print("Selected Google Location is: ", place.placeID, " name: ", place.name)
+        delegate?.locationSelected(googlePlaceId: self.selectedGoogleId)
+        self.dismiss(animated: true, completion: nil)
+        
+        
+    }
+        
+    func tableDataSource(_ tableDataSource: GMSAutocompleteTableDataSource, didFailAutocompleteWithError error: Error) {
+        // TODO: Handle the error.
+        print("Error: \(error)")
+    }
+
     
     
     
