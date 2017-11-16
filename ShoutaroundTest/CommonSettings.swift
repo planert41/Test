@@ -24,3 +24,5 @@ var FilterSortDefault:[String] = ["Nearest", "Oldest", "Latest"]
 var defaultPhotoResize = CGSize(width: 500, height: 500)
 
 var searchBarPlaceholderText = "Search...."
+
+var searchScopeButtons = ["Posts","Users","Places"]

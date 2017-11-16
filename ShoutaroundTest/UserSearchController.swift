@@ -69,49 +69,11 @@ class UserSearchController: UICollectionViewController, UICollectionViewDelegate
     
     fileprivate func fetchUsers() {
         
-        let ref = Database.database().reference().child("users")
-        ref.observeSingleEvent(of: .value, with: { (snapshot) in
-            
-            guard let dictionaries = snapshot.value as? [String: Any] else {return}
-            
-            dictionaries.forEach({ (key,value) in
-             
-                if key == Auth.auth().currentUser?.uid{
-                    print("Found Mmyself, omit from list")
-                    return
-                
-                }
-                
-                guard let userDictionary = value as? [String: Any] else {return}
-                
-                var user = User(uid: key, dictionary: userDictionary)
-                
-                
-                if CurrentUser.followingUids.contains(key){
-                    user.isFollowing = true
-                } else {
-                    user.isFollowing = false
-                }
-                
-                self.users.append(user)
-            })
-            
-            
-            self.users.sort(by: { (u1, u2) -> Bool in
-                
-                return u1.username.compare(u2.username) == .orderedAscending
-                
-            })
-            
-            
+        Database.fetchUsers { (fetchedUsers) in
+            self.users = fetchedUsers
             self.filteredUsers = self.users
             self.collectionView?.reloadData()
-            
-            })
-            
-            { (err) in print ("Failed to fetch users for search", err) }
-        
-        
+        }
     }
     
     override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {

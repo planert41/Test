@@ -29,6 +29,47 @@ extension Database{
         }
     }
     
+    static func fetchUsers(completion: @escaping ([User]) -> ()) {
+        
+        var tempUsers: [User] = []
+        let myGroup = DispatchGroup()
+        let ref = Database.database().reference().child("users")
+        ref.observeSingleEvent(of: .value, with: { (snapshot) in
+            
+            guard let dictionaries = snapshot.value as? [String: Any] else {return}
+            
+            dictionaries.forEach({ (key,value) in
+                myGroup.enter()
+                
+                if key == Auth.auth().currentUser?.uid{
+                    print("Found Myself, omit from list")
+                    myGroup.leave()
+                    return
+                }
+                
+                guard let userDictionary = value as? [String: Any] else {return}
+                var user = User(uid: key, dictionary: userDictionary)
+                
+                if CurrentUser.followingUids.contains(key){
+                    user.isFollowing = true
+                } else {
+                    user.isFollowing = false
+                }
+                tempUsers.append(user)
+                myGroup.leave()
+                
+            })
+            
+            myGroup.notify(queue: .main) {
+                tempUsers.sort(by: { (u1, u2) -> Bool in
+                    return u1.username.compare(u2.username) == .orderedAscending
+                })
+                completion(tempUsers)
+            }
+        })   { (err) in print ("Failed to fetch users for search", err) }
+
+    }
+    
     
     static func fetchPostWithUIDAndPostID(creatoruid: String, postId: String, completion: @escaping (Post) -> ()) {
         

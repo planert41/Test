@@ -335,14 +335,13 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         resultSearchController?.delegate = self
         let searchBar = resultSearchController?.searchBar
         searchBar?.backgroundColor = UIColor.clear
-        let placeholderText = "Search for 😍🐮🍔🇺🇸🔥"
+        searchBar?.scopeButtonTitles = searchScopeButtons
+        
         
         searchBar?.placeholder =  searchBarPlaceholderText
-        
-        navigationItem.titleView = searchBar
         searchBar?.delegate = homePostSearchResults
         
-        resultSearchController?.hidesNavigationBarDuringPresentation = false
+        resultSearchController?.hidesNavigationBarDuringPresentation = true
         resultSearchController?.dimsBackgroundDuringPresentation = true
         definesPresentationContext = true
     }
@@ -735,7 +734,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     
     fileprivate func setupNavigationItems() {
         
-        navigationItem.leftBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "mailbox").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(openInbox))
+        navigationItem.leftBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "search_selected").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(openSearch))
         
 
 //        rangeImageButton.image = #imageLiteral(resourceName: "GeoFence").withRenderingMode(.alwaysOriginal)
@@ -792,6 +791,10 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     func openInbox() {
         let inboxController = InboxController(collectionViewLayout: UICollectionViewFlowLayout())
         navigationController?.pushViewController(inboxController, animated: true)
+    }
+    
+    func openSearch(){
+        self.present(resultSearchController!, animated: true, completion: nil)
     }
 
 
