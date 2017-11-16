@@ -8,6 +8,7 @@
 
 import Foundation
 import UIKit
+import Firebase
 
 protocol HomePostSearchDelegate {
     func filterCaptionSelected(searchedText: String?)
@@ -17,30 +18,41 @@ protocol HomePostSearchDelegate {
 class HomePostSearch : UITableViewController, UISearchResultsUpdating, UISearchControllerDelegate, UISearchBarDelegate {
     
 
-    var filteredEmojis:[Emoji] = []
+    var selectedScope = 0
+
+    // Emojis - Pulls in Default Emojis and Emojis filtered by searchText
     let EmojiCellId = "EmojiCellId"
+    var filteredEmojis:[Emoji] = []
+    
+    // Users
+    let UserCellId = "UserCellId"
+    var allUsers = [User]()
+    var filteredUsers = [User]()
+    
+    
     var isFiltering: Bool = false {
         didSet{
             self.tableView.reloadData()
         }
     }
     var delegate: HomePostSearchDelegate?
-    
-    
-    let emojiDictionary: UILabel = {
-        let label = UILabel()
-        label.text = "Emoji Dictionary"
-        label.font = UIFont.boldSystemFont(ofSize: 12)
-        label.textColor = UIColor.mainBlue()
-        label.textAlignment = NSTextAlignment.center
-        return label
-    }()
+
     
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = UIColor.white
         
         tableView.register(EmojiCell.self, forCellReuseIdentifier: EmojiCellId)
+        tableView.register(UserCell.self, forCellReuseIdentifier: UserCellId)
+        
+        // Load Users
+        Database.fetchUsers { (fetchedUsers) in
+            self.allUsers = fetchedUsers
+            self.filteredUsers = self.allUsers
+        }
+        
+        tableView.rowHeight = UITableViewAutomaticDimension
+        tableView.estimatedRowHeight = 140
         
     }
 
@@ -49,25 +61,55 @@ class HomePostSearch : UITableViewController, UISearchResultsUpdating, UISearchC
     }
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        if isFiltering {
-            return filteredEmojis.count
+        
+        // Emojis
+        if self.selectedScope == 0 {
+            if isFiltering {
+                return filteredEmojis.count
+            }   else {
+                return defaultEmojis.count
+            }
         }
-        else {
-        return defaultEmojis.count
+        
+        // Users
+        else if self.selectedScope == 1 {
+            if isFiltering {
+                return filteredUsers.count
+            } else {
+                return allUsers.count
+            }
+        } else {
+            return 0
         }
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: EmojiCellId, for: indexPath) as! EmojiCell
         
-        if isFiltering{
-            cell.emoji = filteredEmojis[indexPath.row]
-        } else {
+        // Emojis
+        if self.selectedScope == 0 {
+            let cell = tableView.dequeueReusableCell(withIdentifier: EmojiCellId, for: indexPath) as! EmojiCell
+            
+            if isFiltering{
+                cell.emoji = filteredEmojis[indexPath.row]
+            } else {
+                cell.emoji = defaultEmojis[indexPath.row]
+            }
+            return cell
+        }
+        // Users
         
-        cell.emoji = defaultEmojis[indexPath.row]
+        else if self.selectedScope == 1 {
+            let cell = tableView.dequeueReusableCell(withIdentifier: UserCellId, for: indexPath) as! UserCell
+                cell.user = filteredUsers[indexPath.item]
+            return cell
         }
         
-        return cell
+        // Locations
+        
+        else {
+            let cell = tableView.dequeueReusableCell(withIdentifier: EmojiCellId, for: indexPath) as! EmojiCell
+            return cell
+        }
         
     }
     
@@ -91,22 +133,30 @@ class HomePostSearch : UITableViewController, UISearchResultsUpdating, UISearchC
     
     
     func filterContentForSearchText(_ searchText: String) {
-        filteredEmojis = allEmojis.filter({( emoji : Emoji) -> Bool in
-            
-        return emoji.emoji.lowercased().contains(searchText.lowercased()) || (emoji.name?.contains(searchText.lowercased()))!
-        })
         
-        filteredEmojis.sort { (p1, p2) -> Bool in
+        // Emojis
+        if self.selectedScope == 0 {
+            filteredEmojis = allEmojis.filter({( emoji : Emoji) -> Bool in
+                return emoji.emoji.lowercased().contains(searchText.lowercased()) || (emoji.name?.contains(searchText.lowercased()))! })
+            filteredEmojis.sort { (p1, p2) -> Bool in
             ((p1.name?.hasPrefix(searchText.lowercased()))! ? 0 : 1) < ((p2.name?.hasPrefix(searchText.lowercased()))! ? 0 : 1)
+            }
         }
         
-        tableView.reloadData()
+        // Users
+        else if self.selectedScope == 1 {
+            filteredUsers = self.allUsers.filter { (user) -> Bool in
+                return user.username.lowercased().contains(searchText.lowercased())
+            }
+        }
+        self.tableView.reloadData()
     }
     
     func updateSearchResults(for searchController: UISearchController) {
         let searchBar = searchController.searchBar
         
         if (searchBar.text?.isEmpty)! {
+            // Displays Default Search Results even if search bar is empty
             self.isFiltering = false
             searchController.searchResultsController?.view.isHidden = false
         }
@@ -114,7 +164,7 @@ class HomePostSearch : UITableViewController, UISearchResultsUpdating, UISearchC
         self.isFiltering = searchController.isActive && !(searchBar.text?.isEmpty)!
         
         if self.isFiltering {
-        filterContentForSearchText(searchBar.text!)
+            filterContentForSearchText(searchBar.text!)
         }
     
     
@@ -139,6 +189,14 @@ class HomePostSearch : UITableViewController, UISearchResultsUpdating, UISearchC
         self.dismiss(animated: true) {
         }
 
+    }
+    
+    func searchBar(_ searchBar: UISearchBar, selectedScopeButtonIndexDidChange selectedScope: Int) {
+        print("Selected Scope is: ", selectedScope)
+        self.selectedScope = selectedScope
+    
+        self.tableView.reloadData()
+        
     }
     
     
