@@ -12,7 +12,7 @@ import Firebase
 import CoreGraphics
 import GeoFire
 
-class BookMarkController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, UISearchControllerDelegate, HomePostSearchDelegate, BookmarkPhotoCellDelegate, HomePostCellDelegate, CLLocationManagerDelegate, UIGestureRecognizerDelegate, FilterControllerDelegate {
+class BookMarkController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, UISearchControllerDelegate, HomePostSearchDelegate, BookmarkPhotoCellDelegate, HomePostCellDelegate, CLLocationManagerDelegate, UIGestureRecognizerDelegate, FilterControllerDelegate, UISearchBarDelegate {
     let bookmarkCellId = "bookmarkCellId"
     let homePostCellId = "homePostCellId"
     
@@ -98,7 +98,7 @@ class BookMarkController: UIViewController, UICollectionViewDelegate, UICollecti
     }()
     
     var resultSearchController:UISearchController? = nil
-    var searchBar: UISearchBar? = nil
+    var defaultSearchBar = UISearchBar()
     
     lazy var collectionView : UICollectionView = {
         let layout = UICollectionViewFlowLayout()
@@ -175,6 +175,7 @@ class BookMarkController: UIViewController, UICollectionViewDelegate, UICollecti
         view.addSubview(actionBar)
         actionBar.anchor(top: topLayoutGuide.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 50)
         actionBar.backgroundColor = .white
+        setupSearchController()
         setupBottomToolbar()
         
 // Setup CollectionView
@@ -239,23 +240,31 @@ class BookMarkController: UIViewController, UICollectionViewDelegate, UICollecti
         collectionView.keyboardDismissMode = .onDrag
     }
 
-    
-    fileprivate func setupBottomToolbar() {
+    fileprivate func setupSearchController(){
         
         let homePostSearchResults = HomePostSearch()
         homePostSearchResults.delegate = self
         resultSearchController = UISearchController(searchResultsController: homePostSearchResults)
         resultSearchController?.searchResultsUpdater = homePostSearchResults
         resultSearchController?.delegate = self
-        searchBar = resultSearchController?.searchBar
+        let searchBar = resultSearchController?.searchBar
         searchBar?.backgroundColor = UIColor.clear
         searchBar?.placeholder =  searchBarPlaceholderText
-        navigationItem.titleView = searchBar
         searchBar?.delegate = homePostSearchResults
         
-        resultSearchController?.hidesNavigationBarDuringPresentation = false
+        resultSearchController?.hidesNavigationBarDuringPresentation = true
         resultSearchController?.dimsBackgroundDuringPresentation = true
         definesPresentationContext = true
+        
+    }
+    
+    func searchBarShouldBeginEditing(_ searchBar: UISearchBar) -> Bool {
+        self.present(resultSearchController!, animated: true, completion: nil)
+        return false
+    }
+    
+    fileprivate func setupBottomToolbar() {
+
         
         let buttonView = UIView()
 
@@ -269,12 +278,22 @@ class BookMarkController: UIViewController, UICollectionViewDelegate, UICollecti
         let bottomDividerView = UIView()
         bottomDividerView.backgroundColor = UIColor.lightGray
         
+        defaultSearchBar.barTintColor = UIColor.lightGray
+//        defaultSearchBar.backgroundColor = UIColor.gray
+        defaultSearchBar.layer.borderWidth = 0.5
+        defaultSearchBar.layer.borderColor = UIColor.lightGray.cgColor
+        defaultSearchBar.delegate = self
+        
         view.addSubview(buttonStackView)
-
+        view.addSubview(defaultSearchBar)
         view.addSubview(topDividerView)
         view.addSubview(bottomDividerView)
-
-        buttonStackView.anchor(top: actionBar.topAnchor, left: actionBar.leftAnchor, bottom: actionBar.bottomAnchor, right: actionBar.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
+        
+        
+        buttonStackView.anchor(top: actionBar.topAnchor, left: actionBar.leftAnchor, bottom: actionBar.bottomAnchor, right: nil, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 150, height: 0)
+        
+        defaultSearchBar.anchor(top: actionBar.topAnchor, left: buttonStackView.rightAnchor, bottom: actionBar.bottomAnchor, right: actionBar.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
+        
         
         topDividerView.anchor(top: buttonStackView.topAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0.5)
         
@@ -283,6 +302,8 @@ class BookMarkController: UIViewController, UICollectionViewDelegate, UICollecti
     }
     
     fileprivate func setupNavigationItems() {
+        
+        navigationItem.title = "Bookmarks"
         
         navigationItem.leftBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "mailbox").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(openInbox))
 
@@ -411,7 +432,7 @@ class BookMarkController: UIViewController, UICollectionViewDelegate, UICollecti
     
     
     func filterCaptionSelected(searchedText: String?){
-        self.filterCaption = searchedText
+        self.defaultSearchBar.text = searchedText
         self.finalFilterAndSort()
         
     }
@@ -532,7 +553,7 @@ class BookMarkController: UIViewController, UICollectionViewDelegate, UICollecti
     
     func clearFilter(){
         
-        self.resultSearchController?.searchBar.text = nil
+        self.defaultSearchBar.text = nil
         self.filterCaption = nil
         self.filterLocation = nil
         self.filterGroup = defaultGroup

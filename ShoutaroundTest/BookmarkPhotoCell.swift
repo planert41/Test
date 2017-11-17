@@ -145,7 +145,7 @@ class BookmarkPhotoCell: UICollectionViewCell {
         let label = UILabel()
         label.text = "Emojis"
         label.font = UIFont.boldSystemFont(ofSize: 13)
-        label.textAlignment = NSTextAlignment.left
+        label.textAlignment = NSTextAlignment.right
         label.backgroundColor = UIColor.white
         return label
     }()
@@ -341,7 +341,7 @@ class BookmarkPhotoCell: UICollectionViewCell {
 // Photo Image View
         
         addSubview(photoImageView)
-        photoImageView.anchor(top: topAnchor, left: nil, bottom: bottomAnchor, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
+        photoImageView.anchor(top: topAnchor, left: leftAnchor, bottom: bottomAnchor, right: nil, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
         
         photoImageView.widthAnchor.constraint(equalTo: photoImageView.heightAnchor, multiplier: 1).isActive = true
         
@@ -352,7 +352,7 @@ class BookmarkPhotoCell: UICollectionViewCell {
 // Setup Bookmark Stack View
 
         addSubview(userProfileImageView)
-        userProfileImageView.anchor(top: topAnchor, left: leftAnchor, bottom: nil, right: nil, paddingTop: 5, paddingLeft: 10, paddingBottom: 0, paddingRight: 0, width: 30, height: 30)
+        userProfileImageView.anchor(top: topAnchor, left: photoImageView.rightAnchor, bottom: nil, right: nil, paddingTop: 5, paddingLeft: 10, paddingBottom: 0, paddingRight: 0, width: 30, height: 30)
         userProfileImageView.layer.cornerRadius = 30/2
         userProfileImageView.clipsToBounds = true
         userProfileImageView.layer.borderWidth = 0.25
@@ -367,28 +367,28 @@ class BookmarkPhotoCell: UICollectionViewCell {
 //        ratingEmojiLabel.centerYAnchor.constraint(equalTo: userProfileImageView.centerYAnchor).isActive = true
         
         addSubview(nonRatingEmojiLabel)
-        nonRatingEmojiLabel.anchor(top: userProfileImageView.topAnchor, left: nil, bottom: userProfileImageView.bottomAnchor, right: photoImageView.leftAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 10, width: 0, height: 0)
+        nonRatingEmojiLabel.anchor(top: userProfileImageView.topAnchor, left: nil, bottom: userProfileImageView.bottomAnchor, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 10, width: 0, height: 0)
         nonRatingEmojiLabel.centerYAnchor.constraint(equalTo: userProfileImageView.centerYAnchor).isActive = true
 
         
 // Location Data
 
         addSubview(distanceLabel)
-        distanceLabel.anchor(top: userProfileImageView.bottomAnchor, left: nil, bottom: nil, right: photoImageView.leftAnchor, paddingTop: 10, paddingLeft: 5, paddingBottom: 5, paddingRight: 10, width: 70, height: 15)
+        distanceLabel.anchor(top: userProfileImageView.bottomAnchor, left: nil, bottom: nil, right: rightAnchor, paddingTop: 10, paddingLeft: 5, paddingBottom: 5, paddingRight: 10, width: 70, height: 15)
         
         addSubview(locationNameLabel)
-        locationNameLabel.anchor(top: userProfileImageView.bottomAnchor, left: leftAnchor, bottom: nil, right: distanceLabel.leftAnchor, paddingTop: 10, paddingLeft: 10, paddingBottom: 0, paddingRight: 10, width: 0, height: 15)
+        locationNameLabel.anchor(top: userProfileImageView.bottomAnchor, left: photoImageView.rightAnchor, bottom: nil, right: distanceLabel.leftAnchor, paddingTop: 10, paddingLeft: 10, paddingBottom: 0, paddingRight: 10, width: 0, height: 15)
 
 
         addSubview(locationAdressLabel)
-        locationAdressLabel.anchor(top: locationNameLabel.bottomAnchor, left: leftAnchor, bottom: nil, right: photoImageView.leftAnchor, paddingTop: 0, paddingLeft: 10, paddingBottom: 0, paddingRight: 10, width: 0, height: 24)
+        locationAdressLabel.anchor(top: locationNameLabel.bottomAnchor, left: photoImageView.rightAnchor, bottom: nil, right: rightAnchor, paddingTop: 0, paddingLeft: 10, paddingBottom: 0, paddingRight: 10, width: 0, height: 24)
         
         addSubview(captionLabel)
-        captionLabel.anchor(top: locationAdressLabel.bottomAnchor, left: leftAnchor, bottom: nil, right: photoImageView.leftAnchor, paddingTop: 10, paddingLeft: 10, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
+        captionLabel.anchor(top: locationAdressLabel.bottomAnchor, left: photoImageView.rightAnchor, bottom: nil, right: rightAnchor, paddingTop: 10, paddingLeft: 10, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
         captionLabel.sizeToFit()
         
         addSubview(dateLabel)
-        dateLabel.anchor(top: nil, left: leftAnchor, bottom: bottomAnchor, right: nil, paddingTop: 0, paddingLeft: 10, paddingBottom: 5, paddingRight: 0, width: 60, height: 30)
+        dateLabel.anchor(top: nil, left: photoImageView.rightAnchor, bottom: bottomAnchor, right: nil, paddingTop: 0, paddingLeft: 10, paddingBottom: 5, paddingRight: 0, width: 60, height: 30)
         
         
         
@@ -398,14 +398,9 @@ class BookmarkPhotoCell: UICollectionViewCell {
         buttonStackView.distribution = .fillEqually
         addSubview(buttonStackView)
         
-        buttonStackView.anchor(top: nil, left: nil, bottom: bottomAnchor, right: photoImageView.leftAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 5, paddingRight: 10, width: 60, height: 30)
+        buttonStackView.anchor(top: nil, left: nil, bottom: bottomAnchor, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 5, paddingRight: 10, width: 60, height: 30)
         //        buttonStackView.widthAnchor.constraint(equalTo: photoImageView.heightAnchor, multiplier: 1).isActive = true
-        
-        
-        
-        
-        
-        
+
 //        
 //        let stackview = UIStackView()
 //        
@@ -419,10 +414,6 @@ class BookmarkPhotoCell: UICollectionViewCell {
 //        addSubview(stackview)
 //        stackview.anchor(top: topAnchor, left: leftAnchor, bottom: captionLabel.topAnchor, right: photoImageView.leftAnchor, paddingTop: 2, paddingLeft: 2, paddingBottom: 2, paddingRight: 2, width: 0, height: 0)
 
-        
-
-
-        
 //        usernameRow.addSubview(userProfileImageView)
 //        usernameRow.addSubview(usernameLabel)
 //        userProfileImageView.anchor(top: usernameRow.topAnchor, left: usernameRow.leftAnchor, bottom: usernameRow.bottomAnchor, right: nil, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)

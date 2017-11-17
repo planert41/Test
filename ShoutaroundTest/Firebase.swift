@@ -507,10 +507,11 @@ extension Database{
                     return
                 }
                 
+                guard let post = post else {return}
                 var tempPost = post
-                tempPost?.distance = tempPost?.locationGPS?.distance(from: location)
+                tempPost.distance = tempPost.locationGPS?.distance(from: location)
 //                print(tempPost.distance, ": ", tempPost.caption, " : ", location, " : ", tempPost.locationGPS)
-                fetchedPosts.append(tempPost!)
+                fetchedPosts.append(tempPost)
                 myGroup.leave()
             })
         })
