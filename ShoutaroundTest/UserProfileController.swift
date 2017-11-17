@@ -10,15 +10,14 @@ import UIKit
 import Firebase
 import FBSDKLoginKit
 import IQKeyboardManagerSwift
+import CoreLocation
 
-class UserProfileController: UICollectionViewController, UICollectionViewDelegateFlowLayout, UserProfileHeaderDelegate, HomePostCellDelegate,BookmarkPhotoCellDelegate, UserProfilePhotoCellDelegate {
+class UserProfileController: UICollectionViewController, UICollectionViewDelegateFlowLayout, UserProfileHeaderDelegate, HomePostCellDelegate,BookmarkPhotoCellDelegate, UserProfilePhotoCellDelegate, UISearchBarDelegate, HomePostSearchDelegate, FilterControllerDelegate, UISearchControllerDelegate, UIGestureRecognizerDelegate{
     
     let cellId = "cellId"
     let homePostCellId = "homePostCellId"
     
-    var allPosts = [Post]()
-    var filteredPosts = [Post]()
-    var isFinishedPaging = false
+    var displayedPosts = [Post]()
     
     var userId:String?
     var isGroup: Bool = false {
@@ -39,6 +38,63 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
     var groupSelections:[String] = ["Family","Friends","Foodie","Group1", "Group2"]
     var unGroupSelections:[String] = ["Delete"]
     
+// Filter Variables
+    
+    // Filter Variables
+    
+    let defaultRange = geoFilterRangeDefault[geoFilterRangeDefault.endIndex - 1]
+    let defaultGroup = "All"
+    let defaultSort = FilterSortDefault[FilterSortDefault.endIndex - 1]
+    let defaultTime =  FilterSortTimeDefault[FilterSortTimeDefault.endIndex - 1]
+    
+    var filterCaption: String? = nil{
+        didSet{
+            
+        }
+    }
+    var filterLocation: CLLocation? = nil
+    var filterGroup: String? {
+        didSet{
+            setupNavigationItems()
+        }
+    }
+    var filterRange: String? {
+        didSet{
+            setupNavigationItems()
+        }
+    }
+    
+    var filterSort: String?
+    var filterTime: String?{
+        didSet{
+            setupNavigationItems()
+        }
+    }
+    
+    
+    var filterButton: UIImageView = {
+        let view = UIImageView(frame: CGRect(x: 0, y: 0, width: 20, height: 20))
+        view.image = #imageLiteral(resourceName: "blankfilter").withRenderingMode(.alwaysOriginal)
+        view.contentMode = .scaleAspectFit
+        view.sizeToFit()
+        //        view.layer.cornerRadius = 25/2
+        //        view.layer.masksToBounds = true
+        view.backgroundColor = UIColor.clear
+        return view
+    }()
+    
+    lazy var singleTap: UIGestureRecognizer = {
+        let tap = UITapGestureRecognizer(target: self, action: #selector(activateFilter))
+        tap.delegate = self
+        return tap
+    }()
+    
+    
+    var resultSearchController:UISearchController? = nil
+    
+    let locationManager = CLLocationManager()
+    
+    
     
 // UserProfileHeader Delegate Methods
     
@@ -54,6 +110,10 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
 
     func didSignOut(){
         self.handleLogOut()
+    }
+    
+    func activateSearchBar(){
+        self.present(resultSearchController!, animated: true, completion: nil)
     }
     
     func didTapPicture(post: Post){
@@ -73,6 +133,29 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
         let tv = UITextView()
         return tv
     }()
+    
+    fileprivate func setupSearchController(){
+        
+        let homePostSearchResults = HomePostSearch()
+        homePostSearchResults.delegate = self
+        resultSearchController = UISearchController(searchResultsController: homePostSearchResults)
+        resultSearchController?.searchResultsUpdater = homePostSearchResults
+        resultSearchController?.delegate = self
+        let searchBar = resultSearchController?.searchBar
+        searchBar?.backgroundColor = UIColor.clear
+        searchBar?.placeholder =  searchBarPlaceholderText
+        searchBar?.delegate = homePostSearchResults
+        
+        resultSearchController?.hidesNavigationBarDuringPresentation = true
+        resultSearchController?.dimsBackgroundDuringPresentation = true
+        definesPresentationContext = true
+        
+    }
+    
+    func searchBarShouldBeginEditing(_ searchBar: UISearchBar) -> Bool {
+        self.present(resultSearchController!, animated: true, completion: nil)
+        return false
+    }
     
     override func viewDidLoad() {
         
@@ -95,9 +178,13 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
         
         view.addSubview(dummyTextView)
         
+        clearFilter()
+        setupSearchController()
         fetchUser()
         IQKeyboardManager.sharedManager().enable = false
         setupLogOutButton()
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(finishPaginationCheck), name: UserProfileController.finishProfilePaginationNotificationName, object: nil)
         
     }
     
@@ -168,6 +255,38 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
 
     }
     
+    fileprivate func setupNavigationItems() {
+        
+//        navigationItem.title = "Shoutaround"
+//        
+//        navigationItem.leftBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "search_selected").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(openSearch))
+//        
+//        if self.filterGroup == defaultGroup && self.filterRange == defaultRange && self.filterTime == defaultTime && self.filterGroup == "All" {
+//            filterButton.image = #imageLiteral(resourceName: "blankfilter").withRenderingMode(.alwaysOriginal)
+//            filterButton.backgroundColor = UIColor.clear
+//        } else {
+//            filterButton.image = #imageLiteral(resourceName: "filter").withRenderingMode(.alwaysOriginal)
+//            //            filterButton.backgroundColor = UIColor.orange
+//            filterButton.addGestureRecognizer(singleTap)
+//        }
+//        
+//        let rangeBarButton = UIBarButtonItem.init(customView: filterButton)
+//        navigationItem.rightBarButtonItem = rangeBarButton
+        
+    }
+    
+    // Search Delegate And Methods
+    
+    func activateFilter(){
+        let filterController = FilterController()
+        filterController.delegate = self
+        filterController.selectedRange = self.filterRange
+        filterController.selectedGroup = self.filterGroup
+        filterController.selectedSort = self.filterSort
+        filterController.selectedTime = self.filterTime
+        self.navigationController?.pushViewController(filterController, animated: true)
+    }
+    
     
     fileprivate func setupGroupButton() {
         guard let currentLoggedInUserID = Auth.auth().currentUser?.uid else {return}
@@ -219,8 +338,10 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
         
         // RemoveAll so that when user follow/unfollows it updates
         
-        self.isFinishedPaging = false
-        allPosts.removeAll()
+        refreshPagination()
+        clearFilter()
+        fetchPostIds.removeAll()
+        displayedPosts.removeAll()
         collectionView?.reloadData()
         fetchUser()
         self.collectionView?.refreshControl?.endRefreshing()
@@ -253,12 +374,12 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
 
     
     func refreshPost(post: Post) {
-        let index = allPosts.index { (filteredpost) -> Bool in
+        let index = displayedPosts.index { (filteredpost) -> Bool in
         filteredpost.id  == post.id
             
     }
         let filteredindexpath = IndexPath(row:index!, section: 0)
-        self.allPosts[index!] = post
+        self.displayedPosts[index!] = post
         //        self.collectionView?.reloadItems(at: [filteredindexpath])
         
     }
@@ -322,12 +443,12 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
         deleteAlert.addAction(UIAlertAction(title: "Ok", style: .default, handler: { (action: UIAlertAction!) in
             
             // Remove from Current View
-            let index = self.allPosts.index { (filteredpost) -> Bool in
+            let index = self.displayedPosts.index { (filteredpost) -> Bool in
                 filteredpost.id  == post.id
             }
             
             let filteredindexpath = IndexPath(row:index!, section: 0)
-            self.allPosts.remove(at: index!)
+            self.displayedPosts.remove(at: index!)
             self.collectionView?.deleteItems(at: [filteredindexpath])
             Database.deletePost(post: post)
         }))
@@ -346,200 +467,310 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
         
     }
     
+// Home Post Search Delegates
+    
+    func filterCaptionSelected(searchedText: String?){
+        
+        guard let searchedText = searchedText else {return}
+        if searchedText != "" {
+            self.filterCaption = searchedText
+            self.refreshPagination()
+            self.displayedPosts.removeAll()
+            self.collectionView?.reloadData()
+            self.paginatePosts()
+            
+        }
+        
+    }
+    
+    func userSelected(uid: String?){
+        
+    }
+    
+    func locationSelected(googlePlaceId: String?){
+        
+    }
+    
+// Filter Delegate
+    
+    func filterControllerFinished(selectedRange: String?, selectedLocation: CLLocation?, selectedGooglePlaceID: String?, selectedTime: String?, selectedGroup: String?, selectedSort: String?){
+        
+    }
+    
+    
+    
 // Pagination
+    
+    
+    var fetchPostIds: [PostId] = []
+    var fetchedPostCount = 0
+    var isFinishedPaging = false
+    
+    static let finishProfilePaginationNotificationName = NSNotification.Name(rawValue: "UserProfileFinishPagination")
+    
+    
+    
+    fileprivate func fetchUser() {
+        
+        // uid using userID if exist, if not, uses current user, if not uses blank
+        let uid = userId ?? Auth.auth().currentUser?.uid ?? ""
+        
+        Database.fetchUserWithUID(uid: uid) { (user) in
+            self.user = user
+            self.navigationItem.title = self.user?.username
+            if user.uid != Auth.auth().currentUser?.uid {
+                self.setupGroupButton()
+            } else {
+                self.setupLogOutButton()
+            }
+            self.collectionView?.reloadData()
+            self.paginatePosts()
+        }
+        
+        Database.fetchAllPostIDWithCreatorUID(creatoruid: uid) { (postIds) in
+            
+            self.checkDisplayPostIdForDups(postIds: postIds)
+            self.fetchPostIds = self.fetchPostIds + postIds
+            self.fetchPostIds.sort(by: { (p1, p2) -> Bool in
+                return p1.creationDate.compare(p2.creationDate) == .orderedDescending
+            })
+            print("Current User Posts: ", self.fetchPostIds.count)
+            self.paginatePosts()
+            
+        }
+    }
+    
+    fileprivate func checkDisplayPostIdForDups( postIds : [PostId]){
+        
+        for postId in postIds {
+            
+            let postIdCheck = postId.id
+            if let dupIndex = self.fetchPostIds.index(where: { (item) -> Bool in
+                item.id == postIdCheck
+            }) {
+                self.fetchPostIds.remove(at: dupIndex)
+                print("Deleted from fetchPostIds Dup Post ID: ", postIdCheck)
+            }
+        }
+    }
+    
+    
+    func clearFilter(){
+        self.resultSearchController?.searchBar.text = nil
+        self.filterCaption = nil
+        self.filterLocation = nil
+        self.filterGroup = defaultGroup
+        self.filterRange = defaultRange
+        self.filterSort = defaultSort
+        self.filterTime = defaultTime
+    }
+    
+    func refreshPagination(){
+        self.isFinishedPaging = false
+        self.fetchedPostCount = 0
+    }
+    
+    
+    func finishPaginationCheck(){
+        
+        if self.fetchedPostCount == (self.fetchPostIds.count) {
+            self.isFinishedPaging = true
+        }
+        
+        if self.displayedPosts.count < 1 && self.isFinishedPaging != true {
+            print("No Display Pagination Check Paginate")
+            self.paginatePosts()
+        } else {
+            DispatchQueue.main.async(execute: { self.collectionView?.reloadData() })
+            
+            if self.collectionView?.numberOfItems(inSection: 0) != 0 && self.displayedPosts.count < 4{
+                let indexPath = IndexPath(item: 0, section: 0)
+                self.collectionView?.scrollToItem(at: indexPath, at: .bottom, animated: true)
+            }
+        }
+    }
+    
     
     
     fileprivate func paginatePosts(){
         
-        guard let uid = self.user?.uid else {return}
-        let ref = Database.database().reference().child("userposts").child(uid)
-        //var query = ref.queryOrderedByKey()
-        var query = ref.queryOrdered(byChild: "creationDate")
+        print("Start Paginate Loop FetchPostCount: ", self.fetchedPostCount)
+        let paginateFetchPostSize = 4
+        var paginateFetchPostsLimit = min(self.fetchedPostCount + paginateFetchPostSize, self.fetchPostIds.count)
         
-        print(allPosts.count)
-        if allPosts.count > 0 {
-            let value = allPosts.last?.creationDate.timeIntervalSince1970
-            let queryEnd = allPosts.last?.id
-            print("Query Ending", allPosts.last?.id)
-            query = query.queryEnding(atValue: value)
-        }
-        
-        let thisGroup = DispatchGroup()
-        
-        query.queryLimited(toLast: 6).observeSingleEvent(of: .value, with: { (snapshot) in
-            
-            guard var allPostIds = snapshot.value as? [String: Any] else {return}
-            
-            if allPostIds.count < 4 {
-                self.isFinishedPaging = true
-            }
-            
-//            allPostIds.sorted(by: { $0["creationDate"] > $1["creationDate] })
-            print("allpostIds Queried",allPostIds)
-            
-                let intIndex = allPostIds.count // where intIndex < myDictionary.count
-                let index = allPostIds.index(allPostIds.startIndex, offsetBy: intIndex - 1)
-                let testindex = allPostIds.index(allPostIds.startIndex, offsetBy: 1)
- //               let deleteindex = allPostIds.index(forKey: (self.allPosts.last?.id)!)
-                
- //               print("DeletedUID ",allPostIds[deleteindex!])
-                
-            if self.allPosts.count > 0 {
-                print("before delete", allPostIds.count)
-                
-//                let allPostCount = max(0,self.allPosts.count - 5)
-                
-                let lastSixPost =  self.allPosts.suffix(6)
-  //              let lastSixPost = self.allPosts[(allPostCount-1)..<self.allPosts.count-1]
-                
-                var lastSixPostIds: [String] = []
-                
-                for post in lastSixPost{
-                    lastSixPostIds.append(post.id!)
-            }
-                
-                print("Last Six Post Ids: ",lastSixPostIds)
+        for i in self.fetchedPostCount ..< paginateFetchPostsLimit  {
 
-                for post in allPostIds {
-                    print("Post Key :", post.key)
-                    if lastSixPostIds.contains(post.key){
-                    print("Deleting ", post.key)
-                    allPostIds.removeValue(forKey: post.key)
+            let fetchPostId = fetchPostIds[i]
+
+            // Filter Time
+            if self.filterTime != self.defaultTime  {
+                
+                let calendar = Calendar.current
+                let tagHour = Double(calendar.component(.hour, from: fetchPostId.tagTime))
+                guard let filterIndex = FilterSortTimeDefault.index(of: self.filterTime!) else {return}
+                
+                if FilterSortTimeStart[filterIndex] > tagHour || tagHour > FilterSortTimeEnd[filterIndex] {
+                    // Skip Post If not within selected time frame
+                    //                    print("Skipped Post: ", fetchPostId.id, " TagHour: ",tagHour, " Start: ", FilterSortTimeStart[filterIndex]," End: ",FilterSortTimeEnd[filterIndex])
+                    self.fetchedPostCount += 1
+                    if self.fetchedPostCount == paginateFetchPostsLimit {
+                        // End of loop functions are checked every iteration. Skipping iteration skipped the check
+                        //                        print("Finish Paging @ TimeCheck")
+                        NotificationCenter.default.post(name: UserProfileController.finishProfilePaginationNotificationName, object: nil)
+                    }
+                    continue
+                }
+            }
+            
+            // Filter Group
+            
+            if self.filterGroup != self.defaultGroup{
+                if CurrentUser.groupUids.contains(fetchPostId.creatorUID!){
+                } else {
+                    // Skip Post if not in group
+                    //                    print("Skipped Post: ", fetchPostId.id, " Creator Not in Group: ",fetchPostId.creatorUID!)
+                    
+                    self.fetchedPostCount += 1
+                    if self.fetchedPostCount == paginateFetchPostsLimit {
+                        // End of loop functions are checked every iteration. Skipping iteration skipped the check
+                        //                        print("Finish Paging @ GroupCheck")
+                        NotificationCenter.default.post(name: UserProfileController.finishProfilePaginationNotificationName, object: nil)
+                    }
+                    continue
+                }
+            }
+            
+            // Fetch Posts
+            
+            Database.fetchPostWithPostID(postId: fetchPostId.id, completion: { (post, error) in
+                self.fetchedPostCount += 1
+                
+                guard let post = post else {return}
+                var tempPost = [post]
+                
+                if let error = error {
+                    //                    print("Failed to fetch post for: ", fetchPostId.id)
+                    return
+                }
+                
+                // Filter Caption (Only possible after grabbing post)
+                
+                if self.filterCaption != nil && self.filterCaption != "" {
+                    guard let searchedText = self.filterCaption else {return}
+                    tempPost = tempPost.filter { (post) -> Bool in
                         
+                        return post.caption.lowercased().contains(searchedText.lowercased()) || post.emoji.contains(searchedText.lowercased()) || post.locationName.lowercased().contains(searchedText.lowercased()) || post.locationAdress.lowercased().contains(searchedText.lowercased())
                     }
                 }
                 
-                print("after delete", allPostIds.count)
-            }
-            
-            guard let user = self.user else {return}
-            
-            allPostIds.forEach({ (key,value) in
+                if tempPost.count > 0 {print("Adding Temp Post id: ", tempPost[0].id)}
                 
-                thisGroup.enter()
+                self.displayedPosts += tempPost
                 
-                Database.fetchPostWithUIDAndPostID(creatoruid: user.uid, postId: key, completion: { (fetchedPost) in
-
-                self.allPosts.append(fetchedPost)
-                    print(self.allPosts.count, fetchedPost.id)
-                thisGroup.leave()
+                //                print("Current: ", i, "fetchedPostCount: ", self.fetchedPostCount, "Total: ", self.fetchPostIds.count, "Display: ", self.displayedPosts.count, "finished: ", self.isFinishedPaging, "paginate:", paginateFetchPostsLimit)
+                
+                if self.fetchedPostCount == paginateFetchPostsLimit {
                     
-                })
+                    //                print("Finish Paging")
+                    NotificationCenter.default.post(name: UserProfileController.finishProfilePaginationNotificationName, object: nil)
+                    
+                }
             })
             
-            thisGroup.notify(queue: .main) {
-                print(self.allPosts.count)
-                self.allPosts.sort(by: { (p1, p2) -> Bool in
-                    return p1.creationDate.compare(p2.creationDate) == .orderedDescending })
-                
-                self.collectionView?.reloadData()
-            }
-         
-            self.allPosts.forEach({ (post) in
-                print(post.id ?? "")
-
-            })
-            
-        }) { (err) in
-            print("Failed to Paginate for Posts:", err)
         }
-        
-        
     }
+    
     
     
 //    fileprivate func paginatePosts(){
 //        
 //        guard let uid = self.user?.uid else {return}
-//        let ref = Database.database().reference().child("posts").child(uid)
+//        let ref = Database.database().reference().child("userposts").child(uid)
 //        //var query = ref.queryOrderedByKey()
 //        var query = ref.queryOrdered(byChild: "creationDate")
 //        
-//        print(posts.count)
-//        if posts.count > 0 {
-//            let value = posts.last?.creationDate.timeIntervalSince1970
-//            print(posts)
-//            print(value)
+//        print(allPosts.count)
+//        if allPosts.count > 0 {
+//            let value = allPosts.last?.creationDate.timeIntervalSince1970
+//            let queryEnd = allPosts.last?.id
+//            print("Query Ending", allPosts.last?.id)
 //            query = query.queryEnding(atValue: value)
 //        }
 //        
+//        let thisGroup = DispatchGroup()
+//        
 //        query.queryLimited(toLast: 6).observeSingleEvent(of: .value, with: { (snapshot) in
 //            
-//            guard var allObjects = snapshot.children.allObjects as? [DataSnapshot] else {return}
-//            allObjects.reverse()
+//            guard var allPostIds = snapshot.value as? [String: Any] else {return}
 //            
-//            if allObjects.count < 4 {
+//            if allPostIds.count < 4 {
 //                self.isFinishedPaging = true
 //            }
 //            
-//            if self.posts.count > 0 && allObjects.count > 0 {
-//                allObjects.removeFirst()
+////            allPostIds.sorted(by: { $0["creationDate"] > $1["creationDate] })
+//            print("allpostIds Queried",allPostIds)
+//            
+//                let intIndex = allPostIds.count // where intIndex < myDictionary.count
+//                let index = allPostIds.index(allPostIds.startIndex, offsetBy: intIndex - 1)
+//                let testindex = allPostIds.index(allPostIds.startIndex, offsetBy: 1)
+// //               let deleteindex = allPostIds.index(forKey: (self.allPosts.last?.id)!)
+//                
+// //               print("DeletedUID ",allPostIds[deleteindex!])
+//                
+//            if self.allPosts.count > 0 {
+//                print("before delete", allPostIds.count)
+//                
+////                let allPostCount = max(0,self.allPosts.count - 5)
+//                
+//                let lastSixPost =  self.allPosts.suffix(6)
+//  //              let lastSixPost = self.allPosts[(allPostCount-1)..<self.allPosts.count-1]
+//                
+//                var lastSixPostIds: [String] = []
+//                
+//                for post in lastSixPost{
+//                    lastSixPostIds.append(post.id!)
+//            }
+//                
+//                print("Last Six Post Ids: ",lastSixPostIds)
+//
+//                for post in allPostIds {
+//                    print("Post Key :", post.key)
+//                    if lastSixPostIds.contains(post.key){
+//                    print("Deleting ", post.key)
+//                    allPostIds.removeValue(forKey: post.key)
+//                        
+//                    }
+//                }
+//                
+//                print("after delete", allPostIds.count)
 //            }
 //            
 //            guard let user = self.user else {return}
 //            
-//            allObjects.forEach({ (snapshot) in
+//            allPostIds.forEach({ (key,value) in
 //                
-//                guard let dictionary = snapshot.value as? [String: Any] else {return}
+//                thisGroup.enter()
 //                
-//                
-//                var post = Post(user: user, dictionary: dictionary)
-//                post.id = snapshot.key
-//                post.creatorUID = uid
-//                guard let uid = Auth.auth().currentUser?.uid else {return}
-//                guard let key = post.id else {return}
-//                
-//                // Check for Likes and Bookmarks
-//                
-//                
-//                Database.database().reference().child("likes").child(uid).child(key).observeSingleEvent(of: .value, with: { (snapshot) in
+//                Database.fetchPostWithUIDAndPostID(creatoruid: user.uid, postId: key, completion: { (fetchedPost) in
+//
+//                self.allPosts.append(fetchedPost)
+//                    print(self.allPosts.count, fetchedPost.id)
+//                thisGroup.leave()
 //                    
-//                    if let value = snapshot.value as? Int, value == 1 {
-//                        post.hasLiked = true
-//                    } else {
-//                        post.hasLiked = false
-//                    }
-//                    
-//                    
-//                    
-//                    
-//                    Database.database().reference().child("bookmarks").child(uid).child(key).observeSingleEvent(of: .value, with: { (snapshot) in
-//                        
-//                        if let value = snapshot.value as? Int, value == 1 {
-//                            post.hasBookmarked = true
-//                        } else {
-//                            post.hasBookmarked = false
-//                        }
-//                        
-//                        self.posts.append(post)
-//                        
-//                        
-//                    }, withCancel: { (err) in
-//                        print("Failed to fetch bookmark info for post:", err)
-//                    })
-//                    
-//                }, withCancel: { (err) in
-//                    print("Failed to fetch like info for post:", err)
 //                })
-//                
-//                
-//                // Have 1 second delay so that Firebase returns like/bookmark info with post before reloading collectionview
-//                // The problem is that reloading data after every single new post gets added (after getting checked) calls paginate post again before
-//                // the other posts are finished, so it creates duplicates posts
-//                
-//                
-//                let when = DispatchTime.now() + 0.25 // change 2 to desired number of seconds
-//                DispatchQueue.main.asyncAfter(deadline: when) {
-//                    self.collectionView?.reloadData()
-//                }
-//                
-//                
 //            })
 //            
-//            
-//            self.posts.forEach({ (post) in
-//                print(post.id ?? "")
+//            thisGroup.notify(queue: .main) {
+//                print(self.allPosts.count)
+//                self.allPosts.sort(by: { (p1, p2) -> Bool in
+//                    return p1.creationDate.compare(p2.creationDate) == .orderedDescending })
 //                
+//                self.collectionView?.reloadData()
+//            }
+//         
+//            self.allPosts.forEach({ (post) in
+//                print(post.id ?? "")
+//
 //            })
 //            
 //        }) { (err) in
@@ -548,8 +779,7 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
 //        
 //        
 //    }
-//    
-    
+
     
     fileprivate func fetchOrderedPosts() {
         
@@ -566,7 +796,7 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
             let post = Post(user: user, dictionary: dictionary)
 
 //            Helps insert new photos at the front
-            self.allPosts.insert(post, at: 0)
+            self.displayedPosts.insert(post, at: 0)
 //            self.posts.append(post)
 
             self.collectionView?.reloadData()
@@ -618,7 +848,7 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
     
     
     override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return allPosts.count
+        return displayedPosts.count
     }
     
     override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
@@ -626,7 +856,7 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
 //        print("collectionview post count", self.allPosts.count)
 //        print("isfinishedpaging",self.isFinishedPaging)
 //        print(indexPath.item)
-        if indexPath.item == self.allPosts.count - 1 && !isFinishedPaging{
+        if indexPath.item == self.displayedPosts.count - 1 && !isFinishedPaging{
             
             paginatePosts()
         }
@@ -634,13 +864,13 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
         
         if isGridView {
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: cellId, for: indexPath) as! UserProfilePhotoCell
-            cell.post = allPosts[indexPath.item]
+            cell.post = displayedPosts[indexPath.item]
             cell.delegate = self
             return cell
         } else {
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: homePostCellId, for: indexPath) as! HomePostCell
             cell.enableDelete = true
-            cell.post = allPosts[indexPath.item]
+            cell.post = displayedPosts[indexPath.item]
             cell.delegate = self
             return cell
         }
@@ -679,6 +909,7 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
         
         header.user = self.user
         header.delegate = self
+        header.defaultSearchBar.text = self.filterCaption
                 
         return header
         
@@ -688,30 +919,7 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
         return CGSize(width: view.frame.width, height: 200)
     }
     
-    
-    fileprivate func fetchUser() {
 
-        // uid using userID if exist, if not, uses current user, if not uses blank
-        
-        let uid = userId ?? Auth.auth().currentUser?.uid ?? ""
-        
-//        guard let uid = Auth.auth().currentUser?.uid else {return}
-        
-        Database.fetchUserWithUID(uid: uid) { (user) in
-            self.user = user
-            self.navigationItem.title = self.user?.username
-            if user.uid != Auth.auth().currentUser?.uid {
-                self.setupGroupButton()
-            } else {
-                self.setupLogOutButton()
-            }
-            
-            self.collectionView?.reloadData()
-            self.paginatePosts()
-            
-        }
-        
-    }
     
 }
 

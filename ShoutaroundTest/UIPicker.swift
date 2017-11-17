@@ -9,6 +9,322 @@
 //
 //import Foundation
 
+// FUNCTION TO UPDATE GPS LOCATIONS FOR EACH POST
+//
+//func updateGPSForPosts() {
+//
+//    for post in allPosts {
+//
+//        let postID = post.id
+//
+//        let ref = Database.database().reference().child("postlocations")
+//        let geoFire = GeoFire(firebaseRef: ref)
+//
+//        geoFire?.getLocationForKey(postID, withCallback: { (location, error) in
+//            if (error != nil) {
+//                print("An error occurred getting the location for \"firebase-hq\": \(error?.localizedDescription)")
+//            } else if (location != nil) {
+//
+//                let uploadedLocationGPSLatitude = String(format: "%f", (location?.coordinate.latitude)!)
+//                let uploadedlocationGPSLongitude = String(format: "%f", (location?.coordinate.longitude)!)
+//                let uploadedLocationGPS = uploadedLocationGPSLatitude + "," + uploadedlocationGPSLongitude
+//
+//                Database.database().reference().child("posts").child(post.creatorUID!).child(postID!).updateChildValues(["postLocationGPS": uploadedLocationGPS])
+//
+//
+//                print("Location for \"firebase-hq\" is [\(location?.coordinate.latitude), \(location?.coordinate.longitude)]")
+//            } else {
+//                Database.database().reference().child("posts").child(post.creatorUID!).child(postID!).updateChildValues(["postLocationGPS": ""])
+//                print("GeoFire does not contain a location for \"firebase-hq\"")
+//            }
+//        })
+//        print("Updated ", post.creatorUID, "", post.id )
+//    }
+//
+//}
+
+// OLD HOMEPOST CELL DELEGATE FUNCTIONS
+
+//func didBookmark(for cell: HomePostCell) {
+//    print("Handling Like inside controller")
+//
+//    guard let indexPath = collectionView?.indexPath(for: cell) else {return}
+//
+//    var post = self.filteredPosts[indexPath.item]
+//    print(post.caption)
+//
+//
+//    guard let postId = post.id else {return}
+//    guard let uid = Auth.auth().currentUser?.uid else {return}
+//    let values = [uid: post.hasBookmarked == true ? 0 : 1]
+//
+//
+//
+//    Database.database().reference().child("bookmarks").child(postId).updateChildValues(values) { (err, ref) in
+//        if let err = err {
+//            print("Failed to bookmark post", err)
+//            return
+//        }
+//        print("Succesfully Saved Bookmark")
+//        post.hasBookmarked = !post.hasBookmarked
+//
+//        self.filteredPosts[indexPath.item] = post
+//        self.collectionView?.reloadItems(at: [indexPath])
+//
+//    }
+//
+//
+//}
+//
+//
+//func didLike(for cell: HomePostCell) {
+//    print("Handling Like inside controller")
+//
+//    guard let indexPath = collectionView?.indexPath(for: cell) else {return}
+//
+//    var post = self.filteredPosts[indexPath.item]
+//    print(post.caption)
+//
+//
+//    guard let postId = post.id else {return}
+//    guard let uid = Auth.auth().currentUser?.uid else {return}
+//    let values = [uid: post.hasLiked == true ? 0 : 1]
+//
+//
+//
+//    Database.database().reference().child("likes").child(postId).updateChildValues(values) { (err, ref) in
+//        if let err = err {
+//            print("Failed to like post", err)
+//            return
+//        }
+//        print("Succesfully Saved Likes")
+//        post.hasLiked = !post.hasLiked
+//
+//        self.filteredPosts[indexPath.item] = post
+//        self.collectionView?.reloadItems(at: [indexPath])
+//
+//    }
+//
+//
+//}
+
+
+//
+//
+//func didTapUser(post: Post) {
+//    let userProfileController = UserProfileController(collectionViewLayout: UICollectionViewFlowLayout())
+//    userProfileController.userId = post.user.uid
+//
+//    navigationController?.pushViewController(userProfileController, animated: true)
+//}
+//
+//func didSendMessage(post:Post){
+//
+//    print("emailtest")
+//    let mailgun = Mailgun.client(withDomain: "sandbox036bf1de5ba44e7e8ad4f19b9cc5b7d8.mailgun.org", apiKey: "key-2562988360d4f7f8a1fcc6f3647b446a")
+//
+//    let message = MGMessage(from:"Excited User <someone@sample.org>",
+//                            to:"Jay Baird <planert41@gmail.com>",
+//                            subject:"Mailgun is awesome!",
+//                            body:("<html>Inline image here: <img src=cid:image01.jpg></html>"))!
+//
+//
+//
+//    let postImage = CustomImageView()
+//    postImage.loadImage(urlString: post.imageUrl)
+//
+//    //        message.add(postImage.image, withName: "image01", type: .JPEGFileType, inline: true)
+//    message.html = "<html>Inline image here: <img src="+post.imageUrl+" width = \"25%\" height = \"25%\"/></html>"
+//
+//
+//    // someImage: UIImage
+//    // type can be either .JPEGFileType or .PNGFileType
+//    // message.add(postImage.image, withName: "image01", type:.PNGFileType)
+//
+//
+//    mailgun?.send(message, success: { (success) in
+//        print("success sending email")
+//    }, failure: { (error) in
+//        print(error)
+//    })
+//
+//}
+
+
+
+
+//    fileprivate func fetchPostsWithUser(user: User){
+//
+////        guard let uid = Auth.auth().currentUser?.uid  else {return}
+//
+//        let ref = Database.database().reference().child("posts").child(user.uid)
+//
+//        ref.observeSingleEvent(of: .value, with: {(snapshot) in
+//            //print(snapshot.value)
+//
+//
+//            guard let dictionaries = snapshot.value as? [String: Any] else {return}
+//
+//            dictionaries.forEach({ (key,value) in
+//                //print("Key \(key), Value: \(value)")
+//
+//                guard let dictionary = value as? [String: Any] else {return}
+//
+//                //let imageUrl = dictionary["imageUrl"] as? String
+//                //print("imageUrl: \(imageUrl)")
+//                var post = Post(user: user, dictionary: dictionary)
+//                post.id = key
+//                post.creatorUID = user.uid
+//
+//
+//                guard let uid = Auth.auth().currentUser?.uid else {return}
+//
+//                Database.database().reference().child("likes").child(uid).child(key).observeSingleEvent(of: .value, with: { (snapshot) in
+//
+//                    if let value = snapshot.value as? Int, value == 1 {
+//                        post.hasLiked = true
+//                    } else {
+//                        post.hasLiked = false
+//                    }
+//
+//                    Database.database().reference().child("bookmarks").child(uid).child(key).observeSingleEvent(of: .value, with: { (snapshot) in
+//
+//                        let dictionaries = snapshot.value as? [String: Any]
+//
+//                        if let value = dictionaries?["bookmarked"] as? Int, value == 1 {
+//                            post.hasBookmarked = true
+//                        } else {
+//                            post.hasBookmarked = false
+//                        }
+//
+//
+//                    self.allPosts.append(post)
+//
+//                    self.allPosts.sort(by: { (p1, p2) -> Bool in
+//                        return p1.creationDate.compare(p2.creationDate) == .orderedDescending
+//                        })
+//
+//                    self.filteredPosts = self.allPosts
+//                    self.collectionView?.reloadData()
+//
+//                    }, withCancel: { (err) in
+//                        print("Failed to fetch bookmark info for post:", err)
+//                    })
+//
+//
+//                }, withCancel: { (err) in
+//                    print("Failed to fetch like info for post:", err)
+//                })
+//            })
+//
+//        }) { (err) in print("Failed to fetchposts:", err) }
+//
+//
+//    }
+
+
+
+//    fileprivate func paginatePosts(){
+//
+//        guard let uid = self.user?.uid else {return}
+//        let ref = Database.database().reference().child("posts").child(uid)
+//        //var query = ref.queryOrderedByKey()
+//        var query = ref.queryOrdered(byChild: "creationDate")
+//
+//        print(posts.count)
+//        if posts.count > 0 {
+//            let value = posts.last?.creationDate.timeIntervalSince1970
+//            print(posts)
+//            print(value)
+//            query = query.queryEnding(atValue: value)
+//        }
+//
+//        query.queryLimited(toLast: 6).observeSingleEvent(of: .value, with: { (snapshot) in
+//
+//            guard var allObjects = snapshot.children.allObjects as? [DataSnapshot] else {return}
+//            allObjects.reverse()
+//
+//            if allObjects.count < 4 {
+//                self.isFinishedPaging = true
+//            }
+//
+//            if self.posts.count > 0 && allObjects.count > 0 {
+//                allObjects.removeFirst()
+//            }
+//
+//            guard let user = self.user else {return}
+//
+//            allObjects.forEach({ (snapshot) in
+//
+//                guard let dictionary = snapshot.value as? [String: Any] else {return}
+//
+//
+//                var post = Post(user: user, dictionary: dictionary)
+//                post.id = snapshot.key
+//                post.creatorUID = uid
+//                guard let uid = Auth.auth().currentUser?.uid else {return}
+//                guard let key = post.id else {return}
+//
+//                // Check for Likes and Bookmarks
+//
+//
+//                Database.database().reference().child("likes").child(uid).child(key).observeSingleEvent(of: .value, with: { (snapshot) in
+//
+//                    if let value = snapshot.value as? Int, value == 1 {
+//                        post.hasLiked = true
+//                    } else {
+//                        post.hasLiked = false
+//                    }
+//
+//
+//
+//
+//                    Database.database().reference().child("bookmarks").child(uid).child(key).observeSingleEvent(of: .value, with: { (snapshot) in
+//
+//                        if let value = snapshot.value as? Int, value == 1 {
+//                            post.hasBookmarked = true
+//                        } else {
+//                            post.hasBookmarked = false
+//                        }
+//
+//                        self.posts.append(post)
+//
+//
+//                    }, withCancel: { (err) in
+//                        print("Failed to fetch bookmark info for post:", err)
+//                    })
+//
+//                }, withCancel: { (err) in
+//                    print("Failed to fetch like info for post:", err)
+//                })
+//
+//
+//                // Have 1 second delay so that Firebase returns like/bookmark info with post before reloading collectionview
+//                // The problem is that reloading data after every single new post gets added (after getting checked) calls paginate post again before
+//                // the other posts are finished, so it creates duplicates posts
+//
+//
+//                let when = DispatchTime.now() + 0.25 // change 2 to desired number of seconds
+//                DispatchQueue.main.asyncAfter(deadline: when) {
+//                    self.collectionView?.reloadData()
+//                }
+//
+//
+//            })
+//
+//
+//            self.posts.forEach({ (post) in
+//                print(post.id ?? "")
+//
+//            })
+//
+//        }) { (err) in
+//            print("Failed to Paginate for Posts:", err)
+//        }
+//
+//
+//    }
+//
 
 
 

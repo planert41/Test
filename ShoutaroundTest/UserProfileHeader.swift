@@ -15,10 +15,11 @@ protocol UserProfileHeaderDelegate {
     func didChangeToListView()
     func didChangeToGridView()
     func didSignOut()
+    func activateSearchBar()
 }
 
 
-class UserProfileHeader: UICollectionViewCell, UITextFieldDelegate  {
+class UserProfileHeader: UICollectionViewCell, UITextFieldDelegate, UISearchBarDelegate  {
     
     var delegate: UserProfileHeaderDelegate?
     
@@ -305,6 +306,13 @@ class UserProfileHeader: UICollectionViewCell, UITextFieldDelegate  {
         
     }
     
+    var defaultSearchBar = UISearchBar()
+    
+    func searchBarShouldBeginEditing(_ searchBar: UISearchBar) -> Bool {
+        self.delegate?.activateSearchBar()
+        return false
+    }
+    
     fileprivate func setupBottomToolbar() {
         
         
@@ -314,20 +322,26 @@ class UserProfileHeader: UICollectionViewCell, UITextFieldDelegate  {
         let bottomDividerView = UIView()
         bottomDividerView.backgroundColor = UIColor.lightGray
         
-        let stackView = UIStackView(arrangedSubviews: [gridButton, listButton, logOutButton])
+        let stackView = UIStackView(arrangedSubviews: [gridButton, listButton])
         
         stackView.axis = .horizontal
         stackView.distribution = .fillEqually
         
+        defaultSearchBar.barTintColor = UIColor.lightGray
+        defaultSearchBar.layer.borderWidth = 0.5
+        defaultSearchBar.layer.borderColor = UIColor.lightGray.cgColor
+        defaultSearchBar.delegate = self
         
         addSubview(stackView)
         addSubview(topDividerView)
         addSubview(bottomDividerView)
+        addSubview(defaultSearchBar)
         
         
-        stackView.anchor(top: nil, left: leftAnchor, bottom: bottomAnchor, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 50)
+        stackView.anchor(top: nil, left: leftAnchor, bottom: bottomAnchor, right: nil, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 150, height: 50)
+        
+        defaultSearchBar.anchor(top: nil, left: stackView.rightAnchor, bottom: bottomAnchor, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 50)
 
-        
         topDividerView.anchor(top: stackView.topAnchor, left: leftAnchor, bottom: nil, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0.5)
         
         

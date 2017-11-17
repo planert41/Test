@@ -278,7 +278,7 @@ class BookMarkController: UIViewController, UICollectionViewDelegate, UICollecti
         let bottomDividerView = UIView()
         bottomDividerView.backgroundColor = UIColor.lightGray
         
-        defaultSearchBar.barTintColor = UIColor.lightGray
+        defaultSearchBar.barTintColor = UIColor.rgb(red: 128, green: 191, blue: 255)
 //        defaultSearchBar.backgroundColor = UIColor.gray
         defaultSearchBar.layer.borderWidth = 0.5
         defaultSearchBar.layer.borderColor = UIColor.lightGray.cgColor

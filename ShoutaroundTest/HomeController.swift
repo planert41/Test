@@ -594,7 +594,6 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     
     fileprivate func checkDisplayPostIdForDups( postIds : [PostId]){
         
-        
         for postId in postIds {
             
             let postIdCheck = postId.id
@@ -756,19 +755,6 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         
         navigationItem.leftBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "search_selected").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(openSearch))
         
-
-//        rangeImageButton.image = #imageLiteral(resourceName: "GeoFence").withRenderingMode(.alwaysOriginal)
-//
-//        let image = #imageLiteral(resourceName: "shoutaround").withRenderingMode(.alwaysOriginal).resizeImageWith(newSize: CGSize(width: 20, height: 20))
-        
-//        var rangeImageButton = UIImageView(frame: CGRectMake(0, 0, 20, 20))
-//        rangeImageButton.image = #imageLiteral(resourceName: "filter").withRenderingMode(.alwaysOriginal)
-//        rangeImageButton.contentMode = .scaleAspectFit
-//        rangeImageButton.sizeToFit()
-//        rangeImageButton.backgroundColor = UIColor.clear
-//        
-//        rangeImageButton.addGestureRecognizer(singleTap)
-        
         if self.filterGroup == defaultGroup && self.filterRange == defaultRange && self.filterTime == defaultTime && self.filterGroup == "All" {
             filterButton.image = #imageLiteral(resourceName: "blankfilter").withRenderingMode(.alwaysOriginal)
             filterButton.backgroundColor = UIColor.clear
@@ -777,30 +763,6 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
 //            filterButton.backgroundColor = UIColor.orange
             filterButton.addGestureRecognizer(singleTap)
         }
-        
-        
-//        if self.filterGroup != "All" && self.filterGroup != nil{
-//            filterButton.backgroundColor = UIColor.mainBlue()
-//        } else {
-//            filterButton.backgroundColor = UIColor.clear
-//        }
-        
-//        if self.filterRange == nil || self.filterRange == geoFilterRange[geoFilterRange.endIndex - 1] {
-//            filterButton.image = #imageLiteral(resourceName: "filter").withRenderingMode(.alwaysOriginal)
-//            filterButton.backgroundColor = UIColor.mainBlue()
-//            filterButton.addGestureRecognizer(singleTap)
-//        } else {
-//            let rangeIndex = geoFilterRange.index(of: self.filterRange!)
-//            filterButton.image = #imageLiteral(resourceName: "filter").withRenderingMode(.alwaysOriginal)
-//            filterButton.backgroundColor = UIColor.mainBlue()
-//            
-//            filterButton.addGestureRecognizer(singleTap)
-//        }
-//
-//        if self.filterGroup == defaultGroup && self.filterRange == defaultRange && self.filterTime == defaultTime {
-//            filterButton.image = #imageLiteral(resourceName: "filter").withRenderingMode(.alwaysOriginal)
-//            filterButton.backgroundColor = UIColor.clear
-//        }
         
         let rangeBarButton = UIBarButtonItem.init(customView: filterButton)
         navigationItem.rightBarButtonItem = rangeBarButton
@@ -1011,219 +973,6 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     }
     
 }
-
-// FUNCTION TO UPDATE GPS LOCATIONS FOR EACH POST
-//
-//func updateGPSForPosts() {
-//    
-//    for post in allPosts {
-//        
-//        let postID = post.id
-//        
-//        let ref = Database.database().reference().child("postlocations")
-//        let geoFire = GeoFire(firebaseRef: ref)
-//        
-//        geoFire?.getLocationForKey(postID, withCallback: { (location, error) in
-//            if (error != nil) {
-//                print("An error occurred getting the location for \"firebase-hq\": \(error?.localizedDescription)")
-//            } else if (location != nil) {
-//                
-//                let uploadedLocationGPSLatitude = String(format: "%f", (location?.coordinate.latitude)!)
-//                let uploadedlocationGPSLongitude = String(format: "%f", (location?.coordinate.longitude)!)
-//                let uploadedLocationGPS = uploadedLocationGPSLatitude + "," + uploadedlocationGPSLongitude
-//                
-//                Database.database().reference().child("posts").child(post.creatorUID!).child(postID!).updateChildValues(["postLocationGPS": uploadedLocationGPS])
-//                
-//                
-//                print("Location for \"firebase-hq\" is [\(location?.coordinate.latitude), \(location?.coordinate.longitude)]")
-//            } else {
-//                Database.database().reference().child("posts").child(post.creatorUID!).child(postID!).updateChildValues(["postLocationGPS": ""])
-//                print("GeoFire does not contain a location for \"firebase-hq\"")
-//            }
-//        })
-//        print("Updated ", post.creatorUID, "", post.id )
-//    }
-//    
-//}
-
-// OLD HOMEPOST CELL DELEGATE FUNCTIONS
-
-//func didBookmark(for cell: HomePostCell) {
-//    print("Handling Like inside controller")
-//    
-//    guard let indexPath = collectionView?.indexPath(for: cell) else {return}
-//    
-//    var post = self.filteredPosts[indexPath.item]
-//    print(post.caption)
-//    
-//    
-//    guard let postId = post.id else {return}
-//    guard let uid = Auth.auth().currentUser?.uid else {return}
-//    let values = [uid: post.hasBookmarked == true ? 0 : 1]
-//    
-//    
-//    
-//    Database.database().reference().child("bookmarks").child(postId).updateChildValues(values) { (err, ref) in
-//        if let err = err {
-//            print("Failed to bookmark post", err)
-//            return
-//        }
-//        print("Succesfully Saved Bookmark")
-//        post.hasBookmarked = !post.hasBookmarked
-//        
-//        self.filteredPosts[indexPath.item] = post
-//        self.collectionView?.reloadItems(at: [indexPath])
-//        
-//    }
-//    
-//    
-//}
-//
-//
-//func didLike(for cell: HomePostCell) {
-//    print("Handling Like inside controller")
-//    
-//    guard let indexPath = collectionView?.indexPath(for: cell) else {return}
-//    
-//    var post = self.filteredPosts[indexPath.item]
-//    print(post.caption)
-//    
-//    
-//    guard let postId = post.id else {return}
-//    guard let uid = Auth.auth().currentUser?.uid else {return}
-//    let values = [uid: post.hasLiked == true ? 0 : 1]
-//    
-//    
-//    
-//    Database.database().reference().child("likes").child(postId).updateChildValues(values) { (err, ref) in
-//        if let err = err {
-//            print("Failed to like post", err)
-//            return
-//        }
-//        print("Succesfully Saved Likes")
-//        post.hasLiked = !post.hasLiked
-//        
-//        self.filteredPosts[indexPath.item] = post
-//        self.collectionView?.reloadItems(at: [indexPath])
-//        
-//    }
-//    
-//    
-//}
-
-
-//
-//
-//func didTapUser(post: Post) {
-//    let userProfileController = UserProfileController(collectionViewLayout: UICollectionViewFlowLayout())
-//    userProfileController.userId = post.user.uid
-//    
-//    navigationController?.pushViewController(userProfileController, animated: true)
-//}
-//
-//func didSendMessage(post:Post){
-//    
-//    print("emailtest")
-//    let mailgun = Mailgun.client(withDomain: "sandbox036bf1de5ba44e7e8ad4f19b9cc5b7d8.mailgun.org", apiKey: "key-2562988360d4f7f8a1fcc6f3647b446a")
-//    
-//    let message = MGMessage(from:"Excited User <someone@sample.org>",
-//                            to:"Jay Baird <planert41@gmail.com>",
-//                            subject:"Mailgun is awesome!",
-//                            body:("<html>Inline image here: <img src=cid:image01.jpg></html>"))!
-//    
-//    
-//    
-//    let postImage = CustomImageView()
-//    postImage.loadImage(urlString: post.imageUrl)
-//    
-//    //        message.add(postImage.image, withName: "image01", type: .JPEGFileType, inline: true)
-//    message.html = "<html>Inline image here: <img src="+post.imageUrl+" width = \"25%\" height = \"25%\"/></html>"
-//    
-//    
-//    // someImage: UIImage
-//    // type can be either .JPEGFileType or .PNGFileType
-//    // message.add(postImage.image, withName: "image01", type:.PNGFileType)
-//    
-//    
-//    mailgun?.send(message, success: { (success) in
-//        print("success sending email")
-//    }, failure: { (error) in
-//        print(error)
-//    })
-//    
-//}
-
-
-
-
-//    fileprivate func fetchPostsWithUser(user: User){
-//
-////        guard let uid = Auth.auth().currentUser?.uid  else {return}
-//
-//        let ref = Database.database().reference().child("posts").child(user.uid)
-//
-//        ref.observeSingleEvent(of: .value, with: {(snapshot) in
-//            //print(snapshot.value)
-//
-//
-//            guard let dictionaries = snapshot.value as? [String: Any] else {return}
-//
-//            dictionaries.forEach({ (key,value) in
-//                //print("Key \(key), Value: \(value)")
-//
-//                guard let dictionary = value as? [String: Any] else {return}
-//
-//                //let imageUrl = dictionary["imageUrl"] as? String
-//                //print("imageUrl: \(imageUrl)")
-//                var post = Post(user: user, dictionary: dictionary)
-//                post.id = key
-//                post.creatorUID = user.uid
-//
-//
-//                guard let uid = Auth.auth().currentUser?.uid else {return}
-//
-//                Database.database().reference().child("likes").child(uid).child(key).observeSingleEvent(of: .value, with: { (snapshot) in
-//
-//                    if let value = snapshot.value as? Int, value == 1 {
-//                        post.hasLiked = true
-//                    } else {
-//                        post.hasLiked = false
-//                    }
-//
-//                    Database.database().reference().child("bookmarks").child(uid).child(key).observeSingleEvent(of: .value, with: { (snapshot) in
-//
-//                        let dictionaries = snapshot.value as? [String: Any]
-//
-//                        if let value = dictionaries?["bookmarked"] as? Int, value == 1 {
-//                            post.hasBookmarked = true
-//                        } else {
-//                            post.hasBookmarked = false
-//                        }
-//
-//
-//                    self.allPosts.append(post)
-//
-//                    self.allPosts.sort(by: { (p1, p2) -> Bool in
-//                        return p1.creationDate.compare(p2.creationDate) == .orderedDescending
-//                        })
-//
-//                    self.filteredPosts = self.allPosts
-//                    self.collectionView?.reloadData()
-//
-//                    }, withCancel: { (err) in
-//                        print("Failed to fetch bookmark info for post:", err)
-//                    })
-//
-//
-//                }, withCancel: { (err) in
-//                    print("Failed to fetch like info for post:", err)
-//                })
-//            })
-//
-//        }) { (err) in print("Failed to fetchposts:", err) }
-//
-//
-//    }
 
 
 
