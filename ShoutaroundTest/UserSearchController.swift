@@ -95,7 +95,7 @@ class UserSearchController: UICollectionViewController, UICollectionViewDelegate
         
         searchBar.isHidden = true
         searchBar.resignFirstResponder()
-        let userProfileController = UserProfileController(collectionViewLayout: UICollectionViewFlowLayout())
+        let userProfileController = UserProfileController(collectionViewLayout: StickyHeadersCollectionViewFlowLayout())
         userProfileController.userId = user.uid
         navigationController?.pushViewController(userProfileController, animated: true)
         

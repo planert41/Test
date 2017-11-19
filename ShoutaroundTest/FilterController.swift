@@ -12,7 +12,7 @@ import GooglePlaces
 
 
 protocol FilterControllerDelegate: class {
-    func filterControllerFinished(selectedRange: String?, selectedLocation: CLLocation?, selectedGooglePlaceID: String?, selectedTime: String?, selectedGroup: String?, selectedSort: String?)
+    func filterControllerFinished(selectedRange: String, selectedLocation: CLLocation?, selectedGooglePlaceID: String?, selectedTime: String, selectedGroup: String, selectedSort: String)
 }
 
 class FilterController: UIViewController, CLLocationManagerDelegate, GMSAutocompleteViewControllerDelegate {
@@ -23,11 +23,11 @@ class FilterController: UIViewController, CLLocationManagerDelegate, GMSAutocomp
     let optionTime = FilterSortTimeDefault
     let locationManager = CLLocationManager()
     
-    var selectedRange: String? = nil
-    var selectedGroup: String? = nil
-    var selectedSort: String? = nil
-    var selectedTime: String? = nil
-    var currentTime: Int? = 0
+    var selectedRange: String = defaultRange
+    var selectedGroup: String = defaultGroup
+    var selectedSort: String = defaultSort
+    var selectedTime: String = defaultTime
+    var currentTime: Int = 0
     
     
     
@@ -160,23 +160,21 @@ class FilterController: UIViewController, CLLocationManagerDelegate, GMSAutocomp
         view.backgroundColor = UIColor.white
         
         distanceSegment = UISegmentedControl(items: optionRanges)
-        distanceSegment.selectedSegmentIndex = optionRanges.index(of: self.selectedRange!)!
+        distanceSegment.selectedSegmentIndex = optionRanges.index(of: self.selectedRange)!
         distanceSegment.addTarget(self, action: #selector(selectRange), for: .valueChanged)
         distanceSegment.tintColor = UIColor.orange
         
         timeSegment = UISegmentedControl(items: optionTime)
-        timeSegment.selectedSegmentIndex = optionTime.index(of: self.selectedTime!)!
+        timeSegment.selectedSegmentIndex = optionTime.index(of: self.selectedTime)!
         timeSegment.addTarget(self, action: #selector(selectTime), for: .valueChanged)
 //        timeSegment.tintColor = UIColor.orange
         
         groupSegment = UISegmentedControl(items: optionGroups)
-        groupSegment.selectedSegmentIndex = optionGroups.index(of: self.selectedGroup!)!
+        groupSegment.selectedSegmentIndex = optionGroups.index(of: self.selectedGroup)!
         groupSegment.addTarget(self, action: #selector(selectGroup), for: .valueChanged)
 
-        
-        
         sortSegment = UISegmentedControl(items: optionSort)
-        sortSegment.selectedSegmentIndex = optionSort.index(of: self.selectedSort!)!
+        sortSegment.selectedSegmentIndex = optionSort.index(of: self.selectedSort)!
         sortSegment.addTarget(self, action: #selector(selectSort), for: .valueChanged)
         
         

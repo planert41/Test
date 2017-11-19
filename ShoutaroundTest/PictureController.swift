@@ -104,7 +104,7 @@ class PictureController: UICollectionViewController, HomePostCellDelegate, UICol
     }
     
     func didTapUser(post: Post) {
-        let userProfileController = UserProfileController(collectionViewLayout: UICollectionViewFlowLayout())
+        let userProfileController = UserProfileController(collectionViewLayout: StickyHeadersCollectionViewFlowLayout())
         userProfileController.userId = post.user.uid
         
         navigationController?.pushViewController(userProfileController, animated: true)

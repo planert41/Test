@@ -20,17 +20,15 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     var displayedPosts = [Post](){
         didSet{
             if displayedPosts.count == 0 {
-                self.noResultsLabel.isHidden = false
-                self.noResultsLabel.text = "Loading"
-                let when = DispatchTime.now() + 5 // change 2 to desired number of seconds
-                DispatchQueue.main.asyncAfter(deadline: when) {
-                    self.noResultsLabel.text = "Sorry, No Results"
+                if self.isFinishedPaging {
+                    self.noResultsLabel.text = "No Results"
+                } else {
+                    self.noResultsLabel.text = "Loading"
                 }
-                
+                self.noResultsLabel.isHidden = false
             } else {
                 self.noResultsLabel.isHidden = true
                 self.noResultsLabel.text = "Loading"
-                
             }
         }
     }
@@ -61,30 +59,25 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     
 // Filter Variables
     
-    let defaultRange = geoFilterRangeDefault[geoFilterRangeDefault.endIndex - 1]
-    let defaultGroup = "All"
-    let defaultSort = FilterSortDefault[FilterSortDefault.endIndex - 1]
-    let defaultTime =  FilterSortTimeDefault[FilterSortTimeDefault.endIndex - 1]
-    
     var filterCaption: String? = nil{
         didSet{
 
         }
     }
     var filterLocation: CLLocation? = nil
-    var filterGroup: String? {
+    var filterGroup: String = defaultGroup {
         didSet{
             setupNavigationItems()
         }
     }
-    var filterRange: String? {
+    var filterRange: String = defaultRange {
         didSet{
             setupNavigationItems()
         }
     }
     
-    var filterSort: String?
-    var filterTime: String?{
+    var filterSort: String = defaultSort
+    var filterTime: String = defaultTime{
         didSet{
             setupNavigationItems()
         }
@@ -362,7 +355,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     
 // Search Delegates
     
-    func filterControllerFinished(selectedRange: String?, selectedLocation: CLLocation?, selectedGooglePlaceID: String?, selectedTime: String?, selectedGroup: String?, selectedSort: String?){
+    func filterControllerFinished(selectedRange: String, selectedLocation: CLLocation?, selectedGooglePlaceID: String?, selectedTime: String, selectedGroup: String, selectedSort: String){
         
         self.filterRange = selectedRange
         self.filterLocation = selectedLocation
@@ -375,7 +368,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     
         // No Distance Filter is Selected
         
-        guard let filterDistance = Double(self.filterRange!) else {
+        guard let filterDistance = Double(self.filterRange) else {
                     print("Invalid Distance Number or Non Distance")
                     self.clearPostIds()
                     self.fetchAllPostIds()
@@ -428,18 +421,24 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     // Home Post Search Delegates
     
     func filterCaptionSelected(searchedText: String?){
-        navigationItem.title = "Results For: " + searchedText!
-        self.filterCaption = searchedText
-        self.resultSearchController?.searchBar.text = searchedText
-        self.refreshPagination()
-        self.displayedPosts.removeAll()
-        self.collectionView?.reloadData()
-        self.paginatePosts()
         
+        if searchedText == nil {
+            self.handleRefresh()
+
+        } else {
+            navigationItem.title = "Results For: " + searchedText!
+            self.filterCaption = searchedText
+            self.resultSearchController?.searchBar.text = searchedText
+            self.refreshPagination()
+            self.displayedPosts.removeAll()
+            self.collectionView?.reloadData()
+            self.paginatePosts()
         }
+        
+    }
     
     func userSelected(uid: String?){
-        let userProfileController = UserProfileController(collectionViewLayout: UICollectionViewFlowLayout())
+        let userProfileController = UserProfileController(collectionViewLayout: StickyHeadersCollectionViewFlowLayout())
         userProfileController.userId = uid
         self.navigationController?.pushViewController(userProfileController, animated: true)
     }
@@ -616,8 +615,15 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
             self.isFinishedPaging = true
         }
         
-        if self.displayedPosts.count < 1 && self.isFinishedPaging != true {
+        if self.displayedPosts.count < 1 && self.isFinishedPaging == true {
+            print("No Results Pagination Finished")
+            self.noResultsLabel.text = "No Results"
+            self.noResultsLabel.isHidden = false
+        }
+        else if self.displayedPosts.count < 1 && self.isFinishedPaging != true {
             print("No Display Pagination Check Paginate")
+            self.noResultsLabel.text = "Loading"
+            self.noResultsLabel.isHidden = false
             self.paginatePosts()
         } else {
             DispatchQueue.main.async(execute: { self.collectionView?.reloadData() })
@@ -625,16 +631,8 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
             if self.collectionView?.numberOfItems(inSection: 0) != 0 && self.displayedPosts.count < 4{
                 let indexPath = IndexPath(item: 0, section: 0)
                 self.collectionView?.scrollToItem(at: indexPath, at: .bottom, animated: true)
+                self.noResultsLabel.isHidden = true
             }
-//            
-//            if self.collectionView?.numberOfItems(inSection: 0) != 0 {
-//                let indexPath = IndexPath(item: 0, section: 0)
-//                self.collectionView?.scrollToItem(at: indexPath, at: .bottom, animated: true)
-//                self.noResultsLabel.text = "Loading"
-//                
-//            } else {
-//                self.noResultsLabel.text = "No Results"
-//            }
         }
     }
     
@@ -651,11 +649,11 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
             let fetchPostId = fetchPostIds[i]
             
             // Filter Time
-            if self.filterTime != self.defaultTime  {
+            if self.filterTime != defaultTime  {
                 
                 let calendar = Calendar.current
                 let tagHour = Double(calendar.component(.hour, from: fetchPostId.tagTime))
-                guard let filterIndex = FilterSortTimeDefault.index(of: self.filterTime!) else {return}
+                guard let filterIndex = FilterSortTimeDefault.index(of: self.filterTime) else {return}
                 
                 if FilterSortTimeStart[filterIndex] > tagHour || tagHour > FilterSortTimeEnd[filterIndex] {
                     // Skip Post If not within selected time frame
@@ -673,7 +671,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
             
             // Filter Group
             
-            if self.filterGroup != self.defaultGroup{
+            if self.filterGroup != defaultGroup{
                 if CurrentUser.groupUids.contains(fetchPostId.creatorUID!){
                 } else {
                     // Skip Post if not in group
@@ -758,6 +756,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         if self.filterGroup == defaultGroup && self.filterRange == defaultRange && self.filterTime == defaultTime && self.filterGroup == "All" {
             filterButton.image = #imageLiteral(resourceName: "blankfilter").withRenderingMode(.alwaysOriginal)
             filterButton.backgroundColor = UIColor.clear
+            filterButton.addGestureRecognizer(singleTap)
         } else {
             filterButton.image = #imageLiteral(resourceName: "filter").withRenderingMode(.alwaysOriginal)
 //            filterButton.backgroundColor = UIColor.orange
@@ -834,7 +833,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     }
     
     func didTapUser(post: Post) {
-        let userProfileController = UserProfileController(collectionViewLayout: UICollectionViewFlowLayout())
+        let userProfileController = UserProfileController(collectionViewLayout: StickyHeadersCollectionViewFlowLayout())
         userProfileController.userId = post.user.uid
     
         navigationController?.pushViewController(userProfileController, animated: true)

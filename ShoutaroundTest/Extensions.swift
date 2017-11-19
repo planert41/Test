@@ -116,6 +116,17 @@ extension Dictionary where Value: Equatable {
 
 
 extension String {
+    
+    func isEmptyOrWhitespace() -> Bool {
+        
+        if(self.isEmpty) {
+            return true
+        }
+        
+        return (self.trimmingCharacters(in: .whitespaces).isEmpty)
+    }    
+    
+    
     /**
      Truncates the string to the specified length number of characters and appends an optional trailing string if longer.
      
@@ -124,6 +135,7 @@ extension String {
      
      - Returns: A `String` object.
      */
+    
     func truncate(length: Int, trailing: String = "…") -> String {
         if self.characters.count > length {
             return String(self.characters.prefix(length)) + trailing

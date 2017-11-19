@@ -23,13 +23,21 @@ class BookMarkController: UIViewController, UICollectionViewDelegate, UICollecti
     let geoFilterRange = geoFilterRangeDefault
     let geoFilterImage:[UIImage] = geoFilterImageDefault
     
+    
+    // No Results Label
+    
+    var noResultsLabel: UILabel = {
+        let label = UILabel()
+        label.text = "Loading"
+        label.font = UIFont.boldSystemFont(ofSize: 20)
+        label.textColor = UIColor.black
+        label.backgroundColor = UIColor.clear
+        label.isHidden = true
+        label.textAlignment = NSTextAlignment.center
+        return label
+    }()
+    
     // Filter Variables
-    
-    let defaultRange = geoFilterRangeDefault[geoFilterRangeDefault.endIndex-1]
-    let defaultGroup = "All"
-    let defaultSort = FilterSortDefault[FilterSortDefault.endIndex - 1]
-    let defaultTime =  FilterSortTimeDefault[FilterSortTimeDefault.endIndex - 1]
-    
     
     var filterCaption: String? = nil{
         didSet{
@@ -37,34 +45,40 @@ class BookMarkController: UIViewController, UICollectionViewDelegate, UICollecti
         }
     }
     var filterLocation: CLLocation? = nil
-    var filterGroup: String? {
+    var filterGroup: String = defaultGroup {
         didSet{
             setupNavigationItems()
         }
     }
-    var filterRange: String? {
-        didSet{
-            setupNavigationItems()
-        }
-    }
-    
-    var filterSort: String?
-    var filterTime: String?{
+    var filterRange: String = defaultRange {
         didSet{
             setupNavigationItems()
         }
     }
     
-    var filterButton: UIImageView = {
-        let view = UIImageView()
-        view.image = #imageLiteral(resourceName: "blankfilter").withRenderingMode(.alwaysOriginal)
-        view.contentMode = .scaleAspectFit
-        view.sizeToFit()
-        view.layer.cornerRadius = 5
-        view.layer.masksToBounds = true
-        view.backgroundColor = UIColor.clear
-        return view
+    var filterSort: String = defaultSort
+    var filterTime: String = defaultTime{
+        didSet{
+            setupNavigationItems()
+        }
+    }
+    
+    lazy var filterButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setImage(#imageLiteral(resourceName: "grid"), for: .normal)
+        button.addTarget(self, action: #selector(activateFilter), for: .touchUpInside)
+        return button
     }()
+    
+    var isFiltering: Bool = false {
+        didSet {
+            if isFiltering{
+                filterButton.setImage(#imageLiteral(resourceName: "filter").withRenderingMode(.alwaysOriginal), for: .normal)
+            } else {
+                filterButton.setImage(#imageLiteral(resourceName: "blankfilter").withRenderingMode(.alwaysOriginal), for: .normal)
+            }
+        }
+    }
     
     
     var rangeImageButton: UIImageView = {
@@ -88,7 +102,20 @@ class BookMarkController: UIViewController, UICollectionViewDelegate, UICollecti
     
     var userId:String?
     var fetchedBookmarks = [Bookmark]()
-    var displayedBookmarks = [Bookmark]()
+    var displayedBookmarks = [Bookmark]() {
+        didSet{
+            if displayedBookmarks.count == 0 {
+                if self.isFiltering || self.filterCaption != nil{
+                    self.noResultsLabel.text = "No Search Results"
+                    self.noResultsLabel.isHidden = false
+                } else {
+                    self.noResultsLabel.isHidden = true
+                }
+            } else {
+                self.noResultsLabel.isHidden = true
+            }
+        }
+    }
     
     var isGridView = true
 
@@ -212,6 +239,10 @@ class BookMarkController: UIViewController, UICollectionViewDelegate, UICollecti
         emojiDetailLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
         emojiDetailLabel.isHidden = true
         
+        view.addSubview(noResultsLabel)
+        noResultsLabel.anchor(top: collectionView.topAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 50)
+        noResultsLabel.isHidden = true
+        
     }
     
     func sortBookmarks(){
@@ -278,7 +309,7 @@ class BookMarkController: UIViewController, UICollectionViewDelegate, UICollecti
         let bottomDividerView = UIView()
         bottomDividerView.backgroundColor = UIColor.lightGray
         
-        defaultSearchBar.barTintColor = UIColor.rgb(red: 128, green: 191, blue: 255)
+        defaultSearchBar.barTintColor = UIColor.white
 //        defaultSearchBar.backgroundColor = UIColor.gray
         defaultSearchBar.layer.borderWidth = 0.5
         defaultSearchBar.layer.borderColor = UIColor.lightGray.cgColor
@@ -288,11 +319,13 @@ class BookMarkController: UIViewController, UICollectionViewDelegate, UICollecti
         view.addSubview(defaultSearchBar)
         view.addSubview(topDividerView)
         view.addSubview(bottomDividerView)
-        
+        view.addSubview(filterButton)
         
         buttonStackView.anchor(top: actionBar.topAnchor, left: actionBar.leftAnchor, bottom: actionBar.bottomAnchor, right: nil, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 150, height: 0)
         
-        defaultSearchBar.anchor(top: actionBar.topAnchor, left: buttonStackView.rightAnchor, bottom: actionBar.bottomAnchor, right: actionBar.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
+        filterButton.anchor(top: actionBar.topAnchor, left: nil, bottom: actionBar.bottomAnchor, right: actionBar.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 75, height: 0)
+        
+        defaultSearchBar.anchor(top: actionBar.topAnchor, left: buttonStackView.rightAnchor, bottom: actionBar.bottomAnchor, right: filterButton.leftAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
         
         
         topDividerView.anchor(top: buttonStackView.topAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0.5)
@@ -308,17 +341,14 @@ class BookMarkController: UIViewController, UICollectionViewDelegate, UICollecti
         navigationItem.leftBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "mailbox").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(openInbox))
 
         if self.filterGroup == defaultGroup && self.filterRange == defaultRange && self.filterTime == defaultTime && self.filterGroup == "All" {
-            filterButton.image = #imageLiteral(resourceName: "blankfilter").withRenderingMode(.alwaysOriginal)
-            filterButton.backgroundColor = UIColor.clear
+            self.isFiltering = false
         } else {
-            filterButton.image = #imageLiteral(resourceName: "filter").withRenderingMode(.alwaysOriginal)
-//            filterButton.backgroundColor = UIColor.mainBlue()
-            filterButton.addGestureRecognizer(singleTap)
+            self.isFiltering = true
         }
         
-        let rangeBarButton = UIBarButtonItem.init(customView: filterButton)
-        navigationItem.rightBarButtonItem = rangeBarButton
-        
+//        let rangeBarButton = UIBarButtonItem.init(customView: filterButton)
+//        navigationItem.rightBarButtonItem = rangeBarButton
+//        
     }
 
     // Search Delegate And Methods
@@ -382,7 +412,7 @@ class BookMarkController: UIViewController, UICollectionViewDelegate, UICollecti
     
     func filterbyGroup(){
         
-        if self.filterGroup != self.defaultGroup{
+        if self.filterGroup != defaultGroup{
         self.displayedBookmarks = self.displayedBookmarks.filter { (bookmark) -> Bool in
                 return CurrentUser.groupUids.contains(bookmark.post.creatorUID!)
             }
@@ -390,8 +420,8 @@ class BookMarkController: UIViewController, UICollectionViewDelegate, UICollecti
     }
     
     func filterbyTime(){
-        if self.filterTime != self.defaultTime{
-            guard let filterIndex = FilterSortTimeDefault.index(of: self.filterTime!) else {return}
+        if self.filterTime != defaultTime{
+            guard let filterIndex = FilterSortTimeDefault.index(of: self.filterTime) else {return}
             
             self.displayedBookmarks = self.displayedBookmarks.filter { (bookmark) -> Bool in
                 let calendar = Calendar.current
@@ -404,7 +434,7 @@ class BookMarkController: UIViewController, UICollectionViewDelegate, UICollecti
     
     func filterbyDistance(){
         
-        guard let filterDistance = Double(self.filterRange!) else {
+        guard let filterDistance = Double(self.filterRange) else {
             print("Invalid Distance Number or Non Distance")
             return
         }
@@ -432,13 +462,18 @@ class BookMarkController: UIViewController, UICollectionViewDelegate, UICollecti
     
     
     func filterCaptionSelected(searchedText: String?){
+        if searchedText == nil {
+            self.handleRefresh()
+        } else {
         self.defaultSearchBar.text = searchedText
+        self.filterCaption = searchedText
         self.finalFilterAndSort()
+        }
         
     }
     
     func userSelected(uid: String?){
-        let userProfileController = UserProfileController(collectionViewLayout: UICollectionViewFlowLayout())
+        let userProfileController = UserProfileController(collectionViewLayout: StickyHeadersCollectionViewFlowLayout())
         userProfileController.userId = uid
         self.navigationController?.pushViewController(userProfileController, animated: true)
     }
@@ -448,14 +483,13 @@ class BookMarkController: UIViewController, UICollectionViewDelegate, UICollecti
     }
     
     
-    func filterControllerFinished(selectedRange: String?, selectedLocation: CLLocation?, selectedGooglePlaceID: String?, selectedTime: String?, selectedGroup: String?, selectedSort: String?){
+    func filterControllerFinished(selectedRange: String, selectedLocation: CLLocation?, selectedGooglePlaceID: String?, selectedTime: String, selectedGroup: String, selectedSort: String){
         
         self.filterRange = selectedRange
         self.filterLocation = selectedLocation
         self.filterGroup = selectedGroup
         self.filterSort = selectedSort
         self.filterTime = selectedTime
-        
         self.finalFilterAndSort()
     }
     
@@ -648,7 +682,7 @@ class BookMarkController: UIViewController, UICollectionViewDelegate, UICollecti
     }
     
     func didTapUser(post: Post) {
-        let userProfileController = UserProfileController(collectionViewLayout: UICollectionViewFlowLayout())
+        let userProfileController = UserProfileController(collectionViewLayout: StickyHeadersCollectionViewFlowLayout())
         userProfileController.userId = post.user.uid
         
         navigationController?.pushViewController(userProfileController, animated: true)

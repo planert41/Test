@@ -16,12 +16,23 @@ protocol UserProfileHeaderDelegate {
     func didChangeToGridView()
     func didSignOut()
     func activateSearchBar()
+    func activateFilter()
 }
 
 
-class UserProfileHeader: UICollectionViewCell, UITextFieldDelegate, UISearchBarDelegate  {
+class UserProfileHeader: UICollectionViewCell, UITextFieldDelegate, UISearchBarDelegate, UIGestureRecognizerDelegate  {
     
     var delegate: UserProfileHeaderDelegate?
+    var isFiltering: Bool = false {
+        didSet {
+            if isFiltering{
+                filterButton.setImage(#imageLiteral(resourceName: "filter").withRenderingMode(.alwaysOriginal), for: .normal)
+            } else {
+                filterButton.setImage(#imageLiteral(resourceName: "blankfilter").withRenderingMode(.alwaysOriginal), for: .normal)
+            }
+        }
+    }
+    
     
     var user: User? {
         didSet{
@@ -36,10 +47,7 @@ class UserProfileHeader: UICollectionViewCell, UITextFieldDelegate, UISearchBarD
             } else {
                 statusText.isEnabled = true
             }
-            
-            
             setupEditFollowButton()
-            
         }
     }
     
@@ -149,6 +157,22 @@ class UserProfileHeader: UICollectionViewCell, UITextFieldDelegate, UISearchBarD
         return button
     }()
     
+    
+    lazy var listButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setImage(#imageLiteral(resourceName: "list"), for: .normal)
+        button.tintColor = UIColor(white: 0, alpha: 0.2)
+        button.addTarget(self, action: #selector(handleChangetoListView), for: .touchUpInside)
+        return button
+    }()
+    
+    lazy var filterButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setImage(#imageLiteral(resourceName: "grid"), for: .normal)
+        button.addTarget(self, action: #selector(activateFilter), for: .touchUpInside)
+        return button
+    }()
+    
     lazy var logOutButton: UIButton = {
         let button = UIButton(type: .system)
         button.setImage(#imageLiteral(resourceName: "gear").withRenderingMode(.alwaysOriginal), for: .normal)
@@ -162,18 +186,14 @@ class UserProfileHeader: UICollectionViewCell, UITextFieldDelegate, UISearchBarD
         delegate?.didChangeToGridView()
     }
     
-    lazy var listButton: UIButton = {
-        let button = UIButton(type: .system)
-        button.setImage(#imageLiteral(resourceName: "list"), for: .normal)
-        button.tintColor = UIColor(white: 0, alpha: 0.2)
-        button.addTarget(self, action: #selector(handleChangetoListView), for: .touchUpInside)
-        return button
-    }()
-    
     func handleChangetoListView() {
         listButton.tintColor = UIColor.mainBlue()
         gridButton.tintColor = UIColor(white: 0, alpha: 0.2)
         delegate?.didChangeToListView()
+    }
+    
+    func activateFilter(){
+        self.delegate?.activateFilter()
     }
     
     let bookmarkButton: UIButton = {
@@ -251,6 +271,8 @@ class UserProfileHeader: UICollectionViewCell, UITextFieldDelegate, UISearchBarD
 
         // Turnt off for Status Updates
         
+        backgroundColor = UIColor.white
+        
         addSubview(profileImageView)
         profileImageView.anchor(top: topAnchor, left: leftAnchor, bottom: nil, right: nil, paddingTop: 12, paddingLeft: 12, paddingBottom: 0, paddingRight: 0, width: 80, height: 80)
         profileImageView.layer.cornerRadius = 80/2
@@ -313,6 +335,14 @@ class UserProfileHeader: UICollectionViewCell, UITextFieldDelegate, UISearchBarD
         return false
     }
     
+
+    
+    lazy var singleTap: UIGestureRecognizer = {
+        let tap = UITapGestureRecognizer(target: self, action: #selector(activateFilter))
+        tap.delegate = self
+        return tap
+    }()
+    
     fileprivate func setupBottomToolbar() {
         
         
@@ -327,7 +357,7 @@ class UserProfileHeader: UICollectionViewCell, UITextFieldDelegate, UISearchBarD
         stackView.axis = .horizontal
         stackView.distribution = .fillEqually
         
-        defaultSearchBar.barTintColor = UIColor.lightGray
+        defaultSearchBar.barTintColor = UIColor.white
         defaultSearchBar.layer.borderWidth = 0.5
         defaultSearchBar.layer.borderColor = UIColor.lightGray.cgColor
         defaultSearchBar.delegate = self
@@ -335,21 +365,25 @@ class UserProfileHeader: UICollectionViewCell, UITextFieldDelegate, UISearchBarD
         addSubview(stackView)
         addSubview(topDividerView)
         addSubview(bottomDividerView)
+        addSubview(filterButton)
+        
         addSubview(defaultSearchBar)
         
         
-        stackView.anchor(top: nil, left: leftAnchor, bottom: bottomAnchor, right: nil, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 150, height: 50)
+        stackView.anchor(top: nil, left: leftAnchor, bottom: bottomAnchor, right: nil, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: frame.width * 1 / 3, height: 50)
         
-        defaultSearchBar.anchor(top: nil, left: stackView.rightAnchor, bottom: bottomAnchor, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 50)
+        filterButton.anchor(top: stackView.topAnchor, left: nil, bottom: stackView.bottomAnchor, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: frame.width / 6, height: 0)
+        
+        defaultSearchBar.anchor(top: stackView.topAnchor, left: stackView.rightAnchor, bottom: bottomAnchor, right: filterButton.leftAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 50)
 
         topDividerView.anchor(top: stackView.topAnchor, left: leftAnchor, bottom: nil, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0.5)
-        
         
         bottomDividerView.anchor(top: stackView.bottomAnchor, left: leftAnchor, bottom: nil, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0.5)
 
         
         
     }
+
     
     func handleLogOut() {
         delegate?.didSignOut()

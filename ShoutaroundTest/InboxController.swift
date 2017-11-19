@@ -93,7 +93,7 @@ class InboxController: UICollectionViewController,UICollectionViewDelegateFlowLa
     }
     
     func didTapUser(uid: String) {
-        let userProfileController = UserProfileController(collectionViewLayout: UICollectionViewFlowLayout())
+        let userProfileController = UserProfileController(collectionViewLayout: StickyHeadersCollectionViewFlowLayout())
         userProfileController.userId = uid
         
         navigationController?.pushViewController(userProfileController, animated: true)

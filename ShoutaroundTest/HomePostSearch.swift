@@ -225,13 +225,21 @@ class HomePostSearch : UITableViewController, UISearchResultsUpdating, UISearchC
     }
   
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
-        self.delegate?.filterCaptionSelected(searchedText: searchBar.text)
+        if !(searchBar.text?.isEmptyOrWhitespace())! {
+            self.delegate?.filterCaptionSelected(searchedText: searchBar.text)
+        } else {
+            self.delegate?.filterCaptionSelected(searchedText: nil)
+        }
         self.dismiss(animated: true) {
         }
     }
     
     func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
-        self.delegate?.filterCaptionSelected(searchedText: searchBar.text)
+        if !(searchBar.text?.isEmptyOrWhitespace())! {
+            self.delegate?.filterCaptionSelected(searchedText: searchBar.text)
+        } else {
+            self.delegate?.filterCaptionSelected(searchedText: nil)
+        }
         self.dismiss(animated: true) {
         }
     }

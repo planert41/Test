@@ -168,7 +168,7 @@ class MainTabBarController: UITabBarController, UITabBarControllerDelegate, UIIm
         
         //user profile
         
-        let layout = UICollectionViewFlowLayout()
+        let layout = StickyHeadersCollectionViewFlowLayout()
         let userProfileController = UserProfileController(collectionViewLayout: layout)
         let userProfileNavController = UINavigationController(rootViewController: userProfileController)        
         
