@@ -10,6 +10,7 @@ import Foundation
 import CoreLocation
 
 
+
 struct PostId {
     
     var id: String
@@ -46,14 +47,18 @@ struct Post {
     var distance: Double? = nil
     let tagTime: Date
     
-    var hasLiked: Bool = false
-    var hasBookmarked: Bool = false
+
     var creatorUID: String?
     var ratingEmoji: String?
     var emoji: String
     var nonRatingEmoji: [String]?
     var nonRatingEmojiTags: [String]?
     
+    //Social Stats
+    var hasLiked: Bool = false
+    var hasBookmarked: Bool = false
+    var likeStats: Int = 0
+    var bookmarkStats:Int = 0
     
     
     init(user: User, dictionary: [String: Any]) {
@@ -94,12 +99,6 @@ struct Post {
             }
         
         }
-        
-
-
-        
-
-    
     }
     
     

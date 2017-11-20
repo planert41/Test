@@ -37,9 +37,24 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
                 
             guard let imageUrl = post?.imageUrl else {return}
             
-            likeButton.setImage(post?.hasLiked == true ? #imageLiteral(resourceName: "like_selected").withRenderingMode(.alwaysOriginal) : #imageLiteral(resourceName: "like_unselected").withRenderingMode(.alwaysOriginal), for: .normal)
+            likeButton.setBackgroundImage(post?.hasLiked == true ? #imageLiteral(resourceName: "like_selected").withRenderingMode(.alwaysOriginal) : #imageLiteral(resourceName: "like_unselected").withRenderingMode(.alwaysOriginal), for: .normal)
             
-            bookmarkButton.setImage(post?.hasBookmarked == true ? #imageLiteral(resourceName: "bookmark_ribbon_filled").withRenderingMode(.alwaysOriginal) : #imageLiteral(resourceName: "bookmark_ribbon_unfilled").withRenderingMode(.alwaysOriginal), for: .normal)
+            if (post?.likeStats)! > 0 {
+                let count: String! = String(describing: (post?.likeStats)!)
+                likeButton.setTitle(count, for: .normal)
+            } else {
+                likeButton.setTitle("", for: .normal)
+            }
+            
+            
+            bookmarkButton.setBackgroundImage(post?.hasBookmarked == true ? #imageLiteral(resourceName: "bookmark_ribbon_filled").withRenderingMode(.alwaysOriginal) : #imageLiteral(resourceName: "bookmark_ribbon_unfilled").withRenderingMode(.alwaysOriginal), for: .normal)
+            
+            if (post?.bookmarkStats)! > 0 {
+                let count: String! = String(describing: (post?.bookmarkStats)!)
+                bookmarkButton.setTitle(count, for: .normal)
+            } else {
+                bookmarkButton.setTitle("", for: .normal)
+            }
                 
             photoImageView.loadImage(urlString: imageUrl)
             
@@ -429,7 +444,7 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
     
     lazy var likeButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setImage(#imageLiteral(resourceName: "like_unselected").withRenderingMode(.alwaysOriginal), for: .normal)
+        button.setBackgroundImage(#imageLiteral(resourceName: "like_unselected").withRenderingMode(.alwaysOriginal), for: .normal)
         button.addTarget(self, action: #selector(handleLike), for: .touchUpInside)
         return button
         
@@ -440,7 +455,6 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         
         guard let postId = self.post?.id else {return}
         guard let uid = Auth.auth().currentUser?.uid else {return}
-        let values = [postId: self.post?.hasLiked == true ? 0 : 1]
         
         self.likeButton.transform = CGAffineTransform(scaleX: 0.1, y: 0.1)
         
@@ -456,23 +470,23 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
                        completion: nil)
     
         
-        
-        Database.database().reference().child("likes").child(uid).updateChildValues(values) { (err, ref) in
-            if let err = err {
-                print("Failed to like post", err)
-                return
+        Database.handleLike(postId: postId){
+            if (self.post?.hasLiked)! {
+                self.post?.likeStats -= 1
+            } else {
+                self.post?.likeStats += 1
             }
-            print("Succesfully Saved Likes")
             self.post?.hasLiked = !(self.post?.hasLiked)!
             self.delegate?.refreshPost(post: self.post!)
         }
+        
     }
 
     // Bookmark
     
     lazy var bookmarkButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setImage(#imageLiteral(resourceName: "ribbon").withRenderingMode(.alwaysOriginal), for: .normal)
+        button.setBackgroundImage(#imageLiteral(resourceName: "ribbon").withRenderingMode(.alwaysOriginal), for: .normal)
         button.addTarget(self, action: #selector(handleBookmark), for: .touchUpInside)
         return button
         
@@ -484,23 +498,20 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         
         guard let postId = self.post?.id else {return}
         guard let uid = Auth.auth().currentUser?.uid else {return}
-        let bookmarkTime = Date().timeIntervalSince1970
         
-        let values = ["bookmarked": self.post?.hasBookmarked == true ? 0 : 1, "creatorUID": post?.creatorUID, "bookmarkDate": bookmarkTime] as [String : Any]
-        
-        Database.database().reference().child("bookmarks").child(uid).child(postId).updateChildValues(values) { (err, ref) in
-            if let err = err {
-                print("Failed to bookmark post", err)
-                return
-            }
-            print("Succesfully Saved Bookmark")
-            self.post?.hasBookmarked = !(self.post?.hasBookmarked)!
-            self.delegate?.refreshPost(post: self.post!)
-            
+        Database.handleBookmark(postId: postId){
+
         }
         
-        self.bookmarkButton.transform = CGAffineTransform(scaleX: 0.1, y: 0.1)
+        if (self.post?.hasBookmarked)! {
+            self.post?.bookmarkStats -= 1
+        } else {
+            self.post?.bookmarkStats += 1
+        }
+        self.post?.hasBookmarked = !(self.post?.hasBookmarked)!
+        self.delegate?.refreshPost(post: self.post!)
         
+        self.bookmarkButton.transform = CGAffineTransform(scaleX: 0.1, y: 0.1)
         
         UIView.animate(withDuration: 1.0,
                        delay: 0,
@@ -629,6 +640,7 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         addSubview(adressLabel)
         addSubview(locationDistanceLabel)
         addSubview(bookmarkButton)
+
         bookmarkButton.anchor(top: locationView.bottomAnchor, left: nil, bottom: nil, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 40, height: 40)
         
         locationLabel.anchor(top: locationView.topAnchor, left: leftAnchor, bottom: nil, right: bookmarkButton.leftAnchor, paddingTop: 5, paddingLeft: 15, paddingBottom: 0, paddingRight: 0, width: 0, height: 15)
@@ -763,6 +775,7 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         
         addSubview(stackView)
         stackView.anchor(top: locationView.bottomAnchor, left: leftAnchor, bottom: nil, right: nil, paddingTop: 0, paddingLeft: 8, paddingBottom: 0, paddingRight: 0, width: 120, height: 40)
+
 
     }
     

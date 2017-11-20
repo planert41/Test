@@ -102,13 +102,21 @@ extension Database{
         guard let uid = Auth.auth().currentUser?.uid else {return}
         var tempPost = post
         
-        Database.database().reference().child("likes").child(uid).child(post.id!).observeSingleEvent(of: .value, with: { (snapshot) in
+        Database.database().reference().child("likes").child(post.id!).observeSingleEvent(of: .value, with: { (snapshot) in
             
-            if let value = snapshot.value as? Int, value == 1 {
+                let post = snapshot.value as? [String: Any] ?? [:]
+                var likes: Dictionary<String, Bool>
+                likes = post["likes"] as? [String : Bool] ?? [:]
+                var likeCount = post["likeCount"] as? Int ?? 0
+            
+        
+            if likes[uid] == true {
                 tempPost.hasLiked = true
             } else {
                 tempPost.hasLiked = false
             }
+            
+            tempPost.likeStats = likeCount
             
             completion(tempPost)
         }, withCancel: { (err) in
@@ -120,19 +128,26 @@ extension Database{
         
         guard let uid = Auth.auth().currentUser?.uid else {return}
         var tempPost = post
-        Database.database().reference().child("bookmarks").child(uid).child(post.id!).observeSingleEvent(of: .value, with: { (snapshot) in
+        Database.database().reference().child("bookmarks").child(post.id!).observeSingleEvent(of: .value, with: { (snapshot) in
             
-            let dictionaries = snapshot.value as? [String: Any]
+            let post = snapshot.value as? [String: Any] ?? [:]
+            var bookmarks: Dictionary<String, Bool>
+            bookmarks = post["bookmarks"] as? [String : Bool] ?? [:]
+            var bookmarkCount = post["bookmarkCount"] as? Int ?? 0
             
-            if let value = dictionaries?["bookmarked"] as? Int, value == 1 {
+            
+            if bookmarks[uid] == true {
                 tempPost.hasBookmarked = true
             } else {
                 tempPost.hasBookmarked = false
             }
             
+            tempPost.bookmarkStats = bookmarkCount
+            
             completion(tempPost)
+
         }, withCancel: { (err) in
-            print("Failed to fetch like info for post:", err)
+            print("Failed to fetch bookmark info for post:", err)
         })
     }
     
@@ -215,13 +230,12 @@ extension Database{
     }
     
     
-    static func fetchAllBookmarksWithCreatorUID(creatoruid: String, completion: @escaping ([PostId]) -> ()) {
+    static func fetchAllBookmarkIdsForUID(uid: String, completion: @escaping ([BookmarkId]) -> ()) {
         
         let myGroup = DispatchGroup()
-        var fetchedPostIds = [] as [PostId]
-        var count = 0
+        var fetchedBookmarkIds = [] as [BookmarkId]
         
-        let ref = Database.database().reference().child("bookmarks").child(creatoruid)
+        let ref = Database.database().reference().child("users").child(uid).child("bookmarks")
         
         ref.observeSingleEvent(of: .value, with: {(snapshot) in
             
@@ -230,29 +244,69 @@ extension Database{
             bookmarks.forEach({ (key,value) in
                 
                 myGroup.enter()
-                count += 1
                 //                print("Key \(key), Value: \(value)")
                 guard let dictionary = value as? [String: Any] else {return}
-                if let value = dictionary["bookmarked"] as? Int, value == 1 {
                     
-                    let bookmarkTime = dictionary["bookmarkTime"] as? Double ?? 0
+                    let bookmarkTime = dictionary["bookmarkDate"] as? Double ?? 0
                     // Substitute Post Id creation date with bookmark time
-                    
-                    Database.fetchPostIDDetails(postId: key, completion: { (fetchPostId) in
-                    
-                        // Tag Time is not included in the Post ID extracted from this function
-                        let tempID = PostId.init(id: fetchPostId.id, creatorUID: fetchPostId.creatorUID!, fetchedTagTime: 0, fetchedDate: bookmarkTime, distance: nil, postGPS: fetchPostId.postGPS, postEmoji: fetchPostId.emoji)
-                        fetchedPostIds.append(tempID)
+                    let tempId = BookmarkId.init(postId: key, fetchedBookmarkDate: bookmarkTime)
+                    fetchedBookmarkIds.append(tempId)
                         myGroup.leave()
-                        
-                    })
-                }
+
             })
             
             myGroup.notify(queue: .main) {
-                completion(fetchedPostIds)
+                completion(fetchedBookmarkIds)
             }
         })
+    }
+    
+    static func fetchAllBookmarksForUID(uid: String, completion: @escaping ([Bookmark]) -> ()) {
+
+        let myGroup = DispatchGroup()
+        
+        var tempBookmarks:[Bookmark] = []
+        
+        Database.fetchAllBookmarkIdsForUID(uid: uid) { (bookmarkIds) in
+            
+            for bookmarkId in bookmarkIds{
+                myGroup.enter()
+                Database.fetchPostWithPostID(postId: bookmarkId.postId, completion: { (post, error) in
+                    if let error = error {
+                        print("Failed to fetch post for bookmarks: ",bookmarkId.postId , error)
+                        myGroup.leave()
+                        return
+                    } else if let post = post {
+                        let tempBookmark = Bookmark.init(bookmarkDate: bookmarkId.bookmarkDate, post: post)
+                        tempBookmarks.append(tempBookmark)
+                        myGroup.leave()
+                    } else {
+                        print("No Result for PostId: ", bookmarkId.postId)
+                        //Delete Bookmark since post is unavailable, Present Delete Alert
+                        
+                        let deleteAlert = UIAlertController(title: "Delete Bookmark", message: "Post Bookmarked on \(bookmarkId.bookmarkDate) Was Deleted", preferredStyle: UIAlertControllerStyle.alert)
+                        
+                        deleteAlert.addAction(UIAlertAction(title: "Ok", style: .default, handler: { (action: UIAlertAction!) in
+                            // Delete Bookmark in Database
+                            Database.handleBookmark(postId: bookmarkId.postId, completion: {
+                                
+                            })
+                        }))
+                        
+                        UIApplication.shared.keyWindow?.rootViewController?.present(deleteAlert, animated: true, completion: nil)
+                        myGroup.leave()
+                    }
+                    
+                })
+            }
+            
+            myGroup.notify(queue: .main) {
+                tempBookmarks.sort(by: { (p1, p2) -> Bool in
+                    return p1.bookmarkDate.compare(p2.bookmarkDate) == .orderedDescending
+                })
+                completion(tempBookmarks)
+            }
+        }
     }
     
     
@@ -589,5 +643,116 @@ extension Database{
         }
         
     }
+    
+    // Social Functions
+    
+    static func handleLike(postId: String!, completion: @escaping () -> Void){
+        
+        let ref = Database.database().reference().child("likes").child(postId)
+        guard let uid = Auth.auth().currentUser?.uid else {return}
+        
+        ref.runTransactionBlock({ (currentData: MutableData) -> TransactionResult in
+            var post = currentData.value as? [String : AnyObject] ?? [:]
+                var likes: Dictionary<String, Bool>
+                likes = post["likes"] as? [String : Bool] ?? [:]
+                var likeCount = post["likeCount"] as? Int ?? 0
+                if let _ = likes[uid] {
+                    // Unstar the post and remove self from stars
+                    likeCount -= 1
+                    likes.removeValue(forKey: uid)
+                } else {
+                    // Star the post and add self to stars
+                    likeCount += 1
+                    likes[uid] = true
+                }
+                post["likeCount"] = likeCount as AnyObject?
+                post["likes"] = likes as AnyObject?
+                
+                // Set value and report transaction success
+                currentData.value = post
+                print("Successfully Update Like in Likes ",postId, ":", uid,":", likes[uid])
+                return TransactionResult.success(withValue: currentData)
 
+        }) { (error, committed, snapshot) in
+            if let error = error {
+                print(error.localizedDescription)
+            } else {
+                // Completion after updating Likes
+                completion()
+            }
+        }
+        
+    }
+    
+    static func handleBookmark(postId: String!, completion: @escaping () -> Void){
+        
+        guard let uid = Auth.auth().currentUser?.uid else {return}
+        let ref = Database.database().reference().child("bookmarks").child(postId)
+        
+        
+        ref.runTransactionBlock({ (currentData: MutableData) -> TransactionResult in
+                var post = currentData.value as? [String : AnyObject] ?? [:]
+                var bookmarks: Dictionary<String, Bool>
+                bookmarks = post["bookmarks"] as? [String : Bool] ?? [:]
+                var bookmarkCount = post["bookmarkCount"] as? Int ?? 0
+                if let _ = bookmarks[uid] {
+                    // Unstar the post and remove self from stars
+                    bookmarkCount -= 1
+                    bookmarks.removeValue(forKey: uid)
+                } else {
+                    // Star the post and add self to stars
+                    bookmarkCount += 1
+                    bookmarks[uid] = true
+                }
+                post["bookmarkCount"] = bookmarkCount as AnyObject?
+                post["bookmarks"] = bookmarks as AnyObject?
+                
+                // Set value and report transaction success
+                currentData.value = post
+                print("Successfully Update Bookmark in Bookmarks ", postId, ":",uid,":",bookmarks[uid])
+                return TransactionResult.success(withValue: currentData)
+
+        }) { (error, committed, snapshot) in
+            if let error = error {
+                print(error.localizedDescription)
+            } else {
+                // No Error
+                let userRef = Database.database().reference().child("users").child(uid).child("bookmarks")
+                
+                if var post = snapshot?.value as? [String : AnyObject], let uid = Auth.auth().currentUser?.uid {
+                    var likes: Dictionary<String, Bool>
+                    likes = post["bookmarks"] as? [String : Bool] ?? [:]
+                    var likeCount = post["bookmarkCount"] as? Int ?? 0
+                    
+                    if let _ = likes[uid] {
+                        // Bookmark exist in Bookmarks, so add a bookmark into User
+                        let bookmarkTime = Date().timeIntervalSince1970
+                        let values = ["bookmarkDate": bookmarkTime] as [String : Any]
+                        userRef.child(postId).updateChildValues(values) { (err, ref) in
+                            if let err = err {
+                                print("Failed to bookmark post", err)
+                                return
+                            }
+                            print("Succesfully Saved Bookmark in User")
+                        }
+                    } else {
+                        // Bookmark doesnt exist anymore, delete bookmark from user
+                        userRef.child(postId).removeValue()
+                        print("Successfully Deleted Bookmark in User")
+                    }
+                    // Completion after updating Bookmarks and User Bookmarks
+                    completion()
+                
+                
+                }
+            }
+        }
+        
+    }
+    
+    
+    
+    
+    
+    
 }

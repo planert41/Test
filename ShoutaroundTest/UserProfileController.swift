@@ -483,7 +483,7 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
             self.displayedPosts.removeAll()
             self.collectionView?.reloadData()
             self.paginatePosts()
-        } 
+        }
     }
     
     func userSelected(uid: String?){

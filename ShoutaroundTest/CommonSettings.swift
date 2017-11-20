@@ -10,9 +10,9 @@ import Foundation
 import UIKit
 
 
- var geoFilterImageDefault:[UIImage] = [#imageLiteral(resourceName: "GeoFence"),#imageLiteral(resourceName: "GeoFence"), #imageLiteral(resourceName: "City"), #imageLiteral(resourceName: "City"), #imageLiteral(resourceName: "Globe")]
+var geoFilterImageDefault:[UIImage] = [#imageLiteral(resourceName: "GeoFence"),#imageLiteral(resourceName: "GeoFence"), #imageLiteral(resourceName: "City"), #imageLiteral(resourceName: "City"), #imageLiteral(resourceName: "Globe")]
 
- var geoFilterRangeDefault:[String] = ["5", "25", "100","250", "All"]
+var geoFilterRangeDefault:[String] = ["5", "25", "100","250", "All"]
 
 var FilterSortTimeDefault:[String] = ["Early", "Mid-Day", "Night", "All"]
 var FilterSortTimeStart:[Double] = [6,12,18,0]
@@ -31,3 +31,7 @@ var defaultPhotoResize = CGSize(width: 500, height: 500)
 var searchBarPlaceholderText = "Search...."
 
 var searchScopeButtons = ["Posts","Users","Places"]
+
+struct Common {
+
+}
