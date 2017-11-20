@@ -105,12 +105,12 @@ extension Database{
         Database.database().reference().child("likes").child(post.id!).observeSingleEvent(of: .value, with: { (snapshot) in
             
                 let post = snapshot.value as? [String: Any] ?? [:]
-                var likes: Dictionary<String, Bool>
-                likes = post["likes"] as? [String : Bool] ?? [:]
+                var likes: Dictionary<String, Int>
+                likes = post["likes"] as? [String : Int] ?? [:]
                 var likeCount = post["likeCount"] as? Int ?? 0
             
         
-            if likes[uid] == true {
+            if likes[uid] == 1 {
                 tempPost.hasLiked = true
             } else {
                 tempPost.hasLiked = false
@@ -131,12 +131,12 @@ extension Database{
         Database.database().reference().child("bookmarks").child(post.id!).observeSingleEvent(of: .value, with: { (snapshot) in
             
             let post = snapshot.value as? [String: Any] ?? [:]
-            var bookmarks: Dictionary<String, Bool>
-            bookmarks = post["bookmarks"] as? [String : Bool] ?? [:]
+            var bookmarks: Dictionary<String, Int>
+            bookmarks = post["bookmarks"] as? [String : Int] ?? [:]
             var bookmarkCount = post["bookmarkCount"] as? Int ?? 0
             
             
-            if bookmarks[uid] == true {
+            if bookmarks[uid] == 1 {
                 tempPost.hasBookmarked = true
             } else {
                 tempPost.hasBookmarked = false
@@ -653,8 +653,8 @@ extension Database{
         
         ref.runTransactionBlock({ (currentData: MutableData) -> TransactionResult in
             var post = currentData.value as? [String : AnyObject] ?? [:]
-                var likes: Dictionary<String, Bool>
-                likes = post["likes"] as? [String : Bool] ?? [:]
+                var likes: Dictionary<String, Int>
+                likes = post["likes"] as? [String : Int] ?? [:]
                 var likeCount = post["likeCount"] as? Int ?? 0
                 if let _ = likes[uid] {
                     // Unstar the post and remove self from stars
@@ -663,7 +663,7 @@ extension Database{
                 } else {
                     // Star the post and add self to stars
                     likeCount += 1
-                    likes[uid] = true
+                    likes[uid] = 1
                 }
                 post["likeCount"] = likeCount as AnyObject?
                 post["likes"] = likes as AnyObject?
@@ -692,8 +692,8 @@ extension Database{
         
         ref.runTransactionBlock({ (currentData: MutableData) -> TransactionResult in
                 var post = currentData.value as? [String : AnyObject] ?? [:]
-                var bookmarks: Dictionary<String, Bool>
-                bookmarks = post["bookmarks"] as? [String : Bool] ?? [:]
+                var bookmarks: Dictionary<String, Int>
+                bookmarks = post["bookmarks"] as? [String : Int] ?? [:]
                 var bookmarkCount = post["bookmarkCount"] as? Int ?? 0
                 if let _ = bookmarks[uid] {
                     // Unstar the post and remove self from stars
@@ -702,9 +702,9 @@ extension Database{
                 } else {
                     // Star the post and add self to stars
                     bookmarkCount += 1
-                    bookmarks[uid] = true
+                    bookmarks[uid] = 1
                 }
-                post["bookmarkCount"] = bookmarkCount as AnyObject?
+                bookmarks["bookmarkCount"] = bookmarkCount
                 post["bookmarks"] = bookmarks as AnyObject?
                 
                 // Set value and report transaction success
@@ -716,43 +716,120 @@ extension Database{
             if let error = error {
                 print(error.localizedDescription)
             } else {
-                // No Error
-                let userRef = Database.database().reference().child("users").child(uid).child("bookmarks")
-                
-                if var post = snapshot?.value as? [String : AnyObject], let uid = Auth.auth().currentUser?.uid {
-                    var likes: Dictionary<String, Bool>
-                    likes = post["bookmarks"] as? [String : Bool] ?? [:]
-                    var likeCount = post["bookmarkCount"] as? Int ?? 0
-                    
-                    if let _ = likes[uid] {
-                        // Bookmark exist in Bookmarks, so add a bookmark into User
-                        let bookmarkTime = Date().timeIntervalSince1970
-                        let values = ["bookmarkDate": bookmarkTime] as [String : Any]
-                        userRef.child(postId).updateChildValues(values) { (err, ref) in
-                            if let err = err {
-                                print("Failed to bookmark post", err)
-                                return
-                            }
-                            print("Succesfully Saved Bookmark in User")
-                        }
-                    } else {
-                        // Bookmark doesnt exist anymore, delete bookmark from user
-                        userRef.child(postId).removeValue()
-                        print("Successfully Deleted Bookmark in User")
-                    }
-                    // Completion after updating Bookmarks and User Bookmarks
-                    completion()
-                
-                
-                }
+                // No Error Handle Bookmarking in User
+                handleUserBookmark(postId: postId)
+                completion()
+            }
+        }
+    }
+    
+    static func handleUserBookmark(postId: String!){
+        
+        guard let uid = Auth.auth().currentUser?.uid else {return}
+        let ref = Database.database().reference().child("users").child(uid).child("bookmarks")
+        
+        ref.runTransactionBlock({ (currentData: MutableData) -> TransactionResult in
+            var bookmarks = currentData.value as? [String : AnyObject] ?? [:]
+            var bookmarkCount = bookmarks["bookmarkCount"] as? Int ?? 0
+            
+            if let _ = bookmarks[postId] {
+                // Remove Bookmark
+                bookmarkCount -= 1
+                bookmarks.removeValue(forKey: postId)
+            } else {
+                // Add Bookmark
+                let bookmarkTime = Date().timeIntervalSince1970
+                let values = ["bookmarkDate": bookmarkTime] as [String : Any]
+                bookmarkCount += 1
+                bookmarks[postId] = values as AnyObject
+            }
+            
+            bookmarks["bookmarkCount"] = bookmarkCount as AnyObject?
+            
+            // Set value and report transaction success
+            currentData.value = bookmarks
+            print("Successfully Update Bookmark in User ",uid, " for Post: ", postId)
+            return TransactionResult.success(withValue: currentData)
+            
+        }) { (error, committed, snapshot) in
+            if let error = error {
+                print(error.localizedDescription)
             }
         }
         
     }
     
+    static func handleFollowing(userUid: String!, completion: @escaping () -> Void){
+        
+        guard let uid = Auth.auth().currentUser?.uid else {return}
+        let ref = Database.database().reference().child("following").child(uid)
+
+        ref.runTransactionBlock({ (currentData: MutableData) -> TransactionResult in
+            var user = currentData.value as? [String : AnyObject] ?? [:]
+            var following: Dictionary<String, Int>
+            following = user["following"] as? [String : Int] ?? [:]
+            var followingCount = user["followingCount"] as? Int ?? 0
+            if let _ = following[userUid] {
+                // Unfollow User
+                followingCount -= 1
+                following.removeValue(forKey: userUid)
+            } else {
+                // Follow User
+                followingCount += 1
+                following[userUid] = 1
+            }
+            user["followingCount"] = followingCount as AnyObject?
+            user["following"] = following as AnyObject?
+            
+            // Set value and report transaction success
+            currentData.value = user
+            print("Successfully Update ",uid, " following: ", userUid,":", following[userUid])
+            return TransactionResult.success(withValue: currentData)
+            
+        }) { (error, committed, snapshot) in
+            if let error = error {
+                print(error.localizedDescription)
+            } else {
+                handleFollower(followedUid: userUid)
+                completion()
+            }
+        }
+    }
     
-    
-    
+    static func handleFollower(followedUid: String!){
+        
+        guard let uid = Auth.auth().currentUser?.uid else {return}
+        let ref = Database.database().reference().child("following").child(followedUid)
+        
+        ref.runTransactionBlock({ (currentData: MutableData) -> TransactionResult in
+            var user = currentData.value as? [String : AnyObject] ?? [:]
+            var followers: Dictionary<String, Int>
+            followers = user["followers"] as? [String : Int] ?? [:]
+            var followerCount = user["followerCount"] as? Int ?? 0
+            if let _ = followers[uid] {
+                // Unstar the post and remove self from stars
+                followerCount -= 1
+                followers.removeValue(forKey: uid)
+            } else {
+                // Star the post and add self to stars
+                followerCount += 1
+                followers[uid] = 1
+            }
+            user["followerCount"] = followerCount as AnyObject?
+            user["followers"] = followers as AnyObject?
+            
+            // Set value and report transaction success
+            currentData.value = user
+            print("Successfully Update Followers in ",followedUid, " for ", uid," following ", user[uid])
+            return TransactionResult.success(withValue: currentData)
+            
+        }) { (error, committed, snapshot) in
+            if let error = error {
+                print(error.localizedDescription)
+            }
+        }
+    }
+
     
     
 }
