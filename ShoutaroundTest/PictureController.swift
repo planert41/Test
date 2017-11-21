@@ -118,6 +118,9 @@ class PictureController: UICollectionViewController, HomePostCellDelegate, UICol
     }
     
     func refreshPost(post: Post) {
+        
+        self.selectedPost = post
+        postCache[post.id!] = post
         self.collectionView?.reloadData()
     }
     

@@ -17,7 +17,7 @@ extension Database{
     
     static func fetchUserWithUID(uid: String, completion: @escaping (User) -> ()) {
         
-        Database.updateSocialCounts(uid: uid)
+//        Database.updateSocialCounts(uid: uid)
         
         Database.database().reference().child("users").child(uid).observeSingleEvent(of: .value, with: { (snapshot) in
             
@@ -748,14 +748,10 @@ extension Database{
                     // Unstar the post and remove self from stars
                     likeCount -= 1
                     likes.removeValue(forKey: uid)
-                    spotUpdateSocialCount(creatorUid: uid, receiverUid: creatorUid, action: "like", change: -1)
-                    
                 } else {
                     // Star the post and add self to stars
                     likeCount += 1
                     likes[uid] = 1
-                    spotUpdateSocialCount(creatorUid: uid, receiverUid: creatorUid, action: "like", change: 1)
-                    
                 }
                 post["likeCount"] = likeCount as AnyObject?
                 post["likes"] = likes as AnyObject?
@@ -769,6 +765,13 @@ extension Database{
             if let error = error {
                 print(error.localizedDescription)
             } else {
+                var post = snapshot?.value as? [String : AnyObject] ?? [:]
+                var likes = post["likes"] as? [String : Int] ?? [:]
+                if let _ = likes[uid] {
+                    spotUpdateSocialCount(creatorUid: uid, receiverUid: creatorUid, action: "like", change: 1)
+                } else {
+                    spotUpdateSocialCount(creatorUid: uid, receiverUid: creatorUid, action: "like", change: -1)
+                }
                 // Completion after updating Likes
                 completion()
             }
@@ -791,13 +794,11 @@ extension Database{
                     // Unstar the post and remove self from stars
                     bookmarkCount -= 1
                     bookmarks.removeValue(forKey: uid)
-                    spotUpdateSocialCount(creatorUid: uid, receiverUid: creatorUid, action: "bookmark", change: -1)
                     
                 } else {
                     // Star the post and add self to stars
                     bookmarkCount += 1
                     bookmarks[uid] = 1
-                    spotUpdateSocialCount(creatorUid: uid, receiverUid: creatorUid, action: "bookmark", change: -1)
                     
                 }
             
@@ -813,6 +814,15 @@ extension Database{
             if let error = error {
                 print(error.localizedDescription)
             } else {
+                var post = snapshot?.value as? [String : AnyObject] ?? [:]
+                var bookmarks = post["bookmarks"] as? [String : Int] ?? [:]
+
+                if let _ = bookmarks[uid] {
+                    spotUpdateSocialCount(creatorUid: uid, receiverUid: creatorUid, action: "bookmark", change: 1)
+                } else {
+                    spotUpdateSocialCount(creatorUid: uid, receiverUid: creatorUid, action: "bookmark", change: -1)
+                }
+                
                 // No Error Handle Bookmarking in User
                 handleUserBookmark(postId: postId)
                 completion()
@@ -872,12 +882,10 @@ extension Database{
                 // Unfollow User
                 followingCount -= 1
                 following.removeValue(forKey: userUid)
-                spotUpdateSocialCount(creatorUid: uid, receiverUid: userUid, action: "follow", change: -1)
             } else {
                 // Follow User
                 followingCount += 1
                 following[userUid] = 1
-                spotUpdateSocialCount(creatorUid: uid, receiverUid: userUid, action: "follow", change: 1)
             }
             user["followingCount"] = followingCount as AnyObject?
             user["following"] = following as AnyObject?
@@ -891,6 +899,14 @@ extension Database{
             if let error = error {
                 print(error.localizedDescription)
             } else {
+                var user = snapshot?.value as? [String : AnyObject] ?? [:]
+                var following = user["following"] as? [String : Int] ?? [:]
+                if let _ = following[userUid] {
+                    spotUpdateSocialCount(creatorUid: uid, receiverUid: userUid, action: "follow", change: 1)
+                } else {
+                    spotUpdateSocialCount(creatorUid: uid, receiverUid: userUid, action: "follow", change: -1)
+                }
+
                 handleFollower(followedUid: userUid)
                 completion()
             }
@@ -963,21 +979,21 @@ extension Database{
         // Update creator social count - Not Keeping track of producing likes
         
         if action != "like"{
-        creatorRef.runTransactionBlock({ (currentData) -> TransactionResult in
+            creatorRef.runTransactionBlock({ (currentData) -> TransactionResult in
             var user = currentData.value as? [String : AnyObject] ?? [:]
             var count = user[creatorField] as? Int ?? 0
             count = max(0, count + change)
             user[creatorField] = count as AnyObject?
             
             currentData.value = user
-            print("Successfully Update \(creatorField) for creator : \(creatorUid) by: \(change), New Count: \(count)")
+            print("Update \(creatorField!) for creator : \(creatorUid!) by: \(change!), New Count: \(count)")
             return TransactionResult.success(withValue: currentData)
 
-        }) { (error, committed, snapshot) in
-            if let error = error {
+            }) { (error, committed, snapshot) in
+                if let error = error {
                 print("Creator Social Update Error: ", creatorUid, error.localizedDescription)
+                }
             }
-        }
         }
         
         // Update receiver social count  - Not applicable if post was created
@@ -989,7 +1005,7 @@ extension Database{
                 user[receiveField] = count as AnyObject?
                 
                 currentData.value = user
-                print("Successfully Update \(receiveField) for receiver : \(receiverUid) by: \(change), New Count: \(count)")
+                print("Update \(receiveField!) for receiver : \(receiverUid) by: \(change!), New Count: \(count)")
                 return TransactionResult.success(withValue: currentData)
                 
             }) { (error, committed, snapshot) in

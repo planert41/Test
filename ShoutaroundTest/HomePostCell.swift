@@ -459,7 +459,6 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         
         self.likeButton.transform = CGAffineTransform(scaleX: 0.1, y: 0.1)
         
-        
         UIView.animate(withDuration: 1.0,
                        delay: 0,
                        usingSpringWithDamping: 0.2,
@@ -471,17 +470,18 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
                        completion: nil)
     
         
-        
-        
         Database.handleLike(postId: postId, creatorUid: creatorId){
-            if (self.post?.hasLiked)! {
-                self.post?.likeStats -= 1
-            } else {
-                self.post?.likeStats += 1
-            }
-            self.post?.hasLiked = !(self.post?.hasLiked)!
-            self.delegate?.refreshPost(post: self.post!)
         }
+        
+        // Animates before database function is complete
+        
+        if (self.post?.hasLiked)! {
+            self.post?.likeStats -= 1
+        } else {
+            self.post?.likeStats += 1
+        }
+        self.post?.hasLiked = !(self.post?.hasLiked)!
+        self.delegate?.refreshPost(post: self.post!)
         
     }
 
@@ -504,8 +504,9 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         guard let uid = Auth.auth().currentUser?.uid else {return}
         
         Database.handleBookmark(postId: postId, creatorUid: creatorId){
-
         }
+        
+        // Animates before database function is complete
         
         if (self.post?.hasBookmarked)! {
             self.post?.bookmarkStats -= 1
@@ -787,6 +788,10 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         fatalError("init(coder:) has not been implemented")
     }
     
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        photoImageView.image = nil
+    }
     
     
 }

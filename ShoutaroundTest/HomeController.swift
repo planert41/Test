@@ -869,9 +869,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
 //        self.collectionView?.reloadItems(at: [filteredindexpath])
         
         // Update Cache
-        
-        let postId = post.id
-        postCache[postId!] = post
+        postCache[post.id!] = post
     }
     
     func didTapMessage(post: Post) {
