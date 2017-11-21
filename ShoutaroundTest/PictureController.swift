@@ -74,8 +74,6 @@ class PictureController: UICollectionViewController, HomePostCellDelegate, UICol
     
     
     override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        
-        
         return 1
     }
     
@@ -121,7 +119,7 @@ class PictureController: UICollectionViewController, HomePostCellDelegate, UICol
         
         self.selectedPost = post
         postCache[post.id!] = post
-        self.collectionView?.reloadData()
+//        self.collectionView?.reloadData()
     }
     
     
@@ -131,7 +129,6 @@ class PictureController: UICollectionViewController, HomePostCellDelegate, UICol
         messageController.post = post
         
         navigationController?.pushViewController(messageController, animated: true)
-        
     }
     
     internal func didTapNavMessage() {
@@ -140,7 +137,6 @@ class PictureController: UICollectionViewController, HomePostCellDelegate, UICol
         messageController.post = selectedPost
         
         self.navigationController?.pushViewController(messageController, animated: true)
-        
     }
     
     func userOptionPost(post:Post){
@@ -192,7 +188,6 @@ class PictureController: UICollectionViewController, HomePostCellDelegate, UICol
         
         let deleteAlert = UIAlertController(title: "Delete", message: "All data will be lost.", preferredStyle: UIAlertControllerStyle.alert)
         deleteAlert.addAction(UIAlertAction(title: "Ok", style: .default, handler: { (action: UIAlertAction!) in
-            
             // Remove from Current View
             self.dismiss(animated: true, completion: nil)
             Database.deletePost(post: post)
@@ -207,10 +202,8 @@ class PictureController: UICollectionViewController, HomePostCellDelegate, UICol
 
     
     func displaySelectedEmoji(emoji: String, emojitag: String) {
-        
         emojiDetailLabel.text = emoji + " " + emojitag
         emojiDetailLabel.isHidden = false
-        
     }
     
     

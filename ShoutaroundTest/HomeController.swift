@@ -310,7 +310,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     func finishFetchingPosts(){
         
         if self.userPostIdFetched && self.followingPostIdFetched {
-            print("Finish Fetching Post Ids")
+            print("Finish Fetching Post Ids: \(fetchPostIds.count)")
             self.sortFetchPostIds()
             self.paginatePosts()
         } else {
@@ -483,6 +483,8 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     func refreshPagination(){
         self.isFinishedPaging = false
         self.fetchedPostCount = 0
+        self.userPostIdFetched = false
+        self.followingPostIdFetched = false
     }
     
     func handleUpdateFeed() {
@@ -524,7 +526,6 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         clearFilter()
         fetchPostIds.removeAll()
         displayedPosts.removeAll()
-        self.collectionView?.reloadData()
         fetchAllPostIds()
         self.collectionView?.refreshControl?.endRefreshing()
         print("Refresh Home Feed. FetchPostIds: ", self.fetchPostIds.count, " DisplayedPost: ", self.displayedPosts.count)
@@ -562,10 +563,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
             print("Current User Posts: ", self.fetchPostIds.count)
             self.userPostIdFetched = true
             NotificationCenter.default.post(name: HomeController.finishFetchingUserPostIdsNotificationName, object: nil)
-            
         }
-        
-        Database.updateSocialCounts(uid: uid)
     }
 
     
@@ -574,10 +572,9 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         let thisGroup = DispatchGroup()
         guard let uid = Auth.auth().currentUser?.uid else {return}
         
-        var followingUsers: [String] = []
         Database.fetchFollowingUserUids(uid: uid) { (fetchedFollowingUsers) in
             
-            CurrentUser.followingUids = followingUsers
+            CurrentUser.followingUids = fetchedFollowingUsers
             thisGroup.enter()
             for userId in fetchedFollowingUsers {
                 thisGroup.enter()
@@ -721,7 +718,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
                     }
                 }
 
-                if tempPost.count > 0 {print("Adding Temp Post id: ", tempPost[0].id)}
+//                if tempPost.count > 0 {print("Adding Temp Post id: ", tempPost[0].id)}
                 
                 self.displayedPosts += tempPost
 

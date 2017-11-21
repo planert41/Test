@@ -336,9 +336,7 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
             },
                        completion: nil)
         
-        
         self.delegate?.displaySelectedEmoji(emoji: displayEmoji!, emojitag: displayEmojiTag!)
-        
     }
     
     
@@ -420,7 +418,6 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
     
     let captionLabel: UILabel = {
         let label = UILabel()
-        
         label.numberOfLines = 0
         return label
     }()
@@ -459,6 +456,7 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         
         self.likeButton.transform = CGAffineTransform(scaleX: 0.1, y: 0.1)
         
+        self.layoutIfNeeded()
         UIView.animate(withDuration: 1.0,
                        delay: 0,
                        usingSpringWithDamping: 0.2,
@@ -466,6 +464,8 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
                        options: .allowUserInteraction,
                        animations: { [weak self] in
                         self?.likeButton.transform = .identity
+                        self?.likeButton.layoutIfNeeded()
+
             },
                        completion: nil)
     
@@ -516,7 +516,7 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         self.post?.hasBookmarked = !(self.post?.hasBookmarked)!
         self.delegate?.refreshPost(post: self.post!)
         
-        self.bookmarkButton.transform = CGAffineTransform(scaleX: 0.1, y: 0.1)
+        bookmarkButton.transform = CGAffineTransform(scaleX: 0.1, y: 0.1)
         
         UIView.animate(withDuration: 1.0,
                        delay: 0,
@@ -571,6 +571,7 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         addSubview(usernameLabel)
         addSubview(emojiDetailLabel)
         addSubview(ratingEmojiLabel)
+        addSubview(bookmarkButton)
         
         headerView.anchor(top: topAnchor, left: leftAnchor, bottom: nil, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 50)
 
@@ -644,9 +645,6 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         addSubview(locationLabel)
         addSubview(adressLabel)
         addSubview(locationDistanceLabel)
-        addSubview(bookmarkButton)
-
-        bookmarkButton.anchor(top: locationView.bottomAnchor, left: nil, bottom: nil, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 40, height: 40)
         
         locationLabel.anchor(top: locationView.topAnchor, left: leftAnchor, bottom: nil, right: bookmarkButton.leftAnchor, paddingTop: 5, paddingLeft: 15, paddingBottom: 0, paddingRight: 0, width: 0, height: 15)
         
@@ -668,10 +666,26 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         bottomDividerView.anchor(top: locationView.bottomAnchor, left: leftAnchor, bottom: nil, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0.5)
         
         setupActionButtons()
-        
+
         addSubview(captionLabel)
         captionLabel.anchor(top: likeButton.bottomAnchor, left: leftAnchor, bottom: bottomAnchor, right: rightAnchor, paddingTop: 0, paddingLeft: 8, paddingBottom: 0, paddingRight: 8, width: 0, height: 0)
     
+    }
+    
+    
+    fileprivate func setupActionButtons() {
+        
+        let stackView = UIStackView(arrangedSubviews: [likeButton, commentButton, sendMessageButton])
+        stackView.distribution = .fillEqually
+        
+        addSubview(stackView)
+        stackView.anchor(top: locationView.bottomAnchor, left: leftAnchor, bottom: nil, right: nil, paddingTop: 0, paddingLeft: 8, paddingBottom: 0, paddingRight: 0, width: 120, height: 40)
+        
+        addSubview(bookmarkButton)
+        bookmarkButton.anchor(top: locationView.bottomAnchor, left: nil, bottom: stackView.bottomAnchor, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 40, height: 40)
+        
+//        addSubview(testlabel)
+//        testlabel.anchor(top: bookmarkButton.topAnchor, left: bookmarkButton.leftAnchor, bottom: bookmarkButton.bottomAnchor, right: bookmarkButton.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
     }
     
     func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
@@ -770,19 +784,7 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
 //        
 
     }
-    
-    fileprivate func setupActionButtons() {
-        
-        let stackView = UIStackView(arrangedSubviews: [likeButton, commentButton, sendMessageButton])
-        
 
-        stackView.distribution = .fillEqually
-        
-        addSubview(stackView)
-        stackView.anchor(top: locationView.bottomAnchor, left: leftAnchor, bottom: nil, right: nil, paddingTop: 0, paddingLeft: 8, paddingBottom: 0, paddingRight: 0, width: 120, height: 40)
-
-
-    }
     
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")

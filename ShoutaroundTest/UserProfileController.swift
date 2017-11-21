@@ -724,7 +724,7 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
                     }
                 }
                 
-                if tempPost.count > 0 {print("Adding Temp Post id: ", tempPost[0].id)}
+//                if tempPost.count > 0 {print("Adding Temp Post id: ", tempPost[0].id)}
                 
                 self.displayedPosts += tempPost
                 
