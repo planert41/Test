@@ -1527,10 +1527,10 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
                 return}
             
             print("Successfully save post to DB")
-            
+            Database.spotUpdateSocialCount(creatorUid: uid, receiverUid: nil, action: "post", change: 1)
             
             // Put new post in cache
-            self.uploadnewPost(uid: uid,postid: ref.key, dictionary: values)
+            self.uploadnewPostCache(uid: uid,postid: ref.key, dictionary: values)
             
             // SAVE USER AND POSTID IN USERPOSTS
             
@@ -1565,7 +1565,7 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         }
     }
     
-    fileprivate func uploadnewPost(uid: String?, postid: String?, dictionary: [String:Any]?){
+    fileprivate func uploadnewPostCache(uid: String?, postid: String?, dictionary: [String:Any]?){
         guard let uid = uid else {return}
         guard let dictionary = dictionary else {return}
         
@@ -1630,8 +1630,8 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
             
             print("Successfully save edited post to DB")
             
-            // Put new post
-            self.uploadnewPost(uid: uid,postid: postId, dictionary: values)
+            // Put new post into Cache
+            self.uploadnewPostCache(uid: uid,postid: postId, dictionary: values)
 
             
             // SAVE USER AND POSTID

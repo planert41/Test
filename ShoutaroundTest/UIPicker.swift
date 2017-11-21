@@ -9,6 +9,107 @@
 //
 //import Foundation
 
+//    fileprivate func paginatePosts(){
+//
+//        guard let uid = self.user?.uid else {return}
+//        let ref = Database.database().reference().child("userposts").child(uid)
+//        //var query = ref.queryOrderedByKey()
+//        var query = ref.queryOrdered(byChild: "creationDate")
+//
+//        print(allPosts.count)
+//        if allPosts.count > 0 {
+//            let value = allPosts.last?.creationDate.timeIntervalSince1970
+//            let queryEnd = allPosts.last?.id
+//            print("Query Ending", allPosts.last?.id)
+//            query = query.queryEnding(atValue: value)
+//        }
+//
+//        let thisGroup = DispatchGroup()
+//
+//        query.queryLimited(toLast: 6).observeSingleEvent(of: .value, with: { (snapshot) in
+//
+//            guard var allPostIds = snapshot.value as? [String: Any] else {return}
+//
+//            if allPostIds.count < 4 {
+//                self.isFinishedPaging = true
+//            }
+//
+////            allPostIds.sorted(by: { $0["creationDate"] > $1["creationDate] })
+//            print("allpostIds Queried",allPostIds)
+//
+//                let intIndex = allPostIds.count // where intIndex < myDictionary.count
+//                let index = allPostIds.index(allPostIds.startIndex, offsetBy: intIndex - 1)
+//                let testindex = allPostIds.index(allPostIds.startIndex, offsetBy: 1)
+// //               let deleteindex = allPostIds.index(forKey: (self.allPosts.last?.id)!)
+//
+// //               print("DeletedUID ",allPostIds[deleteindex!])
+//
+//            if self.allPosts.count > 0 {
+//                print("before delete", allPostIds.count)
+//
+////                let allPostCount = max(0,self.allPosts.count - 5)
+//
+//                let lastSixPost =  self.allPosts.suffix(6)
+//  //              let lastSixPost = self.allPosts[(allPostCount-1)..<self.allPosts.count-1]
+//
+//                var lastSixPostIds: [String] = []
+//
+//                for post in lastSixPost{
+//                    lastSixPostIds.append(post.id!)
+//            }
+//
+//                print("Last Six Post Ids: ",lastSixPostIds)
+//
+//                for post in allPostIds {
+//                    print("Post Key :", post.key)
+//                    if lastSixPostIds.contains(post.key){
+//                    print("Deleting ", post.key)
+//                    allPostIds.removeValue(forKey: post.key)
+//
+//                    }
+//                }
+//
+//                print("after delete", allPostIds.count)
+//            }
+//
+//            guard let user = self.user else {return}
+//
+//            allPostIds.forEach({ (key,value) in
+//
+//                thisGroup.enter()
+//
+//                Database.fetchPostWithUIDAndPostID(creatoruid: user.uid, postId: key, completion: { (fetchedPost) in
+//
+//                self.allPosts.append(fetchedPost)
+//                    print(self.allPosts.count, fetchedPost.id)
+//                thisGroup.leave()
+//
+//                })
+//            })
+//
+//            thisGroup.notify(queue: .main) {
+//                print(self.allPosts.count)
+//                self.allPosts.sort(by: { (p1, p2) -> Bool in
+//                    return p1.creationDate.compare(p2.creationDate) == .orderedDescending })
+//
+//                self.collectionView?.reloadData()
+//            }
+//
+//            self.allPosts.forEach({ (post) in
+//                print(post.id ?? "")
+//
+//            })
+//
+//        }) { (err) in
+//            print("Failed to Paginate for Posts:", err)
+//        }
+//
+//
+//    }
+
+
+
+
 // FUNCTION TO UPDATE GPS LOCATIONS FOR EACH POST
 //
 //func updateGPSForPosts() {

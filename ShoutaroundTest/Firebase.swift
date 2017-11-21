@@ -12,16 +12,17 @@ import GeoFire
 var postCache = [String: Post]()
 
 extension Database{
+
+// Fetching User Functions
     
     static func fetchUserWithUID(uid: String, completion: @escaping (User) -> ()) {
         
-//        print("Fetching uid", uid)
+        Database.updateSocialCounts(uid: uid)
         
         Database.database().reference().child("users").child(uid).observeSingleEvent(of: .value, with: { (snapshot) in
             
             guard let userDictionary = snapshot.value as? [String:Any] else {return}
             let user = User(uid:uid, dictionary: userDictionary)
-            
             completion(user)
             
         }) {(err) in
@@ -40,7 +41,6 @@ extension Database{
             
             dictionaries.forEach({ (key,value) in
                 myGroup.enter()
-                
                 if key == Auth.auth().currentUser?.uid{
                     print("Found Myself, omit from list")
                     myGroup.leave()
@@ -90,20 +90,117 @@ extension Database{
             completion(followingUsers)
             
         }) { (error) in
-                print("Error fetching following user uids: ", error)
+            print("Error fetching following user uids: ", error)
         }
     }
     
-    static func fetchPostWithUIDAndPostID(creatoruid: String, postId: String, completion: @escaping (Post) -> ()) {
+    static func fetchUserWithUsername( username: String, completion: @escaping (User) -> ()) {
         
+        let myGroup = DispatchGroup()
+        var query = Database.database().reference().child("users").queryOrdered(byChild: "username").queryEqual(toValue: username)
+        var user: User?
+        
+        query.observe(.value, with: { (snapshot) in
+            
+            guard let queryUsers = snapshot.value as? [String: Any] else {return}
+            queryUsers.forEach({ (key,value) in
+                
+                myGroup.enter()
+                guard let dictionary = value as? [String: Any] else {return}
+                
+                user = User(uid: key, dictionary: dictionary)
+                myGroup.leave()
+            })
+            myGroup.notify(queue: .main) {
+                completion(user!)
+            }
+        }) { (err) in
+            print("Failed to fetch post for Google Place ID", err)
+        }
+    }
+    
+// Fetch Bookmark Functions
+    
+    static func fetchAllBookmarkIdsForUID(uid: String, completion: @escaping ([BookmarkId]) -> ()) {
+        
+        let myGroup = DispatchGroup()
+        var fetchedBookmarkIds = [] as [BookmarkId]
+        
+        let ref = Database.database().reference().child("users").child(uid).child("bookmarks").child("bookmarks")
+        ref.observeSingleEvent(of: .value, with: {(snapshot) in
+            
+            guard let bookmarks = snapshot.value as? [String: Any] else {return}
+            bookmarks.forEach({ (key,value) in
+                myGroup.enter()
+                //                print("Key \(key), Value: \(value)")
+                guard let dictionary = value as? [String: Any] else {return}
+                let bookmarkTime = dictionary["bookmarkDate"] as? Double ?? 0
+                // Substitute Post Id creation date with bookmark time
+                let tempId = BookmarkId.init(postId: key, fetchedBookmarkDate: bookmarkTime)
+                fetchedBookmarkIds.append(tempId)
+                myGroup.leave()
+            })
+            
+            myGroup.notify(queue: .main) {
+                completion(fetchedBookmarkIds)
+            }
+        })
+    }
+    
+    static func fetchAllBookmarksForUID(uid: String, completion: @escaping ([Bookmark]) -> ()) {
+        
+        let myGroup = DispatchGroup()
+        var tempBookmarks:[Bookmark] = []
+        
+        Database.fetchAllBookmarkIdsForUID(uid: uid) { (bookmarkIds) in
+            
+            for bookmarkId in bookmarkIds{
+                myGroup.enter()
+                Database.fetchPostWithPostID(postId: bookmarkId.postId, completion: { (post, error) in
+                    if let error = error {
+                        print("Failed to fetch post for bookmarks: ",bookmarkId.postId , error)
+                        myGroup.leave()
+                        return
+                    } else if let post = post {
+                        let tempBookmark = Bookmark.init(bookmarkDate: bookmarkId.bookmarkDate, post: post)
+                        tempBookmarks.append(tempBookmark)
+                        myGroup.leave()
+                    } else {
+                        print("No Result for PostId: ", bookmarkId.postId)
+                        //Delete Bookmark since post is unavailable, Present Delete Alert
+                        
+                        let deleteAlert = UIAlertController(title: "Delete Bookmark", message: "Post Bookmarked on \(bookmarkId.bookmarkDate) Was Deleted", preferredStyle: UIAlertControllerStyle.alert)
+                        
+                        deleteAlert.addAction(UIAlertAction(title: "Ok", style: .default, handler: { (action: UIAlertAction!) in
+                            // Delete Bookmark in Database
+                            Database.handleBookmark(postId: bookmarkId.postId, creatorUid: nil, completion: {
+                            })
+                        }))
+                        
+                        UIApplication.shared.keyWindow?.rootViewController?.present(deleteAlert, animated: true, completion: nil)
+                        myGroup.leave()
+                    }
+                })
+            }
+            
+            myGroup.notify(queue: .main) {
+                tempBookmarks.sort(by: { (p1, p2) -> Bool in
+                    return p1.bookmarkDate.compare(p2.bookmarkDate) == .orderedDescending
+                })
+                completion(tempBookmarks)
+            }
+        }
+    }
 
+    
+// Fetch Posts Functions
+
+    static func fetchPostWithUIDAndPostID(creatoruid: String, postId: String, completion: @escaping (Post) -> ()) {
         Database.fetchUserWithUID(uid: creatoruid) { (user) in
             
             let ref = Database.database().reference().child("posts").child(postId)
-            
             ref.observeSingleEvent(of: .value, with: {(snapshot) in
                 
-
             guard let dictionary = snapshot.value as? [String: Any] else {return}
                 var post = Post(user: user, dictionary: dictionary)
                 post.id = postId
@@ -114,11 +211,259 @@ extension Database{
                         completion(post)
                     })
                 })
-            
         }) { (err) in print("Failed to fetchposts:", err) }
-        
         }
     }
+
+    static func fetchAllPostIDWithCreatorUID(creatoruid: String, completion: @escaping ([PostId]) -> ()) {
+        
+        let myGroup = DispatchGroup()
+        var fetchedPostIds = [] as [PostId]
+        
+        let ref = Database.database().reference().child("userposts").child(creatoruid)
+        ref.observeSingleEvent(of: .value, with: {(snapshot) in
+            
+            guard let userposts = snapshot.value as? [String: Any] else {return}
+            userposts.forEach({ (key,value) in
+                myGroup.enter()
+//                print("Key \(key), Value: \(value)")
+                
+                let dictionary = value as? [String: Any]
+                let secondsFrom1970 = dictionary?["creationDate"] as? Double ?? 0
+                let tagTime = dictionary?["tagTime"] as? Double ?? 0
+                let emoji = dictionary?["emoji"] as? String ?? ""
+                
+                let tempID = PostId.init(id: key, creatorUID: creatoruid, fetchedTagTime: tagTime, fetchedDate: secondsFrom1970, distance: nil, postGPS: nil, postEmoji: emoji)
+                fetchedPostIds.append(tempID)
+                myGroup.leave()
+            })
+            
+            myGroup.notify(queue: .main) {
+                completion(fetchedPostIds)
+            }
+        })
+    }
+    
+    
+    
+    static func fetchAllPostWithUID(creatoruid: String, completion: @escaping ([Post]) -> ()) {
+
+        let myGroup = DispatchGroup()
+        var fetchedPosts = [] as [Post]
+        Database.fetchUserWithUID(uid: creatoruid) { (user) in
+            
+            let ref = Database.database().reference().child("userposts").child(user.uid)
+            
+            ref.observeSingleEvent(of: .value, with: {(snapshot) in
+                
+                guard let userposts = snapshot.value as? [String: Any] else {return}
+                
+                userposts.forEach({ (key,value) in
+                    
+                    myGroup.enter()
+                    let dictionary = value as? [String: Any]
+                    let secondsFrom1970 = dictionary?["creationDate"] as? Double ?? 0
+                    let creationDate = Date(timeIntervalSince1970: secondsFrom1970)
+                    //                    print("PostId: ", key,"Creation Date: ", creationDate)
+                    //                    print(user.uid, key)
+                    Database.fetchPostWithUIDAndPostID(creatoruid: user.uid, postId: key, completion: { (post) in
+                        
+                        Database.checkPostForLikesAndBookmarks(post: post, completion: { (post) in
+                            fetchedPosts.append(post)
+                            fetchedPosts.sort(by: { (p1, p2) -> Bool in
+                                return p1.creationDate.compare(p2.creationDate) == .orderedDescending })
+                            myGroup.leave()
+                            
+                        })
+                    })
+                })
+                
+                myGroup.notify(queue: .main) {
+                    completion(fetchedPosts)
+                }
+                
+            })
+            { (err) in print("Failed to fetch user postids", err)}
+        }
+    }
+    
+    static func fetchAllPostWithGooglePlaceID(googlePlaceId: String, completion: @escaping ([Post]) -> ()) {
+        
+        let myGroup = DispatchGroup()
+        var query = Database.database().reference().child("posts").queryOrdered(byChild: "googlePlaceID").queryEqual(toValue: googlePlaceId)
+        var fetchedPosts = [] as [Post]
+        
+        query.observe(.value, with: { (snapshot) in
+            
+            guard let locationPosts = snapshot.value as? [String: Any] else {return}
+            locationPosts.forEach({ (key,value) in
+                
+                myGroup.enter()
+                guard let dictionary = value as? [String: Any] else {return}
+                let creatorUID = dictionary["creatorUID"] as? String ?? ""
+                
+                Database.fetchUserWithUID(uid: creatorUID) { (user) in
+                    
+                    var post = Post(user: user, dictionary: dictionary)
+                    post.id = key
+
+                    Database.checkPostForLikesAndBookmarks(post: post, completion: { (post) in
+                        fetchedPosts.append(post)
+                        fetchedPosts.sort(by: { (p1, p2) -> Bool in
+                            return p1.creationDate.compare(p2.creationDate) == .orderedDescending })
+                        myGroup.leave()
+                    })
+                }
+            })
+            myGroup.notify(queue: .main) {
+                completion(fetchedPosts)
+            }
+        }) { (err) in
+            print("Failed to fetch post for Google Place ID", err)
+        }
+    }
+    
+    static func fetchPostWithPostID( postId: String, completion: @escaping (Post?, Error?) -> ()) {
+        
+        if let cachedPost = postCache[postId] {
+            if cachedPost != nil {
+                completion(cachedPost, nil)
+                return
+            }
+        }
+        
+        let ref = Database.database().reference().child("posts").child(postId)
+        
+        ref.observeSingleEvent(of: .value, with: {(snapshot) in
+            
+            guard let dictionary = snapshot.value as? [String: Any] else {
+                print("No dictionary for post id: ", postId)
+                completion(nil,nil)
+                return
+            }
+            let creatorUID = dictionary["creatorUID"] as? String ?? ""
+
+            Database.fetchUserWithUID(uid: creatorUID, completion: { (user) in
+                var post = Post(user: user, dictionary: dictionary)
+                post.id = postId
+                
+                checkPostForLikesAndBookmarks(post: post, completion: { (post) in
+                    postCache[postId] = post
+                    //                print(post)
+                    completion(post, nil)
+                })
+            })
+        }) {(err) in
+            print("Failed to fetch post for postid:",err)
+            completion(nil, err)
+        }
+    }
+    
+    static func fetchAllPostWithLocation(location: CLLocation, distance: Double, completion: @escaping ([Post]) -> ()) {
+        
+        var fetchedPosts = [] as [Post]
+        
+        let myGroup = DispatchGroup()
+        let ref = Database.database().reference().child("postlocations")
+        let geoFire = GeoFire(firebaseRef: ref)
+        let circleQuery = geoFire?.query(at: location, withRadius: distance)
+        
+        myGroup.enter()
+        circleQuery?.observe(.keyEntered, with: { (key, firebaselocation) in
+            //            print(key)
+            
+            myGroup.enter()
+            Database.fetchPostWithPostID(postId: key!, completion: { (post, error) in
+                //                print(post)
+                if let error = error {
+                    print(error)
+                    return
+                }
+                
+                guard let post = post else {return}
+                var tempPost = post
+                tempPost.distance = tempPost.locationGPS?.distance(from: location)
+                //                print(tempPost.distance, ": ", tempPost.caption, " : ", location, " : ", tempPost.locationGPS)
+                fetchedPosts.append(tempPost)
+                myGroup.leave()
+            })
+        })
+        
+        circleQuery?.observeReady({
+            myGroup.leave()
+        })
+        
+        myGroup.notify(queue: .main) {
+            fetchedPosts.sort(by: { (p1, p2) -> Bool in
+                return (p1.distance! < p2.distance!)
+            })
+            completion(fetchedPosts)
+        }
+    }
+    
+    static func fetchPostIDDetails(postId: String, completion: @escaping (PostId) -> ()) {
+        
+        var fetchedPostID: PostId? = nil
+        
+        let ref = Database.database().reference().child("posts").child(postId)
+        
+        ref.observeSingleEvent(of: .value, with: {(snapshot) in
+            
+            guard let dictionary = snapshot.value as? [String: Any] else {return}
+            let creatorUID = dictionary["creatorUID"] as? String ?? ""
+            let secondsFrom1970 = dictionary["creationDate"] as? Double ?? 0
+            let postGPS = dictionary["postLocationGPS"] as? String ?? ""
+            let tagTime = dictionary["tagTime"] as? Double ?? 0
+            let emoji = dictionary["emoji"] as? String ?? ""
+            
+            
+            let tempID = PostId.init(id: postId, creatorUID: creatorUID, fetchedTagTime: tagTime, fetchedDate: secondsFrom1970, distance: nil, postGPS: postGPS, postEmoji: emoji)
+            completion(tempID)
+            
+        })
+    }
+    
+    
+    
+    static func fetchAllPostIDWithinLocation(selectedLocation: CLLocation, distance: Double, completion: @escaping ([PostId]) -> ()) {
+        
+        let myGroup = DispatchGroup()
+        var fetchedPostIds = [] as [PostId]
+        
+        let ref = Database.database().reference().child("postlocations")
+        let geoFire = GeoFire(firebaseRef: ref)
+        let circleQuery = geoFire?.query(at: selectedLocation, withRadius: distance)
+        
+        myGroup.enter()
+        circleQuery?.observe(.keyEntered, with: { (key, firebaseLocation) in
+            //            print(key)
+            
+            myGroup.enter()
+            
+            Database.fetchPostIDDetails(postId: key!, completion: { (fetchPostId) in
+                var tempPostId = fetchPostId
+                tempPostId.distance = firebaseLocation?.distance(from: selectedLocation)
+                fetchedPostIds.append(tempPostId)
+                myGroup.leave()
+            })
+        })
+        
+        circleQuery?.observeReady({
+            myGroup.leave()
+        })
+        
+        myGroup.notify(queue: .main) {
+            fetchedPostIds.sort(by: { (p1, p2) -> Bool in
+                return (p1.distance! < p2.distance!)
+            })
+            print("Geofire Fetched Posts: \(fetchedPostIds.count)" )
+            completion(fetchedPostIds)
+        }
+    }
+    
+    
+    
+// Social Stat Updates
     
     static func checkPostForLikes(post: Post, completion: @escaping (Post) -> ()){
         
@@ -127,12 +472,12 @@ extension Database{
         
         Database.database().reference().child("likes").child(post.id!).observeSingleEvent(of: .value, with: { (snapshot) in
             
-                let post = snapshot.value as? [String: Any] ?? [:]
-                var likes: Dictionary<String, Int>
-                likes = post["likes"] as? [String : Int] ?? [:]
-                var likeCount = post["likeCount"] as? Int ?? 0
+            let post = snapshot.value as? [String: Any] ?? [:]
+            var likes: Dictionary<String, Int>
+            likes = post["likes"] as? [String : Int] ?? [:]
+            var likeCount = post["likeCount"] as? Int ?? 0
             
-        
+            
             if likes[uid] == 1 {
                 tempPost.hasLiked = true
             } else {
@@ -168,88 +513,19 @@ extension Database{
             tempPost.bookmarkStats = bookmarkCount
             
             completion(tempPost)
-
+            
         }, withCancel: { (err) in
             print("Failed to fetch bookmark info for post:", err)
         })
     }
     
     static func checkPostForLikesAndBookmarks(post: Post, completion: @escaping (Post) -> ()){
-    
-    Database.checkPostForLikes(post: post) { (post) in
-        Database.checkPostForBookmarks(post: post, completion: { (post) in
-            completion(post)
-        })
-        }
-    
-    
-    }
-    
-    static func fetchUserWithUsername( username: String, completion: @escaping (User) -> ()) {
-    
-        let myGroup = DispatchGroup()
         
-        var query = Database.database().reference().child("users").queryOrdered(byChild: "username").queryEqual(toValue: username)
-        
-        var user: User?
-        
-        query.observe(.value, with: { (snapshot) in
-            
-            guard let queryUsers = snapshot.value as? [String: Any] else {return}
-            
-            queryUsers.forEach({ (key,value) in
-                
-                myGroup.enter()
-                guard let dictionary = value as? [String: Any] else {return}
-              
-                user = User(uid: key, dictionary: dictionary)
-                myGroup.leave()
-
+        Database.checkPostForLikes(post: post) { (post) in
+            Database.checkPostForBookmarks(post: post, completion: { (post) in
+                completion(post)
             })
-            myGroup.notify(queue: .main) {
-                completion(user!)
-            }
-        }) { (err) in
-            print("Failed to fetch post for Google Place ID", err)
         }
-        
-        
-    }
-    
-    static func fetchAllPostIDWithCreatorUID(creatoruid: String, completion: @escaping ([PostId]) -> ()) {
-        
-        let myGroup = DispatchGroup()
-        var fetchedPostIds = [] as [PostId]
-        
-        let ref = Database.database().reference().child("userposts").child(creatoruid)
-        
-        ref.observeSingleEvent(of: .value, with: {(snapshot) in
-            
-            guard let userposts = snapshot.value as? [String: Any] else {return}
-            
-            userposts.forEach({ (key,value) in
-                
-                myGroup.enter()
-                
-//                print("Key \(key), Value: \(value)")
-                
-                let dictionary = value as? [String: Any]
-                let secondsFrom1970 = dictionary?["creationDate"] as? Double ?? 0
-                let tagTime = dictionary?["tagTime"] as? Double ?? 0
-                let emoji = dictionary?["emoji"] as? String ?? ""
-                
-                
-                let tempID = PostId.init(id: key, creatorUID: creatoruid, fetchedTagTime: tagTime, fetchedDate: secondsFrom1970, distance: nil, postGPS: nil, postEmoji: emoji)
-                fetchedPostIds.append(tempID)
-                
-                myGroup.leave()
-                
-            })
-            
-            myGroup.notify(queue: .main) {
-                completion(fetchedPostIds)
-            }
-        })
     }
     
     static func updateSocialCounts(uid: String!){
@@ -282,7 +558,7 @@ extension Database{
                 likeRef.child(postId.id).child("likeCount").observeSingleEvent(of: .value, with: { (snapshot) in
                     var postLikeCount = snapshot.value as? Int ?? 0
                     likedCount += postLikeCount
-                    print("Current Post \(postId.id), likeCount: \(postLikeCount), CumLikeCount: \(likedCount)")
+//                    print("Current Post \(postId.id), likeCount: \(postLikeCount), CumLikeCount: \(likedCount)")
                     innerLoop.leave()
                 })
                 
@@ -291,7 +567,7 @@ extension Database{
                 bookmarkRef.child(postId.id).child("bookmarkCount").observeSingleEvent(of: .value, with: { (snapshot) in
                     var postBookmarkCount = snapshot.value as? Int ?? 0
                     bookmarkedCount += postBookmarkCount
-                    print("Current Post \(postId.id), bookmarkCount: \(postBookmarkCount), CumBookmarkCount: \(bookmarkedCount)")
+//                    print("Current Post \(postId.id), bookmarkCount: \(postBookmarkCount), CumBookmarkCount: \(bookmarkedCount)")
                     
                     innerLoop.leave()
                 })
@@ -348,176 +624,9 @@ extension Database{
                     print("Successfully save user social data for : \(uid)", values)
                 })
             }
-        
     }
     
-    
-    static func fetchAllBookmarkIdsForUID(uid: String, completion: @escaping ([BookmarkId]) -> ()) {
-        
-        let myGroup = DispatchGroup()
-        var fetchedBookmarkIds = [] as [BookmarkId]
-        
-        let ref = Database.database().reference().child("users").child(uid).child("bookmarks").child("bookmarks")
-        
-        ref.observeSingleEvent(of: .value, with: {(snapshot) in
-            
-            guard let bookmarks = snapshot.value as? [String: Any] else {return}
-            
-            bookmarks.forEach({ (key,value) in
-                
-                myGroup.enter()
-                //                print("Key \(key), Value: \(value)")
-                guard let dictionary = value as? [String: Any] else {return}
-                    
-                    let bookmarkTime = dictionary["bookmarkDate"] as? Double ?? 0
-                    // Substitute Post Id creation date with bookmark time
-                    let tempId = BookmarkId.init(postId: key, fetchedBookmarkDate: bookmarkTime)
-                    fetchedBookmarkIds.append(tempId)
-                        myGroup.leave()
-
-            })
-            
-            myGroup.notify(queue: .main) {
-                completion(fetchedBookmarkIds)
-            }
-        })
-    }
-    
-    static func fetchAllBookmarksForUID(uid: String, completion: @escaping ([Bookmark]) -> ()) {
-
-        let myGroup = DispatchGroup()
-        
-        var tempBookmarks:[Bookmark] = []
-        
-        Database.fetchAllBookmarkIdsForUID(uid: uid) { (bookmarkIds) in
-            
-            for bookmarkId in bookmarkIds{
-                myGroup.enter()
-                Database.fetchPostWithPostID(postId: bookmarkId.postId, completion: { (post, error) in
-                    if let error = error {
-                        print("Failed to fetch post for bookmarks: ",bookmarkId.postId , error)
-                        myGroup.leave()
-                        return
-                    } else if let post = post {
-                        let tempBookmark = Bookmark.init(bookmarkDate: bookmarkId.bookmarkDate, post: post)
-                        tempBookmarks.append(tempBookmark)
-                        myGroup.leave()
-                    } else {
-                        print("No Result for PostId: ", bookmarkId.postId)
-                        //Delete Bookmark since post is unavailable, Present Delete Alert
-                        
-                        let deleteAlert = UIAlertController(title: "Delete Bookmark", message: "Post Bookmarked on \(bookmarkId.bookmarkDate) Was Deleted", preferredStyle: UIAlertControllerStyle.alert)
-                        
-                        deleteAlert.addAction(UIAlertAction(title: "Ok", style: .default, handler: { (action: UIAlertAction!) in
-                            // Delete Bookmark in Database
-                            Database.handleBookmark(postId: bookmarkId.postId, creatorUid: nil, completion: {
-                                
-                            })
-                        }))
-                        
-                        UIApplication.shared.keyWindow?.rootViewController?.present(deleteAlert, animated: true, completion: nil)
-                        myGroup.leave()
-                    }
-                    
-                })
-            }
-            
-            myGroup.notify(queue: .main) {
-                tempBookmarks.sort(by: { (p1, p2) -> Bool in
-                    return p1.bookmarkDate.compare(p2.bookmarkDate) == .orderedDescending
-                })
-                completion(tempBookmarks)
-            }
-        }
-    }
-    
-    
-    static func fetchAllPostWithUID(creatoruid: String, completion: @escaping ([Post]) -> ()) {
-        
-        
-        let myGroup = DispatchGroup()
-        var fetchedPosts = [] as [Post]
-        Database.fetchUserWithUID(uid: creatoruid) { (user) in
-            
-            let ref = Database.database().reference().child("userposts").child(user.uid)
-            
-            ref.observeSingleEvent(of: .value, with: {(snapshot) in
-                
-                guard let userposts = snapshot.value as? [String: Any] else {return}
-                
-                userposts.forEach({ (key,value) in
-                    
-                    myGroup.enter()
-                    
-//                    print("Key \(key), Value: \(value)")
-                    
-                    let dictionary = value as? [String: Any]
-                    let secondsFrom1970 = dictionary?["creationDate"] as? Double ?? 0
-                    let creationDate = Date(timeIntervalSince1970: secondsFrom1970)
-//                    print("PostId: ", key,"Creation Date: ", creationDate)
-                    
-                    
-                    
-//                    print(user.uid, key)
-                    Database.fetchPostWithUIDAndPostID(creatoruid: user.uid, postId: key, completion: { (post) in
-                        
-                    Database.checkPostForLikesAndBookmarks(post: post, completion: { (post) in
-                        fetchedPosts.append(post)
-                        fetchedPosts.sort(by: { (p1, p2) -> Bool in
-                            return p1.creationDate.compare(p2.creationDate) == .orderedDescending })
-                        myGroup.leave()
-                        
-                    })
-                    })
-                })
-                
-                myGroup.notify(queue: .main) {
-                    completion(fetchedPosts)
-                }
-                
-            })
-            { (err) in print("Failed to fetch user postids", err)}
-        }
-    }
-    
-    static func fetchAllPostWithGooglePlaceID(googlePlaceId: String, completion: @escaping ([Post]) -> ()) {
-        
-        let myGroup = DispatchGroup()
-        var query = Database.database().reference().child("posts").queryOrdered(byChild: "googlePlaceID").queryEqual(toValue: googlePlaceId)
-        var fetchedPosts = [] as [Post]
-        
-        query.observe(.value, with: { (snapshot) in
-           
-            guard let locationPosts = snapshot.value as? [String: Any] else {return}
-            
-            locationPosts.forEach({ (key,value) in
-                
-            myGroup.enter()
-            guard let dictionary = value as? [String: Any] else {return}
-            let creatorUID = dictionary["creatorUID"] as? String ?? ""
-            
-            Database.fetchUserWithUID(uid: creatorUID) { (user) in
-            
-                var post = Post(user: user, dictionary: dictionary)
-                post.id = key
-            
-
-                Database.checkPostForLikesAndBookmarks(post: post, completion: { (post) in
-                fetchedPosts.append(post)
-                fetchedPosts.sort(by: { (p1, p2) -> Bool in
-                return p1.creationDate.compare(p2.creationDate) == .orderedDescending })
-                myGroup.leave()
-                })
-            }
-            })
-            myGroup.notify(queue: .main) {
-                completion(fetchedPosts)
-            }
-        }) { (err) in
-            print("Failed to fetch post for Google Place ID", err)
-        }
-
-    }
+// Upload/Update Post
     
     static func updatePostwithPostID( postId: String, values: [String:Any]){
         
@@ -547,13 +656,15 @@ extension Database{
     
     static func deletePost(post: Post){
         
+        guard let uid = Auth.auth().currentUser?.uid else {return}
+        
         Database.database().reference().child("posts").child(post.id!).removeValue()
         Database.database().reference().child("postlocations").child(post.id!).removeValue()
         Database.database().reference().child("userposts").child(post.creatorUID!).child(post.id!).removeValue()
         
         // Remove from cache
         postCache.removeValue(forKey: post.id!)
-        
+        Database.spotUpdateSocialCount(creatorUid: uid, receiverUid: nil, action: "post", change: -1)
         
         // Bookmarked post is deleted when user fetches for post but it isn't there
 //        Database.database().reference().child("bookmarks").child(post.creatorUID!).child(post.id!).removeValue()
@@ -571,46 +682,6 @@ extension Database{
             
         })
         
-    }
-    
-    static func fetchPostWithPostID( postId: String, completion: @escaping (Post?, Error?) -> ()) {
-        
-            if let cachedPost = postCache[postId] {
-                if cachedPost != nil {
-                completion(cachedPost, nil)
-                return
-                }
-            }
-        
-            let ref = Database.database().reference().child("posts").child(postId)
-            
-            ref.observeSingleEvent(of: .value, with: {(snapshot) in
-                
-            guard let dictionary = snapshot.value as? [String: Any] else {
-                print("No dictionary for post id: ", postId)
-                completion(nil,nil)
-                return
-                }
-                let creatorUID = dictionary["creatorUID"] as? String ?? ""
-                
-                
-                
-           Database.fetchUserWithUID(uid: creatorUID, completion: { (user) in
-            var post = Post(user: user, dictionary: dictionary)
-            post.id = postId
-            
-           checkPostForLikesAndBookmarks(post: post, completion: { (post) in
-                postCache[postId] = post
-//                print(post)
-                completion(post, nil)
-            })
-           })
-            }) {(err) in
-                print("Failed to fetch post for postid:",err)
-                completion(nil, err)
-        }
-        
-    
     }
     
     static func fetchMessageForUID( userUID: String, completion: @escaping ([Message]) -> ()) {
@@ -646,9 +717,7 @@ extension Database{
                 messages.append(tempMessage)
                 myGroup.leave()
             })
-
             })
-
             })
             
             myGroup.notify(queue: .main) {
@@ -662,109 +731,6 @@ extension Database{
     }
     
     
-    static func fetchAllPostWithLocation(location: CLLocation, distance: Double, completion: @escaping ([Post]) -> ()) {
-
-        var fetchedPosts = [] as [Post]
-        
-        let myGroup = DispatchGroup()
-        let ref = Database.database().reference().child("postlocations")
-        let geoFire = GeoFire(firebaseRef: ref)
-        let circleQuery = geoFire?.query(at: location, withRadius: distance)
-        
-            myGroup.enter()
-        circleQuery?.observe(.keyEntered, with: { (key, firebaselocation) in
-//            print(key)
-
-            myGroup.enter()
-            Database.fetchPostWithPostID(postId: key!, completion: { (post, error) in
-//                print(post)
-                if let error = error {
-                    print(error)
-                    return
-                }
-                
-                guard let post = post else {return}
-                var tempPost = post
-                tempPost.distance = tempPost.locationGPS?.distance(from: location)
-//                print(tempPost.distance, ": ", tempPost.caption, " : ", location, " : ", tempPost.locationGPS)
-                fetchedPosts.append(tempPost)
-                myGroup.leave()
-            })
-        })
-        
-        circleQuery?.observeReady({
-                myGroup.leave()
-        })
-        
-        myGroup.notify(queue: .main) {
-            fetchedPosts.sort(by: { (p1, p2) -> Bool in
-                return (p1.distance! < p2.distance!)
-            })
-            completion(fetchedPosts)
-        }
-    }
-
-    static func fetchPostIDDetails(postId: String, completion: @escaping (PostId) -> ()) {
-        
-        var fetchedPostID: PostId? = nil
-        
-        let ref = Database.database().reference().child("posts").child(postId)
-        
-        ref.observeSingleEvent(of: .value, with: {(snapshot) in
-            
-            guard let dictionary = snapshot.value as? [String: Any] else {return}
-            let creatorUID = dictionary["creatorUID"] as? String ?? ""
-            let secondsFrom1970 = dictionary["creationDate"] as? Double ?? 0
-            let postGPS = dictionary["postLocationGPS"] as? String ?? ""
-            let tagTime = dictionary["tagTime"] as? Double ?? 0
-            let emoji = dictionary["emoji"] as? String ?? ""
-            
-            
-            let tempID = PostId.init(id: postId, creatorUID: creatorUID, fetchedTagTime: tagTime, fetchedDate: secondsFrom1970, distance: nil, postGPS: postGPS, postEmoji: emoji)
-            completion(tempID)
-            
-        })
-    }
-    
-    
-    
-    static func fetchAllPostIDWithinLocation(selectedLocation: CLLocation, distance: Double, completion: @escaping ([PostId]) -> ()) {
-        
-        let myGroup = DispatchGroup()
-        var fetchedPostIds = [] as [PostId]
-        
-        let ref = Database.database().reference().child("postlocations")
-        let geoFire = GeoFire(firebaseRef: ref)
-        let circleQuery = geoFire?.query(at: selectedLocation, withRadius: distance)
-        
-        myGroup.enter()
-        circleQuery?.observe(.keyEntered, with: { (key, firebaseLocation) in
-//            print(key)
-            
-            myGroup.enter()
-            
-            Database.fetchPostIDDetails(postId: key!, completion: { (fetchPostId) in
-                var tempPostId = fetchPostId
-                tempPostId.distance = firebaseLocation?.distance(from: selectedLocation)
-                fetchedPostIds.append(tempPostId)
-                myGroup.leave()
-            })
-        })
-        
-        circleQuery?.observeReady({
-            myGroup.leave()
-        })
-        
-        myGroup.notify(queue: .main) {
-            fetchedPostIds.sort(by: { (p1, p2) -> Bool in
-                return (p1.distance! < p2.distance!)
-            })
-            print("Geofire Fetched Posts: \(fetchedPostIds.count)" )
-            completion(fetchedPostIds)
-            
-        }
-        
-    }
     
     // Social Functions
     
@@ -782,13 +748,13 @@ extension Database{
                     // Unstar the post and remove self from stars
                     likeCount -= 1
                     likes.removeValue(forKey: uid)
-                    updateSocialCount(creatorUid: uid, receiverUid: creatorUid, action: "like", change: -1)
+                    spotUpdateSocialCount(creatorUid: uid, receiverUid: creatorUid, action: "like", change: -1)
                     
                 } else {
                     // Star the post and add self to stars
                     likeCount += 1
                     likes[uid] = 1
-                    updateSocialCount(creatorUid: uid, receiverUid: creatorUid, action: "like", change: 1)
+                    spotUpdateSocialCount(creatorUid: uid, receiverUid: creatorUid, action: "like", change: 1)
                     
                 }
                 post["likeCount"] = likeCount as AnyObject?
@@ -825,13 +791,13 @@ extension Database{
                     // Unstar the post and remove self from stars
                     bookmarkCount -= 1
                     bookmarks.removeValue(forKey: uid)
-                    updateSocialCount(creatorUid: uid, receiverUid: creatorUid, action: "bookmark", change: -1)
+                    spotUpdateSocialCount(creatorUid: uid, receiverUid: creatorUid, action: "bookmark", change: -1)
                     
                 } else {
                     // Star the post and add self to stars
                     bookmarkCount += 1
                     bookmarks[uid] = 1
-                    updateSocialCount(creatorUid: uid, receiverUid: creatorUid, action: "bookmark", change: -1)
+                    spotUpdateSocialCount(creatorUid: uid, receiverUid: creatorUid, action: "bookmark", change: -1)
                     
                 }
             
@@ -906,10 +872,12 @@ extension Database{
                 // Unfollow User
                 followingCount -= 1
                 following.removeValue(forKey: userUid)
+                spotUpdateSocialCount(creatorUid: uid, receiverUid: userUid, action: "follow", change: -1)
             } else {
                 // Follow User
                 followingCount += 1
                 following[userUid] = 1
+                spotUpdateSocialCount(creatorUid: uid, receiverUid: userUid, action: "follow", change: 1)
             }
             user["followingCount"] = followingCount as AnyObject?
             user["following"] = following as AnyObject?
@@ -963,7 +931,7 @@ extension Database{
         }
     }
 
-    static func updateSocialCount(creatorUid: String!, receiverUid: String?, action: String!, change: Int!){
+    static func spotUpdateSocialCount(creatorUid: String!, receiverUid: String?, action: String!, change: Int!){
         
         guard let receiverUid = receiverUid else {
             print("No Receiver Uid Error")
@@ -983,7 +951,7 @@ extension Database{
             receiveField = "bookmarkedCount"
         } else if action == "follow" {
             creatorField = "followingCount"
-            receiveField = "followedCount"
+            receiveField = "followerCount"
         } else if action == "post" {
             creatorField = "postCount"
             receiveField = "postCount"
@@ -992,8 +960,9 @@ extension Database{
             return
         }
         
-        // Update creator social count
+        // Update creator social count - Not Keeping track of producing likes
         
+        if action != "like"{
         creatorRef.runTransactionBlock({ (currentData) -> TransactionResult in
             var user = currentData.value as? [String : AnyObject] ?? [:]
             var count = user[creatorField] as? Int ?? 0
@@ -1009,8 +978,9 @@ extension Database{
                 print("Creator Social Update Error: ", creatorUid, error.localizedDescription)
             }
         }
+        }
         
-        // Update receiver social count (Not applicable if post was created
+        // Update receiver social count  - Not applicable if post was created
         if action != "post" {
             receiveRef.runTransactionBlock({ (currentData) -> TransactionResult in
                 var user = currentData.value as? [String : AnyObject] ?? [:]

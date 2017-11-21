@@ -17,13 +17,12 @@ struct User {
     var isFollowing: Bool? = false
     
     //Social Data
-    var postCount: Int?
-    var followingCount: Int?
-    var followerCount: Int?
-    var bookmarkCount: Int?
-    var bookmarkedCount: Int?
-    var likeCount: Int?
-    var likedCount: Int?
+    var postCount: Int = 0
+    var followingCount: Int = 0
+    var followerCount: Int = 0
+    var bookmarkCount: Int = 0
+    var bookmarkedCount: Int = 0
+    var likedCount: Int = 0
     
     
     init(uid: String, dictionary: [String:Any]) {
@@ -31,6 +30,14 @@ struct User {
         self.profileImageUrl = dictionary["profileImageUrl"] as? String ?? ""
         self.uid = uid
         self.status = dictionary["status"] as? String ?? ""
+        
+        let social = dictionary["social"] as? [String:Int] ?? [:]
+        self.postCount = social["postCount"] as? Int ?? 0
+        self.followingCount = social["followingCount"] as? Int ?? 0
+        self.followerCount = social["followerCount"] as? Int ?? 0
+        self.bookmarkCount = social["bookmarkCount"] as? Int ?? 0
+        self.bookmarkedCount = social["bookmarkedCount"] as? Int ?? 0
+        self.likedCount = social["likedCount"] as? Int ?? 0
     }
     
 }

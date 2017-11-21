@@ -48,6 +48,8 @@ class UserProfileHeader: UICollectionViewCell, UITextFieldDelegate, UISearchBarD
                 statusText.isEnabled = true
             }
             setupEditFollowButton()
+            setupSocialLabels()
+            
         }
     }
     
@@ -250,6 +252,60 @@ class UserProfileHeader: UICollectionViewCell, UITextFieldDelegate, UISearchBarD
         return label
     }()
     
+    let bookmarkedLabel: UILabel = {
+        
+        let label = UILabel()
+        let attributedText = NSMutableAttributedString(string: "11\n", attributes: [NSFontAttributeName: UIFont.boldSystemFont(ofSize: 14)])
+        
+        attributedText.append(NSAttributedString(string: "following", attributes: [NSForegroundColorAttributeName: UIColor.lightGray, NSFontAttributeName: UIFont.systemFont(ofSize: 14)]))
+        
+        label.attributedText = attributedText
+        label.numberOfLines = 0
+        label.textAlignment = .center
+        return label
+    }()
+    
+    let likedLabel: UILabel = {
+        
+        let label = UILabel()
+        let attributedText = NSMutableAttributedString(string: "11\n", attributes: [NSFontAttributeName: UIFont.boldSystemFont(ofSize: 14)])
+        
+        attributedText.append(NSAttributedString(string: "following", attributes: [NSForegroundColorAttributeName: UIColor.lightGray, NSFontAttributeName: UIFont.systemFont(ofSize: 14)]))
+        
+        label.attributedText = attributedText
+        label.numberOfLines = 0
+        label.textAlignment = .center
+        return label
+    }()
+    
+    
+    fileprivate func setupSocialLabels(){
+        
+        let postCount = user?.postCount ?? 0
+        let followingCount = user?.followingCount ?? 0
+        let followerCount = user?.followerCount ?? 0
+        let bookmarkedCount = user?.bookmarkedCount ?? 0
+        let likedCount = user?.likedCount ?? 0
+        
+        setupAttributedSocialLabel(labelName: postsLabel, count: postCount, metric: "posts")
+        setupAttributedSocialLabel(labelName: followingLabel, count: followingCount, metric: "following")
+        setupAttributedSocialLabel(labelName: followersLabel, count: followerCount, metric: "followers")
+        setupAttributedSocialLabel(labelName: bookmarkedLabel, count: bookmarkedCount, metric: "bookmarks")
+        setupAttributedSocialLabel(labelName: likedLabel, count: likedCount, metric: "likes")
+        
+    }
+    
+    
+    
+    fileprivate func setupAttributedSocialLabel(labelName: UILabel, count: Int, metric: String){
+        
+        let attributedText = NSMutableAttributedString(string: "\(count)\n", attributes: [NSFontAttributeName: UIFont.boldSystemFont(ofSize: 14)])
+        
+        attributedText.append(NSAttributedString(string: metric, attributes: [NSForegroundColorAttributeName: UIColor.lightGray, NSFontAttributeName: UIFont.systemFont(ofSize: 14)]))
+        
+        labelName.attributedText = attributedText
+    }
+    
     lazy var editProfileFollowButton: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("Edit Profile", for: .normal)
@@ -317,14 +373,12 @@ class UserProfileHeader: UICollectionViewCell, UITextFieldDelegate, UISearchBarD
     
     fileprivate func setupUserStatsView(){
         
-        let stackView = UIStackView(arrangedSubviews: [postsLabel, followersLabel, followingLabel])
+        setupSocialLabels()
+        let stackView = UIStackView(arrangedSubviews: [postsLabel, followersLabel, followingLabel, bookmarkedLabel, likedLabel])
 
         stackView.distribution = .fillEqually
         addSubview(stackView)
         stackView.anchor(top: statusText.bottomAnchor, left: profileImageView.rightAnchor, bottom: nil, right: rightAnchor, paddingTop: 0, paddingLeft: 12, paddingBottom: 0, paddingRight: 12, width: 0, height: 50)
-        
-        
-        
         
     }
     
