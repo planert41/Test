@@ -16,6 +16,16 @@ struct User {
     let status: String?
     var isFollowing: Bool? = false
     
+    //Social Data
+    var postCount: Int?
+    var followingCount: Int?
+    var followerCount: Int?
+    var bookmarkCount: Int?
+    var bookmarkedCount: Int?
+    var likeCount: Int?
+    var likedCount: Int?
+    
+    
     init(uid: String, dictionary: [String:Any]) {
         self.username = dictionary["username"] as? String ?? ""
         self.profileImageUrl = dictionary["profileImageUrl"] as? String ?? ""

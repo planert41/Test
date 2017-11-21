@@ -1517,6 +1517,9 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         let tagTime = self.selectedTime?.timeIntervalSince1970
         
         let values = ["imageUrl": imageUrl, "caption": caption, "imageWidth": postImage.size.width, "imageHeight": postImage.size.height, "creationDate": uploadTime, "googlePlaceID": googlePlaceID, "locationName": postLocationName, "locationAdress": postLocationAdress, "postLocationGPS": uploadedLocationGPS, "creatorUID": uid, "tagTime": tagTime,"ratingEmoji": ratingEmojiUpload, "nonratingEmoji": nonratingEmojiUpload, "nonratingEmojiTags": nonratingEmojiTagsUpload] as [String:Any]
+        
+        // SAVE POST IN POST DATABASE
+        
         ref.updateChildValues(values) { (err, ref) in
             if let err = err {
                 self.navigationItem.rightBarButtonItem?.isEnabled = true
@@ -1526,10 +1529,10 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
             print("Successfully save post to DB")
             
             
-            // Put new post
+            // Put new post in cache
             self.uploadnewPost(uid: uid,postid: ref.key, dictionary: values)
             
-            // SAVE USER AND POSTID
+            // SAVE USER AND POSTID IN USERPOSTS
             
             let postref = ref.key
             let userPostRef = Database.database().reference().child("userposts").child(uid).child(postref)
@@ -1575,6 +1578,7 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
             
             //Update Cache
             postCache.removeValue(forKey: postid!)
+            postCache[postid!] = newPost
             imageCache[postid!] = self.selectedImage
         } else {
             print("Error creating temp new post")

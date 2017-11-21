@@ -44,6 +44,10 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     let geoFilterImage:[UIImage] = geoFilterImageDefault
     
 // Pagination Variables
+    
+    var userPostIdFetched = false
+    var followingPostIdFetched = false
+    
     var isFinishedPaging = false {
         didSet{
             if isFinishedPaging == true {
@@ -53,7 +57,8 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     }
     var fetchedPostCount = 0
     
-    static let finishFetchingPostIdsNotificationName = NSNotification.Name(rawValue: "FinishFetchingPostIds")
+    static let finishFetchingUserPostIdsNotificationName = NSNotification.Name(rawValue: "FinishFetchingUserPostIds")
+    static let finishFetchingFollowingPostIdsNotificationName = NSNotification.Name(rawValue: "FinishFetchingFollowingPostIds")
     static let finishPaginationNotificationName = NSNotification.Name(rawValue: "FinishPagination")
     
     
@@ -222,7 +227,9 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         
         NotificationCenter.default.addObserver(self, selector: #selector(handleUpdateFeedWithFilter), name: FilterController.updateFeedWithFilterNotificationName, object: nil)
         
-        NotificationCenter.default.addObserver(self, selector: #selector(finishFetchingPosts), name: HomeController.finishFetchingPostIdsNotificationName, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(finishFetchingPosts), name: HomeController.finishFetchingUserPostIdsNotificationName, object: nil)
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(finishFetchingPosts), name: HomeController.finishFetchingFollowingPostIdsNotificationName, object: nil)
         
         NotificationCenter.default.addObserver(self, selector: #selector(finishPaginationCheck), name: HomeController.finishPaginationNotificationName, object: nil)
 
@@ -301,9 +308,15 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     }
     
     func finishFetchingPosts(){
-        print("Finish Fetching Post Ids")
-        self.sortFetchPostIds()
-        self.paginatePosts()
+        
+        if self.userPostIdFetched && self.followingPostIdFetched {
+            print("Finish Fetching Post Ids")
+            self.sortFetchPostIds()
+            self.paginatePosts()
+        } else {
+            print("User PostIds Fetched: \(self.userPostIdFetched), Following PostIds Fetched: \(self.followingPostIdFetched)")
+        }
+
     }
     
     
@@ -547,7 +560,12 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
                 return p1.creationDate.compare(p2.creationDate) == .orderedDescending
             })
             print("Current User Posts: ", self.fetchPostIds.count)
+            self.userPostIdFetched = true
+            NotificationCenter.default.post(name: HomeController.finishFetchingUserPostIdsNotificationName, object: nil)
+            
         }
+        
+        Database.updateSocialCounts(uid: uid)
     }
 
     
@@ -557,15 +575,13 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         guard let uid = Auth.auth().currentUser?.uid else {return}
         
         var followingUsers: [String] = []
-        Database.database().reference().child("following").child(uid).observeSingleEvent(of: .value, with: { (snapshot) in
+        Database.fetchFollowingUserUids(uid: uid) { (fetchedFollowingUsers) in
             
-            guard let userIdsDictionary = snapshot.value as? [String: Any] else {return}
-            userIdsDictionary.forEach({ (key,value) in
-
-                followingUsers.append(key)
-                
+            CurrentUser.followingUids = followingUsers
+            thisGroup.enter()
+            for userId in fetchedFollowingUsers {
                 thisGroup.enter()
-                Database.fetchAllPostIDWithCreatorUID(creatoruid: key) { (postIds) in
+                Database.fetchAllPostIDWithCreatorUID(creatoruid: userId) { (postIds) in
                     
                     self.checkDisplayPostIdForDups(postIds: postIds)
                     self.fetchPostIds = self.fetchPostIds + postIds
@@ -574,18 +590,15 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
                     })
                     thisGroup.leave()
                 }
-            })
+            }
+            thisGroup.leave()
             
             thisGroup.notify(queue: .main) {
-                
-                CurrentUser.followingUids = followingUsers
                 print("Current User And Following Posts: ", self.fetchPostIds.count)
                 print("Number of Following: ",CurrentUser.followingUids.count)
-                NotificationCenter.default.post(name: HomeController.finishFetchingPostIdsNotificationName, object: nil)
+                self.followingPostIdFetched = true
+                NotificationCenter.default.post(name: HomeController.finishFetchingFollowingPostIdsNotificationName, object: nil)
             }
-            
-        }) { (err) in
-            print("Failed to fetch following user post ids:", err)
         }
     }
     

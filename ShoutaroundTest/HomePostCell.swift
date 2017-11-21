@@ -454,6 +454,7 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
   //      delegate?.didLike(for: self)
         
         guard let postId = self.post?.id else {return}
+        guard let creatorId = self.post?.creatorUID else {return}
         guard let uid = Auth.auth().currentUser?.uid else {return}
         
         self.likeButton.transform = CGAffineTransform(scaleX: 0.1, y: 0.1)
@@ -470,7 +471,9 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
                        completion: nil)
     
         
-        Database.handleLike(postId: postId){
+        
+        
+        Database.handleLike(postId: postId, creatorUid: creatorId){
             if (self.post?.hasLiked)! {
                 self.post?.likeStats -= 1
             } else {
@@ -497,9 +500,10 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
     //    delegate?.didBookmark(for: self)
         
         guard let postId = self.post?.id else {return}
+        guard let creatorId = self.post?.creatorUID else {return}
         guard let uid = Auth.auth().currentUser?.uid else {return}
         
-        Database.handleBookmark(postId: postId){
+        Database.handleBookmark(postId: postId, creatorUid: creatorId){
 
         }
         
