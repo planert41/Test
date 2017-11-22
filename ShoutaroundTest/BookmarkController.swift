@@ -18,12 +18,6 @@ class BookMarkController: UIViewController, UICollectionViewDelegate, UICollecti
     
     let locationManager = CLLocationManager()
     
-    // Geo Filter Variables
-    
-    let geoFilterRange = geoFilterRangeDefault
-    let geoFilterImage:[UIImage] = geoFilterImageDefault
-    
-    
     // No Results Label
     
     var noResultsLabel: UILabel = {
@@ -543,116 +537,6 @@ class BookMarkController: UIViewController, UICollectionViewDelegate, UICollecti
         }
     }
     
-    
-    
-//    func fetchBookmarkPosts(){
-//        
-//        guard let uid = Auth.auth().currentUser?.uid  else {return}
-//        
-//        Database.fetchAllBookmarkIdsForUID(uid: uid) { (bookmarkIds) in
-//        
-//            for bookmarkId in bookmarkIds{
-//                Database.fetchPostWithPostID(postId: bookmarkId.postId, completion: { (post, error) in
-//                    if let error = error {
-//                        print("Failed to fetch post for bookmarks: ",bookmarkId.postId , error)
-//                        return
-//                    }
-//                
-//                    guard let post = post else {
-//                        print("No Result for PostId: ", bookmarkId.postId)
-//                        //Delete Bookmark since post is unavailable, Present Delete Alert
-//                        
-//                        let deleteAlert = UIAlertController(title: "Delete Bookmark", message: "Post Bookmarked on \(bookmarkId.bookmarkDate) Was Deleted", preferredStyle: UIAlertControllerStyle.alert)
-//                            
-//                        deleteAlert.addAction(UIAlertAction(title: "Ok", style: .default, handler: { (action: UIAlertAction!) in
-//                            // Delete Bookmark in Database
-//                                Database.handleBookmark(postId: bookmarkId.postId, completion: {
-//                                })
-//                        }))
-//                            
-//                        self.present(deleteAlert, animated: true, completion: nil)
-//                        return}
-//                    
-//                    
-//                    let tempBookmark = Bookmark.init(bookmarkDate: bookmarkId.bookmarkDate, post: post)
-//                    self.fetchedBookmarks.append(tempBookmark)
-//                    self.fetchedBookmarks.sort(by: { (p1, p2) -> Bool in
-//                        return p1.bookmarkDate.compare(p2.bookmarkDate) == .orderedDescending
-//                    })
-//                    self.displayedBookmarks = self.fetchedBookmarks
-//                    self.collectionView.reloadData()
-//            
-//                })
-//            }
-//        }
-//        
-//        
-//        
-//    }
-//    
-    
-    
-//        func fetchBookmarkPosts() {
-//    
-//            guard let uid = Auth.auth().currentUser?.uid  else {return}
-//            let ref = Database.database().reference().child("bookmarks").child(uid)
-//    
-//            ref.observeSingleEvent(of: .value, with: {(snapshot) in
-//                //print(snapshot.value)
-//    
-//                guard let dictionaries = snapshot.value as? [String: Any] else {return}
-//    
-//                dictionaries.forEach({ (key,value) in
-//    
-//                    guard let dictionary = value as? [String: Any] else {return}
-//                    if let value = dictionary["bookmarked"] as? Int, value == 1 {
-//    
-//                        let bookmarkTime = dictionary["bookmarkDate"] as? Double ?? 0
-//                        if let creatorUID = dictionary["creatorUID"] as? String {
-//    
-//                        Database.fetchPostWithPostID(postId: key, completion: { (post, error) in
-//                        
-//                            if let error = error {
-//                                print("Failed to fetch post for bookmarks: ",key , error)
-//                                return
-//                            }
-//                        
-//                            guard let post = post else {
-//                                print("No Result for PostId: ", key)
-//                                //Delete Bookmark since post is unavailable
-//                                
-//                                Database.fetchUserWithUID(uid: creatorUID, completion: { (user) in
-//                                    
-//                                    let bookmarkDate = Date(timeIntervalSince1970: bookmarkTime)
-//                                    
-//                                    
-//                                    let deleteAlert = UIAlertController(title: "Delete Bookmark", message: "Post Created By \(user.username) and Bookmarked on \(bookmarkDate) Was Deleted", preferredStyle: UIAlertControllerStyle.alert)
-//                                    
-//                                    deleteAlert.addAction(UIAlertAction(title: "Ok", style: .default, handler: { (action: UIAlertAction!) in
-//                                        
-//                                        Database.database().reference().child("bookmarks").child(uid).child(key).removeValue()
-//                                        
-//                                    }))
-//                                    
-//                                    self.present(deleteAlert, animated: true, completion: nil)
-//                                })
-//                                return}
-//                            
-//                        let tempBookmark = Bookmark.init(bookmarkCreatorUid: creatorUID, fetchedDate: bookmarkTime, post: post)
-//                        self.fetchedBookmarks.append(tempBookmark)
-//                        self.fetchedBookmarks.sort(by: { (p1, p2) -> Bool in
-//                        return p1.bookmarkDate.compare(p2.bookmarkDate) == .orderedDescending
-//                          })
-//                        self.displayedBookmarks = self.fetchedBookmarks
-//                        self.collectionView.reloadData()
-//                                })
-//                            }
-//                        }
-//                    })
-//                })
-//            }
-    
-    
     func clearFilter(){
         
         self.defaultSearchBar.text = nil
@@ -675,6 +559,8 @@ class BookMarkController: UIViewController, UICollectionViewDelegate, UICollecti
         self.collectionView.refreshControl?.endRefreshing()
         print("Refresh Bookmark Feed")
     }
+    
+    
     
      func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return displayedBookmarks.count
