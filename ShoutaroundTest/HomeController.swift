@@ -714,7 +714,9 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
                     guard let searchedText = self.filterCaption else {return}
                     tempPost = tempPost.filter { (post) -> Bool in
                         
-                    return post.caption.lowercased().contains(searchedText.lowercased()) || post.emoji.contains(searchedText.lowercased()) || post.locationName.lowercased().contains(searchedText.lowercased()) || post.locationAdress.lowercased().contains(searchedText.lowercased())
+                        let searchedEmoji = ReverseEmojiDictionary[searchedText.lowercased()] ?? ""
+                        
+                        return post.caption.lowercased().contains(searchedText.lowercased()) || post.emoji.contains(searchedText.lowercased()) || post.nonRatingEmojiTags.joined(separator: " ").lowercased().contains(searchedText.lowercased()) || post.nonRatingEmojiTags.joined(separator: " ").lowercased().contains(searchedEmoji) || post.locationName.lowercased().contains(searchedText.lowercased()) || post.locationAdress.lowercased().contains(searchedText.lowercased())
                     }
                 }
 

@@ -40,7 +40,7 @@ class BookmarkPhotoCell: UICollectionViewCell {
             usernameLabel.text = post?.user.username
             locationNameLabel.text = post?.locationName
             locationAdressLabel.text = post?.locationAdress
-            nonRatingEmojiLabel.text = (post?.ratingEmoji)! + (post?.nonRatingEmoji?.joined())!
+            nonRatingEmojiLabel.text = (post?.ratingEmoji)! + (post?.nonRatingEmoji.joined())!
 //            ratingEmojiLabel.text = post?.ratingEmoji
             captionLabel.text = post?.caption
             

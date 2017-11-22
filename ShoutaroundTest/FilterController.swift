@@ -154,6 +154,16 @@ class FilterController: UIViewController, CLLocationManagerDelegate, GMSAutocomp
         
         super.viewDidLoad()
         self.determineCurrentLocation()
+        
+        let scrollview = UIScrollView()
+        
+        scrollview.frame = view.bounds
+        scrollview.backgroundColor = UIColor.white
+        scrollview.isScrollEnabled = true
+        scrollview.showsVerticalScrollIndicator = true
+        scrollview.contentSize = CGSize(width: view.bounds.width, height: view.bounds.height * 1.25)
+        
+        view.addSubview(scrollview)
     
         self.navigationItem.rightBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "filter").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(filterSelected))
         
@@ -179,16 +189,16 @@ class FilterController: UIViewController, CLLocationManagerDelegate, GMSAutocomp
         
         
         
-        view.addSubview(filterDistanceLabel)
-        view.addSubview(distanceSegment)
+        scrollview.addSubview(filterDistanceLabel)
+        scrollview.addSubview(distanceSegment)
         
-        filterDistanceLabel.anchor(top: topLayoutGuide.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 20, paddingLeft: 20, paddingBottom: 0, paddingRight: 20, width: 0, height: 30)
+        filterDistanceLabel.anchor(top: scrollview.topAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 20, paddingLeft: 20, paddingBottom: 0, paddingRight: 20, width: 0, height: 30)
         
         distanceSegment.anchor(top: filterDistanceLabel.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 1, paddingLeft: 20, paddingBottom: 0, paddingRight: 20, width: 0, height: 50)
         
-        view.addSubview(locationLabel)
-        view.addSubview(locationNameLabel)
-        view.addSubview(currentLocationButton)
+        scrollview.addSubview(locationLabel)
+        scrollview.addSubview(locationNameLabel)
+        scrollview.addSubview(currentLocationButton)
         
         locationNameLabel.isUserInteractionEnabled = true
         let TapGesture = UITapGestureRecognizer(target: self, action: #selector(tapSearchBar))
@@ -202,8 +212,8 @@ class FilterController: UIViewController, CLLocationManagerDelegate, GMSAutocomp
         currentLocationButton.isHidden = true
         
         
-        view.addSubview(filterTimeLabel)
-        view.addSubview(timeSegment)
+        scrollview.addSubview(filterTimeLabel)
+        scrollview.addSubview(timeSegment)
         
         filterTimeLabel.anchor(top: locationNameLabel.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 15, paddingLeft: 20, paddingBottom: 0, paddingRight: 20, width: 0, height: 30)
         timeSegment.anchor(top: filterTimeLabel.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 1, paddingLeft: 20, paddingBottom: 0, paddingRight: 20, width: 0, height: 40)
@@ -231,16 +241,16 @@ class FilterController: UIViewController, CLLocationManagerDelegate, GMSAutocomp
 //        filterGroupLabel.anchor(top: timeSegment.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 15, paddingLeft: 20, paddingBottom: 0, paddingRight: 20, width: 0, height: 30)
 //        groupSegment.anchor(top: filterGroupLabel.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 1, paddingLeft: 20, paddingBottom: 0, paddingRight: 20, width: 0, height: 40)
         
-        view.addSubview(sortByLabel)
-        view.addSubview(sortSegment)
+        scrollview.addSubview(sortByLabel)
+        scrollview.addSubview(sortSegment)
         
         sortByLabel.anchor(top: timeSegment.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 15, paddingLeft: 20, paddingBottom: 0, paddingRight: 20, width: 0, height: 30)
         sortSegment.anchor(top: sortByLabel.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 1, paddingLeft: 20, paddingBottom: 0, paddingRight: 20, width: 0, height: 40)
 
-        view.addSubview(filterButton)
+        scrollview.addSubview(filterButton)
         filterButton.anchor(top: sortSegment.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 15, paddingLeft: 20, paddingBottom: 0, paddingRight: 20, width: 0, height: 40)
         
-        view.addSubview(clearFilterButton)
+        scrollview.addSubview(clearFilterButton)
         clearFilterButton.anchor(top: filterButton.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 10, paddingLeft: 20, paddingBottom: 0, paddingRight: 20, width: 0, height: 40)
         
 

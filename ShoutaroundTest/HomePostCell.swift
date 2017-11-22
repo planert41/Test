@@ -265,7 +265,7 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
             label.text = ""
         }
         if self.post?.nonRatingEmoji != nil {
-            for (index, emoji) in (self.post?.nonRatingEmoji?.enumerated())! {
+            for (index, emoji) in (self.post?.nonRatingEmoji.enumerated())! {
                 self.nonRatingEmojiLabelArray[index].text = emoji
                 self.nonRatingEmojiLabelArray[index].sizeToFit()
             }
@@ -279,8 +279,8 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         guard let post = post else {return}
         guard let labelTag = sender.view?.tag else {return}
         
-        var displayEmoji = self.post?.nonRatingEmoji?[labelTag]
-        var displayEmojiTag = self.post?.nonRatingEmojiTags?[labelTag]
+        var displayEmoji = self.post?.nonRatingEmoji[labelTag]
+        var displayEmojiTag = self.post?.nonRatingEmojiTags[labelTag]
         
         if let emojiTagLookup = ReverseEmojiDictionary.key(forValue: displayEmojiTag!) {
             displayEmojiTag = emojiTagLookup

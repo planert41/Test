@@ -1574,7 +1574,7 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
             newPost?.id = postid
             print("New Post Temp Uploaded: ",newPost)
             
-            newPostId = PostId.init(id: postid!, creatorUID: CurrentUser.uid!, fetchedTagTime: 0, fetchedDate:(newPost?.creationDate.timeIntervalSince1970)!, distance: nil, postGPS: nil, postEmoji: newPost?.nonRatingEmoji?.joined())
+            newPostId = PostId.init(id: postid!, creatorUID: CurrentUser.uid!, fetchedTagTime: 0, fetchedDate:(newPost?.creationDate.timeIntervalSince1970)!, distance: nil, postGPS: nil, postEmoji: newPost?.nonRatingEmoji.joined())
             
             //Update Cache
             postCache.removeValue(forKey: postid!)

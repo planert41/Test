@@ -406,7 +406,11 @@ class BookMarkController: UIViewController, UICollectionViewDelegate, UICollecti
         
         if searchedText != "" {
             self.displayedBookmarks = self.displayedBookmarks.filter { (bookmark) -> Bool in
-            return bookmark.post.caption.lowercased().contains(searchedText.lowercased()) || bookmark.post.emoji.contains(searchedText.lowercased()) || bookmark.post.locationName.lowercased().contains(searchedText.lowercased()) || bookmark.post.locationAdress.lowercased().contains(searchedText.lowercased())
+                
+                let post = bookmark.post
+                let searchedEmoji = ReverseEmojiDictionary[searchedText.lowercased()] ?? ""
+                
+                return post.caption.lowercased().contains(searchedText.lowercased()) || post.emoji.contains(searchedText.lowercased()) || post.nonRatingEmojiTags.joined(separator: " ").lowercased().contains(searchedText.lowercased()) || post.nonRatingEmojiTags.joined(separator: " ").lowercased().contains(searchedEmoji) || post.locationName.lowercased().contains(searchedText.lowercased()) || post.locationAdress.lowercased().contains(searchedText.lowercased())
             }
         }
         

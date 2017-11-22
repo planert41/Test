@@ -51,8 +51,8 @@ struct Post {
     var creatorUID: String?
     var ratingEmoji: String?
     var emoji: String
-    var nonRatingEmoji: [String]?
-    var nonRatingEmojiTags: [String]?
+    var nonRatingEmoji: [String]
+    var nonRatingEmojiTags: [String]
     
     //Social Stats
     var hasLiked: Bool = false
@@ -73,7 +73,7 @@ struct Post {
         self.ratingEmoji = dictionary["ratingEmoji"] as? String ?? ""
         self.nonRatingEmoji = dictionary["nonratingEmoji"] as? [String] ?? []
         self.nonRatingEmojiTags = dictionary["nonratingEmojiTags"] as? [String] ?? []
-        self.emoji = self.ratingEmoji! + (self.nonRatingEmoji?.joined())!
+        self.emoji = self.ratingEmoji! + (self.nonRatingEmoji.joined())
         
         let tagSecondsFrom1970 = dictionary["tagTime"] as? Double ?? 0
         self.tagTime = Date(timeIntervalSince1970: tagSecondsFrom1970)
