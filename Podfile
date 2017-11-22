@@ -25,6 +25,7 @@ pod 'mailgun', '~> 1.0.3'
 pod 'GoogleAPIClientForREST/Gmail', '~> 1.2.1'
 pod 'GoogleSignIn'
 pod 'IQKeyboardManagerSwift'
+pod 'SMSegmentView'
 
 
 

@@ -77,6 +77,10 @@
 		A5C6452E1F5C481300C78244 /* Comment.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5C6452D1F5C481300C78244 /* Comment.swift */; };
 		A5D942E91FC5145C00A189DD /* ExploreController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5D942E81FC5145C00A189DD /* ExploreController.swift */; };
 		A5F3E32E1FBD486D00A3E3A0 /* UserCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5F3E32D1FBD486D00A3E3A0 /* UserCell.swift */; };
+		A5F46C3D1FC5EBE400D69945 /* SMSegment.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5F46C3B1FC5EBE400D69945 /* SMSegment.swift */; };
+		A5F46C3E1FC5EBE400D69945 /* SMSegmentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5F46C3C1FC5EBE400D69945 /* SMSegmentView.swift */; };
+		A5F46C411FC6057100D69945 /* SMSegmentAppearance.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5F46C3F1FC6057100D69945 /* SMSegmentAppearance.swift */; };
+		A5F46C421FC6057100D69945 /* SMSegmentViewConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5F46C401FC6057100D69945 /* SMSegmentViewConstants.swift */; };
 		B1A3AC30339B082041E14A20 /* Pods_ShoutaroundTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B65B7D125931B939429672C6 /* Pods_ShoutaroundTest.framework */; };
 /* End PBXBuildFile section */
 
@@ -155,6 +159,10 @@
 		A5C6452D1F5C481300C78244 /* Comment.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Comment.swift; sourceTree = "<group>"; };
 		A5D942E81FC5145C00A189DD /* ExploreController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ExploreController.swift; sourceTree = "<group>"; };
 		A5F3E32D1FBD486D00A3E3A0 /* UserCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserCell.swift; sourceTree = "<group>"; };
+		A5F46C3B1FC5EBE400D69945 /* SMSegment.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SMSegment.swift; sourceTree = "<group>"; };
+		A5F46C3C1FC5EBE400D69945 /* SMSegmentView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SMSegmentView.swift; sourceTree = "<group>"; };
+		A5F46C3F1FC6057100D69945 /* SMSegmentAppearance.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SMSegmentAppearance.swift; sourceTree = "<group>"; };
+		A5F46C401FC6057100D69945 /* SMSegmentViewConstants.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SMSegmentViewConstants.swift; sourceTree = "<group>"; };
 		A64D6DDCD46BE134C4B0B7C6 /* Pods-InstagramFirebase.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-InstagramFirebase.release.xcconfig"; path = "Pods/Target Support Files/Pods-InstagramFirebase/Pods-InstagramFirebase.release.xcconfig"; sourceTree = "<group>"; };
 		B65B7D125931B939429672C6 /* Pods_ShoutaroundTest.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_ShoutaroundTest.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		E6A7A43430193F3A7265A821 /* Pods-ShoutaroundTest.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ShoutaroundTest.debug.xcconfig"; path = "Pods/Target Support Files/Pods-ShoutaroundTest/Pods-ShoutaroundTest.debug.xcconfig"; sourceTree = "<group>"; };
@@ -207,6 +215,10 @@
 				A5C645191F57AB0000C78244 /* Firebase.swift */,
 				A58477A71F6EB720007DE06C /* EmojiExtensions.swift */,
 				A56868B91F7843DD0050C406 /* Conversions.swift */,
+				A5F46C3B1FC5EBE400D69945 /* SMSegment.swift */,
+				A5F46C3C1FC5EBE400D69945 /* SMSegmentView.swift */,
+				A5F46C3F1FC6057100D69945 /* SMSegmentAppearance.swift */,
+				A5F46C401FC6057100D69945 /* SMSegmentViewConstants.swift */,
 			);
 			name = Utils;
 			sourceTree = "<group>";
@@ -253,15 +265,15 @@
 		A54E1D691F4E736B00C2AA77 /* ShoutaroundTest */ = {
 			isa = PBXGroup;
 			children = (
+				A54E1D6A1F4E736B00C2AA77 /* AppDelegate.swift */,
+				A57A674A1F5E62F30063D400 /* Credentials.swift */,
+				A51C13C61F51B59900CEB740 /* MainTabBarController.swift */,
 				A5D942E71FC5144100A189DD /* Explore */,
 				A5A17BAE1FA6496B001F227D /* OLD */,
 				A5516BC01F8ED0B9003C3E22 /* ItemCells */,
 				A56868BB1F78A0E50050C406 /* Message */,
 				A57C060A1F7602F100A0568F /* Bookmark */,
 				A53E7E191F5E4A390011C1CA /* GooglePlaces */,
-				A54E1D6A1F4E736B00C2AA77 /* AppDelegate.swift */,
-				A57A674A1F5E62F30063D400 /* Credentials.swift */,
-				A51C13C61F51B59900CEB740 /* MainTabBarController.swift */,
 				A5C645121F565E7E00C78244 /* Home */,
 				A5C6451B1F57AE4800C78244 /* Search */,
 				A57941C71F6A2799004EC40D /* Shared */,
@@ -506,6 +518,7 @@
 				"${BUILT_PRODUCTS_DIR}/GoogleAPIClientForREST/GoogleAPIClientForREST.framework",
 				"${BUILT_PRODUCTS_DIR}/GoogleToolboxForMac/GoogleToolboxForMac.framework",
 				"${BUILT_PRODUCTS_DIR}/IQKeyboardManagerSwift/IQKeyboardManagerSwift.framework",
+				"${BUILT_PRODUCTS_DIR}/SMSegmentView/SMSegmentView.framework",
 				"${BUILT_PRODUCTS_DIR}/SwiftLocation/SwiftLocation.framework",
 				"${BUILT_PRODUCTS_DIR}/SwiftyJSON/SwiftyJSON.framework",
 				"${BUILT_PRODUCTS_DIR}/leveldb-library/leveldb.framework",
@@ -527,6 +540,7 @@
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/GoogleAPIClientForREST.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/GoogleToolboxForMac.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/IQKeyboardManagerSwift.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SMSegmentView.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SwiftLocation.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SwiftyJSON.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/leveldb.framework",
@@ -607,6 +621,7 @@
 				A5C6450D1F564A4C00C78244 /* Post.swift in Sources */,
 				A57A674D1F5FA8190063D400 /* UploadLocationFlowLayout.swift in Sources */,
 				A57C060E1F7611A000A0568F /* BookmarkController.swift in Sources */,
+				A5F46C411FC6057100D69945 /* SMSegmentAppearance.swift in Sources */,
 				A552EA5F1F997973005A0977 /* Message.swift in Sources */,
 				A5AEB9721F96A82B00E88CAC /* HomePostSearch.swift in Sources */,
 				A5516BC21F8ED0D5003C3E22 /* LocationController.swift in Sources */,
@@ -624,12 +639,14 @@
 				A58477AA1F6EFFD7007DE06C /* LocationLabels.swift in Sources */,
 				A552EA631F9A49EA005A0977 /* CommonSettings.swift in Sources */,
 				A5C6450A1F54F68800C78244 /* SharePhotoController.swift in Sources */,
+				A5F46C3D1FC5EBE400D69945 /* SMSegment.swift in Sources */,
 				A57941C91F6A27A6004EC40D /* EmojiDictionary.swift in Sources */,
 				A52912451FAA62620063901B /* Bookmark.swift in Sources */,
 				A562E51D1F53C67B0095C7C1 /* PhotoSelectorHeader.swift in Sources */,
 				A58477A61F6DBFDA007DE06C /* Emoji.swift in Sources */,
 				A5BBD28A1FB26401004367E7 /* Notes.swift in Sources */,
 				A5C645241F5B6DBB00C78244 /* PreviewPhotoContainerView.swift in Sources */,
+				A5F46C421FC6057100D69945 /* SMSegmentViewConstants.swift in Sources */,
 				A562E5161F5354A50095C7C1 /* LoginController.swift in Sources */,
 				A5AEB9741F96B00500E88CAC /* EmojiCell.swift in Sources */,
 				A54E1D6B1F4E736B00C2AA77 /* AppDelegate.swift in Sources */,
@@ -643,6 +660,7 @@
 				A53E7E1B1F5E4A4B0011C1CA /* GoogleDataProvider.swift in Sources */,
 				A51C13C31F4FBF2F00CEB740 /* Extensions.swift in Sources */,
 				A5C6451F1F57B1BD00C78244 /* UserSearchCell.swift in Sources */,
+				A5F46C3E1FC5EBE400D69945 /* SMSegmentView.swift in Sources */,
 				A5C645261F5BADB000C78244 /* CustomAnimationPresentor.swift in Sources */,
 				A5AEB9761F986F8200E88CAC /* PictureController.swift in Sources */,
 				A562E51B1F53C1650095C7C1 /* PhotoSelectorCell.swift in Sources */,
