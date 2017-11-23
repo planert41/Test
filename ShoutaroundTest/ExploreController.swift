@@ -441,37 +441,47 @@ class ExploreController: UIViewController, UISearchBarDelegate, HomePostSearchDe
         var fetchLimit = 8
         self.isFinishedPaging = false
         
-        var query = Database.database().reference().child("likes").queryOrdered(byChild: "likeCount").queryLimited(toFirst: UInt(fetchLimit))
-        var lastPostId: String? = nil
+        var query = Database.database().reference().child("likes").queryOrdered(byChild: "likeSort").queryLimited(toLast: UInt(fetchLimit))
+        
+        var lastPost: PostId? = nil
         
         if fetchedPostIds.count > 0 {
-            lastPostId = fetchedPostIds.last?.id
-            query = query.queryStarting(atValue: lastPostId)
+            lastPost = fetchedPostIds.last
+            
+            query = query.queryEnding(atValue: lastPost?.sort, childKey: lastPost?.id)
         }
         
-        query.observeSingleEvent(of: .value, with: { (snapshot) in
+        query.observe(.value, with: { (snapshot) in
 
             print(snapshot)
-            let postIds = snapshot.value
+            guard let postIds = snapshot.value as? [String:Any] else {return}
             
-                let details = snapshot.value as? NSDictionary
+            postIds.forEach({ (key,value) in
+
+                let details = value as? [String:Any]
+                var likeSort = details?["likeSort"] as! Double
                 var likes = details?["likeCount"] as! Int
                 
-                var tempPostId = PostId.init(id: snapshot.key, creatorUID: " ", fetchedTagTime: 0, fetchedDate: 0, distance: 0, postGPS: nil, postEmoji: nil)
+                
+                var tempPostId = PostId.init(id: key, creatorUID: " ", fetchedTagTime: 0, fetchedDate: 0, distance: 0, postGPS: nil, postEmoji: nil)
                 tempPostId.likeCount = likes
-                print("Current Fetched Post: \(self.fetchedPostIds.count): \(snapshot.key)")
+                tempPostId.sort = likeSort
+                print("Current Fetched Post: \(self.fetchedPostIds.count): \(key)")
                 // Add to fetched post if not dup post id from before
-                if tempPostId.id != lastPostId {
+                if tempPostId.id != lastPost?.id {
                     fetchingPostIds.append(tempPostId)
                 }
                 
+            })
+                
             
-            // Sort post ids before adding so that existing post ids don't get re-ordered if more postids are paginated
+//             Sort post ids before adding so that existing post ids don't get re-ordered if more postids are paginated
             fetchingPostIds.sort(by: { (p1, p2) -> Bool in
-                return (p1.likeCount! > p2.likeCount!)
+                return (p1.sort! > p2.sort!)
             })
             
             self.fetchedPostIds += fetchingPostIds
+            print("Final fetched Post Ids: \(self.fetchedPostIds)")
             
             // Determine if end of post ids to fetch
             if fetchingPostIds.count < (fetchLimit - 2) {

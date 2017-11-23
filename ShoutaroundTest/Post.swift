@@ -23,6 +23,7 @@ struct PostId {
     var likeCount: Int?
     var bookmarkCount: Int?
     var messageCount: Int?
+    var sort: Double?
     
     init(id: String, creatorUID: String, fetchedTagTime: Double, fetchedDate: Double, distance: Double?, postGPS: String?, postEmoji: String?) {
         
