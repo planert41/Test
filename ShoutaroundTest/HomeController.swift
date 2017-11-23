@@ -33,7 +33,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         }
     }
 
-    var fetchPostIds: [PostId] = [] {
+    var fetchedPostIds: [PostId] = [] {
         didSet{
         }
     }
@@ -304,13 +304,13 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     }
     
     func clearPostIds(){
-        self.fetchPostIds.removeAll()
+        self.fetchedPostIds.removeAll()
     }
     
     func finishFetchingPosts(){
         
         if self.userPostIdFetched && self.followingPostIdFetched {
-            print("Finish Fetching Post Ids: \(fetchPostIds.count)")
+            print("Finish Fetching Post Ids: \(fetchedPostIds.count)")
             self.sortFetchPostIds()
             self.paginatePosts()
         } else {
@@ -403,10 +403,10 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
                     tempPostIds.remove(at: i)
                 }
             }
-            self.fetchPostIds = tempPostIds
+            self.fetchedPostIds = tempPostIds
             
             self.sortFetchPostIds()
-            print("Geofire Filtered Posts: ", self.fetchPostIds.count)
+            print("Geofire Filtered Posts: ", self.fetchedPostIds.count)
             self.paginatePosts()
         }
         
@@ -415,18 +415,18 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     func sortFetchPostIds(){
         if self.filterSort == FilterSortDefault[1] {
             // Oldest
-            self.fetchPostIds.sort(by: { (p1, p2) -> Bool in
-                return p1.creationDate.compare(p2.creationDate) == .orderedAscending
+            self.fetchedPostIds.sort(by: { (p1, p2) -> Bool in
+                return p1.creationDate!.compare(p2.creationDate!) == .orderedAscending
             })
         } else if self.filterSort == FilterSortDefault[0] {
             // Nearest
-            self.fetchPostIds.sort(by: { (p1, p2) -> Bool in
+            self.fetchedPostIds.sort(by: { (p1, p2) -> Bool in
                 return (p1.distance! < p2.distance!)
             })
         } else {
             //Latest
-            self.fetchPostIds.sort(by: { (p1, p2) -> Bool in
-                return p1.creationDate.compare(p2.creationDate) == .orderedDescending
+            self.fetchedPostIds.sort(by: { (p1, p2) -> Bool in
+                return p1.creationDate!.compare(p2.creationDate!) == .orderedDescending
         })
         }
     }
@@ -492,7 +492,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         // Check for new post that was edited or uploaded
         if newPost != nil && newPostId != nil {
             self.displayedPosts.insert(newPost!, at: 0)
-            self.fetchPostIds.insert(newPostId!, at: 0)
+            self.fetchedPostIds.insert(newPostId!, at: 0)
             
             newPost = nil
             newPostId = nil
@@ -524,11 +524,11 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         navigationItem.title = "Shoutaround"
         refreshPagination()
         clearFilter()
-        fetchPostIds.removeAll()
+        fetchedPostIds.removeAll()
         displayedPosts.removeAll()
         fetchAllPostIds()
         self.collectionView?.refreshControl?.endRefreshing()
-        print("Refresh Home Feed. FetchPostIds: ", self.fetchPostIds.count, " DisplayedPost: ", self.displayedPosts.count)
+        print("Refresh Home Feed. FetchPostIds: ", self.fetchedPostIds.count, " DisplayedPost: ", self.displayedPosts.count)
     }
 
 // Post ID Fetching
@@ -556,11 +556,11 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         Database.fetchAllPostIDWithCreatorUID(creatoruid: uid) { (postIds) in
             
             self.checkDisplayPostIdForDups(postIds: postIds)
-            self.fetchPostIds = self.fetchPostIds + postIds
-            self.fetchPostIds.sort(by: { (p1, p2) -> Bool in
-                return p1.creationDate.compare(p2.creationDate) == .orderedDescending
+            self.fetchedPostIds = self.fetchedPostIds + postIds
+            self.fetchedPostIds.sort(by: { (p1, p2) -> Bool in
+                return p1.creationDate!.compare(p2.creationDate!) == .orderedDescending
             })
-            print("Current User Posts: ", self.fetchPostIds.count)
+            print("Current User Posts: ", self.fetchedPostIds.count)
             self.userPostIdFetched = true
             NotificationCenter.default.post(name: HomeController.finishFetchingUserPostIdsNotificationName, object: nil)
         }
@@ -581,9 +581,9 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
                 Database.fetchAllPostIDWithCreatorUID(creatoruid: userId) { (postIds) in
                     
                     self.checkDisplayPostIdForDups(postIds: postIds)
-                    self.fetchPostIds = self.fetchPostIds + postIds
-                    self.fetchPostIds.sort(by: { (p1, p2) -> Bool in
-                        return p1.creationDate.compare(p2.creationDate) == .orderedDescending
+                    self.fetchedPostIds = self.fetchedPostIds + postIds
+                    self.fetchedPostIds.sort(by: { (p1, p2) -> Bool in
+                        return p1.creationDate!.compare(p2.creationDate!) == .orderedDescending
                     })
                     thisGroup.leave()
                 }
@@ -591,7 +591,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
             thisGroup.leave()
             
             thisGroup.notify(queue: .main) {
-                print("Current User And Following Posts: ", self.fetchPostIds.count)
+                print("Current User And Following Posts: ", self.fetchedPostIds.count)
                 print("Number of Following: ",CurrentUser.followingUids.count)
                 self.followingPostIdFetched = true
                 NotificationCenter.default.post(name: HomeController.finishFetchingFollowingPostIdsNotificationName, object: nil)
@@ -606,10 +606,10 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         for postId in postIds {
             
             let postIdCheck = postId.id
-            if let dupIndex = self.fetchPostIds.index(where: { (item) -> Bool in
+            if let dupIndex = self.fetchedPostIds.index(where: { (item) -> Bool in
                 item.id == postIdCheck
             }) {
-                self.fetchPostIds.remove(at: dupIndex)
+                self.fetchedPostIds.remove(at: dupIndex)
                 print("Deleted from fetchPostIds Dup Post ID: ", postIdCheck)
             }
         }
@@ -621,7 +621,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     
     func finishPaginationCheck(){
         
-        if self.fetchedPostCount == (self.fetchPostIds.count) {
+        if self.fetchedPostCount == (self.fetchedPostIds.count) {
             self.isFinishedPaging = true
         }
         
@@ -651,18 +651,18 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         
         print("Start Paginate Loop FetchPostCount: ", self.fetchedPostCount)
         let paginateFetchPostSize = 4
-        var paginateFetchPostsLimit = min(self.fetchedPostCount + paginateFetchPostSize, self.fetchPostIds.count)
+        var paginateFetchPostsLimit = min(self.fetchedPostCount + paginateFetchPostSize, self.fetchedPostIds.count)
         
         for i in self.fetchedPostCount ..< paginateFetchPostsLimit  {
             
 //            print("Current number: ", i, "from", self.fetchedPostCount, " to ",paginateFetchPostsLimit)
-            let fetchPostId = fetchPostIds[i]
+            let fetchPostId = fetchedPostIds[i]
             
             // Filter Time
             if self.filterTime != defaultTime  {
                 
                 let calendar = Calendar.current
-                let tagHour = Double(calendar.component(.hour, from: fetchPostId.tagTime))
+                let tagHour = Double(calendar.component(.hour, from: fetchPostId.tagTime!))
                 guard let filterIndex = FilterSortTimeDefault.index(of: self.filterTime) else {return}
                 
                 if FilterSortTimeStart[filterIndex] > tagHour || tagHour > FilterSortTimeEnd[filterIndex] {

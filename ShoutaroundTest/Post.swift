@@ -15,11 +15,14 @@ struct PostId {
     
     var id: String
     var creatorUID: String?
-    var creationDate: Date
+    var creationDate: Date?
     var distance: Double? = 99999999
     var postGPS: String? = nil
-    var tagTime: Date
+    var tagTime: Date?
     var emoji: String?
+    var likeCount: Int?
+    var bookmarkCount: Int?
+    var messageCount: Int?
     
     init(id: String, creatorUID: String, fetchedTagTime: Double, fetchedDate: Double, distance: Double?, postGPS: String?, postEmoji: String?) {
         

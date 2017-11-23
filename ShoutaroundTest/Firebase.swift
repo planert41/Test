@@ -662,6 +662,9 @@ extension Database{
         Database.database().reference().child("postlocations").child(post.id!).removeValue()
         Database.database().reference().child("userposts").child(post.creatorUID!).child(post.id!).removeValue()
         
+        Database.database().reference().child("likes").child(post.id!).removeValue()
+        Database.database().reference().child("bookmarks").child(post.id!).removeValue()
+        
         // Remove from cache
         postCache.removeValue(forKey: post.id!)
         Database.spotUpdateSocialCount(creatorUid: uid, receiverUid: nil, action: "post", change: -1)

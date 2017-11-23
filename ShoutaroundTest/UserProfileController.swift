@@ -575,7 +575,7 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
             self.checkDisplayPostIdForDups(postIds: postIds)
             self.fetchPostIds = self.fetchPostIds + postIds
             self.fetchPostIds.sort(by: { (p1, p2) -> Bool in
-                return p1.creationDate.compare(p2.creationDate) == .orderedDescending
+                return p1.creationDate!.compare(p2.creationDate!) == .orderedDescending
             })
             print("Current User Posts: ", self.fetchPostIds.count)
             self.paginatePosts()
@@ -667,7 +667,7 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
             if self.filterTime != defaultTime  {
                 
                 let calendar = Calendar.current
-                let tagHour = Double(calendar.component(.hour, from: fetchPostId.tagTime))
+                let tagHour = Double(calendar.component(.hour, from: fetchPostId.tagTime!))
                 guard let filterIndex = FilterSortTimeDefault.index(of: self.filterTime) else {return}
                 
                 if FilterSortTimeStart[filterIndex] > tagHour || tagHour > FilterSortTimeEnd[filterIndex] {
