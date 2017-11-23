@@ -743,7 +743,6 @@ extension Database{
         guard let uid = Auth.auth().currentUser?.uid else {return}
         
         ref.runTransactionBlock({ (currentData: MutableData) -> TransactionResult in
-            let  uploadTime = Date().timeIntervalSince1970/1000000000000000
 
             
             var post = currentData.value as? [String : AnyObject] ?? [:]
@@ -761,6 +760,8 @@ extension Database{
                 }
                 post["likeCount"] = likeCount as AnyObject?
                 post["likes"] = likes as AnyObject?
+            
+                let  uploadTime = Date().timeIntervalSince1970/1000000000000000
                 post["likeSort"] = (Double(likeCount) + uploadTime) as AnyObject
                 
                 // Set value and report transaction success
@@ -811,6 +812,10 @@ extension Database{
             
                 post["bookmarkCount"] = bookmarkCount as AnyObject?
                 post["bookmarks"] = bookmarks as AnyObject?
+
+                let  uploadTime = Date().timeIntervalSince1970/1000000000000000
+                post["bookmarkSort"] = (Double(bookmarkCount) + uploadTime) as AnyObject
+            
             
                 // Set value and report transaction success
                 currentData.value = post
