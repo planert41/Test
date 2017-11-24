@@ -649,9 +649,10 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     
     func paginatePosts(){
         
-        print("Start Paginate Loop FetchPostCount: ", self.fetchedPostCount)
         let paginateFetchPostSize = 4
         var paginateFetchPostsLimit = min(self.fetchedPostCount + paginateFetchPostSize, self.fetchedPostIds.count)
+        
+        print("Home Paginate \(self.fetchedPostCount) to \(paginateFetchPostsLimit) : \(self.fetchedPostIds.count)")
         
         for i in self.fetchedPostCount ..< paginateFetchPostsLimit  {
             

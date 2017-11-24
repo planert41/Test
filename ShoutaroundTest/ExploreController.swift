@@ -60,7 +60,7 @@ class ExploreController: UIViewController, UISearchBarDelegate, HomePostSearchDe
     
     var displayedPosts = [Post]() {
         didSet{
-            
+            self.noResultsLabel.isHidden = true
         }
     }
     
@@ -83,15 +83,16 @@ class ExploreController: UIViewController, UISearchBarDelegate, HomePostSearchDe
         return sb
     }()
     
-    lazy var filterButton: UIButton = {
-        let button = UIButton(type: .system)
-        button.setImage(#imageLiteral(resourceName: "blankfilter").withRenderingMode(.alwaysOriginal), for: .normal)
-        button.addTarget(self, action: #selector(activateFilter), for: .touchUpInside)
-//        button.layer.borderColor = UIColor.lightGray.cgColor
-//        button.layer.borderWidth = 0.5
+    var filterButton: UIBarButtonItem {
+        let button = UIBarButtonItem(image: #imageLiteral(resourceName: "blankfilter").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(activateFilter))
         return button
-    }()
+    }
     
+    var rangeButton: UIBarButtonItem {
+        let button = UIBarButtonItem(image: #imageLiteral(resourceName: "Globe").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(activateRange))
+        return button
+    }
+
     var resultSearchController:UISearchController? = nil
 
     var filterCaption: String? = nil{
@@ -121,9 +122,9 @@ class ExploreController: UIViewController, UISearchBarDelegate, HomePostSearchDe
     var isFiltering: Bool = false {
         didSet {
             if isFiltering{
-                filterButton.setImage(#imageLiteral(resourceName: "filter").withRenderingMode(.alwaysOriginal), for: .normal)
+                filterButton.image = #imageLiteral(resourceName: "filter").withRenderingMode(.alwaysOriginal)
             } else {
-                filterButton.setImage(#imageLiteral(resourceName: "blankfilter").withRenderingMode(.alwaysOriginal), for: .normal)
+                filterButton.image = #imageLiteral(resourceName: "blankfilter").withRenderingMode(.alwaysOriginal)
             }
         }
     }
@@ -200,24 +201,25 @@ class ExploreController: UIViewController, UISearchBarDelegate, HomePostSearchDe
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        navigationItem.title = "Explore"
         
         // Add search bar and filter button
-        setupSearchController()
-        view.addSubview(searchView)
-        view.addSubview(filterButton)
-        view.addSubview(defaultSearchBar)
-        searchView.anchor(top: topLayoutGuide.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 50)
-        
-        filterButton.anchor(top: searchView.topAnchor, left: nil, bottom: searchView.bottomAnchor, right: searchView.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: view.frame.width/6, height: 0)
-//        filterButton.widthAnchor.constraint(equalTo: filterButton.heightAnchor, multiplier: 1).isActive = true
-        
-        defaultSearchBar.delegate = self
-        defaultSearchBar.anchor(top: searchView.topAnchor, left: searchView.leftAnchor, bottom: searchView.bottomAnchor, right: filterButton.leftAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
+//        view.addSubview(searchView)
+//        view.addSubview(filterButton)
+//        view.addSubview(defaultSearchBar)
+//        searchView.anchor(top: topLayoutGuide.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 50)
+//        
+//        filterButton.anchor(top: searchView.topAnchor, left: nil, bottom: searchView.bottomAnchor, right: searchView.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: view.frame.width/6, height: 0)
+////        filterButton.widthAnchor.constraint(equalTo: filterButton.heightAnchor, multiplier: 1).isActive = true
+//        
+//        defaultSearchBar.delegate = self
+//        defaultSearchBar.anchor(top: searchView.topAnchor, left: searchView.leftAnchor, bottom: searchView.bottomAnchor, right: filterButton.leftAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
+//        
+        view.backgroundColor = UIColor.white
+        setupNavigationItems()
         
         // Add Ranking buttons
         view.addSubview(rankingView)
-        rankingView.anchor(top: searchView.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 50)
+        rankingView.anchor(top: topLayoutGuide.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 50)
         
         setupRankingView()
 
@@ -229,7 +231,7 @@ class ExploreController: UIViewController, UISearchBarDelegate, HomePostSearchDe
         bottomDividerView.backgroundColor = UIColor.lightGray
         
         view.addSubview(topDividerView)
-        topDividerView.anchor(top: searchView.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0.5)
+        topDividerView.anchor(top: rankingView.topAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0.5)
         
         view.addSubview(bottomDividerView)
         bottomDividerView.anchor(top: nil, left: view.leftAnchor, bottom: rankingView.bottomAnchor, right: view.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0.5)
@@ -262,9 +264,14 @@ class ExploreController: UIViewController, UISearchBarDelegate, HomePostSearchDe
     }
 
     func handleRefresh(){
+        self.clearFilter()
+        self.refreshPosts()
+    }
+    
+    func refreshPosts(){
         self.fetchedPostIds.removeAll()
         self.displayedPosts.removeAll()
-        self.clearFilter()
+        self.collectionView.reloadData()
         self.refreshPagination()
         fetchingPostIds()
         self.collectionView.refreshControl?.endRefreshing()
@@ -335,15 +342,19 @@ class ExploreController: UIViewController, UISearchBarDelegate, HomePostSearchDe
     }
     
     func selectSegmentInSegmentView(segmentView: SMSegmentView) {
-
-        selectedRankIndex = segmentView.selectedSegmentIndex
-        selectedRankVariable = rankOptions[selectedRankIndex]
-        print("Selected Rank By \(selectedRankVariable)")
-        self.handleRefresh()
+        
+        if selectedRankIndex != segmentView.selectedSegmentIndex {
+            selectedRankIndex = segmentView.selectedSegmentIndex
+            selectedRankVariable = rankOptions[selectedRankIndex]
+            print("Selected Rank By \(selectedRankVariable)")
+        
+            // Refreshs Post without clearing filters
+            self.refreshPosts()
+        }
     }
     
     
-    fileprivate func setupSearchController(){
+    fileprivate func setupNavigationItems(){
         
         let homePostSearchResults = HomePostSearch()
         homePostSearchResults.delegate = self
@@ -354,10 +365,19 @@ class ExploreController: UIViewController, UISearchBarDelegate, HomePostSearchDe
         searchBar?.backgroundColor = UIColor.clear
         searchBar?.placeholder =  searchBarPlaceholderText
         searchBar?.delegate = homePostSearchResults
+        navigationItem.titleView = searchBar
         
-        resultSearchController?.hidesNavigationBarDuringPresentation = true
+        resultSearchController?.hidesNavigationBarDuringPresentation = false
         resultSearchController?.dimsBackgroundDuringPresentation = true
         definesPresentationContext = true
+        
+        // Setup Filter Button
+        
+        navigationController?.navigationBar.backgroundColor = UIColor.white
+        navigationItem.rightBarButtonItem = filterButton
+        navigationItem.leftBarButtonItem = rangeButton
+        
+        
     }
     
     
@@ -377,16 +397,20 @@ class ExploreController: UIViewController, UISearchBarDelegate, HomePostSearchDe
         self.navigationController?.pushViewController(filterController, animated: true)
     }
     
+    func activateRange(){
+        
+    }
+    
     // Search Delegate And Methods
     
     func filterCaptionSelected(searchedText: String?){
-//        if searchedText == nil {
-//            self.handleRefresh()
-//        } else {
-//            self.defaultSearchBar.text = searchedText
-//            self.filterCaption = searchedText
-//            self.finalFilterAndSort()
-//        }
+        if searchedText == nil {
+            self.handleRefresh()
+        } else {
+            self.defaultSearchBar.text = searchedText
+            self.filterCaption = searchedText
+            self.refreshPosts()
+        }
     }
     
     func userSelected(uid: String?){
@@ -399,12 +423,14 @@ class ExploreController: UIViewController, UISearchBarDelegate, HomePostSearchDe
     
     func filterControllerFinished(selectedRange: String, selectedLocation: CLLocation?, selectedGooglePlaceID: String?, selectedTime: String, selectedGroup: String, selectedSort: String){
         
-//        self.filterRange = selectedRange
-//        self.filterLocation = selectedLocation
-//        self.filterGroup = selectedGroup
-//        self.filterSort = selectedSort
-//        self.filterTime = selectedTime
-//        self.finalFilterAndSort()
+        print("Filter by Range: \(self.filterRange) at \(self.filterLocation), Group: \(self.filterGroup), Time: \(self.filterTime)")
+        
+        self.filterRange = selectedRange
+        self.filterLocation = selectedLocation
+        self.filterGroup = selectedGroup
+        self.filterSort = selectedSort
+        self.filterTime = selectedTime
+        self.refreshPosts()
     }
     
 // Pagination
@@ -416,22 +442,35 @@ class ExploreController: UIViewController, UISearchBarDelegate, HomePostSearchDe
     }
     
     func finishPaginationCheck() {
+        
         if self.fetchedPostCount == (self.fetchedPostIds.count) {
             self.isFinishedPaging = true
         }
         
+        print("Pagination Check, Fetched Posts: \(self.isFinishedPaging), Post Ids: \(self.isFinishedPagingPostIds)")
+        
         if self.displayedPosts.count < 1 && self.isFinishedPaging == true && self.isFinishedPagingPostIds == true{
+            // No Result = No Results, Finished Paging Posts and Post ids
             print("No Results Pagination Finished")
             self.noResultsLabel.text = "No Results"
             self.noResultsLabel.isHidden = false
         }
-        else if self.displayedPosts.count < 1 && self.isFinishedPaging != true && self.isFinishedPagingPostIds == true{
-            print("No Display Pagination Check Paginate")
+        else if self.displayedPosts.count < 1 && self.isFinishedPaging != true{
+            // Paginate Post = No Result, Not finished Paging Post
+            print("No Display, Paginate More Posts")
             self.noResultsLabel.text = "Loading"
             self.noResultsLabel.isHidden = false
             self.paginatePosts()
+        }
+        else if self.displayedPosts.count < 1 && self.isFinishedPagingPostIds != true{
+            // Paginate Post = No Result, Not finished Fetch More Post Ids
+            print("No Display, Fetch More Post Ids")
+            self.noResultsLabel.text = "Loading"
+            self.noResultsLabel.isHidden = false
+            self.fetchingPostIds()
         } else {
             DispatchQueue.main.async(execute: { self.collectionView.reloadData() })
+            print("Loading View with \(self.displayedPosts.count) posts")
             if self.collectionView.numberOfItems(inSection: 0) != 0 && self.displayedPosts.count < 4{
                 let indexPath = IndexPath(item: 0, section: 0)
                 self.collectionView.scrollToItem(at: indexPath, at: .bottom, animated: true)
@@ -459,12 +498,12 @@ class ExploreController: UIViewController, UISearchBarDelegate, HomePostSearchDe
         if fetchedPostIds.count > 0 {
             lastPost = fetchedPostIds.last
             query = query.queryEnding(atValue: lastPost?.sort, childKey: lastPost?.id)
-            print("Pagination Query starting at \(lastPost?.id)")
+            print("Post Id Pagination starting at \(lastPost?.id)")
         }
         
         query.observe(.value, with: { (snapshot) in
 
-            print("Firebase Snapshot: ",snapshot)
+//            print("Firebase Snapshot: ",snapshot)
             guard let postIds = snapshot.value as? [String:Any] else {return}
             
             postIds.forEach({ (key,value) in
@@ -522,9 +561,11 @@ class ExploreController: UIViewController, UISearchBarDelegate, HomePostSearchDe
     
     func paginatePosts(){
         
-        print("Start Paginate Loop FetchPostCount: ", self.fetchedPostCount)
         let paginateFetchPostSize = 4
         var paginateFetchPostsLimit = min(self.fetchedPostCount + paginateFetchPostSize, self.fetchedPostIds.count)
+        
+        print("Start Pagination \(self.fetchedPostCount) to \(paginateFetchPostsLimit) : \(self.fetchedPostIds.count)")
+        
         
         for i in self.fetchedPostCount ..< paginateFetchPostsLimit  {
             let fetchPostId = fetchedPostIds[i]
@@ -542,7 +583,7 @@ class ExploreController: UIViewController, UISearchBarDelegate, HomePostSearchDe
                 self.filterPosts(post: post!, completion: { (filteredPost, filterCondition) in
                     
                     if filteredPost == nil {
-                        print("\(post?.id) was filtered by \(filterCondition)")
+                        print("\(post?.id) was filtered by \(filterCondition). Current Posts: \(self.displayedPosts.count)")
                     } else {
                         self.displayedPosts.append(filteredPost!)
                     }
@@ -614,7 +655,7 @@ class ExploreController: UIViewController, UISearchBarDelegate, HomePostSearchDe
         if self.filterRange != defaultRange && self.filterLocation != nil && fetchedPost != nil{
             
             guard let filterDistance = Double(self.filterRange) else {return}
-            fetchedPost?.distance = Double((fetchedPost?.locationGPS?.distance(from: self.filterLocation!))!)
+            fetchedPost?.distance = Double((fetchedPost?.locationGPS?.distance(from: self.filterLocation!))!)/1000
             
             
             if (fetchedPost?.distance)! > filterDistance {
