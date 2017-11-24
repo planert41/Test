@@ -282,11 +282,11 @@ extension UIImage{
         
         let ratio = max(horizontalRatio, verticalRatio)
         let newSize = CGSize(width: size.width * ratio, height: size.height * ratio)
-        UIGraphicsBeginImageContextWithOptions(newSize, true, 0)
+        
+        UIGraphicsBeginImageContextWithOptions(newSize, false, 1)
         draw(in: CGRect(origin: CGPoint(x: 0, y: 0), size: newSize))
         
         UIColor.clear.setFill()
-        
         
         let newImage = UIGraphicsGetImageFromCurrentImageContext()
         UIGraphicsEndImageContext()

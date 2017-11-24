@@ -526,6 +526,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         clearFilter()
         fetchedPostIds.removeAll()
         displayedPosts.removeAll()
+        self.collectionView?.reloadData()
         fetchAllPostIds()
         self.collectionView?.refreshControl?.endRefreshing()
         print("Refresh Home Feed. FetchPostIds: ", self.fetchedPostIds.count, " DisplayedPost: ", self.displayedPosts.count)

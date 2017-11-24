@@ -577,22 +577,26 @@ class ExploreController: UIViewController, UISearchBarDelegate, HomePostSearchDe
                 self.fetchedPostCount += 1
                 if let error = error {
                     print("Error Fetching \(fetchPostId.id), \(error)")
-                }
+                } else {
+                fetchedPost = post
+                    
+                print(fetchedPost)
                 
                 // Filter Post based on conditions
-                self.filterPosts(post: post!, completion: { (filteredPost, filterCondition) in
+                self.filterPosts(post: fetchedPost!, completion: { (filteredPost, filterCondition) in
                     
-                    if filteredPost == nil {
-                        print("\(post?.id) was filtered by \(filterCondition). Current Posts: \(self.displayedPosts.count)")
-                    } else {
-                        self.displayedPosts.append(filteredPost!)
-                    }
+                        if filteredPost == nil {
+                            print("\(post?.id) was filtered by \(filterCondition). Current Posts: \(self.displayedPosts.count)")
+                        } else {
+                            self.displayedPosts.append(filteredPost!)
+                        }
                     
                     if self.fetchedPostCount == paginateFetchPostsLimit {
                         print("Finish Paging Posts")
                         NotificationCenter.default.post(name: ExploreController.finishPaginationRankPostIdsNotificationName, object: nil)
                     }
                 })
+                }
             })
         }
     }

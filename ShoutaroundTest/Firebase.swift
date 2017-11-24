@@ -484,7 +484,12 @@ extension Database{
                 tempPost.hasLiked = false
             }
             
-            tempPost.likeCount = likeCount
+            if tempPost.likeCount != likeCount {
+                // Calculated Bookmark Count Different from Database
+                tempPost.likeCount = likeCount
+                updateSocialCountsForPost(postId: tempPost.id, socialVariable: "likeCount", newCount: likeCount)
+            }
+            
             
             completion(tempPost)
         }, withCancel: { (err) in
@@ -510,7 +515,11 @@ extension Database{
                 tempPost.hasBookmarked = false
             }
             
-            tempPost.bookmarkCount = bookmarkCount
+            if tempPost.bookmarkCount != bookmarkCount {
+                // Calculated Bookmark Count Different from Database
+                tempPost.bookmarkCount = bookmarkCount
+                updateSocialCountsForPost(postId: tempPost.id, socialVariable: "bookmarkCount", newCount: bookmarkCount)
+            }
             
             completion(tempPost)
             
@@ -526,6 +535,19 @@ extension Database{
                 completion(post)
             })
         }
+    }
+    
+    static func updateSocialCountsForPost(postId: String!, socialVariable: String!, newCount: Int!){
+        
+        let values = [socialVariable: newCount] as [String:Any]
+        
+        Database.database().reference().child("posts").child(postId).updateChildValues(values, withCompletionBlock: { (err, ref) in
+            if let err = err {
+                print("Failed to save user social data for :",postId, err)
+                return}
+            
+            print("Successfully update \(socialVariable) to \(newCount) for \(postId)")
+        })
     }
     
     static func updateSocialCounts(uid: String!){
