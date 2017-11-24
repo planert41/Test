@@ -868,6 +868,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
 //        self.collectionView?.reloadItems(at: [filteredindexpath])
         
         // Update Cache
+        postCache.removeValue(forKey: post.id!)
         postCache[post.id!] = post
     }
     

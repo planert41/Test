@@ -762,7 +762,7 @@ extension Database{
                 post["likes"] = likes as AnyObject?
             
                 let  uploadTime = Date().timeIntervalSince1970/1000000000000000
-                post["likeSort"] = (Double(likeCount) + uploadTime) as AnyObject
+                post["sort"] = (Double(likeCount) + uploadTime) as AnyObject
                 
                 // Set value and report transaction success
                 currentData.value = post
@@ -814,7 +814,7 @@ extension Database{
                 post["bookmarks"] = bookmarks as AnyObject?
 
                 let  uploadTime = Date().timeIntervalSince1970/1000000000000000
-                post["bookmarkSort"] = (Double(bookmarkCount) + uploadTime) as AnyObject
+                post["sort"] = (Double(bookmarkCount) + uploadTime) as AnyObject
             
             
                 // Set value and report transaction success

@@ -35,9 +35,10 @@ class ExploreController: UIViewController, UISearchBarDelegate, HomePostSearchDe
     static let finishPaginationRankPostIdsNotificationName = NSNotification.Name(rawValue: "FinishPaginationRankPostIds")
 
     
-    let rankfilter = ["likes", "bookmarks", "messages"]
-    let rankfilterCounts = ["likeCount", "bookmarkCount", "messageCount"]
-    var selectedRankFilter = 0
+    
+    var selectedRankIndex = 0
+    var selectedRankVariable: String = defaultRankOptions[0]
+    let rankOptions = defaultRankOptions
     
     var fetchedPostIds: [PostId] = []
     var fetchedPostCount = 0
@@ -131,6 +132,8 @@ class ExploreController: UIViewController, UISearchBarDelegate, HomePostSearchDe
     
     var segmentView: SMSegmentView!
     var margin: CGFloat = 0
+    
+    var rankVariables = ["likes", "bookmarks", "messages"]
     
     var rankingView: UIView = {
         let view = UIView()
@@ -283,34 +286,7 @@ class ExploreController: UIViewController, UISearchBarDelegate, HomePostSearchDe
         self.filterTime = defaultTime
     }
     
-    
-    func finishPaginationCheck() {
-        if self.fetchedPostCount == (self.fetchedPostIds.count) {
-            self.isFinishedPaging = true
-        }
-        
-        if self.displayedPosts.count < 1 && self.isFinishedPaging == true && self.isFinishedPagingPostIds == true{
-            print("No Results Pagination Finished")
-            self.noResultsLabel.text = "No Results"
-            self.noResultsLabel.isHidden = false
-        }
-        else if self.displayedPosts.count < 1 && self.isFinishedPaging != true && self.isFinishedPagingPostIds == true{
-            print("No Display Pagination Check Paginate")
-            self.noResultsLabel.text = "Loading"
-            self.noResultsLabel.isHidden = false
-            self.paginatePosts()
-        } else {
-            DispatchQueue.main.async(execute: { self.collectionView.reloadData() })
-            if self.collectionView.numberOfItems(inSection: 0) != 0 && self.displayedPosts.count < 4{
-                let indexPath = IndexPath(item: 0, section: 0)
-                self.collectionView.scrollToItem(at: indexPath, at: .bottom, animated: true)
-                self.noResultsLabel.isHidden = true
-            }
-        }
-        
-        
-        
-    }
+
     
     
     fileprivate func setupRankingView(){
@@ -359,11 +335,11 @@ class ExploreController: UIViewController, UISearchBarDelegate, HomePostSearchDe
     }
     
     func selectSegmentInSegmentView(segmentView: SMSegmentView) {
-        /*
-         Replace the following line to implement what you want the app to do after the segment gets tapped.
-         */
-        selectedRankFilter = segmentView.selectedSegmentIndex
-        print("Select segment at index: \(segmentView.selectedSegmentIndex)")
+
+        selectedRankIndex = segmentView.selectedSegmentIndex
+        selectedRankVariable = rankOptions[selectedRankIndex]
+        print("Selected Rank By \(selectedRankVariable)")
+        self.handleRefresh()
     }
     
     
@@ -431,41 +407,85 @@ class ExploreController: UIViewController, UISearchBarDelegate, HomePostSearchDe
 //        self.finalFilterAndSort()
     }
     
-// Populate CollectionView
+// Pagination
     
+    
+    func finishFetchingPostIds() {
+        print("Finish Fetching Post Ids: \(self.fetchedPostIds.count)")
+        self.paginatePosts()
+    }
+    
+    func finishPaginationCheck() {
+        if self.fetchedPostCount == (self.fetchedPostIds.count) {
+            self.isFinishedPaging = true
+        }
+        
+        if self.displayedPosts.count < 1 && self.isFinishedPaging == true && self.isFinishedPagingPostIds == true{
+            print("No Results Pagination Finished")
+            self.noResultsLabel.text = "No Results"
+            self.noResultsLabel.isHidden = false
+        }
+        else if self.displayedPosts.count < 1 && self.isFinishedPaging != true && self.isFinishedPagingPostIds == true{
+            print("No Display Pagination Check Paginate")
+            self.noResultsLabel.text = "Loading"
+            self.noResultsLabel.isHidden = false
+            self.paginatePosts()
+        } else {
+            DispatchQueue.main.async(execute: { self.collectionView.reloadData() })
+            if self.collectionView.numberOfItems(inSection: 0) != 0 && self.displayedPosts.count < 4{
+                let indexPath = IndexPath(item: 0, section: 0)
+                self.collectionView.scrollToItem(at: indexPath, at: .bottom, animated: true)
+                self.noResultsLabel.isHidden = true
+            }
+        }
+    }
+    
+
     
     fileprivate func fetchingPostIds(){
         
-        let myGroup = DispatchGroup()
         var fetchingPostIds = [] as [PostId]
         var fetchLimit = 8
         self.isFinishedPaging = false
         
-        var query = Database.database().reference().child("likes").queryOrdered(byChild: "likeSort").queryLimited(toLast: UInt(fetchLimit))
+        let firebaseRank = self.selectedRankVariable
+        guard let firebaseCount = firebaseCountVariable[firebaseRank] else {return}
         
+        print("Query Firebase by \(firebaseRank) : \(firebaseCount)")
+        
+        var query = Database.database().reference().child(firebaseRank).queryOrdered(byChild: "sort").queryLimited(toLast: UInt(fetchLimit))
         var lastPost: PostId? = nil
         
         if fetchedPostIds.count > 0 {
             lastPost = fetchedPostIds.last
-            
             query = query.queryEnding(atValue: lastPost?.sort, childKey: lastPost?.id)
+            print("Pagination Query starting at \(lastPost?.id)")
         }
         
         query.observe(.value, with: { (snapshot) in
 
-            print(snapshot)
+            print("Firebase Snapshot: ",snapshot)
             guard let postIds = snapshot.value as? [String:Any] else {return}
             
             postIds.forEach({ (key,value) in
 
                 let details = value as? [String:Any]
-                var likeSort = details?["likeSort"] as! Double
-                var likes = details?["likeCount"] as! Int
+                var varCount = details?[firebaseCount] as! Int
+                var varSort = details?["sort"] as! Double
                 
                 
                 var tempPostId = PostId.init(id: key, creatorUID: " ", fetchedTagTime: 0, fetchedDate: 0, distance: 0, postGPS: nil, postEmoji: nil)
-                tempPostId.likeCount = likes
-                tempPostId.sort = likeSort
+                
+                if firebaseRank  == "likes" {
+                    tempPostId.likeCount = varCount
+                } else if firebaseRank  == "bookmarks" {
+                    tempPostId.bookmarkCount = varCount
+                } else if firebaseRank == "messages" {
+                    tempPostId.messageCount = varCount
+                }
+
+                tempPostId.sort = varSort
+                
                 print("Current Fetched Post: \(self.fetchedPostIds.count): \(key)")
                 // Add to fetched post if not dup post id from before
                 if tempPostId.id != lastPost?.id {
@@ -473,7 +493,8 @@ class ExploreController: UIViewController, UISearchBarDelegate, HomePostSearchDe
                 }
                 
             })
-                
+            
+            
             
 //             Sort post ids before adding so that existing post ids don't get re-ordered if more postids are paginated
             fetchingPostIds.sort(by: { (p1, p2) -> Bool in
@@ -481,7 +502,7 @@ class ExploreController: UIViewController, UISearchBarDelegate, HomePostSearchDe
             })
             
             self.fetchedPostIds += fetchingPostIds
-            print("Final fetched Post Ids: \(self.fetchedPostIds)")
+//            print("Final fetched Post Ids: \(self.fetchedPostIds)")
             
             // Determine if end of post ids to fetch
             if fetchingPostIds.count < (fetchLimit - 2) {
@@ -496,14 +517,8 @@ class ExploreController: UIViewController, UISearchBarDelegate, HomePostSearchDe
         }) { (error) in
             print("Failed to Paginate for Posts:", error)
         }
-        
+    }
 
-    }
-    
-    func finishFetchingPostIds() {
-        print("Finish Fetching Post Ids: \(self.fetchedPostIds.count)")
-            self.paginatePosts()
-    }
     
     func paginatePosts(){
         
