@@ -39,8 +39,8 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
             
             likeButton.setBackgroundImage(post?.hasLiked == true ? #imageLiteral(resourceName: "like_selected").withRenderingMode(.alwaysOriginal) : #imageLiteral(resourceName: "like_unselected").withRenderingMode(.alwaysOriginal), for: .normal)
             
-            if (post?.likeStats)! > 0 {
-                let count: String! = String(describing: (post?.likeStats)!)
+            if (post?.likeCount)! > 0 {
+                let count: String! = String(describing: (post?.likeCount)!)
                 likeButton.setTitle(count, for: .normal)
             } else {
                 likeButton.setTitle("", for: .normal)
@@ -49,8 +49,8 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
             
             bookmarkButton.setBackgroundImage(post?.hasBookmarked == true ? #imageLiteral(resourceName: "bookmark_ribbon_filled").withRenderingMode(.alwaysOriginal) : #imageLiteral(resourceName: "bookmark_ribbon_unfilled").withRenderingMode(.alwaysOriginal), for: .normal)
             
-            if (post?.bookmarkStats)! > 0 {
-                let count: String! = String(describing: (post?.bookmarkStats)!)
+            if (post?.bookmarkCount)! > 0 {
+                let count: String! = String(describing: (post?.bookmarkCount)!)
                 bookmarkButton.setTitle(count, for: .normal)
             } else {
                 bookmarkButton.setTitle("", for: .normal)
@@ -476,9 +476,9 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         // Animates before database function is complete
         
         if (self.post?.hasLiked)! {
-            self.post?.likeStats -= 1
+            self.post?.likeCount -= 1
         } else {
-            self.post?.likeStats += 1
+            self.post?.likeCount += 1
         }
         self.post?.hasLiked = !(self.post?.hasLiked)!
         self.delegate?.refreshPost(post: self.post!)
@@ -509,9 +509,9 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         // Animates before database function is complete
         
         if (self.post?.hasBookmarked)! {
-            self.post?.bookmarkStats -= 1
+            self.post?.bookmarkCount -= 1
         } else {
-            self.post?.bookmarkStats += 1
+            self.post?.bookmarkCount += 1
         }
         self.post?.hasBookmarked = !(self.post?.hasBookmarked)!
         self.delegate?.refreshPost(post: self.post!)

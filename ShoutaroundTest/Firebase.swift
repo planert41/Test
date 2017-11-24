@@ -484,7 +484,7 @@ extension Database{
                 tempPost.hasLiked = false
             }
             
-            tempPost.likeStats = likeCount
+            tempPost.likeCount = likeCount
             
             completion(tempPost)
         }, withCancel: { (err) in
@@ -510,7 +510,7 @@ extension Database{
                 tempPost.hasBookmarked = false
             }
             
-            tempPost.bookmarkStats = bookmarkCount
+            tempPost.bookmarkCount = bookmarkCount
             
             completion(tempPost)
             

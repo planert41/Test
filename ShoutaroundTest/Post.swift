@@ -61,8 +61,9 @@ struct Post {
     //Social Stats
     var hasLiked: Bool = false
     var hasBookmarked: Bool = false
-    var likeStats: Int = 0
-    var bookmarkStats:Int = 0
+    var likeCount: Int = 0
+    var bookmarkCount:Int = 0
+    var messageCount:Int = 0
     
     
     init(user: User, dictionary: [String: Any]) {
