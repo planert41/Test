@@ -18,7 +18,6 @@ class UserProfilePhotoCell: UICollectionViewCell, UIGestureRecognizerDelegate {
     var delegate: UserProfilePhotoCellDelegate?
     var post: Post? {
         didSet {
-            print(post)
             guard let imageUrl = post?.imageUrl else {return}
 //            guard let url = URL(string: imageUrl) else {return}
 //            photoImageView.setImageWith(url)
@@ -87,7 +86,7 @@ class UserProfilePhotoCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         photoImageView.isUserInteractionEnabled = true
         
         let longPress = UILongPressGestureRecognizer(target: self, action: #selector(SharePhotoController.handleLongPress(_:)))
-        longPress.minimumPressDuration = 0.1
+        longPress.minimumPressDuration = 0.25
         longPress.delegate = self
         photoImageView.addGestureRecognizer(longPress)
         
@@ -143,7 +142,7 @@ class UserProfilePhotoCell: UICollectionViewCell, UIGestureRecognizerDelegate {
     
     func handleLongPress(_ gestureReconizer: UILongPressGestureRecognizer) {
 
-        let animationDuration = 0.1
+        let animationDuration = 0.25
         
         if socialHide {
             if gestureReconizer.state != UIGestureRecognizerState.recognized {

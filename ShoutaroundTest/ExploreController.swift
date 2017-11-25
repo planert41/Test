@@ -14,7 +14,7 @@ import GeoFire
 import CoreGraphics
 import CoreLocation
 
-class ExploreController: UIViewController, UISearchBarDelegate, HomePostSearchDelegate, UISearchControllerDelegate, FilterControllerDelegate, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, UserProfilePhotoCellDelegate {
+class ExploreController: UIViewController, UISearchBarDelegate, HomePostSearchDelegate, UISearchControllerDelegate, FilterControllerDelegate, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, UserProfilePhotoCellDelegate, UIPickerViewDelegate, UIPickerViewDataSource {
 
     
     // CollectionView Variables
@@ -83,16 +83,39 @@ class ExploreController: UIViewController, UISearchBarDelegate, HomePostSearchDe
         return sb
     }()
     
-    var filterButton: UIBarButtonItem {
-        let button = UIBarButtonItem(image: #imageLiteral(resourceName: "blankfilter").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(activateFilter))
-        return button
-    }
-    
-    var rangeButton: UIBarButtonItem {
-        let button = UIBarButtonItem(image: #imageLiteral(resourceName: "Globe").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(activateRange))
-        return button
-    }
+//    var filterButtonImage: UIImageView = {
+//        let view = UIImageView(frame: CGRect(x: 0, y: 0, width: 20, height: 20))
+//        view.contentMode = .scaleAspectFit
+//        view.sizeToFit()
+//        view.backgroundColor = UIColor.clear
+//        return view
+//    }()
+//    
+//    var rangeButtonImage: UIImageView = {
+//        let view = UIImageView(frame: CGRect(x: 0, y: 0, width: 20, height: 20))
+//        view.contentMode = .scaleAspectFit
+//        view.sizeToFit()
+//        view.backgroundColor = UIColor.clear
+//        return view
+//    }()
+//    
+//    var filterButton: UIButton {
+//        let button = UIButton.init(type: .custom)
+//        button.frame = CGRect(x: 0, y: 0, width: 20, height: 20)
+//        button.addTarget(self, action: #selector(activateFilter), for: .touchUpInside)
+//        return button
+//    }
+//    
+//    var rangeButton: UIButton {
+//        let button = UIButton.init(type: .custom)
+//        button.frame = CGRect(x: 0, y: 0, width: 20, height: 20)
+//        button.addTarget(self, action: #selector(activateRange), for: .touchUpInside)
+//        return button
+//    }
 
+    var filterButton = UIButton()
+    var rangeButton = UIButton()
+    
     var resultSearchController:UISearchController? = nil
 
     var filterCaption: String? = nil{
@@ -103,28 +126,28 @@ class ExploreController: UIViewController, UISearchBarDelegate, HomePostSearchDe
     var filterLocation: CLLocation? = nil
     var filterGroup: String = defaultGroup {
         didSet{
-//            setupNavigationItems()
+            setupNavigationItems()
         }
     }
     var filterRange: String = defaultRange {
         didSet{
-//            setupNavigationItems()
+            setupNavigationItems()
         }
     }
     
     var filterSort: String = defaultSort
     var filterTime: String = defaultTime{
         didSet{
-//            setupNavigationItems()
+            setupNavigationItems()
         }
     }
     
     var isFiltering: Bool = false {
         didSet {
             if isFiltering{
-                filterButton.image = #imageLiteral(resourceName: "filter").withRenderingMode(.alwaysOriginal)
+//                filterButton.image = #imageLiteral(resourceName: "filter").withRenderingMode(.alwaysOriginal)
             } else {
-                filterButton.image = #imageLiteral(resourceName: "blankfilter").withRenderingMode(.alwaysOriginal)
+//                filterButton.image = #imageLiteral(resourceName: "blankfilter").withRenderingMode(.alwaysOriginal)
             }
         }
     }
@@ -222,6 +245,7 @@ class ExploreController: UIViewController, UISearchBarDelegate, HomePostSearchDe
         rankingView.anchor(top: topLayoutGuide.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 50)
         
         setupRankingView()
+        setupGeoPicker()
 
         
         let topDividerView = UIView()
@@ -371,12 +395,40 @@ class ExploreController: UIViewController, UISearchBarDelegate, HomePostSearchDe
         resultSearchController?.dimsBackgroundDuringPresentation = true
         definesPresentationContext = true
         
+        navigationController?.navigationBar.backgroundColor = UIColor.white
+        
         // Setup Filter Button
         
-        navigationController?.navigationBar.backgroundColor = UIColor.white
-        navigationItem.rightBarButtonItem = filterButton
-        navigationItem.leftBarButtonItem = rangeButton
+        filterButton = UIButton.init(type: .custom)
+        filterButton.addTarget(self, action: #selector(activateFilter), for: .touchUpInside)
+        filterButton.frame = CGRect(x: 0, y: 0, width: 30, height: 30)
         
+        if self.filterGroup == defaultGroup && self.filterRange == defaultRange && self.filterTime == defaultTime && self.filterGroup == "All" {
+            filterButton.setImage(#imageLiteral(resourceName: "blankfilter").withRenderingMode(.alwaysOriginal), for: .normal)
+        } else {
+            filterButton.setImage(#imageLiteral(resourceName: "filter").withRenderingMode(.alwaysOriginal), for: .normal)
+        }
+        let rightBarButton = UIBarButtonItem(customView: filterButton)
+        navigationItem.rightBarButtonItem = rightBarButton
+        
+        // Setup Range Button
+        
+        rangeButton = UIButton.init(type: .custom)
+        rangeButton.addTarget(self, action: #selector(activateRange), for: .touchUpInside)
+        rangeButton.frame = CGRect(x: 0, y: 0, width: 30, height: 30)
+        
+        if self.filterRange != defaultRange {
+            rangeButton.setBackgroundImage(#imageLiteral(resourceName: "GeoFence").withRenderingMode(.alwaysOriginal), for: .normal)
+            rangeButton.setTitle(self.filterRange, for: .normal)
+            rangeButton.titleLabel!.font = UIFont(name: "Helvetica", size: 12)
+            rangeButton.setTitleColor(UIColor.black, for: .normal)
+
+        } else {
+            rangeButton.setBackgroundImage(#imageLiteral(resourceName: "Globe").withRenderingMode(.alwaysOriginal), for: .normal)
+        }
+        
+        let leftBarButton = UIBarButtonItem(customView: rangeButton)
+        navigationItem.leftBarButtonItem = leftBarButton
         
     }
     
@@ -395,10 +447,6 @@ class ExploreController: UIViewController, UISearchBarDelegate, HomePostSearchDe
         filterController.selectedSort = self.filterSort
         filterController.selectedTime = self.filterTime
         self.navigationController?.pushViewController(filterController, animated: true)
-    }
-    
-    func activateRange(){
-        
     }
     
     // Search Delegate And Methods
@@ -432,6 +480,93 @@ class ExploreController: UIViewController, UISearchBarDelegate, HomePostSearchDe
         self.filterTime = selectedTime
         self.refreshPosts()
     }
+    
+    
+// Set Up Geopicker for Distance Filtering 
+    
+    lazy var dummyTextView: UITextView = {
+        let tv = UITextView()
+        return tv
+    }()
+    
+    var pickerView: UIPickerView = {
+        let pv = UIPickerView()
+        pv.backgroundColor = .white
+        pv.showsSelectionIndicator = true
+        return pv
+    }()
+    
+    func setupGeoPicker() {
+    
+    
+        var toolBar = UIToolbar()
+        toolBar.barStyle = UIBarStyle.default
+        toolBar.isTranslucent = true
+    
+        toolBar.tintColor = UIColor(red: 76/255, green: 217/255, blue: 100/255, alpha: 1)
+        toolBar.sizeToFit()
+    
+    
+        let doneButton = UIBarButtonItem(title: "Done", style: UIBarButtonItemStyle.bordered, target: self, action: Selector("donePicker"))
+        let spaceButton = UIBarButtonItem(barButtonSystemItem: UIBarButtonSystemItem.flexibleSpace, target: nil, action: nil)
+        spaceButton.title = "Filter Range"
+        let cancelButton = UIBarButtonItem(title: "Cancel", style: UIBarButtonItemStyle.bordered, target: self, action: Selector("cancelPicker"))
+    
+        toolBar.setItems([cancelButton, spaceButton, doneButton], animated: false)
+        toolBar.isUserInteractionEnabled = true
+    
+        pickerView.delegate = self
+        pickerView.dataSource = self
+        self.dummyTextView.inputView = pickerView
+        self.dummyTextView.inputAccessoryView = toolBar
+        view.addSubview(dummyTextView)
+    }
+    
+    
+    func donePicker(){
+        print("Filter Range Selected: \(self.filterRange)")
+        self.refreshPosts()
+        dummyTextView.resignFirstResponder()
+    
+    }
+    
+    func cancelPicker(){
+        dummyTextView.resignFirstResponder()
+    }
+    
+    func activateRange() {
+    
+        let rangeIndex = geoFilterRangeDefault.index(of: self.filterRange)
+        pickerView.selectRow(rangeIndex!, inComponent: 0, animated: false)
+        dummyTextView.perform(#selector(becomeFirstResponder), with: nil, afterDelay: 0.1)
+    }
+    
+    // UIPicker DataSource
+    func numberOfComponents(in pickerView: UIPickerView) -> Int {
+    
+        return 1
+    
+    }
+    func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
+        return geoFilterRangeDefault.count
+    }
+    
+    // UIPicker Delegate
+    
+    func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
+        
+        return geoFilterRangeDefault[row]
+    }
+    
+    func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
+        // If Select some number
+        self.filterRange = geoFilterRangeDefault[row]
+    }
+
+    
+    
+    
+    
     
 // Pagination
     
@@ -580,7 +715,7 @@ class ExploreController: UIViewController, UISearchBarDelegate, HomePostSearchDe
                 } else {
                 fetchedPost = post
                     
-                print(fetchedPost)
+//                print(fetchedPost)
                 
                 // Filter Post based on conditions
                 self.filterPosts(post: fetchedPost!, completion: { (filteredPost, filterCondition) in

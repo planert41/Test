@@ -490,6 +490,8 @@ class LocationController: UIViewController, UIScrollViewDelegate, UICollectionVi
 
         }
         
+        // Location Posts Fetching functions are called on the top when posts and googleplaceids are set
+        
     }
     
     func setupPlaceDetailStackview(){
