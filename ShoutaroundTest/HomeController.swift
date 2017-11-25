@@ -796,10 +796,11 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         
         var height: CGFloat = 40 + 8 + 8 //username userprofileimageview
-        height += view.frame.width
-        height += 50
-        height += 60
-        height += 20
+        height += view.frame.width  // Picture
+        height += 50    // Location View
+        height += 60    // Action Bar
+        height += 20    // Social Counts
+        height += 20    // Caption
         
         return CGSize(width: view.frame.width, height: height)
     }

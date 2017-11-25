@@ -680,6 +680,7 @@ class ExploreController: UIViewController, UISearchBarDelegate, HomePostSearchDe
             
             // Determine if end of post ids to fetch
             if fetchingPostIds.count < (fetchLimit - 2) {
+                print("Only Fetched \(fetchingPostIds.count) PostIds. End of PostIDs")
                 self.isFinishedPagingPostIds = true
             } else {
                 self.isFinishedPagingPostIds = false
@@ -701,7 +702,7 @@ class ExploreController: UIViewController, UISearchBarDelegate, HomePostSearchDe
         
         print("Start Pagination \(self.fetchedPostCount) to \(paginateFetchPostsLimit) : \(self.fetchedPostIds.count)")
         
-        
+        // Start Loop for Posts
         for i in self.fetchedPostCount ..< paginateFetchPostsLimit  {
             let fetchPostId = fetchedPostIds[i]
             var fetchedPost: Post? = nil
@@ -733,6 +734,13 @@ class ExploreController: UIViewController, UISearchBarDelegate, HomePostSearchDe
                 })
                 }
             })
+        }
+        
+        // Fetched more post ids and only 1 post id came back. Loop would not be initiaited and finish paging wouldne bt called
+        
+        if self.fetchedPostCount == paginateFetchPostsLimit {
+            print("Finish Paging Posts")
+            NotificationCenter.default.post(name: ExploreController.finishPaginationRankPostIdsNotificationName, object: nil)
         }
     }
     

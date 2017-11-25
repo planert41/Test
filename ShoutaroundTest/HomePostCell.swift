@@ -37,25 +37,25 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
                 
             guard let imageUrl = post?.imageUrl else {return}
             
-            likeButton.setBackgroundImage(post?.hasLiked == true ? #imageLiteral(resourceName: "like_selected").withRenderingMode(.alwaysOriginal) : #imageLiteral(resourceName: "like_unselected").withRenderingMode(.alwaysOriginal), for: .normal)
+            likeButton.setImage(post?.hasLiked == true ? #imageLiteral(resourceName: "like_selected").withRenderingMode(.alwaysOriginal) : #imageLiteral(resourceName: "like_unselected").withRenderingMode(.alwaysOriginal), for: .normal)
+//            
+//            if (post?.likeCount)! > 0 {
+//                let count: String! = String(describing: (post?.likeCount)!)
+//                likeButton.setTitle(count, for: .normal)
+//            } else {
+//                likeButton.setTitle("", for: .normal)
+//            }
             
-            if (post?.likeCount)! > 0 {
-                let count: String! = String(describing: (post?.likeCount)!)
-                likeButton.setTitle(count, for: .normal)
-            } else {
-                likeButton.setTitle("", for: .normal)
-            }
             
+            bookmarkButton.setImage(post?.hasBookmarked == true ? #imageLiteral(resourceName: "bookmark_ribbon_filled").withRenderingMode(.alwaysOriginal) : #imageLiteral(resourceName: "bookmark_ribbon_unfilled").withRenderingMode(.alwaysOriginal), for: .normal)
             
-            bookmarkButton.setBackgroundImage(post?.hasBookmarked == true ? #imageLiteral(resourceName: "bookmark_ribbon_filled").withRenderingMode(.alwaysOriginal) : #imageLiteral(resourceName: "bookmark_ribbon_unfilled").withRenderingMode(.alwaysOriginal), for: .normal)
+//            if (post?.bookmarkCount)! > 0 {
+//                let count: String! = String(describing: (post?.bookmarkCount)!)
+//                bookmarkButton.setTitle(count, for: .normal)
+//            } else {
+//                bookmarkButton.setTitle("", for: .normal)
+//            }
             
-            if (post?.bookmarkCount)! > 0 {
-                let count: String! = String(describing: (post?.bookmarkCount)!)
-                bookmarkButton.setTitle(count, for: .normal)
-            } else {
-                bookmarkButton.setTitle("", for: .normal)
-            }
-                
             photoImageView.loadImage(urlString: imageUrl)
             
 //            let attributedText = NSMutableAttributedString(string: (post?.ratingEmoji)!, attributes: [NSFontAttributeName: UIFont.boldSystemFont(ofSize: 20)])
@@ -80,6 +80,7 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
             userProfileImageView.loadImage(urlString: profileImageUrl)
             captionLabel.text = post?.caption
             setupAttributedCaption()
+            setupAttributedSocialCount()
             
             
             if post?.distance != nil && post?.locationGPS?.coordinate.longitude != 0 && post?.locationGPS?.coordinate.latitude != 0 {
@@ -123,10 +124,19 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         delegate?.didTapLocation(post: post)
     }
     
+    fileprivate func setupAttributedSocialCount(){
+        
+        guard let post = self.post else {return}
+
+        let attributedText = NSMutableAttributedString(string: "\(post.likeCount) likes", attributes: [NSFontAttributeName: UIFont.boldSystemFont(ofSize: 14)])
+        
+        self.socialCountLabel.attributedText = attributedText
+        
+    }
+    
     fileprivate func setupAttributedCaption(){
         
         guard let post = self.post else {return}
-        
         
         let attributedText = NSMutableAttributedString(string: post.user.username, attributes: [NSFontAttributeName: UIFont.boldSystemFont(ofSize: 14)])
         
@@ -421,6 +431,12 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         label.numberOfLines = 0
         return label
     }()
+    
+    let socialCountLabel: UILabel = {
+        let label = UILabel()
+        label.numberOfLines = 0
+        return label
+    }()
 
     lazy var optionsButton: UIButton = {
         let button = UIButton(type: .system)
@@ -441,7 +457,7 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
     
     lazy var likeButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setBackgroundImage(#imageLiteral(resourceName: "like_unselected").withRenderingMode(.alwaysOriginal), for: .normal)
+        button.setImage(#imageLiteral(resourceName: "like_unselected").withRenderingMode(.alwaysOriginal), for: .normal)
         button.addTarget(self, action: #selector(handleLike), for: .touchUpInside)
         return button
         
@@ -489,7 +505,7 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
     
     lazy var bookmarkButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setBackgroundImage(#imageLiteral(resourceName: "ribbon").withRenderingMode(.alwaysOriginal), for: .normal)
+        button.setImage(#imageLiteral(resourceName: "ribbon").withRenderingMode(.alwaysOriginal), for: .normal)
         button.addTarget(self, action: #selector(handleBookmark), for: .touchUpInside)
         return button
         
@@ -666,9 +682,12 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         bottomDividerView.anchor(top: locationView.bottomAnchor, left: leftAnchor, bottom: nil, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0.5)
         
         setupActionButtons()
+        
+        addSubview(socialCountLabel)
+        socialCountLabel.anchor(top: likeButton.bottomAnchor, left: leftAnchor, bottom: nil, right: rightAnchor, paddingTop: 0, paddingLeft: 8, paddingBottom: 0, paddingRight: 0, width: 0, height: 20)
 
         addSubview(captionLabel)
-        captionLabel.anchor(top: likeButton.bottomAnchor, left: leftAnchor, bottom: bottomAnchor, right: rightAnchor, paddingTop: 0, paddingLeft: 8, paddingBottom: 0, paddingRight: 8, width: 0, height: 0)
+        captionLabel.anchor(top: socialCountLabel.bottomAnchor, left: leftAnchor, bottom: bottomAnchor, right: rightAnchor, paddingTop: 0, paddingLeft: 8, paddingBottom: 0, paddingRight: 8, width: 0, height: 0)
     
     }
     
