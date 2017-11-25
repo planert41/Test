@@ -128,9 +128,27 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         
         guard let post = self.post else {return}
 
-        let attributedText = NSMutableAttributedString(string: "\(post.likeCount) likes", attributes: [NSFontAttributeName: UIFont.boldSystemFont(ofSize: 14)])
+        if post.likeCount > 0 {
+            let attributedText = NSMutableAttributedString(string: "\(post.likeCount) likes", attributes: [NSFontAttributeName: UIFont.boldSystemFont(ofSize: 14)])
+            self.socialCountLabel.attributedText = attributedText
+        } else {
+            self.socialCountLabel.text = ""
+        }
         
-        self.socialCountLabel.attributedText = attributedText
+        if post.messageCount > 0 {
+            self.messageLabel.text = String( post.messageCount)
+        } else {
+            self.messageLabel.text = ""
+        }
+        self.messageLabel.sizeToFit()
+        
+        if post.bookmarkCount > 0 {
+            self.bookmarkLabel.text = String( post.bookmarkCount)
+        } else {
+            self.bookmarkLabel.text = ""
+        }
+        self.bookmarkLabel.sizeToFit()
+        self.bookmarkLabel.widthAnchor.constraint(equalToConstant: self.bookmarkLabel.frame.size.width).isActive = true
         
     }
     
@@ -455,128 +473,6 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
     }
     
     
-    lazy var likeButton: UIButton = {
-        let button = UIButton(type: .system)
-        button.setImage(#imageLiteral(resourceName: "like_unselected").withRenderingMode(.alwaysOriginal), for: .normal)
-        button.addTarget(self, action: #selector(handleLike), for: .touchUpInside)
-        return button
-        
-    }()
-    
-    func handleLike() {
-  //      delegate?.didLike(for: self)
-        
-        guard let postId = self.post?.id else {return}
-        guard let creatorId = self.post?.creatorUID else {return}
-        guard let uid = Auth.auth().currentUser?.uid else {return}
-        
-        self.likeButton.transform = CGAffineTransform(scaleX: 0.1, y: 0.1)
-        
-        self.layoutIfNeeded()
-        UIView.animate(withDuration: 1.0,
-                       delay: 0,
-                       usingSpringWithDamping: 0.2,
-                       initialSpringVelocity: 6.0,
-                       options: .allowUserInteraction,
-                       animations: { [weak self] in
-                        self?.likeButton.transform = .identity
-                        self?.likeButton.layoutIfNeeded()
-
-            },
-                       completion: nil)
-    
-        
-        Database.handleLike(postId: postId, creatorUid: creatorId){
-        }
-        
-        // Animates before database function is complete
-        
-        if (self.post?.hasLiked)! {
-            self.post?.likeCount -= 1
-        } else {
-            self.post?.likeCount += 1
-        }
-        self.post?.hasLiked = !(self.post?.hasLiked)!
-        self.delegate?.refreshPost(post: self.post!)
-        
-    }
-
-    // Bookmark
-    
-    lazy var bookmarkButton: UIButton = {
-        let button = UIButton(type: .system)
-        button.setImage(#imageLiteral(resourceName: "ribbon").withRenderingMode(.alwaysOriginal), for: .normal)
-        button.addTarget(self, action: #selector(handleBookmark), for: .touchUpInside)
-        return button
-        
-    }()
-    
-    func handleBookmark() {
-        
-    //    delegate?.didBookmark(for: self)
-        
-        guard let postId = self.post?.id else {return}
-        guard let creatorId = self.post?.creatorUID else {return}
-        guard let uid = Auth.auth().currentUser?.uid else {return}
-        
-        Database.handleBookmark(postId: postId, creatorUid: creatorId){
-        }
-        
-        // Animates before database function is complete
-        
-        if (self.post?.hasBookmarked)! {
-            self.post?.bookmarkCount -= 1
-        } else {
-            self.post?.bookmarkCount += 1
-        }
-        self.post?.hasBookmarked = !(self.post?.hasBookmarked)!
-        self.delegate?.refreshPost(post: self.post!)
-        
-        bookmarkButton.transform = CGAffineTransform(scaleX: 0.1, y: 0.1)
-        
-        UIView.animate(withDuration: 1.0,
-                       delay: 0,
-                       usingSpringWithDamping: 0.2,
-                       initialSpringVelocity: 6.0,
-                       options: .allowUserInteraction,
-                       animations: { [weak self] in
-                        self?.bookmarkButton.transform = .identity
-            },
-                       completion: nil)
-    
-    }
-
-    
-// Comments
-    
-    lazy var commentButton: UIButton = {
-        let button = UIButton(type: .system)
-        button.setImage(#imageLiteral(resourceName: "comment").withRenderingMode(.alwaysOriginal), for: .normal)
-        button.addTarget(self, action: #selector(handleComment), for: .touchUpInside)
-        return button
-        
-    }()
-    
-    func handleComment() {
-        guard let post = post else {return}
-        delegate?.didTapComment(post: post)
-    }
-
-// Send Message
-    
-    lazy var sendMessageButton: UIButton = {
-        let button = UIButton(type: .system)
-        button.setImage(#imageLiteral(resourceName: "message").withRenderingMode(.alwaysOriginal), for: .normal)
-        button.addTarget(self, action: #selector(handleMessage), for: .touchUpInside)
-        return button
-    
-    }()
-
-    func handleMessage(){
-        guard let post = post else {return}
-        delegate?.didTapMessage(post: post)
-        
-    }
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -691,18 +587,189 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
     
     }
     
+    // Action Buttons
+    
+    var actionBar: UIView = {
+        let view = UIView()
+        view.backgroundColor = UIColor.white
+        return view
+    }()
+    
+    lazy var likeButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setImage(#imageLiteral(resourceName: "like_unselected").withRenderingMode(.alwaysOriginal), for: .normal)
+        button.addTarget(self, action: #selector(handleLike), for: .touchUpInside)
+        return button
+        
+    }()
+    
+    func handleLike() {
+        //      delegate?.didLike(for: self)
+        
+        guard let postId = self.post?.id else {return}
+        guard let creatorId = self.post?.creatorUID else {return}
+        guard let uid = Auth.auth().currentUser?.uid else {return}
+        
+        self.likeButton.transform = CGAffineTransform(scaleX: 0.1, y: 0.1)
+        
+        self.layoutIfNeeded()
+        UIView.animate(withDuration: 1.0,
+                       delay: 0,
+                       usingSpringWithDamping: 0.2,
+                       initialSpringVelocity: 6.0,
+                       options: .allowUserInteraction,
+                       animations: { [weak self] in
+                        self?.likeButton.transform = .identity
+                        self?.likeButton.layoutIfNeeded()
+                        
+            },
+                       completion: nil)
+        
+        
+        Database.handleLike(postId: postId, creatorUid: creatorId){
+        }
+        
+        // Animates before database function is complete
+        
+        if (self.post?.hasLiked)! {
+            self.post?.likeCount -= 1
+        } else {
+            self.post?.likeCount += 1
+        }
+        self.post?.hasLiked = !(self.post?.hasLiked)!
+        self.delegate?.refreshPost(post: self.post!)
+        
+    }
+    
+    // Bookmark
+    
+    lazy var bookmarkButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setImage(#imageLiteral(resourceName: "ribbon").withRenderingMode(.alwaysOriginal), for: .normal)
+        button.addTarget(self, action: #selector(handleBookmark), for: .touchUpInside)
+        return button
+        
+    }()
+    
+    
+    func handleBookmark() {
+        
+        //    delegate?.didBookmark(for: self)
+        
+        guard let postId = self.post?.id else {return}
+        guard let creatorId = self.post?.creatorUID else {return}
+        guard let uid = Auth.auth().currentUser?.uid else {return}
+        
+        Database.handleBookmark(postId: postId, creatorUid: creatorId){
+        }
+        
+        // Animates before database function is complete
+        
+        if (self.post?.hasBookmarked)! {
+            self.post?.bookmarkCount -= 1
+        } else {
+            self.post?.bookmarkCount += 1
+        }
+        self.post?.hasBookmarked = !(self.post?.hasBookmarked)!
+        self.delegate?.refreshPost(post: self.post!)
+        
+        bookmarkButton.transform = CGAffineTransform(scaleX: 0.1, y: 0.1)
+        
+        UIView.animate(withDuration: 1.0,
+                       delay: 0,
+                       usingSpringWithDamping: 0.2,
+                       initialSpringVelocity: 6.0,
+                       options: .allowUserInteraction,
+                       animations: { [weak self] in
+                        self?.bookmarkButton.transform = .identity
+            },
+                       completion: nil)
+        
+    }
+    
+    
+    // Comments
+    
+    lazy var commentButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setImage(#imageLiteral(resourceName: "comment").withRenderingMode(.alwaysOriginal), for: .normal)
+        button.addTarget(self, action: #selector(handleComment), for: .touchUpInside)
+        return button
+        
+    }()
+    
+    func handleComment() {
+        guard let post = post else {return}
+        delegate?.didTapComment(post: post)
+    }
+    
+    // Send Message
+    
+    lazy var sendMessageButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setImage(#imageLiteral(resourceName: "message").withRenderingMode(.alwaysOriginal), for: .normal)
+        button.addTarget(self, action: #selector(handleMessage), for: .touchUpInside)
+        return button
+        
+    }()
+    
+    func handleMessage(){
+        guard let post = post else {return}
+        delegate?.didTapMessage(post: post)
+        
+    }
+
+    
+    let bookmarkLabel: UILabel = {
+        let label = UILabel()
+        label.text = ""
+        label.font = UIFont.boldSystemFont(ofSize:12)
+        label.textColor = UIColor.black
+        label.textAlignment = NSTextAlignment.right
+        return label
+    }()
+    
+    let messageLabel: UILabel = {
+        let label = UILabel()
+        label.text = ""
+        label.font = UIFont.boldSystemFont(ofSize:12)
+        label.textColor = UIColor.black
+        label.textAlignment = NSTextAlignment.left
+        return label
+    }()
     
     fileprivate func setupActionButtons() {
         
-        let stackView = UIStackView(arrangedSubviews: [likeButton, commentButton, sendMessageButton])
-        stackView.distribution = .fillEqually
+//        let stackView = UIStackView(arrangedSubviews: [likeButton, commentButton, sendMessageButton])
+//        stackView.distribution = .fillEqually
+//        addSubview(stackView)
+//        stackView.anchor(top: locationView.bottomAnchor, left: leftAnchor, bottom: nil, right: nil, paddingTop: 0, paddingLeft: 8, paddingBottom: 0, paddingRight: 0, width: 120, height: 40)
         
-        addSubview(stackView)
-        stackView.anchor(top: locationView.bottomAnchor, left: leftAnchor, bottom: nil, right: nil, paddingTop: 0, paddingLeft: 8, paddingBottom: 0, paddingRight: 0, width: 120, height: 40)
         
+        addSubview(actionBar)
+        actionBar.anchor(top: locationView.bottomAnchor, left: leftAnchor, bottom: nil, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 40)
+        
+        addSubview(likeButton)
+        likeButton.anchor(top: actionBar.topAnchor, left: actionBar.leftAnchor, bottom: actionBar.bottomAnchor, right: nil, paddingTop: 5, paddingLeft: 8, paddingBottom: 5, paddingRight: 0, width: 30, height: 30)
+        
+        addSubview(commentButton)
+        commentButton.anchor(top: actionBar.topAnchor, left: likeButton.rightAnchor, bottom: actionBar.bottomAnchor, right: nil, paddingTop: 5, paddingLeft: 2, paddingBottom: 5, paddingRight: 0, width: 30, height: 30)
+        
+        addSubview(sendMessageButton)
+        sendMessageButton.anchor(top: actionBar.topAnchor, left: commentButton.rightAnchor, bottom: actionBar.bottomAnchor, right: nil, paddingTop: 5, paddingLeft: 2, paddingBottom: 5, paddingRight: 0, width: 30, height: 30)
+        
+        addSubview(messageLabel)
+        messageLabel.anchor(top: actionBar.topAnchor, left: sendMessageButton.rightAnchor, bottom: actionBar.bottomAnchor, right: nil, paddingTop: 5, paddingLeft: 2, paddingBottom: 5, paddingRight: 0, width: 30, height: 30)
+        
+        
+
+        
+        addSubview(bookmarkLabel)
+        bookmarkLabel.anchor(top: actionBar.topAnchor, left: nil, bottom: actionBar.bottomAnchor, right: actionBar.rightAnchor, paddingTop: 5, paddingLeft: 0, paddingBottom: 5, paddingRight: 8, width: 0, height: 30)
+        // Width anchor is set after bookmark counts are displayed to figure out label width
         addSubview(bookmarkButton)
-        bookmarkButton.anchor(top: locationView.bottomAnchor, left: nil, bottom: stackView.bottomAnchor, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 40, height: 40)
-        
+        bookmarkButton.anchor(top: actionBar.topAnchor, left: nil, bottom: actionBar.bottomAnchor, right: bookmarkLabel.leftAnchor, paddingTop: 5, paddingLeft: 0, paddingBottom: 5, paddingRight: 2, width: 30, height: 30)
+
 //        addSubview(testlabel)
 //        testlabel.anchor(top: bookmarkButton.topAnchor, left: bookmarkButton.leftAnchor, bottom: bookmarkButton.bottomAnchor, right: bookmarkButton.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
     }
@@ -787,20 +854,6 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
                 }) { (done) in
                     self.popView.alpha = 0
                 }
-        
-        
-//        selectedLabel.transform = CGAffineTransform(scaleX: 0.5, y: 0.5)
-//        
-//        UIView.animate(withDuration: 1.0,
-//                       delay: 0,
-//                       usingSpringWithDamping: 0.2,
-//                       initialSpringVelocity: 6.0,
-//                       options: .allowUserInteraction,
-//                       animations: { [weak self] in
-//                        selectedLabel.transform = .identity
-//            },
-//                       completion: nil)
-//        
 
     }
 

@@ -26,6 +26,7 @@ class UserProfilePhotoCell: UICollectionViewCell, UIGestureRecognizerDelegate {
             self.likeCount = post?.likeCount ?? 0
             self.bookmarkCount = post?.bookmarkCount ?? 0
             self.messageCount = post?.messageCount ?? 0
+            
             self.ratingEmojiLabel.text = post?.ratingEmoji
             setupAttributedSocialCount()
 
