@@ -124,6 +124,8 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         delegate?.didTapLocation(post: post)
     }
     
+    var bookmarkLabelConstraint: NSLayoutConstraint? = nil
+    
     fileprivate func setupAttributedSocialCount(){
         
         guard let post = self.post else {return}
@@ -147,8 +149,11 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         } else {
             self.bookmarkLabel.text = ""
         }
+        
+        // Resizes bookmark label to fit new count
         self.bookmarkLabel.sizeToFit()
-        self.bookmarkLabel.widthAnchor.constraint(equalToConstant: self.bookmarkLabel.frame.size.width).isActive = true
+        bookmarkLabelConstraint?.constant = self.bookmarkLabel.frame.size.width
+//        self.layoutIfNeeded()
         
     }
     
@@ -637,6 +642,7 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
             self.post?.likeCount += 1
         }
         self.post?.hasLiked = !(self.post?.hasLiked)!
+        self.setupAttributedSocialCount()
         self.delegate?.refreshPost(post: self.post!)
         
     }
@@ -671,6 +677,7 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
             self.post?.bookmarkCount += 1
         }
         self.post?.hasBookmarked = !(self.post?.hasBookmarked)!
+        self.setupAttributedSocialCount()
         self.delegate?.refreshPost(post: self.post!)
         
         bookmarkButton.transform = CGAffineTransform(scaleX: 0.1, y: 0.1)
@@ -766,6 +773,11 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         
         addSubview(bookmarkLabel)
         bookmarkLabel.anchor(top: actionBar.topAnchor, left: nil, bottom: actionBar.bottomAnchor, right: actionBar.rightAnchor, paddingTop: 5, paddingLeft: 0, paddingBottom: 5, paddingRight: 8, width: 0, height: 30)
+        bookmarkLabel.sizeToFit()
+        bookmarkLabelConstraint = NSLayoutConstraint(item: self.bookmarkLabel, attribute: NSLayoutAttribute.width, relatedBy: NSLayoutRelation.equal, toItem: nil, attribute: NSLayoutAttribute.notAnAttribute, multiplier: 1, constant: self.bookmarkLabel.frame.size.width)
+        self.bookmarkLabel.addConstraint(bookmarkLabelConstraint!)
+//        bookmarkLabel.widthAnchor.constraint(equalToConstant: self.bookmarkLabel.frame.size.width).isActive = true
+        
         // Width anchor is set after bookmark counts are displayed to figure out label width
         addSubview(bookmarkButton)
         bookmarkButton.anchor(top: actionBar.topAnchor, left: nil, bottom: actionBar.bottomAnchor, right: bookmarkLabel.leftAnchor, paddingTop: 5, paddingLeft: 0, paddingBottom: 5, paddingRight: 2, width: 30, height: 30)
