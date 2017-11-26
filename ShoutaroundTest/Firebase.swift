@@ -941,8 +941,12 @@ extension Database{
                 var following = user["following"] as? [String : Int] ?? [:]
                 if let _ = following[userUid] {
                     spotUpdateSocialCount(creatorUid: uid, receiverUid: userUid, action: "follow", change: 1)
+                    CurrentUser.followingUids.append(userUid)
                 } else {
                     spotUpdateSocialCount(creatorUid: uid, receiverUid: userUid, action: "follow", change: -1)
+                    if let index = CurrentUser.followingUids.index(of: userUid) {
+                        CurrentUser.followingUids.remove(at: index)
+                    }
                 }
 
                 handleFollower(followedUid: userUid)

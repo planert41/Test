@@ -14,7 +14,7 @@ import mailgun
 
 
 
-class MessageController: UIViewController, UICollectionViewDataSource, UICollectionViewDelegate, UICollectionViewDelegateFlowLayout, UITextFieldDelegate, UITextViewDelegate {
+class MessageController: UIViewController, UICollectionViewDataSource, UICollectionViewDelegate, UICollectionViewDelegateFlowLayout, UITextFieldDelegate, UITextViewDelegate , UITableViewDelegate, UITableViewDataSource{
     
     let bookmarkCellId = "bookmarkCellId2"
     let postDisplayHeight = 150 as CGFloat
@@ -109,6 +109,13 @@ class MessageController: UIViewController, UICollectionViewDataSource, UICollect
         return tf
     }()
     
+    // EmojiAutoComplete
+    var userAutoComplete: UITableView!
+    let UserAutoCompleteCellId = "UserAutoCompleteCellId"
+    var followingUsers:[User] = []
+    var filteredUsers:[User] = []
+    var isAutocomplete: Bool = false
+    
     override func viewDidLoad() {
         
         super.viewDidLoad()
@@ -161,18 +168,38 @@ class MessageController: UIViewController, UICollectionViewDataSource, UICollect
         toInput.delegate = self
         messageInput.delegate = self
         
-        setupNavigationButtons()
+        toInput.placeholder = "@username, user@gmail.com"
+        toInput.addTarget(self, action: #selector(textFieldDidChange(_:)), for: UIControlEvents.editingChanged)
         
+        // Keyboard Setups
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow(_:)), name: NSNotification.Name.UIKeyboardWillShow, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide(_:)), name: NSNotification.Name.UIKeyboardWillHide, object: nil)
         
         let viewTap: UITapGestureRecognizer = UITapGestureRecognizer(target: self, action: "dismissKeyboard")
+        viewTap.cancelsTouchesInView = false
         view.addGestureRecognizer(viewTap)
         
-        print(self.fromInput.frame)
-        let adjustment = self.view.convert(self.fromInput.frame.origin, from:self.fromInput)
-    
+        setupNavigationButtons()
+        
+        // User Auto Complete
+        
+        setupUserAutoComplete()
+        view.addSubview(userAutoComplete)
+        userAutoComplete.anchor(top: toRow.bottomAnchor, left: view.leftAnchor, bottom: view.bottomAnchor, right: view.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
+        userAutoComplete.isHidden = true
+        
+        fetchFollowingUsers()
     }
+    
+    
+    
+    fileprivate func setupNavigationButtons() {
+        navigationItem.title = "Message"
+        navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Send", style: .plain, target: self, action: #selector(handleSend))
+    }
+
+    // Keyboard Adjustments
+    
     var adjusted: Bool = false
     
     func dismissKeyboard() {
@@ -185,9 +212,6 @@ class MessageController: UIViewController, UICollectionViewDataSource, UICollect
             self.view.frame.origin.y -= postDisplayHeight
             self.adjusted = true
         }
-        
-        if let keyboardSize = (notification.userInfo?[UIKeyboardFrameBeginUserInfoKey] as? NSValue)?.cgRectValue {
-        }
     }
     
     
@@ -197,10 +221,26 @@ class MessageController: UIViewController, UICollectionViewDataSource, UICollect
             self.view.frame.origin.y += postDisplayHeight
             self.adjusted = false
         }
-        
-        if let keyboardSize = (notification.userInfo?[UIKeyboardFrameBeginUserInfoKey] as? NSValue)?.cgRectValue {
+    }
+    
+    func textFieldDidChange(_ textField: UITextField){
+        if textField == toInput {
+            guard let tempCaptionWords = textField.text?.components(separatedBy: " ") else {return}
+            var lastWord = tempCaptionWords[tempCaptionWords.endIndex - 1]
+            self.filterUsersForText(inputString: lastWord)
         }
     }
+
+    
+    func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
+//        if textField == toInput {
+//            guard let tempCaptionWords = textField.text?.components(separatedBy: " ") else {return true}
+//            var lastWord = tempCaptionWords[tempCaptionWords.endIndex - 1]
+//            self.filterUsersForText(inputString: lastWord)
+//        }
+        return true
+    }
+    
     
     func textFieldShouldBeginEditing(_ textField: UITextField) -> Bool {
 
@@ -225,16 +265,98 @@ class MessageController: UIViewController, UICollectionViewDataSource, UICollect
         return false
     }
     
+// User Autocomplete Functions
     
-    
-
-    fileprivate func setupNavigationButtons() {
+    func setupUserAutoComplete(){
         
-        navigationItem.title = "Message"
-        navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Send", style: .plain, target: self, action: #selector(handleSend))
-            
-        }
+        // User Autocomplete View
+        userAutoComplete = UITableView()
+        userAutoComplete.register(UserCell.self, forCellReuseIdentifier: UserAutoCompleteCellId)
+        userAutoComplete.delegate = self
+        userAutoComplete.dataSource = self
+        userAutoComplete.contentInset = UIEdgeInsetsMake(0, 0, 0, 0)
+        userAutoComplete.backgroundColor = UIColor.white
+        userAutoComplete.estimatedRowHeight = 66
+    }
     
+    func fetchFollowingUsers() {
+        guard let uid = Auth.auth().currentUser?.uid else {return}
+        
+        if CurrentUser.followingUids.count == 0 {
+            Database.fetchFollowingUserUids(uid: uid) { (fetchedFollowingUsers) in
+                CurrentUser.followingUids = fetchedFollowingUsers
+                self.FirebaseFetchUsers()
+            }
+        } else {
+            self.FirebaseFetchUsers()
+        }
+    }
+    
+    func FirebaseFetchUsers(){
+        for uid in CurrentUser.followingUids {
+            Database.fetchUserWithUID(uid: uid, completion: { (user) in
+                    self.followingUsers.append(user)
+            })
+        }
+    }
+    
+    func filterUsersForText(inputString: String){
+        filteredUsers = followingUsers.filter({( user : User) -> Bool in
+            return user.username.lowercased().contains(inputString.lowercased())
+        })
+        
+        // Show only if filtered users not 0
+        if filteredUsers.count > 0 {
+            self.userAutoComplete.isHidden = false
+        } else {
+            self.userAutoComplete.isHidden = true
+        }
+        
+        // Sort results based on prefix
+        filteredUsers.sort { (p1, p2) -> Bool in
+            ((p1.username.hasPrefix(inputString)) ? 0 : 1) < ((p2.username.hasPrefix(inputString)) ? 0 : 1)
+        }
+        self.userAutoComplete.reloadData()
+    }
+    
+    
+    // Tableview delegate functions
+    
+    func numberOfSections(in tableView: UITableView) -> Int {
+        return 1
+    }
+    
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return filteredUsers.count
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: UserAutoCompleteCellId, for: indexPath) as! UserCell
+        cell.user = filteredUsers[indexPath.row]
+        cell.followButton.isHidden = true
+        return cell
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        
+        var userSelected = filteredUsers[indexPath.row]
+        var selectedUsername = userSelected.username
+        var addedString : String?
+        addedString = selectedUsername + ","
+        
+        guard var tempCaptionWords = self.toInput.text?.lowercased().components(separatedBy: " ") else {
+            self.toInput.text = (addedString)! + " "
+            return
+        }
+        
+        var lastWord = tempCaptionWords[tempCaptionWords.endIndex - 1]
+        self.toInput.text = tempCaptionWords.dropLast().joined(separator: " ") + (addedString)! + " "
+        self.userAutoComplete.isHidden = true
+
+    }
+    
+    
+// CollectionView Delegate Functions
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
             

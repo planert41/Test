@@ -723,11 +723,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ShoutaroundTest/MessageController.swift"
-            timestampString = "533366371.38954"
+            timestampString = "533370490.529326"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "437"
-            endingLineNumber = "437"
+            startingLineNumber = "559"
+            endingLineNumber = "559"
             landmarkName = "handleSendEmail()"
             landmarkType = "7">
          </BreakpointContent>
@@ -973,11 +973,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ShoutaroundTest/Firebase.swift"
-            timestampString = "533362063.515264"
+            timestampString = "533369613.486818"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1146"
-            endingLineNumber = "1146">
+            startingLineNumber = "1150"
+            endingLineNumber = "1150">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -1759,11 +1759,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ShoutaroundTest/MessageController.swift"
-            timestampString = "533366371.38954"
+            timestampString = "533370490.529326"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "347"
-            endingLineNumber = "347"
+            startingLineNumber = "469"
+            endingLineNumber = "469"
             landmarkName = "handleSend()"
             landmarkType = "7">
          </BreakpointContent>
@@ -1791,11 +1791,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ShoutaroundTest/MessageController.swift"
-            timestampString = "533366371.38954"
+            timestampString = "533370490.529326"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "344"
-            endingLineNumber = "344"
+            startingLineNumber = "466"
+            endingLineNumber = "466"
             landmarkName = "handleSend()"
             landmarkType = "7">
          </BreakpointContent>
@@ -1807,11 +1807,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ShoutaroundTest/MessageController.swift"
-            timestampString = "533366371.38954"
+            timestampString = "533370490.529326"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "343"
-            endingLineNumber = "343"
+            startingLineNumber = "465"
+            endingLineNumber = "465"
             landmarkName = "handleSend()"
             landmarkType = "7">
          </BreakpointContent>
@@ -1823,11 +1823,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ShoutaroundTest/MessageController.swift"
-            timestampString = "533366371.38954"
+            timestampString = "533370490.529326"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "373"
-            endingLineNumber = "373"
+            startingLineNumber = "495"
+            endingLineNumber = "495"
             landmarkName = "handleSendMessage()"
             landmarkType = "7">
          </BreakpointContent>
@@ -1839,11 +1839,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ShoutaroundTest/MessageController.swift"
-            timestampString = "533366371.38954"
+            timestampString = "533370490.529326"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "379"
-            endingLineNumber = "379"
+            startingLineNumber = "501"
+            endingLineNumber = "501"
             landmarkName = "handleSendMessage()"
             landmarkType = "7">
             <Locations>
@@ -1887,11 +1887,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ShoutaroundTest/MessageController.swift"
-            timestampString = "533366371.38954"
+            timestampString = "533370490.529326"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "370"
-            endingLineNumber = "370"
+            startingLineNumber = "492"
+            endingLineNumber = "492"
             landmarkName = "handleSendMessage()"
             landmarkType = "7">
             <Locations>
@@ -1903,11 +1903,11 @@
                   moduleName = "ShoutaroundTest"
                   usesParentBreakpointCondition = "Yes"
                   urlString = "file:///Users/planert41/Code/ShoutaroundTest/ShoutaroundTest/MessageController.swift"
-                  timestampString = "533366424.773573"
+                  timestampString = "533370491.801104"
                   startingColumnNumber = "9223372036854775807"
                   endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "370"
-                  endingLineNumber = "370"
+                  startingLineNumber = "492"
+                  endingLineNumber = "492"
                   offsetFromSymbolStart = "5949">
                </Location>
                <Location
@@ -1918,11 +1918,11 @@
                   moduleName = "ShoutaroundTest"
                   usesParentBreakpointCondition = "Yes"
                   urlString = "file:///Users/planert41/Code/ShoutaroundTest/ShoutaroundTest/MessageController.swift"
-                  timestampString = "533366424.775844"
+                  timestampString = "533370491.803767"
                   startingColumnNumber = "9223372036854775807"
                   endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "371"
-                  endingLineNumber = "371"
+                  startingLineNumber = "493"
+                  endingLineNumber = "493"
                   offsetFromSymbolStart = "36">
                </Location>
             </Locations>
@@ -1935,11 +1935,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ShoutaroundTest/MessageController.swift"
-            timestampString = "533366371.38954"
+            timestampString = "533370490.529326"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "378"
-            endingLineNumber = "378"
+            startingLineNumber = "500"
+            endingLineNumber = "500"
             landmarkName = "handleSendMessage()"
             landmarkType = "7">
             <Locations>
@@ -1983,11 +1983,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ShoutaroundTest/MessageController.swift"
-            timestampString = "533366371.38954"
+            timestampString = "533370490.529326"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "377"
-            endingLineNumber = "377"
+            startingLineNumber = "499"
+            endingLineNumber = "499"
             landmarkName = "handleSendMessage()"
             landmarkType = "7">
          </BreakpointContent>
@@ -3409,11 +3409,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ShoutaroundTest/Firebase.swift"
-            timestampString = "533362063.515264"
+            timestampString = "533369613.486818"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1064"
-            endingLineNumber = "1064">
+            startingLineNumber = "1068"
+            endingLineNumber = "1068">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -3423,11 +3423,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ShoutaroundTest/Firebase.swift"
-            timestampString = "533362063.515264"
+            timestampString = "533369613.486818"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1102"
-            endingLineNumber = "1102">
+            startingLineNumber = "1106"
+            endingLineNumber = "1106">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -3437,11 +3437,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ShoutaroundTest/Firebase.swift"
-            timestampString = "533362063.515264"
+            timestampString = "533369613.486818"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1090"
-            endingLineNumber = "1090">
+            startingLineNumber = "1094"
+            endingLineNumber = "1094">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -3483,11 +3483,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ShoutaroundTest/Firebase.swift"
-            timestampString = "533362063.515264"
+            timestampString = "533369613.486818"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1103"
-            endingLineNumber = "1103">
+            startingLineNumber = "1107"
+            endingLineNumber = "1107">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -3817,11 +3817,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ShoutaroundTest/MessageController.swift"
-            timestampString = "532220594.859182"
+            timestampString = "533369613.486818"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "156"
-            endingLineNumber = "156"
+            startingLineNumber = "163"
+            endingLineNumber = "163"
             landmarkName = "viewDidLoad()"
             landmarkType = "7">
          </BreakpointContent>
@@ -6100,7 +6100,7 @@
                   moduleName = "ShoutaroundTest"
                   usesParentBreakpointCondition = "Yes"
                   urlString = "file:///Users/planert41/Code/ShoutaroundTest/ShoutaroundTest/BookmarkController.swift"
-                  timestampString = "533366424.787432"
+                  timestampString = "533370491.813336"
                   startingColumnNumber = "9223372036854775807"
                   endingColumnNumber = "9223372036854775807"
                   startingLineNumber = "416"
@@ -6115,7 +6115,7 @@
                   moduleName = "ShoutaroundTest"
                   usesParentBreakpointCondition = "Yes"
                   urlString = "file:///Users/planert41/Code/ShoutaroundTest/ShoutaroundTest/BookmarkController.swift"
-                  timestampString = "533366424.789609"
+                  timestampString = "533370491.816266"
                   startingColumnNumber = "9223372036854775807"
                   endingColumnNumber = "9223372036854775807"
                   startingLineNumber = "417"
@@ -7159,11 +7159,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ShoutaroundTest/Firebase.swift"
-            timestampString = "533362063.515264"
+            timestampString = "533369613.486818"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "949"
-            endingLineNumber = "949"
+            startingLineNumber = "953"
+            endingLineNumber = "953"
             landmarkName = "handleFollowing(userUid:completion:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -7351,11 +7351,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ShoutaroundTest/Firebase.swift"
-            timestampString = "533362063.515264"
+            timestampString = "533369613.486818"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1033"
-            endingLineNumber = "1033"
+            startingLineNumber = "1037"
+            endingLineNumber = "1037"
             landmarkName = "spotUpdateSocialCount(creatorUid:receiverUid:action:change:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -7399,11 +7399,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ShoutaroundTest/Firebase.swift"
-            timestampString = "533362063.515264"
+            timestampString = "533369613.486818"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1034"
-            endingLineNumber = "1034"
+            startingLineNumber = "1038"
+            endingLineNumber = "1038"
             landmarkName = "spotUpdateSocialCount(creatorUid:receiverUid:action:change:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -7415,11 +7415,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ShoutaroundTest/Firebase.swift"
-            timestampString = "533362063.515264"
+            timestampString = "533369613.486818"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "985"
-            endingLineNumber = "985"
+            startingLineNumber = "989"
+            endingLineNumber = "989"
             landmarkName = "handleFollower(followedUid:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -7431,11 +7431,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ShoutaroundTest/Firebase.swift"
-            timestampString = "533362063.515264"
+            timestampString = "533369613.486818"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1041"
-            endingLineNumber = "1041"
+            startingLineNumber = "1045"
+            endingLineNumber = "1045"
             landmarkName = "spotUpdateSocialCount(creatorUid:receiverUid:action:change:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -7447,11 +7447,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ShoutaroundTest/Firebase.swift"
-            timestampString = "533362063.515264"
+            timestampString = "533369613.486818"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1037"
-            endingLineNumber = "1037"
+            startingLineNumber = "1041"
+            endingLineNumber = "1041"
             landmarkName = "spotUpdateSocialCount(creatorUid:receiverUid:action:change:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -8164,11 +8164,59 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ShoutaroundTest/MessageController.swift"
-            timestampString = "533366371.38954"
+            timestampString = "533370490.529326"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "175"
-            endingLineNumber = "175"
+            startingLineNumber = "200"
+            endingLineNumber = "200"
+            landmarkName = "MessageController"
+            landmarkType = "3">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "ShoutaroundTest/MessageController.swift"
+            timestampString = "533370490.529326"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "220"
+            endingLineNumber = "220"
+            landmarkName = "keyboardWillHide(_:)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "ShoutaroundTest/MessageController.swift"
+            timestampString = "533370490.529326"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "227"
+            endingLineNumber = "227"
+            landmarkName = "textFieldDidChange(_:)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "ShoutaroundTest/MessageController.swift"
+            timestampString = "533370112.527643"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "172"
+            endingLineNumber = "172"
             landmarkName = "viewDidLoad()"
             landmarkType = "7">
          </BreakpointContent>
@@ -8176,128 +8224,16 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            shouldBeEnabled = "No"
+            shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ShoutaroundTest/MessageController.swift"
-            timestampString = "533366371.38954"
+            timestampString = "533370490.529326"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "189"
-            endingLineNumber = "189"
-            landmarkName = "keyboardWillShow(_:)"
-            landmarkType = "7">
-            <Locations>
-               <Location
-                  shouldBeEnabled = "No"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "ShoutaroundTest.MessageController.keyboardWillShow (__ObjC.NSNotification) -&gt; ()"
-                  moduleName = "ShoutaroundTest"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/planert41/Code/ShoutaroundTest/ShoutaroundTest/MessageController.swift"
-                  timestampString = "533366069.628997"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "178"
-                  endingLineNumber = "178"
-                  offsetFromSymbolStart = "30">
-               </Location>
-               <Location
-                  shouldBeEnabled = "No"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "ShoutaroundTest.MessageController.keyboardWillShow (__ObjC.NSNotification) -&gt; ()"
-                  moduleName = "ShoutaroundTest"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/planert41/Code/ShoutaroundTest/ShoutaroundTest/MessageController.swift"
-                  timestampString = "533366069.632778"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "178"
-                  endingLineNumber = "178"
-                  offsetFromSymbolStart = "839">
-               </Location>
-            </Locations>
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "ShoutaroundTest/MessageController.swift"
-            timestampString = "533366371.38954"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "201"
-            endingLineNumber = "201"
-            landmarkName = "keyboardWillHide(_:)"
-            landmarkType = "7">
-            <Locations>
-               <Location
-                  shouldBeEnabled = "No"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "ShoutaroundTest.MessageController.keyboardWillHide (__ObjC.NSNotification) -&gt; ()"
-                  moduleName = "ShoutaroundTest"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/planert41/Code/ShoutaroundTest/ShoutaroundTest/MessageController.swift"
-                  timestampString = "533366069.639817"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "186"
-                  endingLineNumber = "186"
-                  offsetFromSymbolStart = "30">
-               </Location>
-               <Location
-                  shouldBeEnabled = "No"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "ShoutaroundTest.MessageController.keyboardWillHide (__ObjC.NSNotification) -&gt; ()"
-                  moduleName = "ShoutaroundTest"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/planert41/Code/ShoutaroundTest/ShoutaroundTest/MessageController.swift"
-                  timestampString = "533366069.643602"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "186"
-                  endingLineNumber = "186"
-                  offsetFromSymbolStart = "839">
-               </Location>
-            </Locations>
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "ShoutaroundTest/MessageController.swift"
-            timestampString = "533366371.38954"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "190"
-            endingLineNumber = "190"
-            landmarkName = "keyboardWillShow(_:)"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "ShoutaroundTest/MessageController.swift"
-            timestampString = "533366399.395088"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "196"
-            endingLineNumber = "196"
-            landmarkName = "keyboardWillHide(_:)"
+            startingLineNumber = "342"
+            endingLineNumber = "342"
+            landmarkName = "tableView(_:didSelectRowAt:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
