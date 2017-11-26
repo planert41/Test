@@ -102,7 +102,7 @@ extension Database{
         
         query.observe(.value, with: { (snapshot) in
             
-            print(snapshot)
+//            print(snapshot)
             guard let queryUsers = snapshot.value as? [String: Any] else {
                 completion(nil,nil)
                 return}

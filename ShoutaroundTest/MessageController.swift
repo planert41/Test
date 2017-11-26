@@ -11,6 +11,7 @@ import UIKit
 import CoreGraphics
 import Firebase
 import mailgun
+import SearchTextField
 
 
 
@@ -80,7 +81,6 @@ class MessageController: UIViewController, UICollectionViewDataSource, UICollect
     
     lazy var toInput: PaddedTextField = {
         let tf = PaddedTextField()
-        
         tf.font = UIFont.systemFont(ofSize: 14.0)
         tf.layer.borderWidth = 1
         tf.layer.borderColor = UIColor.gray.cgColor
@@ -89,6 +89,15 @@ class MessageController: UIViewController, UICollectionViewDataSource, UICollect
         tf.layer.cornerRadius = 10
         tf.layer.masksToBounds = true
         tf.delegate = self
+//        
+//        let indentView = UIView(frame: CGRect(x: 0, y: 0, width: 10, height: 20))
+//        tf.leftView = indentView
+//        tf.leftViewMode = .always
+//
+//        tf.inlineMode = true
+//        tf.startFilteringAfter = "@"
+//        tf.startSuggestingInmediately = true
+//        tf.filterStrings(["gmail.com", "yahoo.com", "yahoo.com.ar"])
         
         return tf
     }()
@@ -115,6 +124,8 @@ class MessageController: UIViewController, UICollectionViewDataSource, UICollect
     var followingUsers:[User] = []
     var filteredUsers:[User] = []
     var isAutocomplete: Bool = false
+    
+    var sentUsers: [String] = []
     
     override func viewDidLoad() {
         
@@ -219,8 +230,6 @@ class MessageController: UIViewController, UICollectionViewDataSource, UICollect
         }
     }
     
-    
-    
     func keyboardWillHide(_ notification: NSNotification) {
         if self.adjusted {
             self.view.frame.origin.y += postDisplayHeight
@@ -249,7 +258,9 @@ class MessageController: UIViewController, UICollectionViewDataSource, UICollect
     
     
     func textFieldShouldBeginEditing(_ textField: UITextField) -> Bool {
-
+        
+        textField.keyboardType = UIKeyboardType.emailAddress
+    
 //        self.adjustment = textField.convert(textField.frame.origin, to: self.view).y - (self.navigationController?.navigationBar.frame.height)!
 //        print("Adjustment is \(self.adjustment)")
         return true
@@ -262,8 +273,14 @@ class MessageController: UIViewController, UICollectionViewDataSource, UICollect
         if textField == fromInput {
             toInput.becomeFirstResponder()
         } else if textField == toInput {
+            // This calls the autocomplete function for searchtextfield. Just a workaround. Doesn't work wiht multiple @s
+//            toInput.textFieldDidEndEditingOnExit()
+            self.checkToText(inputString: self.toInput.text, completion: { (fetchedSentUsers) in
+                self.sentUsers = fetchedSentUsers
+            })
             messageInput.becomeFirstResponder()
             self.userAutoComplete.isHidden = true
+            
         } else {
             textField.resignFirstResponder()
         }
@@ -399,13 +416,14 @@ class MessageController: UIViewController, UICollectionViewDataSource, UICollect
     func handleSendTest(){
         
         guard let toText = toInput.text else {return}
-        guard let senderUID = Auth.auth().currentUser?.uid else {return}
+        guard let creatorUID = Auth.auth().currentUser?.uid else {return}
         guard let postId = self.post?.id else {return}
         guard let message = self.messageInput.text else {return}
+        guard let sentUsers = self.sentUsers else {return}
         let uploadTime = Date().timeIntervalSince1970
         
         let messageRef = Database.database().reference().child("messages").child(postId).childByAutoId()
-        let values = ["postUID": postId, "creatorUID": senderUID, "message": message, "creationDate": uploadTime, "receiver": toText] as [String:Any]
+        let values = ["postUID": postId, "creatorUID": creatorUID, "message": message, "creationDate": uploadTime, "receiver": toText] as [String:Any]
         
     }
     
@@ -414,18 +432,26 @@ class MessageController: UIViewController, UICollectionViewDataSource, UICollect
         guard let inputString = inputString else {return}
         let toArray = inputString.components(separatedBy: ",")
         let myGroup = DispatchGroup()
-        var sentArray: [String]? = nil
+        var sentArray: [String] = []
         
         for text in toArray {
             // Remove white spaces and lower case everything
-            myGroup.enter()
             var tempText = text
             tempText = tempText.removingWhitespaces()
             tempText = tempText.lowercased()
             
+            // Check is blank
+            if tempText.isEmptyOrWhitespace(){
+                continue
+                print("Empty Space So Ignore")
+            } else {
+                myGroup.enter()
+                print("Searching for: \(tempText)")
+            }
+            
             // Check if email
             if tempText.isValidEmail {
-                sentArray?.append(tempText)
+                sentArray.append(tempText)
                 print("Email Found for \(tempText)")
                 myGroup.leave()
 
@@ -434,7 +460,7 @@ class MessageController: UIViewController, UICollectionViewDataSource, UICollect
                 Database.fetchUserWithUsername(username: tempText, completion: { (fetchedUser, error) in
                    
                     var user: User?
-                    var userId: String?
+                    var userId: String!
                     
                     if let error = error {
                         print("Error finding user for \(tempText): \(error)")
@@ -444,8 +470,8 @@ class MessageController: UIViewController, UICollectionViewDataSource, UICollect
                     
                     if let user = fetchedUser {
                         userId = user.uid
-                        print("User Found for \(tempText): \(userId)")
-                        sentArray?.append(userId!)
+                        print("User Found for \(tempText): \(userId!)")
+                        sentArray.append(userId!)
                         myGroup.leave()
                     }
                     
@@ -459,7 +485,8 @@ class MessageController: UIViewController, UICollectionViewDataSource, UICollect
         }
         
         myGroup.notify(queue: .main) {
-            completion(sentArray!)
+            print("Final Sent Array: \(sentArray)")
+            completion(sentArray)
         }
     }
     
