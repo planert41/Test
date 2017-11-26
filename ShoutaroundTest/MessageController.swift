@@ -175,9 +175,14 @@ class MessageController: UIViewController, UICollectionViewDataSource, UICollect
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow(_:)), name: NSNotification.Name.UIKeyboardWillShow, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide(_:)), name: NSNotification.Name.UIKeyboardWillHide, object: nil)
         
-        let viewTap: UITapGestureRecognizer = UITapGestureRecognizer(target: self, action: "dismissKeyboard")
-        viewTap.cancelsTouchesInView = false
-        view.addGestureRecognizer(viewTap)
+        fromRow.isUserInteractionEnabled = true
+        fromRow.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard)))
+        toRow.isUserInteractionEnabled = true
+        toRow.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard)))
+        messageLabel.isUserInteractionEnabled = true
+        messageLabel.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard)))
+        
+        
         
         setupNavigationButtons()
         
@@ -221,6 +226,7 @@ class MessageController: UIViewController, UICollectionViewDataSource, UICollect
             self.view.frame.origin.y += postDisplayHeight
             self.adjusted = false
         }
+        self.userAutoComplete.isHidden = true
     }
     
     func textFieldDidChange(_ textField: UITextField){
@@ -257,6 +263,7 @@ class MessageController: UIViewController, UICollectionViewDataSource, UICollect
             toInput.becomeFirstResponder()
         } else if textField == toInput {
             messageInput.becomeFirstResponder()
+            self.userAutoComplete.isHidden = true
         } else {
             textField.resignFirstResponder()
         }
