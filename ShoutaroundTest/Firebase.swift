@@ -94,7 +94,7 @@ extension Database{
         }
     }
     
-    static func fetchUserWithUsername( username: String, completion: @escaping (User) -> ()) {
+    static func fetchUserWithUsername( username: String, completion: @escaping (User?, Error?) -> ()) {
         
         let myGroup = DispatchGroup()
         var query = Database.database().reference().child("users").queryOrdered(byChild: "username").queryEqual(toValue: username)
@@ -102,7 +102,10 @@ extension Database{
         
         query.observe(.value, with: { (snapshot) in
             
-            guard let queryUsers = snapshot.value as? [String: Any] else {return}
+            print(snapshot)
+            guard let queryUsers = snapshot.value as? [String: Any] else {
+                completion(nil,nil)
+                return}
             queryUsers.forEach({ (key,value) in
                 
                 myGroup.enter()
@@ -112,10 +115,11 @@ extension Database{
                 myGroup.leave()
             })
             myGroup.notify(queue: .main) {
-                completion(user!)
+                completion(user!, nil)
             }
         }) { (err) in
-            print("Failed to fetch post for Google Place ID", err)
+            print("Failed to fetch user for Username", err)
+            completion(nil, err)
         }
     }
     

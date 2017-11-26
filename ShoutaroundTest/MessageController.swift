@@ -14,7 +14,7 @@ import mailgun
 
 
 
-class MessageController: UIViewController, UICollectionViewDataSource, UICollectionViewDelegate, UICollectionViewDelegateFlowLayout, UITextFieldDelegate {
+class MessageController: UIViewController, UICollectionViewDataSource, UICollectionViewDelegate, UICollectionViewDelegateFlowLayout, UITextFieldDelegate, UITextViewDelegate {
     
     let bookmarkCellId = "bookmarkCellId2"
     let postDisplayHeight = 150 as CGFloat
@@ -123,12 +123,12 @@ class MessageController: UIViewController, UICollectionViewDataSource, UICollect
         collectionView.anchor(top: topLayoutGuide.bottomAnchor , left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: postDisplayHeight)
 
         view.addSubview(fromRow)
-        fromRow.addSubview(fromLabel)
-        fromRow.addSubview(fromInput)
+        view.addSubview(fromLabel)
+        view.addSubview(fromInput)
         
         view.addSubview(toRow)
-        toRow.addSubview(toLabel)
-        toRow.addSubview(toInput)
+        view.addSubview(toLabel)
+        view.addSubview(toInput)
         
         view.addSubview(messageLabel)
         view.addSubview(messageInput)
@@ -157,10 +157,58 @@ class MessageController: UIViewController, UICollectionViewDataSource, UICollect
         toInput.tag = 1
         messageInput.tag = 2
         
+        fromInput.delegate = self
+        toInput.delegate = self
+        messageInput.delegate = self
         
         setupNavigationButtons()
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow(_:)), name: NSNotification.Name.UIKeyboardWillShow, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide(_:)), name: NSNotification.Name.UIKeyboardWillHide, object: nil)
+        
+        let viewTap: UITapGestureRecognizer = UITapGestureRecognizer(target: self, action: "dismissKeyboard")
+        view.addGestureRecognizer(viewTap)
+        
+        print(self.fromInput.frame)
+        let adjustment = self.view.convert(self.fromInput.frame.origin, from:self.fromInput)
     
     }
+    var adjusted: Bool = false
+    
+    func dismissKeyboard() {
+        //Causes the view (or one of its embedded text fields) to resign the first responder status.
+        view.endEditing(true)
+    }
+    
+    func keyboardWillShow(_ notification: NSNotification) {
+        if !self.adjusted {
+            self.view.frame.origin.y -= postDisplayHeight
+            self.adjusted = true
+        }
+        
+        if let keyboardSize = (notification.userInfo?[UIKeyboardFrameBeginUserInfoKey] as? NSValue)?.cgRectValue {
+        }
+    }
+    
+    
+    
+    func keyboardWillHide(_ notification: NSNotification) {
+        if self.adjusted {
+            self.view.frame.origin.y += postDisplayHeight
+            self.adjusted = false
+        }
+        
+        if let keyboardSize = (notification.userInfo?[UIKeyboardFrameBeginUserInfoKey] as? NSValue)?.cgRectValue {
+        }
+    }
+    
+    func textFieldShouldBeginEditing(_ textField: UITextField) -> Bool {
+
+//        self.adjustment = textField.convert(textField.frame.origin, to: self.view).y - (self.navigationController?.navigationBar.frame.height)!
+//        print("Adjustment is \(self.adjustment)")
+        return true
+    }
+    
     
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         // Try to find next responder
@@ -219,6 +267,74 @@ class MessageController: UIViewController, UICollectionViewDataSource, UICollect
         return 1
     }
     
+    func handleSendTest(){
+        
+        guard let toText = toInput.text else {return}
+        guard let senderUID = Auth.auth().currentUser?.uid else {return}
+        guard let postId = self.post?.id else {return}
+        guard let message = self.messageInput.text else {return}
+        let uploadTime = Date().timeIntervalSince1970
+        
+        let messageRef = Database.database().reference().child("messages").child(postId).childByAutoId()
+        let values = ["postUID": postId, "creatorUID": senderUID, "message": message, "creationDate": uploadTime, "receiver": toText] as [String:Any]
+        
+    }
+    
+    
+    func checkToText(inputString: String?, completion: @escaping ([String]) -> ()){
+        guard let inputString = inputString else {return}
+        let toArray = inputString.components(separatedBy: ",")
+        let myGroup = DispatchGroup()
+        var sentArray: [String]? = nil
+        
+        for text in toArray {
+            // Remove white spaces and lower case everything
+            myGroup.enter()
+            var tempText = text
+            tempText = tempText.removingWhitespaces()
+            tempText = tempText.lowercased()
+            
+            // Check if email
+            if tempText.isValidEmail {
+                sentArray?.append(tempText)
+                print("Email Found for \(tempText)")
+                myGroup.leave()
+
+            } else {
+                // Check if is a user
+                Database.fetchUserWithUsername(username: tempText, completion: { (fetchedUser, error) in
+                   
+                    var user: User?
+                    var userId: String?
+                    
+                    if let error = error {
+                        print("Error finding user for \(tempText): \(error)")
+                        self.alert(title: "Error Message Receipient", message: "No user or email was found for \(tempText)")
+                        return
+                    }
+                    
+                    if let user = fetchedUser {
+                        userId = user.uid
+                        print("User Found for \(tempText): \(userId)")
+                        sentArray?.append(userId!)
+                        myGroup.leave()
+                    }
+                    
+                    else {
+                        print("No user was found for \(tempText)")
+                        self.alert(title: "Error Message Receipient", message: "No user or email was found for \(tempText)")
+                        return
+                    }
+                })
+            }
+        }
+        
+        myGroup.notify(queue: .main) {
+            completion(sentArray!)
+        }
+    }
+    
+    
     
     func handleSend() {
      
@@ -237,19 +353,20 @@ class MessageController: UIViewController, UICollectionViewDataSource, UICollect
     func handleSendMessage() {
         
         guard let toText = toInput.text else {return}
-        Database.fetchUserWithUsername(username: toText) { (user) in
+        Database.fetchUserWithUsername(username: toText) { (user, error) in
         
             
             guard let senderUID = Auth.auth().currentUser?.uid else {return}
             guard let postId = self.post?.id else {return}
             guard let message = self.messageInput.text else {return}
+            guard let user = user else {return}
             let uploadTime = Date().timeIntervalSince1970
             let receiverUID = user.uid
             
             let databaseRef = Database.database().reference().child("messages").child(receiverUID)
             let userMessageRef = databaseRef.childByAutoId()
             
-            let values = ["postUID": postId, "senderUID": senderUID, "message": message, "creationDate": uploadTime] as [String:Any]
+            let values = ["postId": postId, "creatorUID": senderUID, "message": message, "creationDate": uploadTime] as [String:Any]
             userMessageRef.updateChildValues(values) { (err, ref) in
                 if let err = err {
                     self.navigationItem.rightBarButtonItem?.isEnabled = true

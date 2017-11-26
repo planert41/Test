@@ -29,7 +29,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         GMSPlacesClient.provideAPIKey(googlePlacesApiKey)
         GMSServices.provideAPIKey(googlePlacesApiKey)
-        IQKeyboardManager.sharedManager().enable = true
+        IQKeyboardManager.sharedManager().enable = false
         IQKeyboardManager.sharedManager().enableAutoToolbar = false
         
         
@@ -52,6 +52,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         self.EmojiSetup()
         
         FBSDKApplicationDelegate.sharedInstance().application(application, didFinishLaunchingWithOptions: launchOptions)
+        
+        Database.fetchUserWithUsername(username: "xinahui") { (user, error) in
+            print("User : \(user)")
+            print("Error : \(error)")
+        }
         
         return true
     }
