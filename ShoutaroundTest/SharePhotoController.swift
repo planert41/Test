@@ -1430,7 +1430,6 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
     
     func handleShare() {
         // If imageurl exist, then post is being edited. New posts do not have prior image url
-        
         // Check for Caption and Location Data
         guard let postImage = selectedImage else {
             self.alert(title: "Upload Post Requirement", message: "Please Insert Picture")

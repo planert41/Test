@@ -168,7 +168,11 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         attributedText.append(NSAttributedString(string: "\n\n", attributes: [NSFontAttributeName: UIFont.systemFont(ofSize: 4)]))
         
         
-        let timeAgoDisplay = post.creationDate.timeAgoDisplay()
+//        let timeAgoDisplay = post.creationDate.timeAgoDisplay()
+        let formatter = DateFormatter()
+        formatter.dateFormat = "MMM d YYYY, h:mm a"
+        let timeAgoDisplay = formatter.string(from: post.creationDate)
+        
         attributedText.append(NSAttributedString(string: timeAgoDisplay, attributes: [NSFontAttributeName: UIFont.systemFont(ofSize: 12),NSForegroundColorAttributeName: UIColor.gray]))
         
         self.captionLabel.attributedText = attributedText

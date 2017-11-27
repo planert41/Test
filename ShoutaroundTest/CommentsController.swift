@@ -48,20 +48,11 @@ class CommentsController: UICollectionViewController, UICollectionViewDelegateFl
             guard let uid = dictionary["uid"] as? String else {return}
             
             Database.fetchUserWithUID(uid: uid, completion: { (user) in
-                
-                
                 var comment = Comment(user: user, dictionary:dictionary)
 
                 self.comments.append(comment)
                 self.collectionView?.reloadData()
-                
-                
             })
-            
-
-            
-            
-            
         }) { (err) in
             print("Failed to observe comments")
         }

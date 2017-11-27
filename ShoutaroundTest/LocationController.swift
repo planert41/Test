@@ -305,9 +305,9 @@ class LocationController: UIViewController, UIScrollViewDelegate, UICollectionVi
         let url = URL(string: urlString)!
         print("Google Places URL: ",urlString)
 
-        print("Place Cache for postid: ", placeId, placeCache[placeId])
+//        print("Place Cache for postid: ", placeId, placeCache[placeId])
         if let result = placeCache[placeId] {
-            print("Using Place Cache for placeId: ", placeId)
+//            print("Using Place Cache for placeId: ", placeId)
             self.extractPlaceDetails(fetchedResults: result)
         } else {
         
@@ -327,15 +327,15 @@ class LocationController: UIViewController, UIScrollViewDelegate, UICollectionVi
     func extractPlaceDetails(fetchedResults: JSON){
         
         let result = fetchedResults
-        print("Fetched Results: ",result)
+//        print("Fetched Results: ",result)
         if result["place_id"].string != nil {
             
             self.placeName = result["name"].string ?? ""
-            print("place Name: ", self.placeName)
+//            print("place Name: ", self.placeName)
             self.locationNameLabel.text = self.placeName
             
             self.placeOpeningHours = result["opening_hours"]["weekday_text"].arrayValue
-            print("placeOpeningHours: ", self.placeOpeningHours)
+//            print("placeOpeningHours: ", self.placeOpeningHours)
             
             let today = Date()
             let myCalendar = Calendar(identifier: .gregorian)
@@ -349,7 +349,7 @@ class LocationController: UIViewController, UIScrollViewDelegate, UICollectionVi
             }
             
             self.placeOpenNow = result["open_now"].boolValue ?? false
-            print("placeOpenNow: ", self.placeOpenNow)
+//            print("placeOpenNow: ", self.placeOpenNow)
             
             if self.placeOpeningHours! != [] {
                 let todayHours = String(describing: (self.placeOpeningHours?[hourIndex!])!)
@@ -372,15 +372,15 @@ class LocationController: UIViewController, UIScrollViewDelegate, UICollectionVi
             }
         
             self.placePhoneNo = result["formatted_phone_number"].string ?? ""
-            print("placePhoneNo: ", self.placePhoneNo)
+//            print("placePhoneNo: ", self.placePhoneNo)
             self.locationPhoneLabel.text = self.placePhoneNo
             
             self.placeWebsite = result["website"].string ?? ""
-            print("placeWebsite: ", self.placeWebsite)
+//            print("placeWebsite: ", self.placeWebsite)
             self.locationWebsiteLabel.text = self.placeWebsite
             
             self.placeGoogleRating = result["rating"].double ?? 0
-            print("placeGoogleRating: ", self.placeGoogleRating)
+//            print("placeGoogleRating: ", self.placeGoogleRating)
             
             self.placeGoogleMapUrl = result["url"].string!
             
@@ -620,7 +620,7 @@ class LocationController: UIViewController, UIScrollViewDelegate, UICollectionVi
         Database.fetchAllPostWithLocation(location: location, distance: 25) { (fetchedPosts) in
 
             self.displayedPosts = fetchedPosts
-            print(fetchedPosts)
+            print("Fetching Post with Location: \(location)")
             self.photoCollectionView.reloadData()
         }
         
@@ -630,7 +630,7 @@ class LocationController: UIViewController, UIScrollViewDelegate, UICollectionVi
         print("Searching Posts by Google Place ID: ", googlePlaceID)
         Database.fetchAllPostWithGooglePlaceID(googlePlaceId: googlePlaceID) { (fetchedPosts) in
             self.displayedPosts = fetchedPosts
-            print(fetchedPosts)
+            print("Fetching Post with googlePlaceId: \(googlePlaceID)")
             self.photoCollectionView.reloadData()
         }
         
@@ -692,8 +692,7 @@ class LocationController: UIViewController, UIScrollViewDelegate, UICollectionVi
             let postLocation: CLLocation = post.locationGPS!
             
             let state_marker = GMSMarker()
-            print(postLocation.coordinate.latitude)
-            print(postLocation.coordinate.latitude)
+            print("Marker Coordinate: \(postLocation)")
             state_marker.position = CLLocationCoordinate2D(latitude: postLocation.coordinate.latitude, longitude: postLocation.coordinate.longitude)
             state_marker.title = postUID
             state_marker.snippet = "Hey, this is \(postLocation.description)"
@@ -859,7 +858,7 @@ class LocationController: UIViewController, UIScrollViewDelegate, UICollectionVi
         let urlString = "\(URL_Search)location=\(lat.coordinate.latitude),\(lat.coordinate.longitude)&rankby=distance&type=\(searchType)&key=\(API_iOSKey)"
         let url = URL(string: urlString)!
         
-        print(urlString)
+        print("Restaurant Google Download URL: \(urlString)")
         
         //   https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=-33.8670,151.1957&radius=500&types=food&name=cruise&key=YOUR_API_KEY
         

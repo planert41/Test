@@ -308,15 +308,29 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     }
     
     func finishFetchingPosts(){
+
+        // Function is called after User Post are called AND following user post ids are called. So need to check that all post are picked up before refresh
+        print("User PostIds Fetched: \(self.userPostIdFetched), Following PostIds Fetched: \(self.followingPostIdFetched)")
         
         if self.userPostIdFetched && self.followingPostIdFetched {
             print("Finish Fetching Post Ids: \(fetchedPostIds.count)")
+            var postIdTest: [String] = []
+            
             self.sortFetchPostIds()
+            
+//            for id in fetchedPostIds {
+//                let formatter = DateFormatter()
+//                formatter.dateFormat = "MMM d YYYY, h:mm a"
+//                let timeAgoDisplay = formatter.string(from: id.creationDate!)
+//                let teststring = "\(id.id):\(timeAgoDisplay)"
+//                postIdTest.append(teststring)
+//            }
+//            print("Final Post Ids: \(postIdTest)")
+            
             self.paginatePosts()
         } else {
-            print("User PostIds Fetched: \(self.userPostIdFetched), Following PostIds Fetched: \(self.followingPostIdFetched)")
+            print("Wait for user/following user post ids to be fetched")
         }
-
     }
     
     
@@ -428,6 +442,25 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
             self.fetchedPostIds.sort(by: { (p1, p2) -> Bool in
                 return p1.creationDate!.compare(p2.creationDate!) == .orderedDescending
         })
+        }
+    }
+    
+    func sortDisplayedPosts(){
+        if self.filterSort == FilterSortDefault[1] {
+            // Oldest
+            self.displayedPosts.sort(by: { (p1, p2) -> Bool in
+                return p1.creationDate.compare(p2.creationDate) == .orderedAscending
+            })
+        } else if self.filterSort == FilterSortDefault[0] {
+            // Nearest
+            self.displayedPosts.sort(by: { (p1, p2) -> Bool in
+                return (p1.distance! < p2.distance!)
+            })
+        } else {
+            //Latest
+            self.displayedPosts.sort(by: { (p1, p2) -> Bool in
+                return p1.creationDate.compare(p2.creationDate) == .orderedDescending
+            })
         }
     }
     
@@ -637,13 +670,19 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
             self.noResultsLabel.isHidden = false
             self.paginatePosts()
         } else {
+            
+            // Sort Displayed Post - Firebase does not return post in order
+            self.sortDisplayedPosts()
+            
             DispatchQueue.main.async(execute: { self.collectionView?.reloadData() })
             
             if self.collectionView?.numberOfItems(inSection: 0) != 0 && self.displayedPosts.count < 4{
                 let indexPath = IndexPath(item: 0, section: 0)
                 self.collectionView?.scrollToItem(at: indexPath, at: .bottom, animated: true)
                 self.noResultsLabel.isHidden = true
-            }
+            }        
+//            print("Displayed Posts: ",displayedPosts)
+        
         }
     }
     
@@ -659,6 +698,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
             
 //            print("Current number: ", i, "from", self.fetchedPostCount, " to ",paginateFetchPostsLimit)
             let fetchPostId = fetchedPostIds[i]
+            print(" Paginate \(i): \(fetchPostId.id)")
             
             // Filter Time
             if self.filterTime != defaultTime  {
@@ -722,7 +762,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
                     }
                 }
 
-//                if tempPost.count > 0 {print("Adding Temp Post id: ", tempPost[0].id)}
+                if tempPost.count > 0 {print("Adding Temp Post id: ", tempPost[0].id)}
                 
                 self.displayedPosts += tempPost
 

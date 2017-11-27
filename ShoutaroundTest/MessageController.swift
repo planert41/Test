@@ -259,7 +259,7 @@ class MessageController: UIViewController, UICollectionViewDataSource, UICollect
     
     func textFieldShouldBeginEditing(_ textField: UITextField) -> Bool {
         
-        textField.keyboardType = UIKeyboardType.emailAddress
+        textField.keyboardType = UIKeyboardType.twitter
     
 //        self.adjustment = textField.convert(textField.frame.origin, to: self.view).y - (self.navigationController?.navigationBar.frame.height)!
 //        print("Adjustment is \(self.adjustment)")
@@ -366,15 +366,15 @@ class MessageController: UIViewController, UICollectionViewDataSource, UICollect
         var userSelected = filteredUsers[indexPath.row]
         var selectedUsername = userSelected.username
         var addedString : String?
-        addedString = selectedUsername + ","
+        addedString = selectedUsername
         
         guard var tempCaptionWords = self.toInput.text?.lowercased().components(separatedBy: " ") else {
-            self.toInput.text = (addedString)! + " "
+            self.toInput.text = (addedString)! + ", "
             return
         }
         
         var lastWord = tempCaptionWords[tempCaptionWords.endIndex - 1]
-        self.toInput.text = tempCaptionWords.dropLast().joined(separator: " ") + (addedString)! + " "
+        self.toInput.text = tempCaptionWords.dropLast().joined(separator: " ") + (addedString)! + ", "
         self.userAutoComplete.isHidden = true
 
     }
@@ -413,47 +413,182 @@ class MessageController: UIViewController, UICollectionViewDataSource, UICollect
         return 1
     }
     
-    func handleSendTest(){
+    func handleSendTest(sentUsers: [String]){
         
         guard let toText = toInput.text else {return}
         guard let creatorUID = Auth.auth().currentUser?.uid else {return}
         guard let postId = self.post?.id else {return}
         guard let message = self.messageInput.text else {return}
-        guard let sentUsers = self.sentUsers else {return}
         let uploadTime = Date().timeIntervalSince1970
+        let descTime = Date()
+
+        var receiveUserUid: [String] = []
+        var receiveUserEmail: [String] = []
         
-        let messageRef = Database.database().reference().child("messages").child(postId).childByAutoId()
-        let values = ["postUID": postId, "creatorUID": creatorUID, "message": message, "creationDate": uploadTime, "receiver": toText] as [String:Any]
+        //Disable Message Button to avoid dup presses
+        navigationItem.rightBarButtonItem?.isEnabled = false
         
+
+            // Split Sent Users to email/uids
+            for receiver in sentUsers {
+                if receiver.isValidEmail {
+                    receiveUserEmail.append(receiver)
+                } else {
+                    receiveUserUid.append(receiver)
+                }
+            }
+            
+            print("Sent Targets Emails: \(receiveUserEmail), Uids: \(receiveUserUid)")
+        
+        // Save and create Message Thread
+        
+            let messageThreadRef = Database.database().reference().child("messageThreads").childByAutoId()
+            let values = ["postUID": postId, "creatorUID": creatorUID, "sentMessage": message, "creationDate": uploadTime, "sentTo": toText, "sentToUids": receiveUserUid, "sentToEmails": receiveUserEmail ] as [String:Any]
+            
+            messageThreadRef.updateChildValues(values, withCompletionBlock: { (err, ref) in
+                
+                if let err = err {
+                    print("Failed to Save Message to DB", err)
+                }
+                
+                // Success Creating Message Thread
+                var threadKey = messageThreadRef.key
+                self.navigationItem.rightBarButtonItem?.isEnabled = true
+                
+                print("Successfully Created Message Thread \(threadKey) in Database")
+
+                // Update Message Count
+                let messageRef = Database.database().reference().child("messages").child(postId)
+                messageRef.runTransactionBlock({ (currentData) -> TransactionResult in
+                    
+                    var post = currentData.value as? [String : AnyObject] ?? [:]
+                    var count = post["messageCount"] as? Int ?? 0
+                    var threads: Dictionary<String, Int>
+                    threads = post["threads"] as? [String : Int] ?? [:]
+                    
+                    count = max(0, count + 1)
+                    threads[threadKey] = 1
+                    
+                    post["messageCount"] = count as AnyObject?
+                    post["threads"] = threads as AnyObject?
+                    
+                    // Enables firebase sort by count and recent upload time
+                    let  sortTime = uploadTime/1000000000000000
+                    post["sort"] = (Double(count) + sortTime) as AnyObject
+                    
+                    currentData.value = post
+                    print("Update Message Count for post : \(postId) to \(count)")
+                    return TransactionResult.success(withValue: currentData)
+                
+                }) { (error, committed, snapshot) in
+                    if let error = error {
+                        print("Failed to Update Message Thread Count Error: ", postId, error.localizedDescription)
+                    }
+                }
+            
+                // Send Emails
+                print("Trying to send emails for emails: \(receiveUserEmail)")
+                for email in receiveUserEmail {
+                    self.handleSendEmail(email: email)
+                }
+                
+                // Send User Message
+                print("Trying to send messages for user uids: \(receiveUserUid)")
+                if receiveUserUid.count > 0 {
+                    self.updateMessageThread(threadKey: threadKey, creatorUid: creatorUID, receiveUid: receiveUserUid, message: message)
+                
+                }
+            })
+        
+    }
+    
+    func updateMessageThread(threadKey: String, creatorUid: String, receiveUid: [String]?, message: String) {
+        
+        // Create User Message within Thread
+        let threadRef = Database.database().reference().child("messageThreads").child(threadKey)
+        let threadMessageRef = threadRef.child("messages").childByAutoId()
+        let inboxRef = Database.database().reference().child("inbox")
+        let uploadTime = Date().timeIntervalSince1970
+        let descTime = Date()
+
+        // Create Message in Message Thread
+        let values = ["creatorUID": creatorUid, "message": message, "creationDate": uploadTime] as [String:Any]
+        
+        threadMessageRef.updateChildValues(values, withCompletionBlock: { (err, ref) in
+            if let err = err {
+                print("Error saving \(creatorUid) message: \(message) : in Thread \(threadKey) at \(descTime)")
+                return
+            }
+            print("Success saving \(creatorUid) message: \(message) : in Thread \(threadKey) at \(descTime)")
+        })
+        
+        // Update Users in Thread and Inbox
+        var allUsers: [String]
+        if let receiveUid = receiveUid {
+            allUsers = receiveUid
+            allUsers.append(creatorUid)
+        } else {
+            allUsers = [creatorUid]
+        }
+        
+        
+        // Update User List in Message Thread
+        var userListUpload: [String: Any] = [:]
+        for user in allUsers {
+            userListUpload[user] = 1
+        }
+        
+        threadRef.child("users").updateChildValues(userListUpload, withCompletionBlock: { (err, ref) in
+            if let err = err {
+                print("Error Updating Users \(userListUpload) in Thread \(threadKey)")
+                return
+            }
+            print("Success Updating Users \(userListUpload) in Thread \(threadKey)")
+        })
+        
+        // Loop Through Users
+        var threadUpload = [threadKey:uploadTime]
+        for user in allUsers {
+            inboxRef.child(user).updateChildValues(threadUpload, withCompletionBlock: { (err, ref) in
+                if let err = err {
+                    print("Error Updating Inbox for User \(user), Thread \(threadKey)")
+                    return
+                }
+                print("Success Updating Inbox for User \(user), Thread \(threadKey)")
+            })
+        }
     }
     
     
     func checkToText(inputString: String?, completion: @escaping ([String]) -> ()){
         guard let inputString = inputString else {return}
         let toArray = inputString.components(separatedBy: ",")
-        let myGroup = DispatchGroup()
+        let checkGroup = DispatchGroup()
         var sentArray: [String] = []
         
+        print("Checking To Field for Array: \(toArray)")
         for text in toArray {
+            
             // Remove white spaces and lower case everything
             var tempText = text
+            print("Searching for: \(tempText)")
+            
             tempText = tempText.removingWhitespaces()
             tempText = tempText.lowercased()
             
             // Check is blank
             if tempText.isEmptyOrWhitespace(){
-                continue
                 print("Empty Space So Ignore")
+                continue
             } else {
-                myGroup.enter()
-                print("Searching for: \(tempText)")
+                checkGroup.enter()
             }
             
             // Check if email
             if tempText.isValidEmail {
                 sentArray.append(tempText)
                 print("Email Found for \(tempText)")
-                myGroup.leave()
+                checkGroup.leave()
 
             } else {
                 // Check if is a user
@@ -472,7 +607,7 @@ class MessageController: UIViewController, UICollectionViewDataSource, UICollect
                         userId = user.uid
                         print("User Found for \(tempText): \(userId!)")
                         sentArray.append(userId!)
-                        myGroup.leave()
+                        checkGroup.leave()
                     }
                     
                     else {
@@ -484,7 +619,7 @@ class MessageController: UIViewController, UICollectionViewDataSource, UICollect
             }
         }
         
-        myGroup.notify(queue: .main) {
+        checkGroup.notify(queue: .main) {
             print("Final Sent Array: \(sentArray)")
             completion(sentArray)
         }
@@ -494,19 +629,33 @@ class MessageController: UIViewController, UICollectionViewDataSource, UICollect
     
     func handleSend() {
      
-        guard let toText = toInput.text else {return}
+        self.checkToText(inputString: toInput.text) { (users) in
+            self.handleSendTest(sentUsers: users)
+        }
         
-        if toText.isUsername{
-            handleSendMessage()
-        }
-        else if toText.isValidEmail {
-            handleSendEmail()
-        } else{
-            alert(title: "Sending Error", message: "Not a valid receipient")
-        }
+//        guard let toText = toInput.text else {return}
+//        
+//        if toText.isUsername{
+//            handleSendMessage(userId: String)
+//        }
+//        else if toText.isValidEmail {
+//            handleSendEmail()
+//        } else{
+//            alert(title: "Sending Error", message: "Not a valid receipient")
+//        }
     }
     
-    func handleSendMessage() {
+    
+    func handleSendUserMessage(threadKey: String!, creatorUserId: String!, receiveUserID: String!, message: String?){
+        
+        
+        
+        
+        
+        
+    }
+    
+    func handleSendMessage(userId: String) {
         
         guard let toText = toInput.text else {return}
         Database.fetchUserWithUsername(username: toText) { (user, error) in
@@ -539,7 +688,7 @@ class MessageController: UIViewController, UICollectionViewDataSource, UICollect
     
     
     
-    func handleSendEmail(){
+    func handleSendEmail(email: String!){
             
             view.endEditing(true)
             
@@ -561,8 +710,8 @@ class MessageController: UIViewController, UICollectionViewDataSource, UICollect
             
             var toLabel: String?
             
-            if isValidEmail(testStr: toInput.text!) {
-                toLabel = "<" + toInput.text! + ">"
+            if isValidEmail(testStr: email) {
+                toLabel = "<" + email + ">"
             } else {
                 print("Not Email")
                 return
@@ -586,9 +735,8 @@ class MessageController: UIViewController, UICollectionViewDataSource, UICollect
     
     
             mailgun?.send(message, success: { (success) in
-                print("success sending email")
+                print("success sending email to \(email)")
                 self.navigationController?.popViewController(animated: true)
-                
                 
             }, failure: { (error) in
                 print(error)

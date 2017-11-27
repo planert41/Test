@@ -331,6 +331,7 @@ extension Database{
         
         if let cachedPost = postCache[postId] {
             if cachedPost != nil {
+                print("Using post cache for \(postId)")
                 completion(cachedPost, nil)
                 return
             }
@@ -787,6 +788,7 @@ extension Database{
                 post["likeCount"] = likeCount as AnyObject?
                 post["likes"] = likes as AnyObject?
             
+            // Enables firebase sort by count and recent upload time
                 let  uploadTime = Date().timeIntervalSince1970/1000000000000000
                 post["sort"] = (Double(likeCount) + uploadTime) as AnyObject
                 
@@ -839,6 +841,7 @@ extension Database{
                 post["bookmarkCount"] = bookmarkCount as AnyObject?
                 post["bookmarks"] = bookmarks as AnyObject?
 
+            // Enables firebase sort by count and recent upload time
                 let  uploadTime = Date().timeIntervalSince1970/1000000000000000
                 post["sort"] = (Double(bookmarkCount) + uploadTime) as AnyObject
             
