@@ -760,6 +760,48 @@ extension Database{
             })
     }
     
+    static func fetchMessageThreadsForUID( userUID: String, completion: @escaping ([MessageThread]) -> ()) {
+        
+        let myGroup = DispatchGroup()
+        var messageThreadIds = [] as [String]
+        var messageThreads = [] as [MessageThread]
+        let ref = Database.database().reference().child("inbox").child(userUID)
+        
+        ref.observeSingleEvent(of: .value, with: {(snapshot) in
+            
+            guard let userposts = snapshot.value as? [String:Any]  else {return}
+            
+            userposts.forEach({ (key, lastTime) in
+                
+                myGroup.enter()
+                
+                self.fetchMessageThread(threadId: key, completion: { (messageThread) in
+                    var tempThread = messageThread
+                    let lastReadTime = lastTime as? Double ?? 0
+                    tempThread.lastCheckDate = Date(timeIntervalSince1970: lastReadTime)
+                    messageThreads.append(tempThread)
+                    myGroup.leave()
+                })
+            })
+            
+            myGroup.notify(queue: .main) {
+                completion(messageThreads)
+            }
+        })
+    }
+    
+    static func fetchMessageThread( threadId: String, completion: @escaping (MessageThread) -> ()) {
+        let ref = Database.database().reference().child("messageThreads").child(threadId)
+        
+        ref.observeSingleEvent(of: .value, with: { (snapshot) in
+            guard let threadDictionary = snapshot.value as? [String: Any] else {return}
+            
+            let tempThread = MessageThread.init(threadID: threadId, dictionary: threadDictionary)
+            completion(tempThread)
+        }) { (error) in
+                print("Error fetching message thread: \(threadId)", error)
+        }
+    }
     
     
     // Social Functions

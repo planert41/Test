@@ -23,12 +23,15 @@ protocol BookmarkPhotoCellDelegate {
 
 class BookmarkPhotoCell: UICollectionViewCell {
     
-    let adressLabelSize = 12 as CGFloat
+    let adressLabelSize = 8 as CGFloat
     var delegate: BookmarkPhotoCellDelegate?
     
     var bookmarkDate: Date?{
         didSet{
-            let timeAgoDisplay = bookmarkDate?.timeAgoDisplay()
+//            let timeAgoDisplay = bookmarkDate?.timeAgoDisplay()
+            let formatter = DateFormatter()
+            formatter.dateFormat = "MMM d YYYY"
+            let timeAgoDisplay = formatter.string(from: bookmarkDate!)
             dateLabel.text = timeAgoDisplay
         }
     }
@@ -41,9 +44,22 @@ class BookmarkPhotoCell: UICollectionViewCell {
             locationNameLabel.text = post?.locationName
             locationAdressLabel.text = post?.locationAdress
             nonRatingEmojiLabel.text = (post?.ratingEmoji)! + (post?.nonRatingEmoji.joined())!
+            nonRatingEmojiLabel.sizeToFit()
 //            ratingEmojiLabel.text = post?.ratingEmoji
             captionLabel.text = post?.caption
+            captionLabel.sizeToFit()
             
+            if (post?.bookmarkCount)! > 0 {
+                bookmarkCount.text = String(describing: (post?.bookmarkCount)!)
+            } else {
+                bookmarkCount.text = ""
+            }
+            
+            if (post?.messageCount)! > 0 {
+                messageCount.text = String(describing: (post?.messageCount)!)
+            } else {
+                messageCount.text = ""
+            }
             
             
             guard let profileImageUrl = post?.user.profileImageUrl else {return}
@@ -79,6 +95,8 @@ class BookmarkPhotoCell: UICollectionViewCell {
                     distanceLabel.text = ""
             }
             
+            distanceLabel.sizeToFit()
+            
             
         }
     }
@@ -107,7 +125,7 @@ class BookmarkPhotoCell: UICollectionViewCell {
     let usernameLabel: UILabel = {
         let label = UILabel()
         label.text = "Username"
-        label.font = UIFont.boldSystemFont(ofSize: 12)
+        label.font = UIFont.boldSystemFont(ofSize: 11)
         label.sizeToFit()
         return label
     }()
@@ -117,7 +135,7 @@ class BookmarkPhotoCell: UICollectionViewCell {
         label.text = ""
         label.font = UIFont.boldSystemFont(ofSize: 10)
         label.textColor = UIColor.mainBlue()
-        label.textAlignment = NSTextAlignment.right
+        label.textAlignment = NSTextAlignment.left
         return label
     }()
     
@@ -144,7 +162,7 @@ class BookmarkPhotoCell: UICollectionViewCell {
     let nonRatingEmojiLabel: UILabel = {
         let label = UILabel()
         label.text = "Emojis"
-        label.font = UIFont.boldSystemFont(ofSize: 13)
+        label.font = UIFont.boldSystemFont(ofSize: 11)
         label.textAlignment = NSTextAlignment.right
         label.backgroundColor = UIColor.white
         return label
@@ -163,7 +181,7 @@ class BookmarkPhotoCell: UICollectionViewCell {
     let locationNameLabel: UILabel = {
         let label = UILabel()
         label.text = "Location"
-        label.font = UIFont.boldSystemFont(ofSize: 12)
+        label.font = UIFont.boldSystemFont(ofSize: 10)
         label.textColor = UIColor.black
         label.sizeToFit()
         return label
@@ -172,7 +190,7 @@ class BookmarkPhotoCell: UICollectionViewCell {
     let locationAdressLabel: UILabel = {
         let label = UILabel()
         label.text = "Location"
-        label.font = UIFont.boldSystemFont(ofSize: 10)
+        label.font = UIFont.boldSystemFont(ofSize: 8)
         label.textColor = UIColor.darkGray
         label.numberOfLines = 0
         label.lineBreakMode = NSLineBreakMode.byWordWrapping
@@ -181,10 +199,10 @@ class BookmarkPhotoCell: UICollectionViewCell {
     
     let captionLabel: UILabel = {
         let label = UILabel()
-        label.font = UIFont.systemFont(ofSize: 12)
+        label.font = UIFont.systemFont(ofSize: 10)
         label.numberOfLines = 0
-        label.lineBreakMode = NSLineBreakMode.byWordWrapping
-        label.sizeToFit()
+//        label.lineBreakMode = NSLineBreakMode.byWordWrapping
+//        label.sizeToFit()
         return label
     }()
     
@@ -250,26 +268,47 @@ class BookmarkPhotoCell: UICollectionViewCell {
         
     }()
     
+    let bookmarkCount: UILabel = {
+        let label = UILabel()
+        label.text = ""
+        label.font = UIFont.boldSystemFont(ofSize:10)
+        label.textColor = UIColor.black
+        label.textAlignment = NSTextAlignment.left
+        return label
+    }()
+    
+    let messageCount: UILabel = {
+        let label = UILabel()
+        label.text = ""
+        label.font = UIFont.boldSystemFont(ofSize:10)
+        label.textColor = UIColor.black
+        label.textAlignment = NSTextAlignment.left
+        return label
+    }()
+    
     func handleBookmark() {
         
-        //delegate?.didBookmark(for: self)
+        //    delegate?.didBookmark(for: self)
         
         guard let postId = self.post?.id else {return}
+        guard let creatorId = self.post?.creatorUID else {return}
         guard let uid = Auth.auth().currentUser?.uid else {return}
-        let values = ["bookmarked": self.post?.hasBookmarked == true ? 0 : 1, "creatorUID": post?.creatorUID] as [String : Any]
+        guard let post = self.post else {return}
         
-        Database.database().reference().child("bookmarks").child(uid).child(postId).updateChildValues(values) { (err, ref) in
-            if let err = err {
-                print("Failed to bookmark post", err)
-                return
-            }
-            print("Succesfully Saved Bookmark")
-            self.post?.hasBookmarked = !(self.post?.hasBookmarked)!
-            self.delegate?.refreshPost(post: self.post!)
-            
+        Database.handleBookmark(postId: postId, creatorUid: creatorId){
         }
         
-        self.bookmarkButton.transform = CGAffineTransform(scaleX: 0.1, y: 0.1)
+        // Animates before database function is complete
+        
+        if (self.post?.hasBookmarked)! {
+            self.post?.bookmarkCount -= 1
+        } else {
+            self.post?.bookmarkCount += 1
+        }
+        self.post?.hasBookmarked = !(self.post?.hasBookmarked)!
+        self.delegate?.refreshPost(post: self.post!)
+        
+        bookmarkButton.transform = CGAffineTransform(scaleX: 0.1, y: 0.1)
         
         UIView.animate(withDuration: 1.0,
                        delay: 0,
@@ -280,6 +319,11 @@ class BookmarkPhotoCell: UICollectionViewCell {
                         self?.bookmarkButton.transform = .identity
             },
                        completion: nil)
+        
+        // Update Cache
+        postCache.removeValue(forKey: postId)
+        postCache[postId] = post
+        
         
     }
     
@@ -343,6 +387,9 @@ class BookmarkPhotoCell: UICollectionViewCell {
         addSubview(photoImageView)
         photoImageView.anchor(top: topAnchor, left: leftAnchor, bottom: bottomAnchor, right: nil, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
         
+//        photoImageView.widthAnchor.constraint(equalTo: self.frame.height, multiplier: 1).isActive = true
+        
+//        photoImageView.widthAnchor.constraint(equalToConstant: self.frame.height).isActive = true
         photoImageView.widthAnchor.constraint(equalTo: photoImageView.heightAnchor, multiplier: 1).isActive = true
         
         let TapGesture = UITapGestureRecognizer(target: self, action: #selector(BookmarkPhotoCell.handlePictureTap))
@@ -358,47 +405,86 @@ class BookmarkPhotoCell: UICollectionViewCell {
         userProfileImageView.layer.borderWidth = 0.25
         userProfileImageView.layer.borderColor = UIColor.lightGray.cgColor
         
+        addSubview(nonRatingEmojiLabel)
+        nonRatingEmojiLabel.anchor(top: userProfileImageView.topAnchor, left: nil, bottom: userProfileImageView.bottomAnchor, right: rightAnchor, paddingTop: 0, paddingLeft: 5, paddingBottom: 5, paddingRight: 10, width: 0, height: 0)
+//        nonRatingEmojiLabel.heightAnchor.constraint(equalTo: userProfileImageView.heightAnchor, multiplier: 0.5).isActive = true
+        nonRatingEmojiLabel.centerYAnchor.constraint(equalTo: userProfileImageView.centerYAnchor).isActive = true
+        
+    
         addSubview(usernameLabel)
-        usernameLabel.anchor(top: userProfileImageView.topAnchor, left: userProfileImageView.rightAnchor, bottom: userProfileImageView.bottomAnchor, right: nil, paddingTop: 0, paddingLeft: 5, paddingBottom: 0, paddingRight: 0, width: 80, height: 0)
-        usernameLabel.centerYAnchor.constraint(equalTo: userProfileImageView.centerYAnchor).isActive = true
+        usernameLabel.anchor(top: userProfileImageView.topAnchor, left: userProfileImageView.rightAnchor, bottom: nil, right: nonRatingEmojiLabel.leftAnchor, paddingTop: 0, paddingLeft: 5, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
+        usernameLabel.heightAnchor.constraint(equalTo: userProfileImageView.heightAnchor, multiplier: 0.5).isActive = true
+        
+        addSubview(dateLabel)
+        dateLabel.anchor(top: usernameLabel.bottomAnchor, left: usernameLabel.leftAnchor, bottom: userProfileImageView.bottomAnchor, right: nil, paddingTop: 2, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 80, height: 0)
+        
+//        usernameLabel.centerYAnchor.constraint(equalTo: userProfileImageView.centerYAnchor).isActive = true
+        
 //
 //        addSubview(ratingEmojiLabel)
 //        ratingEmojiLabel.anchor(top: userProfileImageView.topAnchor, left: nil, bottom: userProfileImageView.bottomAnchor, right: userProfileImageView.leftAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 5, width: 30, height: 30)
 //        ratingEmojiLabel.centerYAnchor.constraint(equalTo: userProfileImageView.centerYAnchor).isActive = true
         
-        addSubview(nonRatingEmojiLabel)
-        nonRatingEmojiLabel.anchor(top: userProfileImageView.topAnchor, left: nil, bottom: userProfileImageView.bottomAnchor, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 10, width: 0, height: 0)
-        nonRatingEmojiLabel.centerYAnchor.constraint(equalTo: userProfileImageView.centerYAnchor).isActive = true
+//        nonRatingEmojiLabel.anchor(top: userProfileImageView.topAnchor, left: nil, bottom: userProfileImageView.bottomAnchor, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 10, width: 0, height: 0)
+//        nonRatingEmojiLabel.centerYAnchor.constraint(equalTo: userProfileImageView.centerYAnchor).isActive = true
+
+        
+
 
         
 // Location Data
 
-        addSubview(distanceLabel)
-        distanceLabel.anchor(top: userProfileImageView.bottomAnchor, left: nil, bottom: nil, right: rightAnchor, paddingTop: 10, paddingLeft: 5, paddingBottom: 5, paddingRight: 10, width: 70, height: 15)
-        
+
         addSubview(locationNameLabel)
-        locationNameLabel.anchor(top: userProfileImageView.bottomAnchor, left: photoImageView.rightAnchor, bottom: nil, right: distanceLabel.leftAnchor, paddingTop: 10, paddingLeft: 10, paddingBottom: 0, paddingRight: 10, width: 0, height: 15)
+        locationNameLabel.anchor(top: userProfileImageView.bottomAnchor, left: photoImageView.rightAnchor, bottom: nil, right: rightAnchor, paddingTop: 10, paddingLeft: 10, paddingBottom: 0, paddingRight: 20, width: 0, height: 10)
 
 
         addSubview(locationAdressLabel)
-        locationAdressLabel.anchor(top: locationNameLabel.bottomAnchor, left: photoImageView.rightAnchor, bottom: nil, right: rightAnchor, paddingTop: 0, paddingLeft: 10, paddingBottom: 0, paddingRight: 10, width: 0, height: 24)
+        locationAdressLabel.anchor(top: locationNameLabel.bottomAnchor, left: photoImageView.rightAnchor, bottom: nil, right: rightAnchor, paddingTop: 0, paddingLeft: 10, paddingBottom: 0, paddingRight: 20, width: 0, height: 13)
+//        locationAdressLabel.backgroundColor = UIColor.blue
+        
+        
+        let detailView = UIView()
+        addSubview(detailView)
+        detailView.anchor(top: nil, left: photoImageView.rightAnchor, bottom: bottomAnchor, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 20)
         
         addSubview(captionLabel)
-        captionLabel.anchor(top: locationAdressLabel.bottomAnchor, left: photoImageView.rightAnchor, bottom: nil, right: rightAnchor, paddingTop: 10, paddingLeft: 10, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
+        captionLabel.anchor(top: locationAdressLabel.bottomAnchor, left: photoImageView.rightAnchor, bottom: nil, right: rightAnchor, paddingTop: 5, paddingLeft: 10, paddingBottom: 2, paddingRight: 20, width: 0, height: 0)
+
+        // Sets maximum caption label size
+        captionLabel.frame = CGRect(x: 0, y: 0, width: self.frame.width/2, height: self.frame.height)
         captionLabel.sizeToFit()
+//        captionLabel.backgroundColor = UIColor.yellow
+
         
-        addSubview(dateLabel)
-        dateLabel.anchor(top: nil, left: photoImageView.rightAnchor, bottom: bottomAnchor, right: nil, paddingTop: 0, paddingLeft: 10, paddingBottom: 5, paddingRight: 0, width: 60, height: 30)
+        addSubview(distanceLabel)
+        distanceLabel.anchor(top: detailView.topAnchor, left: detailView.leftAnchor, bottom: detailView.bottomAnchor, right: nil, paddingTop: 2, paddingLeft: 10, paddingBottom: 0, paddingRight: 0, width: 80, height: 0)
+
+        
+        // Add Action Buttons
+    
+        addSubview(bookmarkCount)
+        addSubview(bookmarkButton)
+        addSubview(messageCount)
+        addSubview(sendMessageButton)
+        
+        bookmarkCount.anchor(top: detailView.topAnchor, left: nil, bottom: detailView.bottomAnchor, right: detailView.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 5, width: 15, height: 0)
+        
+        bookmarkButton.anchor(top: detailView.topAnchor, left: nil, bottom: detailView.bottomAnchor, right: bookmarkCount.leftAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 2, width: 20, height: 0)
+        
+        messageCount.anchor(top: detailView.topAnchor, left: nil, bottom: detailView.bottomAnchor, right: bookmarkButton.leftAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 15, height: 0)
+        
+        sendMessageButton.anchor(top: detailView.topAnchor, left: nil, bottom: detailView.bottomAnchor, right: messageCount.leftAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 2, width: 20, height: 0)
+        
+//        let buttonStackView = UIStackView(arrangedSubviews: [sendMessageButton, bookmarkButton])
+//        buttonStackView.distribution = .fillEqually
+//        addSubview(buttonStackView)
+//        buttonStackView.anchor(top: nil, left: nil, bottom: bottomAnchor, right: rightAnchor, paddingTop: 5, paddingLeft: 0, paddingBottom: 5, paddingRight: 10, width: 40, height: 20)
         
         
         
 //        let buttonStackView = UIStackView(arrangedSubviews: [likeButton, commentButton, sendMessageButton, bookmarkButton])
-        let buttonStackView = UIStackView(arrangedSubviews: [sendMessageButton, bookmarkButton])
-        
-        buttonStackView.distribution = .fillEqually
-        addSubview(buttonStackView)
-        
-        buttonStackView.anchor(top: nil, left: nil, bottom: bottomAnchor, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 5, paddingRight: 10, width: 60, height: 30)
+
         //        buttonStackView.widthAnchor.constraint(equalTo: photoImageView.heightAnchor, multiplier: 1).isActive = true
 
 //        
@@ -454,7 +540,6 @@ class BookmarkPhotoCell: UICollectionViewCell {
         addSubview(bottomDividerView)
         
         topDividerView.anchor(top: topAnchor, left: leftAnchor, bottom: nil, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0.5)
-        
         
         bottomDividerView.anchor(top: bottomAnchor, left: leftAnchor, bottom: nil, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0.5)
         

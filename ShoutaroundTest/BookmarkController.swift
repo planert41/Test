@@ -603,7 +603,7 @@ class BookMarkController: UIViewController, UICollectionViewDelegate, UICollecti
         
         if isGridView {
 
-            return CGSize(width: view.frame.width, height: 150)
+            return CGSize(width: view.frame.width, height: 120)
         } else {
             var height: CGFloat = 40 + 8 + 8 //username userprofileimageview
             height += view.frame.width

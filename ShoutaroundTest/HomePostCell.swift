@@ -138,21 +138,21 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         }
         
         if post.messageCount > 0 {
-            self.messageLabel.text = String( post.messageCount)
+            self.messageCount.text = String( post.messageCount)
         } else {
-            self.messageLabel.text = ""
+            self.messageCount.text = ""
         }
-        self.messageLabel.sizeToFit()
+        self.messageCount.sizeToFit()
         
         if post.bookmarkCount > 0 {
-            self.bookmarkLabel.text = String( post.bookmarkCount)
+            self.bookmarkCount.text = String( post.bookmarkCount)
         } else {
-            self.bookmarkLabel.text = ""
+            self.bookmarkCount.text = ""
         }
         
         // Resizes bookmark label to fit new count
-        self.bookmarkLabel.sizeToFit()
-        bookmarkLabelConstraint?.constant = self.bookmarkLabel.frame.size.width
+        self.bookmarkCount.sizeToFit()
+        bookmarkLabelConstraint?.constant = self.bookmarkCount.frame.size.width
 //        self.layoutIfNeeded()
         
     }
@@ -731,7 +731,7 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
     }
 
     
-    let bookmarkLabel: UILabel = {
+    let bookmarkCount: UILabel = {
         let label = UILabel()
         label.text = ""
         label.font = UIFont.boldSystemFont(ofSize:12)
@@ -740,7 +740,7 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         return label
     }()
     
-    let messageLabel: UILabel = {
+    let messageCount: UILabel = {
         let label = UILabel()
         label.text = ""
         label.font = UIFont.boldSystemFont(ofSize:12)
@@ -769,22 +769,22 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         addSubview(sendMessageButton)
         sendMessageButton.anchor(top: actionBar.topAnchor, left: commentButton.rightAnchor, bottom: actionBar.bottomAnchor, right: nil, paddingTop: 5, paddingLeft: 2, paddingBottom: 5, paddingRight: 0, width: 30, height: 30)
         
-        addSubview(messageLabel)
-        messageLabel.anchor(top: actionBar.topAnchor, left: sendMessageButton.rightAnchor, bottom: actionBar.bottomAnchor, right: nil, paddingTop: 5, paddingLeft: 2, paddingBottom: 5, paddingRight: 0, width: 30, height: 30)
+        addSubview(messageCount)
+        messageCount.anchor(top: actionBar.topAnchor, left: sendMessageButton.rightAnchor, bottom: actionBar.bottomAnchor, right: nil, paddingTop: 5, paddingLeft: 2, paddingBottom: 5, paddingRight: 0, width: 30, height: 30)
         
         
 
         
-        addSubview(bookmarkLabel)
-        bookmarkLabel.anchor(top: actionBar.topAnchor, left: nil, bottom: actionBar.bottomAnchor, right: actionBar.rightAnchor, paddingTop: 5, paddingLeft: 0, paddingBottom: 5, paddingRight: 8, width: 0, height: 30)
-        bookmarkLabel.sizeToFit()
-        bookmarkLabelConstraint = NSLayoutConstraint(item: self.bookmarkLabel, attribute: NSLayoutAttribute.width, relatedBy: NSLayoutRelation.equal, toItem: nil, attribute: NSLayoutAttribute.notAnAttribute, multiplier: 1, constant: self.bookmarkLabel.frame.size.width)
-        self.bookmarkLabel.addConstraint(bookmarkLabelConstraint!)
+        addSubview(bookmarkCount)
+        bookmarkCount.anchor(top: actionBar.topAnchor, left: nil, bottom: actionBar.bottomAnchor, right: actionBar.rightAnchor, paddingTop: 5, paddingLeft: 0, paddingBottom: 5, paddingRight: 8, width: 0, height: 30)
+        bookmarkCount.sizeToFit()
+        bookmarkLabelConstraint = NSLayoutConstraint(item: self.bookmarkCount, attribute: NSLayoutAttribute.width, relatedBy: NSLayoutRelation.equal, toItem: nil, attribute: NSLayoutAttribute.notAnAttribute, multiplier: 1, constant: self.bookmarkCount.frame.size.width)
+        self.bookmarkCount.addConstraint(bookmarkLabelConstraint!)
 //        bookmarkLabel.widthAnchor.constraint(equalToConstant: self.bookmarkLabel.frame.size.width).isActive = true
         
         // Width anchor is set after bookmark counts are displayed to figure out label width
         addSubview(bookmarkButton)
-        bookmarkButton.anchor(top: actionBar.topAnchor, left: nil, bottom: actionBar.bottomAnchor, right: bookmarkLabel.leftAnchor, paddingTop: 5, paddingLeft: 0, paddingBottom: 5, paddingRight: 2, width: 30, height: 30)
+        bookmarkButton.anchor(top: actionBar.topAnchor, left: nil, bottom: actionBar.bottomAnchor, right: bookmarkCount.leftAnchor, paddingTop: 5, paddingLeft: 0, paddingBottom: 5, paddingRight: 2, width: 30, height: 30)
 
 //        addSubview(testlabel)
 //        testlabel.anchor(top: bookmarkButton.topAnchor, left: bookmarkButton.leftAnchor, bottom: bookmarkButton.bottomAnchor, right: bookmarkButton.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)

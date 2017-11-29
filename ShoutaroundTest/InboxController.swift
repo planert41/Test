@@ -10,14 +10,23 @@ import Foundation
 import UIKit
 import Firebase
 
-class InboxController: UICollectionViewController,UICollectionViewDelegateFlowLayout, InboxCellDelegate {
+class InboxController: UICollectionViewController,UICollectionViewDelegateFlowLayout, ThreadCellDelegate {
     
     var messages = [Message](){
         didSet{
             self.updateCounts()
         }
     }
+    
+    var messageThreads = [MessageThread](){
+        didSet{
+            self.updateCounts()
+        }
+    }
+    
+    
     let inboxCellId = "inboxCellId"
+    let threadCellId = "threadCellId"
 
     var noResultsLabel: UILabel = {
         let label = UILabel()
@@ -39,17 +48,23 @@ class InboxController: UICollectionViewController,UICollectionViewDelegateFlowLa
         navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Bookmarks", style: .plain, target: self, action: #selector(toBookmarks))
         
         collectionView?.register(InboxCell.self, forCellWithReuseIdentifier: inboxCellId)
-        fetchMessages()
+        collectionView?.register(ThreadCell.self, forCellWithReuseIdentifier: threadCellId)
+
+        fetchMessageThreads()
+//        fetchMessages()
         collectionView?.backgroundColor = UIColor.white
         view.addSubview(noResultsLabel)
         noResultsLabel.anchor(top: topLayoutGuide.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 5, paddingLeft: 5, paddingBottom: 5, paddingRight: 5, width: 0, height: 50)
         noResultsLabel.isHidden = true
+    }
     
+    override func viewWillAppear(_ animated: Bool) {
+        fetchMessageThreads()
     }
     
     func updateCounts(){
-        navigationItem.title = "Inbox (" + String(messages.count) + ")"
-        if messages.count == 0 {
+        navigationItem.title = "Inbox (" + String(messageThreads.count) + ")"
+        if messageThreads.count == 0 {
             noResultsLabel.isHidden = false
         } else {
             noResultsLabel.isHidden = true
@@ -72,57 +87,33 @@ class InboxController: UICollectionViewController,UICollectionViewDelegateFlowLa
         }
     }
     
-    // HOME POST CELL DELEGATE METHODS
+
+    func fetchMessageThreads(){
+        guard let currentUserUID = Auth.auth().currentUser?.uid else {return}
+        
+        Database.fetchMessageThreadsForUID(userUID: currentUserUID) { (messageThreads) in
+            self.messageThreads = messageThreads
+            self.collectionView?.reloadData()
+        }
+    }
+    
+    // THREAD CELL DELEGATE METHODS
     
     func didTapPicture(post: Post) {
         
         let pictureController = PictureController(collectionViewLayout: UICollectionViewFlowLayout())
         pictureController.selectedPost = post
-        
-        
         navigationController?.pushViewController(pictureController, animated: true)
     }
     
     
-    func didTapComment(post: Post) {
-        
-        let commentsController = CommentsController(collectionViewLayout: UICollectionViewFlowLayout())
-        commentsController.post = post
-        
-        navigationController?.pushViewController(commentsController, animated: true)
-    }
-    
-    func didTapUser(uid: String) {
-        let userProfileController = UserProfileController(collectionViewLayout: StickyHeadersCollectionViewFlowLayout())
-        userProfileController.userId = uid
-        
-        navigationController?.pushViewController(userProfileController, animated: true)
-    }
-    
-    func didTapLocation(post: Post) {
-        let locationController = LocationController()
-        locationController.selectedPost = post
-        
-        navigationController?.pushViewController(locationController, animated: true)
-    }
-    
     func refreshPost(post: Post) {
-        print("Refresh Message Post")
+        // Update Cache
+        postCache.removeValue(forKey: post.id!)
+        postCache[post.id!] = post
     }
     
-//    func refreshMessage(message: Message) {
-//        let index = messages.index { (message) -> Bool in
-//            message.postId  == post.id
-//        }
-//        
-//        let filteredindexpath = IndexPath(row:index!, section: 0)
-//        print(index)
-//        if post.hasBookmarked == false{
-//        
-//        
-//        self.messages[index!] = post
-//        //        self.collectionView?.reloadItems(at: [filteredindexpath])
-//    }
+
     
     func didTapMessage(post: Post) {
         
@@ -136,16 +127,18 @@ class InboxController: UICollectionViewController,UICollectionViewDelegateFlowLa
     
     
     override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return messages.count
+        return messageThreads.count
     }
     
     override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         
-        var displayMessage = messages[indexPath.item]
+        var displayMessage = messageThreads[indexPath.item]
         
-            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: inboxCellId, for: indexPath) as! InboxCell
+            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: threadCellId, for: indexPath) as! ThreadCell
+//            cell.delegate = self
+            cell.messageThread = displayMessage
             cell.delegate = self
-            cell.cellMessage = displayMessage
+            print("Displayed Message Thread", displayMessage)
         
             return cell
 
@@ -162,7 +155,7 @@ class InboxController: UICollectionViewController,UICollectionViewDelegateFlowLa
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         
-            return CGSize(width: view.frame.width, height: 220)
+            return CGSize(width: view.frame.width, height: 100)
         
     }
     

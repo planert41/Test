@@ -52,6 +52,7 @@
 		A5AEB9761F986F8200E88CAC /* PictureController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5AEB9751F986F8200E88CAC /* PictureController.swift */; };
 		A5AEB9781F9956B500E88CAC /* InboxController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5AEB9771F9956B500E88CAC /* InboxController.swift */; };
 		A5AEB97A1F99583B00E88CAC /* InboxCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5AEB9791F99583B00E88CAC /* InboxCell.swift */; };
+		A5B5F8281FCE58EC00CED8EB /* ThreadMessageController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5B5F8271FCE58EC00CED8EB /* ThreadMessageController.swift */; };
 		A5BBD2881FB0A377004367E7 /* GoogleMaps.bundle in Resources */ = {isa = PBXBuildFile; fileRef = A5BBD2871FB0A377004367E7 /* GoogleMaps.bundle */; };
 		A5BBD28A1FB26401004367E7 /* Notes.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5BBD2891FB26401004367E7 /* Notes.swift */; };
 		A5BBD28C1FB26F4B004367E7 /* Notes2.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5BBD28B1FB26F4B004367E7 /* Notes2.swift */; };
@@ -75,6 +76,7 @@
 		A5C6452A1F5BB84200C78244 /* CommentsController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5C645291F5BB84200C78244 /* CommentsController.swift */; };
 		A5C6452C1F5C459500C78244 /* CommentCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5C6452B1F5C459500C78244 /* CommentCell.swift */; };
 		A5C6452E1F5C481300C78244 /* Comment.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5C6452D1F5C481300C78244 /* Comment.swift */; };
+		A5CC6EE01FCC81050074AB78 /* ThreadCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5CC6EDF1FCC81050074AB78 /* ThreadCell.swift */; };
 		A5D942E91FC5145C00A189DD /* ExploreController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5D942E81FC5145C00A189DD /* ExploreController.swift */; };
 		A5F3E32E1FBD486D00A3E3A0 /* UserCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5F3E32D1FBD486D00A3E3A0 /* UserCell.swift */; };
 		A5F46C3D1FC5EBE400D69945 /* SMSegment.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5F46C3B1FC5EBE400D69945 /* SMSegment.swift */; };
@@ -133,6 +135,7 @@
 		A5AEB9751F986F8200E88CAC /* PictureController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PictureController.swift; sourceTree = "<group>"; };
 		A5AEB9771F9956B500E88CAC /* InboxController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InboxController.swift; sourceTree = "<group>"; };
 		A5AEB9791F99583B00E88CAC /* InboxCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InboxCell.swift; sourceTree = "<group>"; };
+		A5B5F8271FCE58EC00CED8EB /* ThreadMessageController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ThreadMessageController.swift; sourceTree = "<group>"; };
 		A5BBD2871FB0A377004367E7 /* GoogleMaps.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; name = GoogleMaps.bundle; path = Pods/GoogleMaps/Maps/Frameworks/GoogleMaps.framework/Resources/GoogleMaps.bundle; sourceTree = "<group>"; };
 		A5BBD2891FB26401004367E7 /* Notes.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Notes.swift; sourceTree = "<group>"; };
 		A5BBD28B1FB26F4B004367E7 /* Notes2.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Notes2.swift; sourceTree = "<group>"; };
@@ -157,6 +160,7 @@
 		A5C645291F5BB84200C78244 /* CommentsController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CommentsController.swift; sourceTree = "<group>"; };
 		A5C6452B1F5C459500C78244 /* CommentCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CommentCell.swift; sourceTree = "<group>"; };
 		A5C6452D1F5C481300C78244 /* Comment.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Comment.swift; sourceTree = "<group>"; };
+		A5CC6EDF1FCC81050074AB78 /* ThreadCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ThreadCell.swift; sourceTree = "<group>"; };
 		A5D942E81FC5145C00A189DD /* ExploreController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ExploreController.swift; sourceTree = "<group>"; };
 		A5F3E32D1FBD486D00A3E3A0 /* UserCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserCell.swift; sourceTree = "<group>"; };
 		A5F46C3B1FC5EBE400D69945 /* SMSegment.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SMSegment.swift; sourceTree = "<group>"; };
@@ -333,8 +337,10 @@
 			children = (
 				A56868BC1F78A0FA0050C406 /* MessageController.swift */,
 				A56868BE1F79C2FF0050C406 /* EmailHtmlFormat.swift */,
-				A5AEB9771F9956B500E88CAC /* InboxController.swift */,
 				A5AEB9791F99583B00E88CAC /* InboxCell.swift */,
+				A5AEB9771F9956B500E88CAC /* InboxController.swift */,
+				A5CC6EDF1FCC81050074AB78 /* ThreadCell.swift */,
+				A5B5F8271FCE58EC00CED8EB /* ThreadMessageController.swift */,
 			);
 			name = Message;
 			sourceTree = "<group>";
@@ -398,8 +404,8 @@
 				A5C6451E1F57B1BD00C78244 /* UserSearchCell.swift */,
 				A530FE8E1F8B17BA003C3591 /* LocationSearchController.swift */,
 				A5AEB9711F96A82B00E88CAC /* HomePostSearch.swift */,
-				A5AEB9731F96B00500E88CAC /* EmojiCell.swift */,
 				A5F3E32D1FBD486D00A3E3A0 /* UserCell.swift */,
+				A5AEB9731F96B00500E88CAC /* EmojiCell.swift */,
 				A5A17BAA1FA582B4001F227D /* FilterController.swift */,
 			);
 			name = Search;
@@ -621,6 +627,7 @@
 				A5C645111F56547300C78244 /* CustomImageView.swift in Sources */,
 				A5AEB97A1F99583B00E88CAC /* InboxCell.swift in Sources */,
 				A5C6450D1F564A4C00C78244 /* Post.swift in Sources */,
+				A5B5F8281FCE58EC00CED8EB /* ThreadMessageController.swift in Sources */,
 				A57A674D1F5FA8190063D400 /* UploadLocationFlowLayout.swift in Sources */,
 				A57C060E1F7611A000A0568F /* BookmarkController.swift in Sources */,
 				A5F46C411FC6057100D69945 /* SMSegmentAppearance.swift in Sources */,
@@ -642,6 +649,7 @@
 				A552EA631F9A49EA005A0977 /* CommonSettings.swift in Sources */,
 				A5C6450A1F54F68800C78244 /* SharePhotoController.swift in Sources */,
 				A5F46C3D1FC5EBE400D69945 /* SMSegment.swift in Sources */,
+				A5CC6EE01FCC81050074AB78 /* ThreadCell.swift in Sources */,
 				A57941C91F6A27A6004EC40D /* EmojiDictionary.swift in Sources */,
 				A52912451FAA62620063901B /* Bookmark.swift in Sources */,
 				A562E51D1F53C67B0095C7C1 /* PhotoSelectorHeader.swift in Sources */,
