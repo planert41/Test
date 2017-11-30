@@ -34,6 +34,7 @@
 		A56868BA1F7843DD0050C406 /* Conversions.swift in Sources */ = {isa = PBXBuildFile; fileRef = A56868B91F7843DD0050C406 /* Conversions.swift */; };
 		A56868BD1F78A0FA0050C406 /* MessageController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A56868BC1F78A0FA0050C406 /* MessageController.swift */; };
 		A56868BF1F79C2FF0050C406 /* EmailHtmlFormat.swift in Sources */ = {isa = PBXBuildFile; fileRef = A56868BE1F79C2FF0050C406 /* EmailHtmlFormat.swift */; };
+		A56F4C361FD06621000BB676 /* ThreadMessageHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = A56F4C351FD06621000BB676 /* ThreadMessageHeader.swift */; };
 		A57941C41F6A2092004EC40D /* UploadEmojiFlowLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = A57941C31F6A2092004EC40D /* UploadEmojiFlowLayout.swift */; };
 		A57941C61F6A225D004EC40D /* UploadEmojiCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = A57941C51F6A225D004EC40D /* UploadEmojiCell.swift */; };
 		A57941C91F6A27A6004EC40D /* EmojiDictionary.swift in Sources */ = {isa = PBXBuildFile; fileRef = A57941C81F6A27A6004EC40D /* EmojiDictionary.swift */; };
@@ -51,8 +52,6 @@
 		A5AEB9741F96B00500E88CAC /* EmojiCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5AEB9731F96B00500E88CAC /* EmojiCell.swift */; };
 		A5AEB9761F986F8200E88CAC /* PictureController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5AEB9751F986F8200E88CAC /* PictureController.swift */; };
 		A5AEB9781F9956B500E88CAC /* InboxController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5AEB9771F9956B500E88CAC /* InboxController.swift */; };
-		A5AEB97A1F99583B00E88CAC /* InboxCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5AEB9791F99583B00E88CAC /* InboxCell.swift */; };
-		A5B5F8281FCE58EC00CED8EB /* ThreadMessageController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5B5F8271FCE58EC00CED8EB /* ThreadMessageController.swift */; };
 		A5BBD2881FB0A377004367E7 /* GoogleMaps.bundle in Resources */ = {isa = PBXBuildFile; fileRef = A5BBD2871FB0A377004367E7 /* GoogleMaps.bundle */; };
 		A5BBD28A1FB26401004367E7 /* Notes.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5BBD2891FB26401004367E7 /* Notes.swift */; };
 		A5BBD28C1FB26F4B004367E7 /* Notes2.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5BBD28B1FB26F4B004367E7 /* Notes2.swift */; };
@@ -83,6 +82,8 @@
 		A5F46C3E1FC5EBE400D69945 /* SMSegmentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5F46C3C1FC5EBE400D69945 /* SMSegmentView.swift */; };
 		A5F46C411FC6057100D69945 /* SMSegmentAppearance.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5F46C3F1FC6057100D69945 /* SMSegmentAppearance.swift */; };
 		A5F46C421FC6057100D69945 /* SMSegmentViewConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5F46C401FC6057100D69945 /* SMSegmentViewConstants.swift */; };
+		A5F990821FCF66EF0086E661 /* ThreadMessageController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5F990811FCF66EF0086E661 /* ThreadMessageController.swift */; };
+		A5F990841FCF84540086E661 /* ThreadMessageCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5F990831FCF84540086E661 /* ThreadMessageCell.swift */; };
 		B1A3AC30339B082041E14A20 /* Pods_ShoutaroundTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B65B7D125931B939429672C6 /* Pods_ShoutaroundTest.framework */; };
 /* End PBXBuildFile section */
 
@@ -117,6 +118,7 @@
 		A56868B91F7843DD0050C406 /* Conversions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Conversions.swift; sourceTree = "<group>"; };
 		A56868BC1F78A0FA0050C406 /* MessageController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MessageController.swift; sourceTree = "<group>"; };
 		A56868BE1F79C2FF0050C406 /* EmailHtmlFormat.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EmailHtmlFormat.swift; sourceTree = "<group>"; };
+		A56F4C351FD06621000BB676 /* ThreadMessageHeader.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ThreadMessageHeader.swift; sourceTree = "<group>"; };
 		A57941C31F6A2092004EC40D /* UploadEmojiFlowLayout.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UploadEmojiFlowLayout.swift; sourceTree = "<group>"; };
 		A57941C51F6A225D004EC40D /* UploadEmojiCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UploadEmojiCell.swift; sourceTree = "<group>"; };
 		A57941C81F6A27A6004EC40D /* EmojiDictionary.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EmojiDictionary.swift; sourceTree = "<group>"; };
@@ -134,8 +136,6 @@
 		A5AEB9731F96B00500E88CAC /* EmojiCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EmojiCell.swift; sourceTree = "<group>"; };
 		A5AEB9751F986F8200E88CAC /* PictureController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PictureController.swift; sourceTree = "<group>"; };
 		A5AEB9771F9956B500E88CAC /* InboxController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InboxController.swift; sourceTree = "<group>"; };
-		A5AEB9791F99583B00E88CAC /* InboxCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InboxCell.swift; sourceTree = "<group>"; };
-		A5B5F8271FCE58EC00CED8EB /* ThreadMessageController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ThreadMessageController.swift; sourceTree = "<group>"; };
 		A5BBD2871FB0A377004367E7 /* GoogleMaps.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; name = GoogleMaps.bundle; path = Pods/GoogleMaps/Maps/Frameworks/GoogleMaps.framework/Resources/GoogleMaps.bundle; sourceTree = "<group>"; };
 		A5BBD2891FB26401004367E7 /* Notes.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Notes.swift; sourceTree = "<group>"; };
 		A5BBD28B1FB26F4B004367E7 /* Notes2.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Notes2.swift; sourceTree = "<group>"; };
@@ -167,6 +167,8 @@
 		A5F46C3C1FC5EBE400D69945 /* SMSegmentView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SMSegmentView.swift; sourceTree = "<group>"; };
 		A5F46C3F1FC6057100D69945 /* SMSegmentAppearance.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SMSegmentAppearance.swift; sourceTree = "<group>"; };
 		A5F46C401FC6057100D69945 /* SMSegmentViewConstants.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SMSegmentViewConstants.swift; sourceTree = "<group>"; };
+		A5F990811FCF66EF0086E661 /* ThreadMessageController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ThreadMessageController.swift; sourceTree = "<group>"; };
+		A5F990831FCF84540086E661 /* ThreadMessageCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ThreadMessageCell.swift; sourceTree = "<group>"; };
 		A64D6DDCD46BE134C4B0B7C6 /* Pods-InstagramFirebase.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-InstagramFirebase.release.xcconfig"; path = "Pods/Target Support Files/Pods-InstagramFirebase/Pods-InstagramFirebase.release.xcconfig"; sourceTree = "<group>"; };
 		B65B7D125931B939429672C6 /* Pods_ShoutaroundTest.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_ShoutaroundTest.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		E6A7A43430193F3A7265A821 /* Pods-ShoutaroundTest.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ShoutaroundTest.debug.xcconfig"; path = "Pods/Target Support Files/Pods-ShoutaroundTest/Pods-ShoutaroundTest.debug.xcconfig"; sourceTree = "<group>"; };
@@ -337,10 +339,11 @@
 			children = (
 				A56868BC1F78A0FA0050C406 /* MessageController.swift */,
 				A56868BE1F79C2FF0050C406 /* EmailHtmlFormat.swift */,
-				A5AEB9791F99583B00E88CAC /* InboxCell.swift */,
 				A5AEB9771F9956B500E88CAC /* InboxController.swift */,
 				A5CC6EDF1FCC81050074AB78 /* ThreadCell.swift */,
-				A5B5F8271FCE58EC00CED8EB /* ThreadMessageController.swift */,
+				A5F990811FCF66EF0086E661 /* ThreadMessageController.swift */,
+				A5F990831FCF84540086E661 /* ThreadMessageCell.swift */,
+				A56F4C351FD06621000BB676 /* ThreadMessageHeader.swift */,
 			);
 			name = Message;
 			sourceTree = "<group>";
@@ -606,6 +609,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A56F4C361FD06621000BB676 /* ThreadMessageHeader.swift in Sources */,
 				A54E1D731F4E736B00C2AA77 /* InstagramFirebase.xcdatamodeld in Sources */,
 				A5C645161F56604200C78244 /* HomePostCell.swift in Sources */,
 				A552EA611F99BE76005A0977 /* PhotoSelectorControllerDummy.swift in Sources */,
@@ -625,9 +629,7 @@
 				A5C645221F5B5F2700C78244 /* CameraController.swift in Sources */,
 				A530FE8F1F8B17BA003C3591 /* LocationSearchController.swift in Sources */,
 				A5C645111F56547300C78244 /* CustomImageView.swift in Sources */,
-				A5AEB97A1F99583B00E88CAC /* InboxCell.swift in Sources */,
 				A5C6450D1F564A4C00C78244 /* Post.swift in Sources */,
-				A5B5F8281FCE58EC00CED8EB /* ThreadMessageController.swift in Sources */,
 				A57A674D1F5FA8190063D400 /* UploadLocationFlowLayout.swift in Sources */,
 				A57C060E1F7611A000A0568F /* BookmarkController.swift in Sources */,
 				A5F46C411FC6057100D69945 /* SMSegmentAppearance.swift in Sources */,
@@ -664,10 +666,12 @@
 				A5C645141F565E8800C78244 /* HomeController.swift in Sources */,
 				A5C645181F57A4BF00C78244 /* User.swift in Sources */,
 				A57A674B1F5E62F30063D400 /* Credentials.swift in Sources */,
+				A5F990821FCF66EF0086E661 /* ThreadMessageController.swift in Sources */,
 				A56868BD1F78A0FA0050C406 /* MessageController.swift in Sources */,
 				A5C6450F1F564C7700C78244 /* UserProfilePhotoCell.swift in Sources */,
 				A5D942E91FC5145C00A189DD /* ExploreController.swift in Sources */,
 				A53E7E1B1F5E4A4B0011C1CA /* GoogleDataProvider.swift in Sources */,
+				A5F990841FCF84540086E661 /* ThreadMessageCell.swift in Sources */,
 				A51C13C31F4FBF2F00CEB740 /* Extensions.swift in Sources */,
 				A5C6451F1F57B1BD00C78244 /* UserSearchCell.swift in Sources */,
 				A5F46C3E1FC5EBE400D69945 /* SMSegmentView.swift in Sources */,

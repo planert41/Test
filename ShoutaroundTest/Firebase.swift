@@ -714,52 +714,52 @@ extension Database{
         
     }
     
-    static func fetchMessageForUID( userUID: String, completion: @escaping ([Message]) -> ()) {
-        
-        let myGroup = DispatchGroup()
-        var messages = [] as [Message]
-        let ref = Database.database().reference().child("messages").child(userUID)
-        
-        ref.observeSingleEvent(of: .value, with: {(snapshot) in
-            
-//            print(snapshot.value)
-            guard let userposts = snapshot.value as? [String:Any]  else {return}
-            
-            userposts.forEach({ (key,value) in
-            myGroup.enter()
-                
-                
-            guard let messageDetails = value as? [String: Any] else {return}
-            guard let senderUserUID = messageDetails["senderUID"] as? String else {return}
-            guard let postID = messageDetails["postUID"] as? String else {return}
-                
-            Database.fetchUserWithUID(uid: senderUserUID, completion: { (senderUser) in
-                
-            Database.fetchPostWithPostID(postId: postID, completion: { (post, error) in
-                
-                if let error = error {
-                  print(error)
-                    return
-                }
-                
-                let tempMessage = Message.init(uid: key, senderUser: senderUser, sendPost: post, dictionary: messageDetails)
-                
-                messages.append(tempMessage)
-                myGroup.leave()
-            })
-            })
-            })
-            
-            myGroup.notify(queue: .main) {
-                messages.sort(by: { (p1, p2) -> Bool in
-                    return p1.creationDate.compare(p2.creationDate) == .orderedDescending
-                })
-                completion(messages)
-            }
-            
-            })
-    }
-    
+//    static func fetchMessageForUID( userUID: String, completion: @escaping ([Message]) -> ()) {
+//        
+//        let myGroup = DispatchGroup()
+//        var messages = [] as [Message]
+//        let ref = Database.database().reference().child("messages").child(userUID)
+//        
+//        ref.observeSingleEvent(of: .value, with: {(snapshot) in
+//            
+////            print(snapshot.value)
+//            guard let userposts = snapshot.value as? [String:Any]  else {return}
+//            
+//            userposts.forEach({ (key,value) in
+//            myGroup.enter()
+//                
+//                
+//            guard let messageDetails = value as? [String: Any] else {return}
+//            guard let senderUserUID = messageDetails["senderUID"] as? String else {return}
+//            guard let postID = messageDetails["postUID"] as? String else {return}
+//                
+//            Database.fetchUserWithUID(uid: senderUserUID, completion: { (senderUser) in
+//                
+//            Database.fetchPostWithPostID(postId: postID, completion: { (post, error) in
+//                
+//                if let error = error {
+//                  print(error)
+//                    return
+//                }
+//                
+//                let tempMessage = Message.init(uid: key, senderUser: senderUser, sendPost: post, dictionary: messageDetails)
+//                
+//                messages.append(tempMessage)
+//                myGroup.leave()
+//            })
+//            })
+//            })
+//            
+//            myGroup.notify(queue: .main) {
+//                messages.sort(by: { (p1, p2) -> Bool in
+//                    return p1.creationDate.compare(p2.creationDate) == .orderedDescending
+//                })
+//                completion(messages)
+//            }
+//            
+//            })
+//    }
+//    
     static func fetchMessageThreadsForUID( userUID: String, completion: @escaping ([MessageThread]) -> ()) {
         
         let myGroup = DispatchGroup()

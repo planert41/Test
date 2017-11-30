@@ -469,7 +469,7 @@ class MessageController: UIViewController, UICollectionViewDataSource, UICollect
                     var threads = post["threads"] as? [String : Any] ?? [:]
                     
                     count = max(0, count + 1)
-                    threads[threadKey] = uploadTime
+                    threads[threadKey] = creatorUID
                     
                     post["messageCount"] = count as AnyObject?
                     post["threads"] = threads as AnyObject?

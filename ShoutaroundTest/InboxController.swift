@@ -38,20 +38,15 @@ class InboxController: UICollectionViewController,UICollectionViewDelegateFlowLa
         return label
     }()
     
-    
-    
-    
     override func viewDidLoad() {
         super.viewDidLoad()
     
-        navigationItem.title = "Inbox (" + String(messages.count) + ")"
+        navigationItem.title = "Inbox (" + String(messageThreads.count) + ")"
         navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Bookmarks", style: .plain, target: self, action: #selector(toBookmarks))
         
-        collectionView?.register(InboxCell.self, forCellWithReuseIdentifier: inboxCellId)
         collectionView?.register(ThreadCell.self, forCellWithReuseIdentifier: threadCellId)
 
         fetchMessageThreads()
-//        fetchMessages()
         collectionView?.backgroundColor = UIColor.white
         view.addSubview(noResultsLabel)
         noResultsLabel.anchor(top: topLayoutGuide.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 5, paddingLeft: 5, paddingBottom: 5, paddingRight: 5, width: 0, height: 50)
@@ -74,19 +69,6 @@ class InboxController: UICollectionViewController,UICollectionViewDelegateFlowLa
     func toBookmarks(){
         tabBarController?.selectedIndex = 3
     }
-    
-    
-    func fetchMessages(){
-        
-        guard let currentUserUID = Auth.auth().currentUser?.uid else {return}
-        
-        Database.fetchMessageForUID(userUID: currentUserUID) { (fetchedMessages) in
-
-            self.messages = fetchedMessages
-            self.collectionView?.reloadData()
-        }
-    }
-    
 
     func fetchMessageThreads(){
         guard let currentUserUID = Auth.auth().currentUser?.uid else {return}
@@ -119,10 +101,24 @@ class InboxController: UICollectionViewController,UICollectionViewDelegateFlowLa
         
         let messageController = MessageController()
         messageController.post = post
-        
         navigationController?.pushViewController(messageController, animated: true)
         
     }
+    
+    
+    override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        print(indexPath.item)
+        
+        if let collectionView = self.collectionView {
+            let cell = collectionView.cellForItem(at: indexPath) as? ThreadCell
+            let threadMessageController = ThreadMessageController(collectionViewLayout: UICollectionViewFlowLayout())
+            threadMessageController.messageThread = messageThreads[indexPath.item]
+            threadMessageController.post = cell?.post
+            navigationController?.pushViewController(threadMessageController, animated: true)
+        }
+    }
+        
+
     
     
     

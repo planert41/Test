@@ -9,30 +9,6 @@
 import Foundation
 import Firebase
 
-struct Message {
-    let postId: String
-    let messageID: String
-    let senderUID: String
-    let senderMessage : String
-    let creationDate: Date
-    let senderUser: User?
-    let sendPost: Post?
-    
-    
-    init(uid: String, senderUser: User?, sendPost: Post?, dictionary: [String:Any]) {
-        
-        let secondsFrom1970 = dictionary["creationDate"] as? Double ?? 0
-        self.creationDate = Date(timeIntervalSince1970: secondsFrom1970)
-        self.postId = dictionary["postUID"] as? String ?? ""
-        self.senderUID = dictionary["senderUID"] as? String ?? ""
-        self.senderMessage = dictionary["message"] as? String ?? ""
-        self.messageID = uid as? String ?? ""
-        self.senderUser = senderUser as? User ?? nil
-        self.sendPost = sendPost as? Post ?? nil
-    }
-    
-}
-
 struct MessageThread {
     let threadID: String
     let creatorUID: String
@@ -65,7 +41,7 @@ struct MessageThread {
     }
 }
 
-struct MessageTest {
+struct Message {
     let messageID: String
     let senderUID: String
     let message : String
