@@ -716,6 +716,11 @@ class ExploreController: UIViewController, UISearchBarDelegate, HomePostSearchDe
                 } else {
                 fetchedPost = post
                     
+                // Update Post with Location Distance from selected Location
+                    if self.filterLocation != nil {
+                    fetchedPost?.distance = Double((fetchedPost?.locationGPS?.distance(from: self.filterLocation!))!)
+                    }
+                    
 //                print(fetchedPost)
                 
                 // Filter Post based on conditions

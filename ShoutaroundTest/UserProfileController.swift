@@ -706,8 +706,14 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
             Database.fetchPostWithPostID(postId: fetchPostId.id, completion: { (post, error) in
                 self.fetchedPostCount += 1
                 
-                guard let post = post else {return}
-                var tempPost = [post]
+                guard var fetchedPost = post else {return}
+                
+                // Update Post with Location Distance from selected Location
+                if self.filterLocation != nil {
+                    fetchedPost.distance = Double((fetchedPost.locationGPS?.distance(from: self.filterLocation!))!)
+                }
+                
+                var tempPost = [fetchedPost]
                 
                 if let error = error {
                     //                    print("Failed to fetch post for: ", fetchPostId.id)

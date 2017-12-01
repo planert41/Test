@@ -332,6 +332,7 @@ extension Database{
         if let cachedPost = postCache[postId] {
             if cachedPost != nil {
                 print("Using post cache for \(postId)")
+                
                 completion(cachedPost, nil)
                 return
             }
@@ -458,6 +459,7 @@ extension Database{
         })
         
         myGroup.notify(queue: .main) {
+            
             fetchedPostIds.sort(by: { (p1, p2) -> Bool in
                 return (p1.distance! < p2.distance!)
             })

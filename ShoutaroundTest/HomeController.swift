@@ -14,7 +14,7 @@ import CoreGraphics
 import CoreLocation
 
 
-class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLayout, HomePostCellDelegate, CLLocationManagerDelegate, UISearchControllerDelegate, HomePostSearchDelegate, UIGestureRecognizerDelegate, FilterControllerDelegate  {
+class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLayout, HomePostCellDelegate, CLLocationManagerDelegate, UISearchControllerDelegate, HomePostSearchDelegate, UIGestureRecognizerDelegate, FilterControllerDelegate, UISearchBarDelegate  {
     
     let cellId = "cellId"
     var displayedPosts = [Post](){
@@ -108,6 +108,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
 
     
     var resultSearchController:UISearchController? = nil
+    var defaultSearchBar = UISearchBar()
 
     let locationManager = CLLocationManager()
 
@@ -346,6 +347,11 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         return label
     }()
 
+    func searchBarShouldBeginEditing(_ searchBar: UISearchBar) -> Bool {
+        self.openSearch()
+        return false
+    }
+    
     
     func setupSearchController() {
         let homePostSearchResults = HomePostSearch()
@@ -446,6 +452,9 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     }
     
     func sortDisplayedPosts(){
+        if self.displayedPosts.count > 1 {
+            print(self.displayedPosts)
+            
         if self.filterSort == FilterSortDefault[1] {
             // Oldest
             self.displayedPosts.sort(by: { (p1, p2) -> Bool in
@@ -462,6 +471,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
                 return p1.creationDate.compare(p2.creationDate) == .orderedDescending
             })
         }
+        }
     }
     
     // Home Post Search Delegates
@@ -472,7 +482,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
             self.handleRefresh()
 
         } else {
-            navigationItem.title = "Results For: " + searchedText!
+            defaultSearchBar.text = searchedText!
             self.filterCaption = searchedText
             self.resultSearchController?.searchBar.text = searchedText
             self.refreshPagination()
@@ -554,7 +564,8 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     func handleRefresh() {
         
         // RemoveAll so that when user follow/unfollows it updates
-        navigationItem.title = "Shoutaround"
+//        navigationItem.title = "Shoutaround"
+        defaultSearchBar.text?.removeAll()
         refreshPagination()
         clearFilter()
         fetchedPostIds.removeAll()
@@ -734,21 +745,31 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
                         // End of loop functions are checked every iteration. Skipping iteration skipped the check
 //                        print("Finish Paging @ GroupCheck")
                         NotificationCenter.default.post(name: HomeController.finishPaginationNotificationName, object: nil)
-                    }
+    
                     continue
                 }
+            }
             }
             
             Database.fetchPostWithPostID(postId: fetchPostId.id, completion: { (post, error) in
                 self.fetchedPostCount += 1
                 
-                guard let post = post else {return}
-                var tempPost = [post]
+                guard var fetchedPost = post else {return}
+                
+                // Update Post with Location Distance from selected Location
+                if self.filterLocation != nil {
+                    fetchedPost.distance = Double((fetchedPost.locationGPS?.distance(from: self.filterLocation!))!)
+                }
+                
+                var tempPost = [fetchedPost]
                 
                 if let error = error {
 //                    print("Failed to fetch post for: ", fetchPostId.id)
                     return
                 }
+                
+                
+                
                 
                 // Filter Caption
                 
@@ -763,6 +784,8 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
                 }
 
                 if tempPost.count > 0 {print("Adding Temp Post id: ", tempPost[0].id)}
+                
+                // Update Location if nil
                 
                 self.displayedPosts += tempPost
 
@@ -803,17 +826,20 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     
     fileprivate func setupNavigationItems() {
         
-        navigationItem.title = "Shoutaround"
+        navigationItem.titleView = defaultSearchBar
+        defaultSearchBar.delegate = self
+        defaultSearchBar.placeholder = "Search Food, User, Location"
         
-        navigationItem.leftBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "search_selected").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(openSearch))
+        navigationItem.leftBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "mailbox").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(openInbox))
         
         if self.filterGroup == defaultGroup && self.filterRange == defaultRange && self.filterTime == defaultTime && self.filterGroup == "All" {
-            filterButton.image = #imageLiteral(resourceName: "blankfilter").withRenderingMode(.alwaysOriginal)
+            filterButton.image = #imageLiteral(resourceName: "filter").withRenderingMode(.alwaysOriginal)
             filterButton.backgroundColor = UIColor.clear
             filterButton.addGestureRecognizer(singleTap)
         } else {
-            filterButton.image = #imageLiteral(resourceName: "filter").withRenderingMode(.alwaysOriginal)
-//            filterButton.backgroundColor = UIColor.orange
+            filterButton.image = #imageLiteral(resourceName: "blankfilter").withRenderingMode(.alwaysOriginal)
+            filterButton.backgroundColor = UIColor.orange
+//            filterButton.layer.cornerRadius = filterButton.layer.frame.width / 2
             filterButton.addGestureRecognizer(singleTap)
         }
         
