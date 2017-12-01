@@ -10,7 +10,7 @@ import UIKit
 import Firebase
 
 
-class CommentsController: UICollectionViewController, UICollectionViewDelegateFlowLayout {
+class CommentsController: UICollectionViewController, UICollectionViewDelegateFlowLayout, UITextFieldDelegate {
 
     var post: Post?
     
@@ -31,7 +31,15 @@ class CommentsController: UICollectionViewController, UICollectionViewDelegateFl
         
         collectionView?.register(CommentCell.self, forCellWithReuseIdentifier: cellId)
         
+        collectionView?.isUserInteractionEnabled = true
+        collectionView?.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard)))
+        
         fetchComments()
+    }
+    
+    func dismissKeyboard() {
+        //Causes the view (or one of its embedded text fields) to resign the first responder status.
+        self.commentTextField.resignFirstResponder()
     }
     
     var comments = [Comment]()
@@ -118,6 +126,7 @@ class CommentsController: UICollectionViewController, UICollectionViewDelegateFl
 
         containerView.addSubview(self.commentTextField)
         self.commentTextField.anchor(top: containerView.topAnchor, left: containerView.leftAnchor, bottom: containerView.bottomAnchor, right: submitButton.leftAnchor, paddingTop: 0, paddingLeft: 12, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
+        self.commentTextField.delegate = self
         
         let lineSeparatorView = UIView()
         lineSeparatorView.backgroundColor = UIColor.rgb(red: 230, green: 230, blue: 230)
@@ -132,9 +141,15 @@ class CommentsController: UICollectionViewController, UICollectionViewDelegateFl
         
         let textField = UITextField()
         textField.placeholder = "Enter Comment"
+        textField.returnKeyType = UIReturnKeyType.done
         return textField
         
     }()
+    
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        textField.resignFirstResponder()
+        return true
+    }
     
     
     func handleSubmit() {
@@ -150,7 +165,6 @@ class CommentsController: UICollectionViewController, UICollectionViewDelegateFl
                 print("Failed to insert comment:", err)
                 return
             }
-            
                 print("Successfully saved comment:")
         }
         

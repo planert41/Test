@@ -46,7 +46,6 @@ struct Message {
     let senderUID: String
     let message : String
     let creationDate: Date
-    var senderUser: User? = nil
     
     init(messageID: String, dictionary: [String:Any]) {
         

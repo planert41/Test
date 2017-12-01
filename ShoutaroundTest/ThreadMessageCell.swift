@@ -48,6 +48,7 @@ class ThreadMessageCell: UICollectionViewCell {
         textView.font = UIFont.systemFont(ofSize: 14)
         textView.isScrollEnabled = false
         textView.backgroundColor = .white
+        textView.isUserInteractionEnabled = false
         return textView
     }()
     
@@ -76,7 +77,7 @@ class ThreadMessageCell: UICollectionViewCell {
         profileImageView.layer.cornerRadius = 40/2
         
         addSubview(dateLabel)
-        dateLabel.anchor(top: topAnchor, left: nil, bottom: nil, right: rightAnchor, paddingTop: 8, paddingLeft: 0, paddingBottom: 0, paddingRight: 8, width: 50, height: 10)
+        dateLabel.anchor(top: topAnchor, left: nil, bottom: nil, right: rightAnchor, paddingTop: 8, paddingLeft: 0, paddingBottom: 0, paddingRight: 8, width: 70, height: 10)
         
         addSubview(textView)
         textView.anchor(top: topAnchor, left: profileImageView.rightAnchor, bottom: bottomAnchor, right: dateLabel.leftAnchor, paddingTop: 4, paddingLeft: 4, paddingBottom: 4, paddingRight: 4, width: 0, height: 0)

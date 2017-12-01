@@ -497,7 +497,7 @@ class MessageController: UIViewController, UICollectionViewDataSource, UICollect
                 // Send User Message
                 print("Trying to send messages for user uids: \(receiveUserUid)")
                 if receiveUserUid.count > 0 {
-                    self.updateMessageThread(threadKey: threadKey, creatorUid: creatorUID, creatorUsername: creatorUsername, receiveUid: receiveUserUid, message: message)
+                    Database.updateMessageThread(threadKey: threadKey, creatorUid: creatorUID, creatorUsername: creatorUsername, receiveUid: receiveUserUid, message: message)
                 
                 }
                 
@@ -505,57 +505,6 @@ class MessageController: UIViewController, UICollectionViewDataSource, UICollect
             })
         
     }
-    
-    func updateMessageThread(threadKey: String, creatorUid: String, creatorUsername: String, receiveUid: [String: String]?, message: String) {
-        
-        // Create User Message within Thread
-        let threadRef = Database.database().reference().child("messageThreads").child(threadKey)
-        let threadMessageRef = threadRef.child("messages").childByAutoId()
-        let inboxRef = Database.database().reference().child("inbox")
-        let uploadTime = Date().timeIntervalSince1970
-        let descTime = Date()
-
-        // Create Message in Message Thread
-        let values = ["creatorUID": creatorUid, "message": message, "creationDate": uploadTime] as [String:Any]
-        
-        threadMessageRef.updateChildValues(values, withCompletionBlock: { (err, ref) in
-            if let err = err {
-                print("Error saving \(creatorUid) message: \(message) : in Thread \(threadKey) at \(descTime)")
-                return
-            }
-            print("Success saving \(creatorUid) message: \(message) : in Thread \(threadKey) at \(descTime)")
-        })
-        
-        // Update Users in Thread and Inbox
-        var allUsers: [String: String] = [:]
-        if let receiveUid = receiveUid {
-            allUsers = receiveUid
-            allUsers[creatorUid] = creatorUsername
-        } else {
-            allUsers[creatorUid] = creatorUsername
-        }
-                
-        threadRef.child("users").updateChildValues(allUsers, withCompletionBlock: { (err, ref) in
-            if let err = err {
-                print("Error Updating Users \(allUsers) in Thread \(threadKey)")
-                return
-            }
-            print("Success Updating Users \(allUsers) in Thread \(threadKey)")
-        })
-        
-        // Loop Through Users
-        var threadUpload = [threadKey:uploadTime]
-        for (user, username) in allUsers {
-            inboxRef.child(user).updateChildValues(threadUpload, withCompletionBlock: { (err, ref) in
-                if let err = err {
-                    print("Error Updating Inbox for User \(user), Thread \(threadKey)")
-                    return
-                }
-                print("Success Updating Inbox for User \(user), Thread \(threadKey)")
-            })
-        }
-    }
-    
     
     func checkToText(inputString: String?, completion: @escaping ([String:String]) -> ()){
         guard let inputString = inputString else {return}
