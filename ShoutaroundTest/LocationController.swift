@@ -60,8 +60,8 @@ class LocationController: UIViewController, UIScrollViewDelegate, UICollectionVi
     var displayedPosts = [Post]()
     var placesClient: GMSPlacesClient!
 
-    var selectedLong: Double?
-    var selectedLat: Double?
+    var selectedLong: Double? = 0
+    var selectedLat: Double? = 0
     var selectedLocation: CLLocation?
     
     var selectedAdress: String?
@@ -102,13 +102,20 @@ class LocationController: UIViewController, UIScrollViewDelegate, UICollectionVi
     
     let locationNameView: UIView = {
         let view = UIView()
-        view.backgroundColor = UIColor.clear
+        view.backgroundColor = UIColor.rgb(red: 128, green: 191, blue: 255)
         return view
     }()
     
     lazy var locationNameLabel: PaddedUILabel = {
         let ul = PaddedUILabel()
         ul.text = "Name: "
+        ul.font = UIFont.systemFont(ofSize: 12)
+        ul.backgroundColor = UIColor(white: 1, alpha: 0.75)
+        ul.layer.backgroundColor = UIColor.rgb(red: 128, green: 191, blue: 255).cgColor
+        ul.layer.borderWidth = 1
+        ul.layer.cornerRadius = 5
+        ul.layer.masksToBounds = true
+        
         return ul
     }()
     
@@ -120,7 +127,7 @@ class LocationController: UIViewController, UIScrollViewDelegate, UICollectionVi
     
     let locationDistanceView: UIView = {
         let view = UIView()
-        view.backgroundColor = UIColor.clear
+        view.backgroundColor = UIColor.rgb(red: 128, green: 191, blue: 255)
         return view
     }()
     
@@ -128,6 +135,12 @@ class LocationController: UIViewController, UIScrollViewDelegate, UICollectionVi
         let ul = PaddedUILabel()
         ul.text = "Name: "
         ul.isUserInteractionEnabled = true
+        ul.font = UIFont.systemFont(ofSize: 10)
+        ul.backgroundColor = UIColor(white: 1, alpha: 0.75)
+        ul.layer.backgroundColor = UIColor.rgb(red: 128, green: 191, blue: 255).cgColor
+        ul.layer.borderWidth = 0.5
+        ul.layer.cornerRadius = 5
+        ul.layer.masksToBounds = true
         ul.addGestureRecognizer(UITapGestureRecognizer(target: self, action:  #selector(activateMap)))
         return ul
     }()
@@ -333,6 +346,7 @@ class LocationController: UIViewController, UIScrollViewDelegate, UICollectionVi
             self.placeName = result["name"].string ?? ""
 //            print("place Name: ", self.placeName)
             self.locationNameLabel.text = self.placeName
+            self.navigationItem.title = self.placeName
             
             self.placeOpeningHours = result["opening_hours"]["weekday_text"].arrayValue
 //            print("placeOpeningHours: ", self.placeOpeningHours)
@@ -387,6 +401,7 @@ class LocationController: UIViewController, UIScrollViewDelegate, UICollectionVi
             self.selectedLong = result["geometry"]["location"]["lat"].double ?? 0
             self.selectedLat = result["geometry"]["location"]["lng"].double ?? 0
             self.selectedLocation = CLLocation(latitude: self.selectedLat!, longitude: self.selectedLong!)
+            self.refreshMap(long: self.selectedLat!, lat: self.selectedLong!)
             
             self.selectedAdress = result["formatted_address"].string ?? ""
             self.locationDistanceLabel.text = self.selectedAdress
@@ -436,14 +451,48 @@ class LocationController: UIViewController, UIScrollViewDelegate, UICollectionVi
         scrollView.showsVerticalScrollIndicator = true
         scrollView.contentSize = CGSize(width: view.bounds.width, height: view.bounds.height * 2)
         
-        setupPlaceDetailStackview()
+        tempView.addSubview(placeDetailsView)
+        placeDetailsView.anchor(top: tempView.topAnchor, left: tempView.leftAnchor, bottom: nil, right: tempView.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 5 * (30 + 2 + 2))
         
-        tempView.addSubview(placeDetailStackview)
-        placeDetailStackview.anchor(top: tempView.topAnchor, left: tempView.leftAnchor, bottom: nil, right: tempView.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 5 * (30 + 2 + 2))
-        placeDetailsView.backgroundColor = UIColor.rgb(red: 204, green: 238, blue: 255)
+        // Location Adress Label
+        setupLocationLabels(containerview: locationDistanceView, icon: locationDistanceIcon, label: locationDistanceLabel)
+        tempView.addSubview(locationDistanceView)
+        locationDistanceView.anchor(top: nil, left: placeDetailsView.leftAnchor, bottom: placeDetailsView.bottomAnchor, right: placeDetailsView.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 30 + 2 + 2)
+        
+        // Location Name Label
+        placeDetailsView.addSubview(locationNameView)
+        locationNameView.anchor(top: nil, left: placeDetailsView.leftAnchor, bottom: locationDistanceView.topAnchor, right: placeDetailsView.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 30 + 2 + 2)
+        
+        let buttonStackView = UIStackView(arrangedSubviews: [locationHoursIcon, locationPhoneIcon,locationWebsiteIcon])
+        buttonStackView.distribution = .fillEqually
+        
+        locationNameView.addSubview(locationNameIcon)
+        locationNameView.addSubview(locationNameLabel)
+        locationNameView.addSubview(buttonStackView)
+        
+        buttonStackView.anchor(top: locationNameView.topAnchor, left: nil, bottom: locationNameView.bottomAnchor, right: locationNameView.rightAnchor, paddingTop: 2, paddingLeft: 5, paddingBottom: 2, paddingRight: 15, width: 90, height: 0)
+        
+        locationNameIcon.anchor(top: locationNameView.topAnchor, left: locationNameView.leftAnchor, bottom: locationNameView.bottomAnchor, right: nil, paddingTop: 2, paddingLeft: 15, paddingBottom: 2, paddingRight: 5, width: 30, height: 30)
+        
+        locationNameLabel.anchor(top: locationNameView.topAnchor, left: locationNameIcon.rightAnchor, bottom: locationNameView.bottomAnchor, right: buttonStackView.leftAnchor, paddingTop: 2, paddingLeft: 15, paddingBottom: 2, paddingRight: 5, width: 0, height: 0)
+        
+        // Add Map
+        placeDetailsView.addSubview(map)
+        map.anchor(top: placeDetailsView.topAnchor, left: placeDetailsView.leftAnchor, bottom: locationNameView.topAnchor, right: placeDetailsView.rightAnchor, paddingTop: 1, paddingLeft: 1, paddingBottom: 0, paddingRight: 1, width: 0, height: 0)
+        map.delegate = self
+        
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(activateMap))
+        tapGesture.numberOfTapsRequired = 1
+        
+        map.addGestureRecognizer(tapGesture)
+        map.isUserInteractionEnabled = true
+        
+        if self.selectedLong != nil && self.selectedLat != nil {
+            self.refreshMap(long: self.selectedLong!, lat: self.selectedLat!)
+        }
         
         tempView.addSubview(collectionViewTitleLabel)
-        collectionViewTitleLabel.anchor(top: placeDetailStackview.bottomAnchor, left: tempView.leftAnchor, bottom: nil, right: tempView.rightAnchor, paddingTop: 10, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 20)
+        collectionViewTitleLabel.anchor(top: placeDetailsView.bottomAnchor, left: tempView.leftAnchor, bottom: nil, right: tempView.rightAnchor, paddingTop: 10, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 20)
         
         
         let bottomDividerView = UIView()
@@ -478,12 +527,16 @@ class LocationController: UIViewController, UIScrollViewDelegate, UICollectionVi
             self.populatePlaceDetails(placeId: self.googlePlaceId)
         } else{
             self.googleLocationSearch(GPSLocation: CLLocation(latitude: self.selectedLat!, longitude: self.selectedLong!))
-            self.showNoPlaceIDStackview()
             
-            tempView.addSubview(noIdView)
-            noIdView.backgroundColor = UIColor.white
+            tempView.addSubview(placesCollectionView)
+            placesCollectionView.anchor(top: locationNameView.topAnchor, left: locationNameView.leftAnchor, bottom: locationNameView.bottomAnchor, right: locationNameView.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
+            placesCollectionView.backgroundColor = UIColor.rgb(red: 128, green: 191, blue: 255)
+            placesCollectionView.register(UploadLocationCell.self, forCellWithReuseIdentifier: locationCellId)
             
-            noIdView.anchor(top: tempView.topAnchor, left: tempView.leftAnchor, bottom: nil, right: tempView.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 5 * (30 + 2 + 2) + 10)
+            placesCollectionView.delegate = self
+            placesCollectionView.dataSource = self
+            placesCollectionView.showsHorizontalScrollIndicator = false
+            
             collectionViewTitleLabel.text = "Photos Around Location"
             self.placesCollectionView.reloadData()
             self.photoCollectionView.reloadData()
@@ -507,6 +560,7 @@ class LocationController: UIViewController, UIScrollViewDelegate, UICollectionVi
         placeDetailStackview.axis = .vertical
    
     }
+    
     
     var noIdView = UIView()
     
@@ -535,8 +589,7 @@ class LocationController: UIViewController, UIScrollViewDelegate, UICollectionVi
         map.addGestureRecognizer(tapGesture)
         map.isUserInteractionEnabled = true
         self.refreshMap(long: self.selectedLong!, lat: self.selectedLat!)
-
-//        map.heightAnchor.constraint(equalTo: map.widthAnchor, multiplier: 1).isActive = true
+        //        map.heightAnchor.constraint(equalTo: map.widthAnchor, multiplier: 1).isActive = true
         
         
 
@@ -640,7 +693,7 @@ class LocationController: UIViewController, UIScrollViewDelegate, UICollectionVi
         
         self.map.clear()
         
-        let camera = GMSCameraPosition.camera(withLatitude: lat, longitude: long, zoom: 15)
+        let camera = GMSCameraPosition.camera(withLatitude: lat, longitude: long, zoom: 13)
         print("refresh map", camera)
         self.map.camera = camera
         
@@ -797,7 +850,8 @@ class LocationController: UIViewController, UIScrollViewDelegate, UICollectionVi
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: locationCellId, for: indexPath) as! UploadLocationCell
             cell.uploadLocations.font = UIFont.systemFont(ofSize: 13)
             cell.uploadLocations.text = googlePlaceNames[indexPath.item]
-            cell.backgroundColor = UIColor(white: 0, alpha: 0.03)
+//            cell.backgroundColor = UIColor(white: 0, alpha: 0.03)
+            cell.backgroundColor = UIColor.white
             
             return cell
         } else {

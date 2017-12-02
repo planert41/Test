@@ -17,10 +17,10 @@ var defaultPhotoResize = CGSize(width: 500, height: 500)
 
 // Filter Defaults
 
-var FilterSortTimeDefault:[String] = ["Early", "Mid-Day", "Night", "All"]
+var FilterSortTimeDefault:[String] = ["Breakfast", "Lunch", "Dinner", "All"]
 var FilterSortTimeStart:[Double] = [6,12,18,0]
 var FilterSortTimeEnd:[Double] = [12,18,23,23]
-var FilterSortDefault:[String] = ["Nearest", "Oldest", "Latest"]
+var FilterSortDefault:[String] = ["Nearest", "Oldest", "Recent"]
 
 let defaultRange = geoFilterRangeDefault[geoFilterRangeDefault.endIndex - 1]
 let defaultGroup = "All"

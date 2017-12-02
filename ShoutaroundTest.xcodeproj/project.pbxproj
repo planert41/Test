@@ -27,6 +27,7 @@
 		A552EA5F1F997973005A0977 /* Message.swift in Sources */ = {isa = PBXBuildFile; fileRef = A552EA5E1F997973005A0977 /* Message.swift */; };
 		A552EA611F99BE76005A0977 /* PhotoSelectorControllerDummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = A552EA601F99BE76005A0977 /* PhotoSelectorControllerDummy.swift */; };
 		A552EA631F9A49EA005A0977 /* CommonSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = A552EA621F9A49EA005A0977 /* CommonSettings.swift */; };
+		A55E6AF21FD2388100DEC490 /* TEST.swift in Sources */ = {isa = PBXBuildFile; fileRef = A55E6AF11FD2388100DEC490 /* TEST.swift */; };
 		A562E5161F5354A50095C7C1 /* LoginController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A562E5151F5354A50095C7C1 /* LoginController.swift */; };
 		A562E5191F539C040095C7C1 /* PhotoSelectorController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A562E5181F539C040095C7C1 /* PhotoSelectorController.swift */; };
 		A562E51B1F53C1650095C7C1 /* PhotoSelectorCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = A562E51A1F53C1650095C7C1 /* PhotoSelectorCell.swift */; };
@@ -111,6 +112,7 @@
 		A552EA5E1F997973005A0977 /* Message.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Message.swift; sourceTree = "<group>"; };
 		A552EA601F99BE76005A0977 /* PhotoSelectorControllerDummy.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PhotoSelectorControllerDummy.swift; sourceTree = "<group>"; };
 		A552EA621F9A49EA005A0977 /* CommonSettings.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CommonSettings.swift; sourceTree = "<group>"; };
+		A55E6AF11FD2388100DEC490 /* TEST.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TEST.swift; sourceTree = "<group>"; };
 		A562E5151F5354A50095C7C1 /* LoginController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoginController.swift; sourceTree = "<group>"; };
 		A562E5181F539C040095C7C1 /* PhotoSelectorController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PhotoSelectorController.swift; sourceTree = "<group>"; };
 		A562E51A1F53C1650095C7C1 /* PhotoSelectorCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PhotoSelectorCell.swift; sourceTree = "<group>"; };
@@ -304,6 +306,7 @@
 			children = (
 				A5516BC11F8ED0D5003C3E22 /* LocationController.swift */,
 				A5AEB9751F986F8200E88CAC /* PictureController.swift */,
+				A55E6AF11FD2388100DEC490 /* TEST.swift */,
 			);
 			name = ItemCells;
 			sourceTree = "<group>";
@@ -676,6 +679,7 @@
 				A5C6451F1F57B1BD00C78244 /* UserSearchCell.swift in Sources */,
 				A5F46C3E1FC5EBE400D69945 /* SMSegmentView.swift in Sources */,
 				A5C645261F5BADB000C78244 /* CustomAnimationPresentor.swift in Sources */,
+				A55E6AF21FD2388100DEC490 /* TEST.swift in Sources */,
 				A5AEB9761F986F8200E88CAC /* PictureController.swift in Sources */,
 				A562E51B1F53C1650095C7C1 /* PhotoSelectorCell.swift in Sources */,
 			);
