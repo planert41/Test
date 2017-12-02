@@ -621,7 +621,7 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
             self.isFinishedPaging = true
         }
         
-        if self.displayedPosts.count < 1 && self.isFinishedPaging != true {
+        else if self.displayedPosts.count < 1 && self.isFinishedPaging != true {
             print("No Display Pagination Check Paginate")
             self.paginatePosts()
         } else {
@@ -640,8 +640,6 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
                     print("Finished Paging No Results")
                     self.collectionView?.scrollsToTop = true
                     self.collectionView?.reloadData()
-                    
-                
                 } else {
                     self.noResultsLabel.isHidden = false
                     self.noResultsLabel.text = "Loading"
@@ -655,9 +653,11 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
     
     fileprivate func paginatePosts(){
         
-        print("Start Paginate Loop FetchPostCount: ", self.fetchedPostCount)
         let paginateFetchPostSize = 4
         var paginateFetchPostsLimit = min(self.fetchedPostCount + paginateFetchPostSize, self.fetchPostIds.count)
+        
+        print("Start Paginate Loop FetchPostCount: \(self.fetchedPostCount) to \(paginateFetchPostsLimit)")
+        
         
         for i in self.fetchedPostCount ..< paginateFetchPostsLimit  {
 
@@ -706,8 +706,13 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
             Database.fetchPostWithPostID(postId: fetchPostId.id, completion: { (post, error) in
                 self.fetchedPostCount += 1
                 
-                guard var fetchedPost = post else {return}
+//                print("\(self.fetchedPostCount): \(post)")
                 
+                guard let post = post else {
+                    print("No Post Returned from Fetching \(fetchPostId.id)")
+                    return}
+                
+                var fetchedPost = post
                 // Update Post with Location Distance from selected Location
                 if self.filterLocation != nil {
                     fetchedPost.distance = Double((fetchedPost.locationGPS?.distance(from: self.filterLocation!))!)
@@ -716,7 +721,7 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
                 var tempPost = [fetchedPost]
                 
                 if let error = error {
-                    //                    print("Failed to fetch post for: ", fetchPostId.id)
+                    print("Failed to fetch post for: ", fetchPostId.id)
                     return
                 }
                 
@@ -736,7 +741,7 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
                 
                 self.displayedPosts += tempPost
                 
-                //                print("Current: ", i, "fetchedPostCount: ", self.fetchedPostCount, "Total: ", self.fetchPostIds.count, "Display: ", self.displayedPosts.count, "finished: ", self.isFinishedPaging, "paginate:", paginateFetchPostsLimit)
+//                                print("Current: ", i, "fetchedPostCount: ", self.fetchedPostCount, "Total: ", self.fetchPostIds.count, "Display: ", self.displayedPosts.count, "finished: ", self.isFinishedPaging, "paginate:", paginateFetchPostsLimit)
                 
                 if self.fetchedPostCount == paginateFetchPostsLimit {
                     

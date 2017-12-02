@@ -453,7 +453,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     
     func sortDisplayedPosts(){
         if self.displayedPosts.count > 1 {
-            print(self.displayedPosts)
+//            print(self.displayedPosts)
             
         if self.filterSort == FilterSortDefault[1] {
             // Oldest
@@ -828,7 +828,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         
         navigationItem.titleView = defaultSearchBar
         defaultSearchBar.delegate = self
-        defaultSearchBar.placeholder = "Search Food, User, Location"
+        defaultSearchBar.placeholder = "Food, User, Location"
         
         navigationItem.leftBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "mailbox").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(openInbox))
         
@@ -837,8 +837,8 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
             filterButton.backgroundColor = UIColor.clear
             filterButton.addGestureRecognizer(singleTap)
         } else {
-            filterButton.image = #imageLiteral(resourceName: "blankfilter").withRenderingMode(.alwaysOriginal)
-            filterButton.backgroundColor = UIColor.orange
+            filterButton.image = #imageLiteral(resourceName: "filter").withRenderingMode(.alwaysOriginal)
+            filterButton.backgroundColor = UIColor.mainBlue()
 //            filterButton.layer.cornerRadius = filterButton.layer.frame.width / 2
             filterButton.addGestureRecognizer(singleTap)
         }

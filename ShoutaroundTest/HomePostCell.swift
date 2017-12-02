@@ -881,6 +881,7 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
     override func prepareForReuse() {
         super.prepareForReuse()
         photoImageView.image = nil
+        photoImageView.cancelImageRequestOperation()
     }
     
     
