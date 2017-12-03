@@ -182,7 +182,7 @@ class MessageController: UIViewController, UICollectionViewDataSource, UICollect
         toInput.placeholder = "@username, user@gmail.com"
         toInput.addTarget(self, action: #selector(textFieldDidChange(_:)), for: UIControlEvents.editingChanged)
         
-        // Keyboard Setups
+        // Keyboard Setups to Dismiss Keyboard
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow(_:)), name: NSNotification.Name.UIKeyboardWillShow, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide(_:)), name: NSNotification.Name.UIKeyboardWillHide, object: nil)
         
@@ -192,6 +192,14 @@ class MessageController: UIViewController, UICollectionViewDataSource, UICollect
         toRow.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard)))
         messageLabel.isUserInteractionEnabled = true
         messageLabel.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard)))
+        
+        let swipeUp = UISwipeGestureRecognizer(target: self, action: #selector(dismissKeyboard))
+        swipeUp.direction = .up
+        self.view.addGestureRecognizer(swipeUp)
+        
+        let swipeDown = UISwipeGestureRecognizer(target: self, action: #selector(dismissKeyboard))
+        swipeDown.direction = .down
+        self.view.addGestureRecognizer(swipeDown)
         
         
         

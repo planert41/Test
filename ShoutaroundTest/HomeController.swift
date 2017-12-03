@@ -967,9 +967,14 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
             print("Handle Cancel Logic here")
         }))
         
-        present(optionsAlert, animated: true, completion: nil)
+        present(optionsAlert, animated: true) {
+            optionsAlert.view.superview?.isUserInteractionEnabled = true
+            optionsAlert.view.superview?.addGestureRecognizer(UITapGestureRecognizer(target: self, action:#selector(self.alertClose(gesture:))))
+        }
+        
     }
     
+
     func editPost(post:Post){
         let editPost = SharePhotoController()
         

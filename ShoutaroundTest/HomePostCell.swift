@@ -537,15 +537,15 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         
         photoImageView.anchor(top: headerView.bottomAnchor, left: leftAnchor, bottom: nil, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
         photoImageView.heightAnchor.constraint(equalTo: widthAnchor, multiplier: 1).isActive = true
-
         
-        let locationTapGesture = UITapGestureRecognizer(target: self, action: #selector(locationTap))
-        photoImageView.addGestureRecognizer(locationTapGesture)
-
         let doubleTap = UITapGestureRecognizer(target: self, action: #selector(photoDoubleTapped))
         doubleTap.numberOfTapsRequired = 2
         photoImageView.addGestureRecognizer(doubleTap)
         photoImageView.isUserInteractionEnabled = true
+        
+        let locationTapGesture = UITapGestureRecognizer(target: self, action: #selector(locationTap))
+        photoImageView.addGestureRecognizer(locationTapGesture)
+        locationTapGesture.require(toFail: doubleTap)
         
         let pinch = UIPinchGestureRecognizer(target: self, action: #selector(self.pinch(sender:)))
         pinch.delegate = self
