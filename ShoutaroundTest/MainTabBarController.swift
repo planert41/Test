@@ -11,7 +11,7 @@ import Firebase
 import Photos
 import CoreLocation
 
-class MainTabBarController: UITabBarController, UITabBarControllerDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
+class MainTabBarController: UITabBarController, UITabBarControllerDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate, UIGestureRecognizerDelegate {
     
 
     var imagePicker = UIImagePickerController()
@@ -28,13 +28,37 @@ class MainTabBarController: UITabBarController, UITabBarControllerDelegate, UIIm
         if index == 2 {
 
         _ = UICollectionViewFlowLayout()
+        // Add photo function selected
             
-            imagePicker.allowsEditing = true
-            imagePicker.sourceType = .photoLibrary
-            imagePicker.delegate = self
-            imagePicker.modalPresentationStyle = UIModalPresentationStyle.overCurrentContext
-            present(imagePicker, animated: true, completion: nil)
-//            
+            let alertController = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+    
+            alertController.addAction(UIAlertAction(title: "Camera", style: .default, handler: { (_) in
+                self.presentCamera()
+            }))
+            
+            alertController.addAction(UIAlertAction(title: "Photo Roll", style: .default, handler: { (_) in
+                self.presentImagePicker()
+            }))
+
+            alertController.addAction(UIAlertAction(title: "Cancel", style: .destructive, handler: { (_) in
+                self.dismiss(animated: true, completion: nil)
+            }))
+            
+            present(alertController, animated: true) {
+                // Works if you tag subview for tabbarcontroller
+                alertController.view.superview?.subviews[1].isUserInteractionEnabled = true
+                let cancelTap = UITapGestureRecognizer(target: self, action:#selector(self.alertClose(gesture:)))
+                alertController.view.superview?.subviews[1].addGestureRecognizer(cancelTap)
+                print(alertController.view.superview?.subviews)
+
+            }
+            
+//            imagePicker.allowsEditing = true
+//            imagePicker.sourceType = .photoLibrary
+//            imagePicker.delegate = self
+//            imagePicker.modalPresentationStyle = UIModalPresentationStyle.overCurrentContext
+//            present(imagePicker, animated: true, completion: nil)
+//
 //            let photoSelectorController = PhotoSelectorControllerDummy()
 //            let navController = UINavigationController(rootViewController: photoSelectorController)
 //            
@@ -47,9 +71,29 @@ class MainTabBarController: UITabBarController, UITabBarControllerDelegate, UIIm
         return true
     }
     
+    func presentImagePicker(){
+        imagePicker.allowsEditing = true
+        imagePicker.sourceType = .photoLibrary
+        imagePicker.delegate = self
+        imagePicker.modalPresentationStyle = UIModalPresentationStyle.overCurrentContext
+        present(imagePicker, animated: true, completion: nil)
+    }
+    
+    func presentCamera(){
+        if UIImagePickerController.isSourceTypeAvailable(.camera) {
+            imagePicker.delegate = self
+            imagePicker.sourceType = .camera;
+            imagePicker.allowsEditing = false
+            present(imagePicker, animated: true, completion: nil)
+        } else {
+            self.alert(title: "No Camera", message: "Device has no camera")
+            presentImagePicker()
+        }
+    }
+    
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : Any]) {
         picker.dismiss(animated: true, completion: { () in
-            if (picker.sourceType == .photoLibrary) {
+            if (picker.sourceType == .photoLibrary) || (picker.sourceType == .camera) {
                 
                 let image = info[UIImagePickerControllerEditedImage] as! UIImage
 
@@ -70,8 +114,6 @@ class MainTabBarController: UITabBarController, UITabBarControllerDelegate, UIIm
                     // The location is "asset.location", as a CLLocation
                     
                     //Read Time/Date
-                    
-                    
                     // ... Other stuff like dismiss omitted
                 }
                 

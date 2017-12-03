@@ -17,6 +17,7 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
     let cellId = "cellId"
     let homePostCellId = "homePostCellId"
     
+    var scrollToFirst: Bool = false
     var displayedPosts = [Post]() {
         didSet{
             if displayedPosts.count > 0 {
@@ -198,6 +199,7 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
         // Pagination happens after post ids are fetched
         IQKeyboardManager.sharedManager().enable = false
         setupLogOutButton()
+        self.scrollToFirst = false
         
         NotificationCenter.default.addObserver(self, selector: #selector(finishPaginationCheck), name: UserProfileController.finishProfilePaginationNotificationName, object: nil)
         
@@ -484,6 +486,7 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
          self.filterCaption = searchedText
             self.refreshPagination()
             self.displayedPosts.removeAll()
+            self.scrollToFirst = true
             self.collectionView?.reloadData()
             self.paginatePosts()
         }
@@ -507,6 +510,8 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
         self.filterSort = selectedSort
         self.filterTime = selectedTime
         self.refreshPagination()
+        self.scrollToFirst = true
+        
         self.displayedPosts.removeAll()
         self.collectionView?.reloadData()
         
@@ -630,10 +635,11 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
         } else {
             DispatchQueue.main.async(execute: { self.collectionView?.reloadData() })
             
-            if self.collectionView?.numberOfItems(inSection: 0) != 0 && self.displayedPosts.count < 4{
+            if self.collectionView?.numberOfItems(inSection: 0) != 0 && scrollToFirst && (self.collectionView?.indexPathsForVisibleItems)! != [] {
                 let indexPath = IndexPath(item: 0, section: 0)
-                self.collectionView?.scrollToItem(at: indexPath, at: .bottom, animated: true)
+                self.collectionView?.scrollToItem(at: indexPath, at: .top, animated: true)
                 self.noResultsLabel.isHidden = true
+                self.scrollToFirst = false
             }
             
             else if self.collectionView?.numberOfItems(inSection: 0) == 0 {

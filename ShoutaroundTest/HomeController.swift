@@ -17,9 +17,13 @@ import CoreLocation
 class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLayout, HomePostCellDelegate, CLLocationManagerDelegate, UISearchControllerDelegate, HomePostSearchDelegate, UIGestureRecognizerDelegate, FilterControllerDelegate, UISearchBarDelegate  {
     
     let cellId = "cellId"
+    var scrolltoFirst: Bool = false
+    
     var displayedPosts = [Post](){
         didSet{
             if displayedPosts.count == 0 {
+//                self.scrolltoFirst = true
+//                p
                 if self.isFinishedPaging {
                     self.noResultsLabel.text = "No Results"
                 } else {
@@ -37,6 +41,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         didSet{
         }
     }
+    
     
 // Geo Filter Variables
     
@@ -264,6 +269,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         self.refreshPagination()
         fetchAllPostIds()
         fetchGroupUserIds()
+        self.scrolltoFirst = false
         
         // Search Controller
         setupSearchController()
@@ -396,6 +402,8 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         self.filterSort = selectedSort
         self.filterTime = selectedTime
         self.refreshPagination()
+        self.scrolltoFirst = true
+        
         self.displayedPosts.removeAll()
         self.collectionView?.reloadData()
     
@@ -487,6 +495,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
             self.resultSearchController?.searchBar.text = searchedText
             self.refreshPagination()
             self.displayedPosts.removeAll()
+            self.scrolltoFirst = true
             self.collectionView?.reloadData()
             self.paginatePosts()
         }
@@ -662,10 +671,10 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
 
     
 // Pagination
-
     
     func finishPaginationCheck(){
         
+        print("Visible Cells: ",self.collectionView?.indexPathsForVisibleItems)
         if self.fetchedPostCount == (self.fetchedPostIds.count) {
             self.isFinishedPaging = true
         }
@@ -687,10 +696,12 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
             
             DispatchQueue.main.async(execute: { self.collectionView?.reloadData() })
             
-            if self.collectionView?.numberOfItems(inSection: 0) != 0 && self.displayedPosts.count < 4{
+            if self.collectionView?.numberOfItems(inSection: 0) != 0 && self.scrolltoFirst && (self.collectionView?.indexPathsForVisibleItems)! != [] {
                 let indexPath = IndexPath(item: 0, section: 0)
-                self.collectionView?.scrollToItem(at: indexPath, at: .bottom, animated: true)
+                self.collectionView?.scrollToItem(at: indexPath, at: .top, animated: true)
+                self.scrolltoFirst = false
                 self.noResultsLabel.isHidden = true
+                print("Scolled to First")
             }        
 //            print("Displayed Posts: ",displayedPosts)
         
@@ -970,6 +981,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         present(optionsAlert, animated: true) {
             optionsAlert.view.superview?.isUserInteractionEnabled = true
             optionsAlert.view.superview?.addGestureRecognizer(UITapGestureRecognizer(target: self, action:#selector(self.alertClose(gesture:))))
+            
         }
         
     }

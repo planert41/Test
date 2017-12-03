@@ -133,8 +133,11 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         if post.likeCount > 0 {
             let attributedText = NSMutableAttributedString(string: "\(post.likeCount) likes", attributes: [NSFontAttributeName: UIFont.boldSystemFont(ofSize: 14)])
             self.socialCountLabel.attributedText = attributedText
+            self.socialCountLabel.isHidden = false
+            self.socialCountLabel.sizeToFit()
         } else {
-            self.socialCountLabel.text = ""
+            self.socialCountLabel.text?.removeAll()
+            self.socialCountLabel.isHidden = true
         }
         
         if post.messageCount > 0 {
@@ -589,10 +592,13 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         setupActionButtons()
         
         addSubview(socialCountLabel)
-        socialCountLabel.anchor(top: likeButton.bottomAnchor, left: leftAnchor, bottom: nil, right: rightAnchor, paddingTop: 0, paddingLeft: 8, paddingBottom: 0, paddingRight: 0, width: 0, height: 20)
+        socialCountLabel.anchor(top: likeButton.bottomAnchor, left: leftAnchor, bottom: nil, right: rightAnchor, paddingTop: 0, paddingLeft: 8, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
+        socialCountLabel.heightAnchor.constraint(lessThanOrEqualToConstant: 20).isActive = true
+        socialCountLabel.sizeToFit()
 
         addSubview(captionLabel)
-        captionLabel.anchor(top: socialCountLabel.bottomAnchor, left: leftAnchor, bottom: bottomAnchor, right: rightAnchor, paddingTop: 0, paddingLeft: 8, paddingBottom: 0, paddingRight: 8, width: 0, height: 0)
+        captionLabel.anchor(top: socialCountLabel.bottomAnchor, left: leftAnchor, bottom: nil, right: rightAnchor, paddingTop: 2, paddingLeft: 8, paddingBottom: 0, paddingRight: 8, width: 0, height: 0)
+        captionLabel.bottomAnchor.constraint(lessThanOrEqualTo: bottomAnchor)
     
     }
     
