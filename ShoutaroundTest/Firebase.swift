@@ -331,7 +331,7 @@ extension Database{
         
         if let cachedPost = postCache[postId] {
             if cachedPost != nil {
-                print("Using post cache for \(postId)")
+//                print("Using post cache for \(postId)")
                 
                 completion(cachedPost, nil)
                 return

@@ -22,8 +22,10 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     var displayedPosts = [Post](){
         didSet{
             if displayedPosts.count == 0 {
-//                self.scrolltoFirst = true
-//                p
+                // Won't need to scroll if 0 results as it will default to the top
+//                self.scrolltoFirst = false
+//                self.collectionView?.setContentOffset(CGPoint.zero, animated: true)
+                
                 if self.isFinishedPaging {
                     self.noResultsLabel.text = "No Results"
                 } else {
@@ -34,6 +36,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
                 self.noResultsLabel.isHidden = true
                 self.noResultsLabel.text = "Loading"
             }
+            
         }
     }
 
@@ -403,6 +406,9 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         self.filterTime = selectedTime
         self.refreshPagination()
         self.scrolltoFirst = true
+//        self.collectionView?.refreshControl?.endRefreshing()
+//        self.collectionView?.setContentOffset(CGPoint.zero, animated: true)
+        
         
         self.displayedPosts.removeAll()
         self.collectionView?.reloadData()
@@ -490,12 +496,15 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
             self.handleRefresh()
 
         } else {
+            print("Searching for \(searchedText)")
             defaultSearchBar.text = searchedText!
             self.filterCaption = searchedText
             self.resultSearchController?.searchBar.text = searchedText
             self.refreshPagination()
             self.displayedPosts.removeAll()
             self.scrolltoFirst = true
+//            self.collectionView?.refreshControl?.endRefreshing()
+//            self.collectionView?.setContentOffset(CGPoint.zero, animated: true)
             self.collectionView?.reloadData()
             self.paginatePosts()
         }
@@ -674,7 +683,6 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     
     func finishPaginationCheck(){
         
-        print("Visible Cells: ",self.collectionView?.indexPathsForVisibleItems)
         if self.fetchedPostCount == (self.fetchedPostIds.count) {
             self.isFinishedPaging = true
         }
@@ -694,15 +702,33 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
             // Sort Displayed Post - Firebase does not return post in order
             self.sortDisplayedPosts()
             
-            DispatchQueue.main.async(execute: { self.collectionView?.reloadData() })
+            DispatchQueue.main.async(execute: { self.collectionView?.reloadData()
             
-            if self.collectionView?.numberOfItems(inSection: 0) != 0 && self.scrolltoFirst && (self.collectionView?.indexPathsForVisibleItems)! != [] {
-                let indexPath = IndexPath(item: 0, section: 0)
-                self.collectionView?.scrollToItem(at: indexPath, at: .top, animated: true)
-                self.scrolltoFirst = false
-                self.noResultsLabel.isHidden = true
-                print("Scolled to First")
-            }        
+                // Scrolling for refreshed results
+                if self.scrolltoFirst && self.displayedPosts.count > 0{
+                                    let indexPath = IndexPath(item: 0, section: 0)
+                                    self.collectionView?.scrollToItem(at: indexPath, at: .top, animated: true)
+                    print("Scrolled to Top")
+                    self.scrolltoFirst = false
+                    self.noResultsLabel.isHidden = true
+                    
+                }
+            
+            })
+
+//            print("Visible Cells: ",self.collectionView?.indexPathsForVisibleItems, " ScrollToFirst: ",self.scrolltoFirst, "No of items: ", self.collectionView?.numberOfItems(inSection: 0))
+//            
+//            if self.collectionView?.numberOfItems(inSection: 0) != 0 && self.scrolltoFirst {
+//                if (self.collectionView?.indexPathsForVisibleItems)! != [] {
+//                let indexPath = IndexPath(item: 0, section: 0)
+//                self.collectionView?.scrollToItem(at: indexPath, at: .top, animated: true)
+//                self.scrolltoFirst = false
+//                self.noResultsLabel.isHidden = true
+//                    print("Scolled to First")}
+//                else {
+//                self.scrolltoFirst = false
+//                }
+//            }        
 //            print("Displayed Posts: ",displayedPosts)
         
         }
@@ -720,7 +746,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
             
 //            print("Current number: ", i, "from", self.fetchedPostCount, " to ",paginateFetchPostsLimit)
             let fetchPostId = fetchedPostIds[i]
-            print(" Paginate \(i): \(fetchPostId.id)")
+//            print(" Paginate \(i): \(fetchPostId.id)")
             
             // Filter Time
             if self.filterTime != defaultTime  {
