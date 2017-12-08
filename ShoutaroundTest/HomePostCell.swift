@@ -37,8 +37,8 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
                 
             guard let imageUrl = post?.imageUrl else {return}
             
-            likeButton.setImage(post?.hasLiked == true ? #imageLiteral(resourceName: "like_selected").withRenderingMode(.alwaysOriginal) : #imageLiteral(resourceName: "like_unselected").withRenderingMode(.alwaysOriginal), for: .normal)
-//            
+//            likeButton.setImage(post?.hasLiked == true ? #imageLiteral(resourceName: "like_selected").withRenderingMode(.alwaysOriginal) : #imageLiteral(resourceName: "like_unselected").withRenderingMode(.alwaysOriginal), for: .normal)
+//
 //            if (post?.likeCount)! > 0 {
 //                let count: String! = String(describing: (post?.likeCount)!)
 //                likeButton.setTitle(count, for: .normal)
@@ -47,7 +47,7 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
 //            }
             
             
-            bookmarkButton.setImage(post?.hasBookmarked == true ? #imageLiteral(resourceName: "bookmark_ribbon_filled").withRenderingMode(.alwaysOriginal) : #imageLiteral(resourceName: "bookmark_ribbon_unfilled").withRenderingMode(.alwaysOriginal), for: .normal)
+            bookmarkButton.setImage(post?.hasBookmarked == true ? #imageLiteral(resourceName: "bookmark_selected").withRenderingMode(.alwaysOriginal) : #imageLiteral(resourceName: "bookmark_unselected").withRenderingMode(.alwaysOriginal), for: .normal)
             
 //            if (post?.bookmarkCount)! > 0 {
 //                let count: String! = String(describing: (post?.bookmarkCount)!)
@@ -143,14 +143,14 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         if post.messageCount > 0 {
             self.messageCount.text = String( post.messageCount)
         } else {
-            self.messageCount.text = ""
+            self.messageCount.text = "10"
         }
         self.messageCount.sizeToFit()
         
         if post.bookmarkCount > 0 {
             self.bookmarkCount.text = String( post.bookmarkCount)
         } else {
-            self.bookmarkCount.text = ""
+            self.bookmarkCount.text = "10"
         }
         
         // Resizes bookmark label to fit new count
@@ -572,17 +572,19 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         addSubview(adressLabel)
         addSubview(locationDistanceLabel)
         
-        locationLabel.anchor(top: locationView.topAnchor, left: leftAnchor, bottom: nil, right: bookmarkButton.leftAnchor, paddingTop: 5, paddingLeft: 15, paddingBottom: 0, paddingRight: 0, width: 0, height: 15)
-        
-        adressLabel.anchor(top: locationLabel.bottomAnchor, left: leftAnchor, bottom: locationView.bottomAnchor, right: bookmarkButton.leftAnchor, paddingTop: 2, paddingLeft: 15, paddingBottom: 5, paddingRight: 0, width: 0, height: 0)
-        
-        addSubview(locationButton)
-        locationButton.anchor(top: locationView.topAnchor, left: locationView.leftAnchor, bottom: locationView.bottomAnchor, right: locationView.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
-        
         addSubview(optionsButton)
         optionsButton.anchor(top: locationView.topAnchor, left: nil, bottom: locationView.bottomAnchor, right: locationView.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 40, height: 40)
         optionsButton.centerYAnchor.constraint(equalTo: locationView.centerYAnchor).isActive = true
         optionsButton.isHidden = true
+        
+        locationLabel.anchor(top: locationView.topAnchor, left: leftAnchor, bottom: nil, right: optionsButton.leftAnchor, paddingTop: 5, paddingLeft: 15, paddingBottom: 0, paddingRight: 0, width: 0, height: 15)
+        
+        adressLabel.anchor(top: locationLabel.bottomAnchor, left: leftAnchor, bottom: locationView.bottomAnchor, right: optionsButton.leftAnchor, paddingTop: 2, paddingLeft: 15, paddingBottom: 5, paddingRight: 0, width: 0, height: 0)
+        
+        addSubview(locationButton)
+        locationButton.anchor(top: locationView.topAnchor, left: locationView.leftAnchor, bottom: locationView.bottomAnchor, right: locationView.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
+        
+
         
         
         let bottomDividerView = UIView()
@@ -663,7 +665,7 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
     
     lazy var bookmarkButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setImage(#imageLiteral(resourceName: "ribbon").withRenderingMode(.alwaysOriginal), for: .normal)
+        button.setImage(#imageLiteral(resourceName: "bookmark_unselected").withRenderingMode(.alwaysOriginal), for: .normal)
         button.addTarget(self, action: #selector(handleBookmark), for: .touchUpInside)
         return button
         
@@ -757,6 +759,15 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         return label
     }()
     
+    let commentCount: UILabel = {
+        let label = UILabel()
+        label.text = ""
+        label.font = UIFont.boldSystemFont(ofSize:12)
+        label.textColor = UIColor.black
+        label.textAlignment = NSTextAlignment.left
+        return label
+    }()
+    
     // Upvote Downvote
     
     lazy var upVoteButton: UIButton = {
@@ -778,9 +789,9 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
     let voteCount: UILabel = {
         let label = UILabel()
         label.text = ""
-        label.font = UIFont.boldSystemFont(ofSize:12)
-        label.textColor = UIColor.black
-        label.textAlignment = NSTextAlignment.left
+        label.font = UIFont.boldSystemFont(ofSize:11)
+        label.textColor = UIColor.darkGray
+        label.textAlignment = NSTextAlignment.center
         return label
     }()
     
@@ -792,7 +803,137 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         
     }
     
+    
     fileprivate func setupActionButtons() {
+
+        addSubview(actionBar)
+        actionBar.anchor(top: locationView.bottomAnchor, left: leftAnchor, bottom: nil, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 40)
+        
+        let voteView = UIView()
+//        voteView.backgroundColor = UIColor.blue
+        
+        let commentView = UIView()
+//        commentView.backgroundColor = UIColor.yellow
+        
+        let bookmarkView = UIView()
+//        bookmarkView.backgroundColor = UIColor.blue
+        
+        let messageView = UIView()
+//        messageView.backgroundColor = UIColor.yellow
+        
+        let voteContainer = UIView()
+        let commentContainer = UIView()
+        let bookmarkContainer = UIView()
+        let messageContainer = UIView()
+        
+        
+        let actionStackView = UIStackView(arrangedSubviews: [voteView, commentView, bookmarkView, messageView])
+        actionStackView.distribution = .fillEqually
+        addSubview(actionStackView)
+        
+        actionStackView.anchor(top: locationView.bottomAnchor, left: leftAnchor, bottom: actionBar.bottomAnchor, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 40)
+        
+        addSubview(upVoteButton)
+        addSubview(downVoteButton)
+        addSubview(voteCount)
+        
+        upVoteButton.anchor(top: voteView.topAnchor, left: voteView.leftAnchor, bottom: voteView.bottomAnchor, right: nil, paddingTop: 5, paddingLeft: 5, paddingBottom: 5, paddingRight: 0, width: 0, height: 0)
+        upVoteButton.widthAnchor.constraint(equalTo: upVoteButton.heightAnchor, multiplier: 1).isActive = true
+        
+        downVoteButton.anchor(top: voteView.topAnchor, left: nil, bottom: voteView.bottomAnchor, right: voteView.rightAnchor, paddingTop: 5, paddingLeft: 0, paddingBottom: 5, paddingRight: 5, width: 0, height: 0)
+        downVoteButton.widthAnchor.constraint(equalTo: downVoteButton.heightAnchor, multiplier: 1).isActive = true
+        
+        voteCount.anchor(top: voteView.topAnchor, left: upVoteButton.rightAnchor, bottom: voteView.bottomAnchor, right: downVoteButton.leftAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
+        voteCount.text = "10"
+        voteCount.sizeToFit()
+        
+    // Comments
+        
+        commentContainer.addSubview(commentButton)
+        commentContainer.addSubview(commentCount)
+        
+        commentButton.anchor(top: commentContainer.topAnchor, left: commentContainer.leftAnchor, bottom: commentContainer.bottomAnchor, right: nil, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
+        commentButton.widthAnchor.constraint(equalTo: commentButton.heightAnchor, multiplier: 1).isActive = true
+
+        commentCount.anchor(top: commentContainer.topAnchor, left: commentButton.rightAnchor, bottom: commentContainer.bottomAnchor, right: commentContainer.rightAnchor, paddingTop: 0, paddingLeft: 2, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
+        commentCount.text = "10"
+        commentCount.sizeToFit()
+        
+        addSubview(commentContainer)
+        commentContainer.anchor(top: commentView.topAnchor, left: nil, bottom: commentView.bottomAnchor, right: nil, paddingTop: 5, paddingLeft: 0, paddingBottom: 5, paddingRight: 0, width: 0, height: 0)
+        commentContainer.centerXAnchor.constraint(equalTo: commentView.centerXAnchor).isActive = true
+        
+    // Bookmarks
+        
+        bookmarkContainer.addSubview(bookmarkButton)
+        bookmarkContainer.addSubview(bookmarkCount)
+        
+        bookmarkButton.anchor(top: bookmarkContainer.topAnchor, left: bookmarkContainer.leftAnchor, bottom: bookmarkContainer.bottomAnchor, right: nil, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
+        bookmarkButton.widthAnchor.constraint(equalTo: bookmarkButton.heightAnchor, multiplier: 1).isActive = true
+        
+        bookmarkCount.anchor(top: bookmarkContainer.topAnchor, left: bookmarkButton.rightAnchor, bottom: bookmarkContainer.bottomAnchor, right: bookmarkContainer.rightAnchor, paddingTop: 0, paddingLeft: 2, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
+        bookmarkCount.text = "10"
+        bookmarkCount.sizeToFit()
+        
+        addSubview(bookmarkContainer)
+        bookmarkContainer.anchor(top: bookmarkView.topAnchor, left: nil, bottom: bookmarkView.bottomAnchor, right: nil, paddingTop: 5, paddingLeft: 0, paddingBottom: 5, paddingRight: 0, width: 0, height: 0)
+        bookmarkContainer.centerXAnchor.constraint(equalTo: bookmarkView.centerXAnchor).isActive = true
+
+        
+    // Message
+        
+        messageContainer.addSubview(sendMessageButton)
+        messageContainer.addSubview(messageCount)
+        
+        sendMessageButton.anchor(top: messageContainer.topAnchor, left: messageContainer.leftAnchor, bottom: messageContainer.bottomAnchor, right: nil, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
+        sendMessageButton.widthAnchor.constraint(equalTo: sendMessageButton.heightAnchor, multiplier: 1).isActive = true
+        
+        messageCount.anchor(top: messageContainer.topAnchor, left: sendMessageButton.rightAnchor, bottom: messageContainer.bottomAnchor, right: messageContainer.rightAnchor, paddingTop: 0, paddingLeft: 2, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
+        messageCount.text = "10"
+        messageCount.sizeToFit()
+        
+        addSubview(messageContainer)
+        messageContainer.anchor(top: messageView.topAnchor, left: nil, bottom: messageView.bottomAnchor, right: nil, paddingTop: 5, paddingLeft: 0, paddingBottom: 5, paddingRight: 0, width: 0, height: 0)
+        messageContainer.centerXAnchor.constraint(equalTo: messageView.centerXAnchor).isActive = true
+        
+    // Dividers
+        
+        let div1 = UIView()
+        div1.backgroundColor = .black
+        addSubview(div1)
+        div1.anchor(top: actionStackView.topAnchor, left: commentView.leftAnchor, bottom: actionStackView.bottomAnchor, right: nil, paddingTop: 10, paddingLeft: 0, paddingBottom: 10, paddingRight: 0, width: 1, height: 0)
+        div1.heightAnchor.constraint(equalTo: actionStackView.heightAnchor, multiplier: 0.4).isActive = true
+
+        let div2 = UIView()
+        div2.backgroundColor = .black
+        addSubview(div2)
+        div2.anchor(top: actionStackView.topAnchor, left: bookmarkView.leftAnchor, bottom: actionStackView.bottomAnchor, right: nil, paddingTop: 10, paddingLeft: 0, paddingBottom: 10, paddingRight: 0, width: 1, height: 0)
+        div2.heightAnchor.constraint(equalTo: actionStackView.heightAnchor, multiplier: 0.4).isActive = true
+        
+
+        let div3 = UIView()
+        div3.backgroundColor = .black
+        addSubview(div3)
+        div3.anchor(top: actionStackView.topAnchor, left: messageView.leftAnchor, bottom: actionStackView.bottomAnchor, right: nil, paddingTop: 10, paddingLeft: 0, paddingBottom: 10, paddingRight: 0, width: 1, height: 0)
+        div3.heightAnchor.constraint(equalTo: actionStackView.heightAnchor, multiplier: 0.4).isActive = true
+        
+        
+        
+//        for i in 1 ..< (actionStackView.arrangedSubviews.count - 1){
+//            let div = UIView()
+//            div.widthAnchor.constraint(equalToConstant: 1).isActive = true
+//            div.backgroundColor = .black
+//            addSubview(div)
+//            div.heightAnchor.constraint(equalTo: actionStackView.heightAnchor, multiplier: 0.4).isActive = true
+//            div.centerXAnchor.constraint(equalTo: actionStackView.arrangedSubviews[i].leftAnchor).isActive = true
+//            div.centerYAnchor.constraint(equalTo: actionStackView.centerYAnchor).isActive = true
+//        }
+
+        
+        
+    }
+    
+    fileprivate func setupActionButtonsTest() {
         
 //        let stackView = UIStackView(arrangedSubviews: [likeButton, commentButton, sendMessageButton])
 //        stackView.distribution = .fillEqually

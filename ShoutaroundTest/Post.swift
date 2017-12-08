@@ -64,6 +64,7 @@ struct Post {
     var likeCount: Int = 0
     var bookmarkCount:Int = 0
     var messageCount:Int = 0
+    var voteCount:Int = 0
     
     
     init(user: User, dictionary: [String: Any]) {
