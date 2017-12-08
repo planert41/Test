@@ -683,16 +683,18 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     
     func finishPaginationCheck(){
         
+        print("Finish Paging Check")
+        
         if self.fetchedPostCount == (self.fetchedPostIds.count) {
             self.isFinishedPaging = true
         }
         
-        if self.displayedPosts.count < 1 && self.isFinishedPaging == true {
+        if self.displayedPosts.count == 0 && self.isFinishedPaging == true {
             print("No Results Pagination Finished")
             self.noResultsLabel.text = "No Results"
             self.noResultsLabel.isHidden = false
         }
-        else if self.displayedPosts.count < 1 && self.isFinishedPaging != true {
+        else if self.displayedPosts.count == 0 && self.isFinishedPaging != true {
             print("No Display Pagination Check Paginate")
             self.noResultsLabel.text = "Loading"
             self.noResultsLabel.isHidden = false
@@ -701,13 +703,17 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
             
             // Sort Displayed Post - Firebase does not return post in order
             self.sortDisplayedPosts()
+            print("Refreshing CollectionView")
             
             DispatchQueue.main.async(execute: { self.collectionView?.reloadData()
             
                 // Scrolling for refreshed results
-                if self.scrolltoFirst && self.displayedPosts.count > 0{
-                                    let indexPath = IndexPath(item: 0, section: 0)
-                                    self.collectionView?.scrollToItem(at: indexPath, at: .top, animated: true)
+                if self.scrolltoFirst && self.displayedPosts.count > 1{
+                    print("Refresh Control Status: ", self.collectionView?.refreshControl?.state)
+                    self.collectionView?.refreshControl?.endRefreshing()
+                    let indexPath = IndexPath(item: 0, section: 0)
+                    self.collectionView?.scrollToItem(at: indexPath, at: .top, animated: true)
+//                    self.collectionView?.setContentOffset(CGPoint(x: 0, y: 0 - self.topLayoutGuide.length), animated: true)
                     print("Scrolled to Top")
                     self.scrolltoFirst = false
                     self.noResultsLabel.isHidden = true

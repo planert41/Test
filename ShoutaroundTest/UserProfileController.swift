@@ -17,7 +17,7 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
     let cellId = "cellId"
     let homePostCellId = "homePostCellId"
     
-    var scrollToFirst: Bool = false
+    var scrolltoFirst: Bool = false
     var displayedPosts = [Post]() {
         didSet{
             if displayedPosts.count > 0 {
@@ -199,7 +199,7 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
         // Pagination happens after post ids are fetched
         IQKeyboardManager.sharedManager().enable = false
         setupLogOutButton()
-        self.scrollToFirst = false
+        self.scrolltoFirst = false
         
         NotificationCenter.default.addObserver(self, selector: #selector(finishPaginationCheck), name: UserProfileController.finishProfilePaginationNotificationName, object: nil)
         
@@ -486,7 +486,7 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
          self.filterCaption = searchedText
             self.refreshPagination()
             self.displayedPosts.removeAll()
-            self.scrollToFirst = true
+            self.scrolltoFirst = true
             self.collectionView?.reloadData()
             self.paginatePosts()
         }
@@ -510,7 +510,7 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
         self.filterSort = selectedSort
         self.filterTime = selectedTime
         self.refreshPagination()
-        self.scrollToFirst = true
+        self.scrolltoFirst = true
         
         self.displayedPosts.removeAll()
         self.collectionView?.reloadData()
@@ -633,16 +633,21 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
             print("No Display Pagination Check Paginate")
             self.paginatePosts()
         } else {
-            DispatchQueue.main.async(execute: { self.collectionView?.reloadData() })
+            DispatchQueue.main.async(execute: { self.collectionView?.reloadData()
             
-            if self.collectionView?.numberOfItems(inSection: 0) != 0 && scrollToFirst && (self.collectionView?.indexPathsForVisibleItems)! != [] {
-                let indexPath = IndexPath(item: 0, section: 0)
-                self.collectionView?.scrollToItem(at: indexPath, at: .top, animated: true)
-                self.noResultsLabel.isHidden = true
-                self.scrollToFirst = false
-            }
+                // Scrolling for refreshed results
+                if self.scrolltoFirst && self.displayedPosts.count > 0{
+                    let indexPath = IndexPath(item: 0, section: 0)
+                    self.collectionView?.scrollToItem(at: indexPath, at: .top, animated: true)
+                    print("Scrolled to Top")
+                    self.scrolltoFirst = false
+                    self.noResultsLabel.isHidden = true
+                    
+                }
             
-            else if self.collectionView?.numberOfItems(inSection: 0) == 0 {
+            })
+            
+            if self.collectionView?.numberOfItems(inSection: 0) == 0 {
                 if self.isFinishedPaging{
                     self.noResultsLabel.isHidden = false
                     self.noResultsLabel.text = "No Results"

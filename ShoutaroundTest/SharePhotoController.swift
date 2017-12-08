@@ -361,6 +361,7 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
     let captionTextView: UITextView = {
         let tv = UITextView()
         tv.font = UIFont.systemFont(ofSize: 14)
+        tv.autocorrectionType = .no
         return tv
     }()
     

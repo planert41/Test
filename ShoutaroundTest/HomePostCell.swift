@@ -477,6 +477,8 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         return button
     }()
     
+    
+    
     func handleOptions() {
         
         guard let post = post else {return}
@@ -592,7 +594,7 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         setupActionButtons()
         
         addSubview(socialCountLabel)
-        socialCountLabel.anchor(top: likeButton.bottomAnchor, left: leftAnchor, bottom: nil, right: rightAnchor, paddingTop: 0, paddingLeft: 8, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
+        socialCountLabel.anchor(top: actionBar.bottomAnchor, left: leftAnchor, bottom: nil, right: rightAnchor, paddingTop: 0, paddingLeft: 8, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
         socialCountLabel.heightAnchor.constraint(lessThanOrEqualToConstant: 20).isActive = true
         socialCountLabel.sizeToFit()
 
@@ -755,6 +757,41 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         return label
     }()
     
+    // Upvote Downvote
+    
+    lazy var upVoteButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setImage(#imageLiteral(resourceName: "upvote").withRenderingMode(.alwaysOriginal), for: .normal)
+        button.addTarget(self, action: #selector(handleUpVote), for: .touchUpInside)
+        return button
+        
+    }()
+    
+    lazy var downVoteButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setImage(#imageLiteral(resourceName: "downvote").withRenderingMode(.alwaysOriginal), for: .normal)
+        button.addTarget(self, action: #selector(handleDownVote), for: .touchUpInside)
+        return button
+        
+    }()
+    
+    let voteCount: UILabel = {
+        let label = UILabel()
+        label.text = ""
+        label.font = UIFont.boldSystemFont(ofSize:12)
+        label.textColor = UIColor.black
+        label.textAlignment = NSTextAlignment.left
+        return label
+    }()
+    
+    func handleUpVote(){
+        
+    }
+    
+    func handleDownVote(){
+        
+    }
+    
     fileprivate func setupActionButtons() {
         
 //        let stackView = UIStackView(arrangedSubviews: [likeButton, commentButton, sendMessageButton])
@@ -766,11 +803,11 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         addSubview(actionBar)
         actionBar.anchor(top: locationView.bottomAnchor, left: leftAnchor, bottom: nil, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 40)
         
-        addSubview(likeButton)
-        likeButton.anchor(top: actionBar.topAnchor, left: actionBar.leftAnchor, bottom: actionBar.bottomAnchor, right: nil, paddingTop: 5, paddingLeft: 8, paddingBottom: 5, paddingRight: 0, width: 30, height: 30)
+//        addSubview(likeButton)
+//        likeButton.anchor(top: actionBar.topAnchor, left: actionBar.leftAnchor, bottom: actionBar.bottomAnchor, right: nil, paddingTop: 5, paddingLeft: 8, paddingBottom: 5, paddingRight: 0, width: 30, height: 30)
         
         addSubview(commentButton)
-        commentButton.anchor(top: actionBar.topAnchor, left: likeButton.rightAnchor, bottom: actionBar.bottomAnchor, right: nil, paddingTop: 5, paddingLeft: 2, paddingBottom: 5, paddingRight: 0, width: 30, height: 30)
+        commentButton.anchor(top: actionBar.topAnchor, left: actionBar.leftAnchor, bottom: actionBar.bottomAnchor, right: nil, paddingTop: 5, paddingLeft: 2, paddingBottom: 5, paddingRight: 0, width: 30, height: 30)
         
         addSubview(sendMessageButton)
         sendMessageButton.anchor(top: actionBar.topAnchor, left: commentButton.rightAnchor, bottom: actionBar.bottomAnchor, right: nil, paddingTop: 5, paddingLeft: 2, paddingBottom: 5, paddingRight: 0, width: 30, height: 30)
@@ -779,21 +816,38 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         messageCount.anchor(top: actionBar.topAnchor, left: sendMessageButton.rightAnchor, bottom: actionBar.bottomAnchor, right: nil, paddingTop: 5, paddingLeft: 2, paddingBottom: 5, paddingRight: 0, width: 30, height: 30)
         
         
-
         
-        addSubview(bookmarkCount)
-        bookmarkCount.anchor(top: actionBar.topAnchor, left: nil, bottom: actionBar.bottomAnchor, right: actionBar.rightAnchor, paddingTop: 5, paddingLeft: 0, paddingBottom: 5, paddingRight: 8, width: 0, height: 30)
-        bookmarkCount.sizeToFit()
-        bookmarkLabelConstraint = NSLayoutConstraint(item: self.bookmarkCount, attribute: NSLayoutAttribute.width, relatedBy: NSLayoutRelation.equal, toItem: nil, attribute: NSLayoutAttribute.notAnAttribute, multiplier: 1, constant: self.bookmarkCount.frame.size.width)
-        self.bookmarkCount.addConstraint(bookmarkLabelConstraint!)
+        addSubview(upVoteButton)
+        addSubview(downVoteButton)
+        addSubview(voteCount)
+        
+        downVoteButton.anchor(top: actionBar.topAnchor, left: nil, bottom: actionBar.bottomAnchor, right: actionBar.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 15, width: 30, height: 0)
+        downVoteButton.widthAnchor.constraint(equalTo: downVoteButton.heightAnchor, multiplier: 1)
+        
+        voteCount.anchor(top: actionBar.topAnchor, left: nil, bottom: actionBar.bottomAnchor, right: downVoteButton.leftAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
+        voteCount.sizeToFit()
+        
+        upVoteButton.anchor(top: actionBar.topAnchor, left: nil, bottom: actionBar.bottomAnchor, right: voteCount.leftAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
+        upVoteButton.widthAnchor.constraint(equalTo: upVoteButton.heightAnchor, multiplier: 1)
+        
+        
+//        addSubview(bookmarkCount)
+//        bookmarkCount.anchor(top: actionBar.topAnchor, left: nil, bottom: actionBar.bottomAnchor, right: upVoteButton.leftAnchor, paddingTop: 5, paddingLeft: 0, paddingBottom: 5, paddingRight: 8, width: 0, height: 30)
+//        bookmarkCount.sizeToFit()
+//        bookmarkLabelConstraint = NSLayoutConstraint(item: self.bookmarkCount, attribute: NSLayoutAttribute.width, relatedBy: NSLayoutRelation.equal, toItem: nil, attribute: NSLayoutAttribute.notAnAttribute, multiplier: 1, constant: self.bookmarkCount.frame.size.width)
+//        self.bookmarkCount.addConstraint(bookmarkLabelConstraint!)
 //        bookmarkLabel.widthAnchor.constraint(equalToConstant: self.bookmarkLabel.frame.size.width).isActive = true
         
         // Width anchor is set after bookmark counts are displayed to figure out label width
         addSubview(bookmarkButton)
-        bookmarkButton.anchor(top: actionBar.topAnchor, left: nil, bottom: actionBar.bottomAnchor, right: bookmarkCount.leftAnchor, paddingTop: 5, paddingLeft: 0, paddingBottom: 5, paddingRight: 2, width: 30, height: 30)
+        bookmarkButton.anchor(top: actionBar.topAnchor, left: nil, bottom: actionBar.bottomAnchor, right: upVoteButton.leftAnchor, paddingTop: 5, paddingLeft: 0, paddingBottom: 5, paddingRight: 2, width: 30, height: 30)
 
 //        addSubview(testlabel)
 //        testlabel.anchor(top: bookmarkButton.topAnchor, left: bookmarkButton.leftAnchor, bottom: bookmarkButton.bottomAnchor, right: bookmarkButton.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
+
+        
+        
+        
     }
     
     func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {

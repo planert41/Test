@@ -925,7 +925,7 @@ class LocationController: UIViewController, UIScrollViewDelegate, UICollectionVi
         
         Alamofire.request(url).responseJSON { (response) -> Void in
             
-            //            print(response)
+               //         print(response)
             
             if let value  = response.result.value {
                 let json = JSON(value)

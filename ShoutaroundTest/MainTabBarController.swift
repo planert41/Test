@@ -83,7 +83,7 @@ class MainTabBarController: UITabBarController, UITabBarControllerDelegate, UIIm
         if UIImagePickerController.isSourceTypeAvailable(.camera) {
             imagePicker.delegate = self
             imagePicker.sourceType = .camera;
-            imagePicker.allowsEditing = false
+            imagePicker.allowsEditing = true
             present(imagePicker, animated: true, completion: nil)
         } else {
             self.alert(title: "No Camera", message: "Device has no camera")
