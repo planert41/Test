@@ -36,33 +36,14 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         didSet {
                 
             guard let imageUrl = post?.imageUrl else {return}
-            
-//            likeButton.setImage(post?.hasLiked == true ? #imageLiteral(resourceName: "like_selected").withRenderingMode(.alwaysOriginal) : #imageLiteral(resourceName: "like_unselected").withRenderingMode(.alwaysOriginal), for: .normal)
-//
-//            if (post?.likeCount)! > 0 {
-//                let count: String! = String(describing: (post?.likeCount)!)
-//                likeButton.setTitle(count, for: .normal)
-//            } else {
-//                likeButton.setTitle("", for: .normal)
-//            }
-            
-            
+
             bookmarkButton.setImage(post?.hasBookmarked == true ? #imageLiteral(resourceName: "bookmark_selected").withRenderingMode(.alwaysOriginal) : #imageLiteral(resourceName: "bookmark_unselected").withRenderingMode(.alwaysOriginal), for: .normal)
             
-//            if (post?.bookmarkCount)! > 0 {
-//                let count: String! = String(describing: (post?.bookmarkCount)!)
-//                bookmarkButton.setTitle(count, for: .normal)
-//            } else {
-//                bookmarkButton.setTitle("", for: .normal)
-//            }
+            upVoteButton.setImage(post?.hasVoted == 1 ? #imageLiteral(resourceName: "upvote_selected").withRenderingMode(.alwaysOriginal) : #imageLiteral(resourceName: "upvote").withRenderingMode(.alwaysOriginal), for: .normal)
+            
+            downVoteButton.setImage(post?.hasVoted == -1 ? #imageLiteral(resourceName: "downvote_selected").withRenderingMode(.alwaysOriginal) : #imageLiteral(resourceName: "downvote").withRenderingMode(.alwaysOriginal), for: .normal)
             
             photoImageView.loadImage(urlString: imageUrl)
-            
-//            let attributedText = NSMutableAttributedString(string: (post?.ratingEmoji)!, attributes: [NSFontAttributeName: UIFont.boldSystemFont(ofSize: 20)])
-//            
-//            attributedText.append(NSMutableAttributedString(string: (post?.user.username)!, attributes: [NSFontAttributeName: UIFont.boldSystemFont(ofSize: 14)]))
-//            
-//            usernameLabel.attributedText = attributedText
             
             usernameLabel.text = post?.user.username
             usernameLabel.sizeToFit()
@@ -143,18 +124,24 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         if post.messageCount > 0 {
             self.messageCount.text = String( post.messageCount)
         } else {
-            self.messageCount.text = "10"
+            self.messageCount.text = ""
         }
-        self.messageCount.sizeToFit()
+//        self.messageCount.sizeToFit()
         
         if post.bookmarkCount > 0 {
             self.bookmarkCount.text = String( post.bookmarkCount)
         } else {
-            self.bookmarkCount.text = "10"
+            self.bookmarkCount.text = ""
+        }
+        
+        if post.voteCount != 0 {
+            self.voteCount.text = String( post.voteCount)
+        } else {
+            self.voteCount.text = ""
         }
         
         // Resizes bookmark label to fit new count
-        self.bookmarkCount.sizeToFit()
+//        self.bookmarkCount.sizeToFit()
         bookmarkLabelConstraint?.constant = self.bookmarkCount.frame.size.width
 //        self.layoutIfNeeded()
         
@@ -796,11 +783,93 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
     }()
     
     func handleUpVote(){
+        guard let postId = self.post?.id else {return}
+        guard let creatorId = self.post?.creatorUID else {return}
+        guard let uid = Auth.auth().currentUser?.uid else {return}
         
+        self.upVoteButton.transform = CGAffineTransform(scaleX: 0.1, y: 0.1)
+        
+        self.layoutIfNeeded()
+        UIView.animate(withDuration: 1.0,
+                       delay: 0,
+                       usingSpringWithDamping: 0.2,
+                       initialSpringVelocity: 6.0,
+                       options: .allowUserInteraction,
+                       animations: { [weak self] in
+                        self?.upVoteButton.transform = .identity
+                        self?.upVoteButton.layoutIfNeeded()
+                        
+            },
+                       completion: nil)
+        
+        Database.handleVote(postId: postId, creatorUid: creatorId, vote: 1) { 
+            
+        }
+
+        
+        // Animates before database function is complete
+        
+        if (self.post?.hasVoted)! == 1 {
+            // Unselect Upvote
+            self.post?.hasVoted = 0
+            self.post?.voteCount -= 1
+        } else if (self.post?.hasVoted)! == 0 {
+            // Upvote
+            self.post?.hasVoted = 1
+            self.post?.voteCount += 1
+        } else if (self.post?.hasVoted)! == -1 {
+            // Upvote
+            self.post?.hasVoted = 1
+            self.post?.voteCount += 2
+        }
+        
+        self.setupAttributedSocialCount()
+        self.delegate?.refreshPost(post: self.post!)
     }
     
     func handleDownVote(){
+        guard let postId = self.post?.id else {return}
+        guard let creatorId = self.post?.creatorUID else {return}
+        guard let uid = Auth.auth().currentUser?.uid else {return}
         
+        self.downVoteButton.transform = CGAffineTransform(scaleX: 0.1, y: 0.1)
+        
+        self.layoutIfNeeded()
+        UIView.animate(withDuration: 1.0,
+                       delay: 0,
+                       usingSpringWithDamping: 0.2,
+                       initialSpringVelocity: 6.0,
+                       options: .allowUserInteraction,
+                       animations: { [weak self] in
+                        self?.downVoteButton.transform = .identity
+                        self?.downVoteButton.layoutIfNeeded()
+                        
+            },
+                       completion: nil)
+        
+        Database.handleVote(postId: postId, creatorUid: creatorId, vote: -1) {
+            
+        }
+        
+        
+        // Animates before database function is complete
+        
+        if (self.post?.hasVoted)! == 1 {
+            // Downvote
+            self.post?.hasVoted = -1
+            self.post?.voteCount += -2
+        } else if (self.post?.hasVoted)! == 0 {
+            // Downvote
+            self.post?.hasVoted = -1
+            self.post?.voteCount += -1
+        } else if (self.post?.hasVoted)! == -1 {
+            // Unselect Downvote
+            self.post?.hasVoted = 0
+            self.post?.voteCount += 1
+        }
+        
+        self.setupAttributedSocialCount()
+        self.delegate?.refreshPost(post: self.post!)
     }
     
     
@@ -844,7 +913,6 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         downVoteButton.widthAnchor.constraint(equalTo: downVoteButton.heightAnchor, multiplier: 1).isActive = true
         
         voteCount.anchor(top: voteView.topAnchor, left: upVoteButton.rightAnchor, bottom: voteView.bottomAnchor, right: downVoteButton.leftAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
-        voteCount.text = "10"
         voteCount.sizeToFit()
         
     // Comments
@@ -856,7 +924,7 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         commentButton.widthAnchor.constraint(equalTo: commentButton.heightAnchor, multiplier: 1).isActive = true
 
         commentCount.anchor(top: commentContainer.topAnchor, left: commentButton.rightAnchor, bottom: commentContainer.bottomAnchor, right: commentContainer.rightAnchor, paddingTop: 0, paddingLeft: 2, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
-        commentCount.text = "10"
+        commentCount.centerYAnchor.constraint(equalTo: commentButton.centerYAnchor).isActive = true
         commentCount.sizeToFit()
         
         addSubview(commentContainer)
@@ -872,7 +940,8 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         bookmarkButton.widthAnchor.constraint(equalTo: bookmarkButton.heightAnchor, multiplier: 1).isActive = true
         
         bookmarkCount.anchor(top: bookmarkContainer.topAnchor, left: bookmarkButton.rightAnchor, bottom: bookmarkContainer.bottomAnchor, right: bookmarkContainer.rightAnchor, paddingTop: 0, paddingLeft: 2, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
-        bookmarkCount.text = "10"
+        bookmarkCount.centerYAnchor.constraint(equalTo: bookmarkButton.centerYAnchor).isActive = true
+        
         bookmarkCount.sizeToFit()
         
         addSubview(bookmarkContainer)
@@ -889,6 +958,8 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         sendMessageButton.widthAnchor.constraint(equalTo: sendMessageButton.heightAnchor, multiplier: 1).isActive = true
         
         messageCount.anchor(top: messageContainer.topAnchor, left: sendMessageButton.rightAnchor, bottom: messageContainer.bottomAnchor, right: messageContainer.rightAnchor, paddingTop: 0, paddingLeft: 2, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
+        messageCount.centerYAnchor.constraint(equalTo: sendMessageButton.centerYAnchor).isActive = true
+        
         messageCount.text = "10"
         messageCount.sizeToFit()
         

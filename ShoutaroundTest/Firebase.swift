@@ -272,7 +272,7 @@ extension Database{
                     //                    print(user.uid, key)
                     Database.fetchPostWithUIDAndPostID(creatoruid: user.uid, postId: key, completion: { (post) in
                         
-                        Database.checkPostForLikesAndBookmarks(post: post, completion: { (post) in
+                        Database.checkPostForSocial(post: post, completion: { (post) in
                             fetchedPosts.append(post)
                             fetchedPosts.sort(by: { (p1, p2) -> Bool in
                                 return p1.creationDate.compare(p2.creationDate) == .orderedDescending })
@@ -311,7 +311,7 @@ extension Database{
                     var post = Post(user: user, dictionary: dictionary)
                     post.id = key
 
-                    Database.checkPostForLikesAndBookmarks(post: post, completion: { (post) in
+                    Database.checkPostForSocial(post: post, completion: { (post) in
                         fetchedPosts.append(post)
                         fetchedPosts.sort(by: { (p1, p2) -> Bool in
                             return p1.creationDate.compare(p2.creationDate) == .orderedDescending })
@@ -353,7 +353,7 @@ extension Database{
                 var post = Post(user: user, dictionary: dictionary)
                 post.id = postId
                 
-                checkPostForLikesAndBookmarks(post: post, completion: { (post) in
+                checkPostForSocial(post: post, completion: { (post) in
                     postCache[postId] = post
                     //                print(post)
                     completion(post, nil)
@@ -472,6 +472,35 @@ extension Database{
     
 // Social Stat Updates
     
+    static func checkPostForVotes(post: Post, completion: @escaping (Post) -> ()){
+        
+        guard let uid = Auth.auth().currentUser?.uid else {return}
+        var tempPost = post
+        
+        Database.database().reference().child("votes").child(post.id!).observeSingleEvent(of: .value, with: { (snapshot) in
+            
+            let post = snapshot.value as? [String: Any] ?? [:]
+            var votes: Dictionary<String, Int>
+            votes = post["votes"] as? [String : Int] ?? [:]
+            var voteCount = post["voteCount"] as? Int ?? 0
+            
+            if let curVote = votes[uid] {
+                tempPost.hasVoted = curVote
+            }
+            
+            if tempPost.voteCount != voteCount {
+                // Calculated Bookmark Count Different from Database
+                tempPost.voteCount = voteCount
+                updateSocialCountsForPost(postId: tempPost.id, socialVariable: "voteCount", newCount: voteCount)
+            }
+            
+            
+            completion(tempPost)
+        }, withCancel: { (err) in
+            print("Failed to fetch bookmark info for post:", err)
+        })
+    }
+    
     static func checkPostForLikes(post: Post, completion: @escaping (Post) -> ()){
         
         guard let uid = Auth.auth().currentUser?.uid else {return}
@@ -535,6 +564,30 @@ extension Database{
         })
     }
     
+    static func checkPostForMessages(post: Post, completion: @escaping (Post) -> ()){
+        
+        guard let uid = Auth.auth().currentUser?.uid else {return}
+        var tempPost = post
+        Database.database().reference().child("messages").child(post.id!).observeSingleEvent(of: .value, with: { (snapshot) in
+            
+            let post = snapshot.value as? [String: Any] ?? [:]
+            var messages: Dictionary<String, Int>
+            messages = post["bookmarks"] as? [String : Int] ?? [:]
+            var messageCount = post["messageCount"] as? Int ?? 0
+
+            if tempPost.messageCount != messageCount {
+                // Calculated Bookmark Count Different from Database
+                tempPost.messageCount = messageCount
+                updateSocialCountsForPost(postId: tempPost.id, socialVariable: "messageCount", newCount: messageCount)
+            }
+            
+            completion(tempPost)
+            
+        }, withCancel: { (err) in
+            print("Failed to fetch bookmark info for post:", err)
+        })
+    }
+    
     static func checkPostForLikesAndBookmarks(post: Post, completion: @escaping (Post) -> ()){
         
         Database.checkPostForLikes(post: post) { (post) in
@@ -543,6 +596,19 @@ extension Database{
             })
         }
     }
+    
+    static func checkPostForSocial(post: Post, completion: @escaping (Post) -> ()){
+        
+        Database.checkPostForVotes(post: post) { (post) in
+            Database.checkPostForBookmarks(post: post, completion: { (post) in
+                Database.checkPostForMessages(post: post, completion: { (post) in
+                    completion(post)
+                })
+            })
+        }
+    }
+    
+    
     
     static func updateSocialCountsForPost(postId: String!, socialVariable: String!, newCount: Int!){
         
@@ -883,6 +949,62 @@ extension Database{
     
     // Social Functions
     
+    static func handleVote(postId: String!, creatorUid: String!, vote: Int!, completion: @escaping () -> Void){
+
+        let ref = Database.database().reference().child("votes").child(postId)
+        guard let uid = Auth.auth().currentUser?.uid else {return}
+        var voteChange = 0 as Int
+        
+        ref.runTransactionBlock({ (currentData: MutableData) -> TransactionResult in
+            
+            var post = currentData.value as? [String : AnyObject] ?? [:]
+            var votes: Dictionary<String, Int>
+            votes = post["votes"] as? [String : Int] ?? [:]
+            var voteCount = post["voteCount"] as? Int ?? 0
+            if let curVote = votes[uid] {
+                // Has Current Vote
+                if curVote == vote {
+                    // Deselect Current Vote
+                    votes[uid] = 0
+                    voteChange = -vote
+                } else {
+                    // Override Current Vote
+                    votes[uid] = vote
+                    voteChange = (vote - curVote)
+                }
+            } else {
+                // Make New Vote
+                votes[uid] = vote
+                voteChange = vote
+            }
+            
+            voteCount += voteChange
+            post["voteCount"] = voteCount as AnyObject?
+            post["votes"] = votes as AnyObject?
+            
+            // Enables firebase sort by count and recent upload time
+            let  uploadTime = Date().timeIntervalSince1970/1000000000000000
+            post["sort"] = (Double(voteCount) + uploadTime) as AnyObject
+            
+            // Set value and report transaction success
+            currentData.value = post
+            print("Successfully Update Like in Likes \(postId):\(uid):\(votes[uid])")
+            return TransactionResult.success(withValue: currentData)
+            
+        }) { (error, committed, snapshot) in
+            if let error = error {
+                print(error.localizedDescription)
+            } else {
+                var post = snapshot?.value as? [String : AnyObject] ?? [:]
+                var votes = post["votes"] as? [String : Int] ?? [:]
+                spotUpdateSocialCount(creatorUid: uid, receiverUid: creatorUid, action: "vote", change: voteChange)
+                // Completion after updating Likes
+                completion()
+            }
+        }
+        
+    }
+    
     static func handleLike(postId: String!, creatorUid: String!, completion: @escaping () -> Void){
         
         let ref = Database.database().reference().child("likes").child(postId)
@@ -1135,6 +1257,9 @@ extension Database{
         } else if action == "post" {
             creatorField = "postCount"
             receiveField = "postCount"
+        } else if action == "vote" {
+            creatorField = "voteCount"
+            receiveField = "votedCount"
         } else {
             print("Invalid Social Action")
             return
@@ -1146,7 +1271,7 @@ extension Database{
             creatorRef.runTransactionBlock({ (currentData) -> TransactionResult in
             var user = currentData.value as? [String : AnyObject] ?? [:]
             var count = user[creatorField] as? Int ?? 0
-            count = max(0, count + change)
+            count = count + change
             user[creatorField] = count as AnyObject?
             
             currentData.value = user
@@ -1165,7 +1290,7 @@ extension Database{
             receiveRef.runTransactionBlock({ (currentData) -> TransactionResult in
                 var user = currentData.value as? [String : AnyObject] ?? [:]
                 var count = user[receiveField] as? Int ?? 0
-                count = max(0, count + change)
+                count = count + change
                 user[receiveField] = count as AnyObject?
                 
                 currentData.value = user

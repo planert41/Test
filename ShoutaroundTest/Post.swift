@@ -61,10 +61,12 @@ struct Post {
     //Social Stats
     var hasLiked: Bool = false
     var hasBookmarked: Bool = false
+    var hasMessaged: Bool = false
     var likeCount: Int = 0
     var bookmarkCount:Int = 0
     var messageCount:Int = 0
     var voteCount:Int = 0
+    var hasVoted:Int = 0
     
     
     init(user: User, dictionary: [String: Any]) {
@@ -94,6 +96,8 @@ struct Post {
         self.likeCount = dictionary["likeCount"] as? Int ?? 0
         self.bookmarkCount = dictionary["bookmarkCount"] as? Int ?? 0
         self.messageCount = dictionary["messageCount"] as? Int ?? 0
+        self.voteCount = dictionary["voteCount"] as? Int ?? 0
+        
         
         
         let locationGPSText = dictionary["postLocationGPS"] as? String ?? "0,0"
