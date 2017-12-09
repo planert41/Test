@@ -110,16 +110,6 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
     fileprivate func setupAttributedSocialCount(){
         
         guard let post = self.post else {return}
-
-        if post.likeCount > 0 {
-            let attributedText = NSMutableAttributedString(string: "\(post.likeCount) likes", attributes: [NSFontAttributeName: UIFont.boldSystemFont(ofSize: 14)])
-            self.socialCountLabel.attributedText = attributedText
-            self.socialCountLabel.isHidden = false
-            self.socialCountLabel.sizeToFit()
-        } else {
-            self.socialCountLabel.text?.removeAll()
-            self.socialCountLabel.isHidden = true
-        }
         
         if post.messageCount > 0 {
             self.messageCount.text = String( post.messageCount)
@@ -448,12 +438,7 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         label.numberOfLines = 0
         return label
     }()
-    
-    let socialCountLabel: UILabel = {
-        let label = UILabel()
-        label.numberOfLines = 0
-        return label
-    }()
+
 
     lazy var optionsButton: UIButton = {
         let button = UIButton(type: .system)
@@ -581,14 +566,9 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         bottomDividerView.anchor(top: locationView.bottomAnchor, left: leftAnchor, bottom: nil, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0.5)
         
         setupActionButtons()
-        
-        addSubview(socialCountLabel)
-        socialCountLabel.anchor(top: actionBar.bottomAnchor, left: leftAnchor, bottom: nil, right: rightAnchor, paddingTop: 0, paddingLeft: 8, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
-        socialCountLabel.heightAnchor.constraint(lessThanOrEqualToConstant: 20).isActive = true
-        socialCountLabel.sizeToFit()
 
         addSubview(captionLabel)
-        captionLabel.anchor(top: socialCountLabel.bottomAnchor, left: leftAnchor, bottom: nil, right: rightAnchor, paddingTop: 2, paddingLeft: 8, paddingBottom: 0, paddingRight: 8, width: 0, height: 0)
+        captionLabel.anchor(top: actionBar.bottomAnchor, left: leftAnchor, bottom: nil, right: rightAnchor, paddingTop: 2, paddingLeft: 8, paddingBottom: 0, paddingRight: 8, width: 0, height: 0)
         captionLabel.bottomAnchor.constraint(lessThanOrEqualTo: bottomAnchor)
     
     }
@@ -923,7 +903,7 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         commentButton.anchor(top: commentContainer.topAnchor, left: commentContainer.leftAnchor, bottom: commentContainer.bottomAnchor, right: nil, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
         commentButton.widthAnchor.constraint(equalTo: commentButton.heightAnchor, multiplier: 1).isActive = true
 
-        commentCount.anchor(top: commentContainer.topAnchor, left: commentButton.rightAnchor, bottom: commentContainer.bottomAnchor, right: commentContainer.rightAnchor, paddingTop: 0, paddingLeft: 2, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
+        commentCount.anchor(top: commentContainer.topAnchor, left: commentButton.rightAnchor, bottom: commentContainer.bottomAnchor, right: commentContainer.rightAnchor, paddingTop: 0, paddingLeft: 5, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
         commentCount.centerYAnchor.constraint(equalTo: commentButton.centerYAnchor).isActive = true
         commentCount.sizeToFit()
         
@@ -939,7 +919,7 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         bookmarkButton.anchor(top: bookmarkContainer.topAnchor, left: bookmarkContainer.leftAnchor, bottom: bookmarkContainer.bottomAnchor, right: nil, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
         bookmarkButton.widthAnchor.constraint(equalTo: bookmarkButton.heightAnchor, multiplier: 1).isActive = true
         
-        bookmarkCount.anchor(top: bookmarkContainer.topAnchor, left: bookmarkButton.rightAnchor, bottom: bookmarkContainer.bottomAnchor, right: bookmarkContainer.rightAnchor, paddingTop: 0, paddingLeft: 2, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
+        bookmarkCount.anchor(top: bookmarkContainer.topAnchor, left: bookmarkButton.rightAnchor, bottom: bookmarkContainer.bottomAnchor, right: bookmarkContainer.rightAnchor, paddingTop: 0, paddingLeft: 5, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
         bookmarkCount.centerYAnchor.constraint(equalTo: bookmarkButton.centerYAnchor).isActive = true
         
         bookmarkCount.sizeToFit()
@@ -957,7 +937,7 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         sendMessageButton.anchor(top: messageContainer.topAnchor, left: messageContainer.leftAnchor, bottom: messageContainer.bottomAnchor, right: nil, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
         sendMessageButton.widthAnchor.constraint(equalTo: sendMessageButton.heightAnchor, multiplier: 1).isActive = true
         
-        messageCount.anchor(top: messageContainer.topAnchor, left: sendMessageButton.rightAnchor, bottom: messageContainer.bottomAnchor, right: messageContainer.rightAnchor, paddingTop: 0, paddingLeft: 2, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
+        messageCount.anchor(top: messageContainer.topAnchor, left: sendMessageButton.rightAnchor, bottom: messageContainer.bottomAnchor, right: messageContainer.rightAnchor, paddingTop: 0, paddingLeft: 5, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
         messageCount.centerYAnchor.constraint(equalTo: sendMessageButton.centerYAnchor).isActive = true
         
         messageCount.text = "10"
