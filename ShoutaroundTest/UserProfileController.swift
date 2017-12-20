@@ -430,12 +430,12 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
         editPost.editPostId = post.id
         
         // Post Details
-        editPost.selectedPostGooglePlaceID = post.locationGooglePlaceID
+        editPost.selectPostGooglePlaceID = post.locationGooglePlaceID
         editPost.selectedImageLocation = post.locationGPS
-        editPost.selectedPostLocation = post.locationGPS
-        editPost.selectedPostLocationName = post.locationName
-        editPost.selectedPostLocationAdress = post.locationAdress
-        editPost.selectedTime = post.tagTime
+        editPost.selectPostLocation = post.locationGPS
+        editPost.selectPostLocationName = post.locationName
+        editPost.selectPostLocationAdress = post.locationAdress
+        editPost.selectTime = post.tagTime
         editPost.ratingEmoji = post.ratingEmoji
         editPost.nonRatingEmoji = post.nonRatingEmoji
         editPost.nonRatingEmojiTags = post.nonRatingEmojiTags

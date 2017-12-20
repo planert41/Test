@@ -15,6 +15,7 @@ import SwiftyJSON
 import SwiftLocation
 import Alamofire
 import GooglePlaces
+import Cosmos
 
 var newPost: Post? = nil
 var newPostId: PostId? = nil
@@ -33,7 +34,9 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
     let emojiCellID = "emojiCellID"
     let captionDefault = "Insert Caption Here"
     let emojiDefault = ""
-    var blankImageGPSName: String = "No GPS Location"
+    var blankGPSName: String = defaultEmptyGPSName
+    
+    // Location Adress is setup as default image location name
 
 // Information from image
     
@@ -45,11 +48,11 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
     
     var selectedImageLocation:CLLocation?{
         didSet{
-            selectedPostLocation = selectedImageLocation
+            selectPostLocation = selectedImageLocation
             // Updates Adress and Finds Restaurants near location
-            if selectedPostLocation != nil && (selectedPostLocation?.coordinate.latitude != 0) && (selectedPostLocation?.coordinate.longitude != 0){
-                googleReverseGPS(GPSLocation: selectedPostLocation!)
-                googleLocationSearch(GPSLocation: selectedPostLocation!)
+            if selectPostLocation != nil && (selectPostLocation?.coordinate.latitude != 0) && (selectPostLocation?.coordinate.longitude != 0){
+                googleReverseGPS(GPSLocation: selectPostLocation!)
+                googleLocationSearch(GPSLocation: selectPostLocation!)
             }
         }
     }
@@ -59,10 +62,12 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
             if selectedImageTime == nil {
                 ("No Image Time, Defaulting to Current Upload Time: ")
             } else {
-                self.selectedTime = selectedImageTime
+                self.selectTime = selectedImageTime
             }
         }
     }
+    
+    var defaultImageLocationName: String? = nil
     
 // Editing Post Information
     
@@ -82,71 +87,93 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
     
 // Selected Post Information
 
-    var selectedPostGooglePlaceID: String? = nil
-    var selectedGoogleLocationIndex: Int? = nil
+    var selectPostGooglePlaceID: String? = nil
+    var selectGoogleLocationIndex: Int? = nil
     
-    var selectedPostLocation: CLLocation? = nil {
+    var selectPostLocation: CLLocation? = nil {
         // Selected Location for Post to Upload
         didSet{
-            if selectedPostLocation == nil || (selectedPostLocation?.coordinate.latitude == 0 && selectedPostLocation?.coordinate.longitude == 0){
-                self.locationNameLabel.text =  self.blankImageGPSName
-                self.locationAdressLabel.text = nil
+            if selectPostLocation == nil || (selectPostLocation?.coordinate.latitude == 0 && selectPostLocation?.coordinate.longitude == 0){
+                self.selectPostLocationName = self.blankGPSName
+                self.selectPostLocationAdress = nil
                 self.locationCancelButton.isHidden = true
+                self.findCurrentLocationButton.isHidden = false
             }
             else {
-                let postLatitude:String! = String(format:"%.4f",(selectedPostLocation?.coordinate.latitude)!)
-                let postLongitude:String! = String(format:"%.4f",(selectedPostLocation?.coordinate.longitude)!)
-                self.locationNameLabel.text = "GPS: " + " (" + postLatitude + "," + postLongitude + ")"
-
+//                let postLatitude:String! = String(format:"%.4f",(selectedPostLocation?.coordinate.latitude)!)
+//                let postLongitude:String! = String(format:"%.4f",(selectedPostLocation?.coordinate.longitude)!)
+//                self.locationNameLabel.text = "GPS: " + " (" + postLatitude + "," + postLongitude + ")"
+                self.selectPostLocationName = self.defaultImageLocationName
                 self.locationCancelButton.isHidden = false
+                self.findCurrentLocationButton.isHidden = true
             }
         }
     }
     
-    var selectedPostLocationName:String?{
+    var selectPostLocationName:String?{
         // Location from Image
         didSet {
-            locationNameLabel.text = selectedPostLocationName
+            locationNameLabel.text = selectPostLocationName
+            
+            if selectPostLocationName == self.blankGPSName {
+                self.locationCancelButton.isHidden = true
+                self.findCurrentLocationButton.isHidden = false
+            } else {
+                self.locationCancelButton.isHidden = false
+                self.findCurrentLocationButton.isHidden = true
+            }
         }
     }
     
     
-    var selectedPostLocationAdress:String?{
+    var selectPostLocationAdress:String?{
         // Location Adress from Image
         didSet {
-            locationAdressLabel.text = selectedPostLocationAdress
+            locationAdressLabel.text = selectPostLocationAdress
         }
     }
     
-    var selectedTime: Date? = nil {
+    var selectTime: Date? = nil {
         didSet{
             // get the current date and time
             let formatter = DateFormatter()
             formatter.dateFormat = "MMM d YYYY, h:mm a"
-            if self.selectedTime == nil {
+            if self.selectTime == nil {
                 self.timeLabel.text = ""
             }
             else {
-                self.timeLabel.text = formatter.string(from: self.selectedTime!)
+                self.timeLabel.text = formatter.string(from: self.selectTime!)
             }
         }
     }
     
+// Star Rating
+
+    let starRating: CosmosView = {
+        let iv = CosmosView()
+        iv.settings.fillMode = .half
+        iv.settings.totalStars = 7
+        iv.settings.filledImage = #imageLiteral(resourceName: "starfilled")
+        iv.settings.emptyImage = #imageLiteral(resourceName: "starunfill")
+        return iv
+    }()
+    
+
 // Emoji Variables
     
     var emojiViews: Array<UICollectionView>?
-    var selectedEmojis = ""
+    var selectEmojis = ""
     var ratingEmoji: String? = nil {
         didSet{
             self.ratingEmojiLabel.text = ratingEmoji
-            updateSelectedEmojis()
+            updateselectEmojis()
         }
     }
     
     var nonRatingEmoji: [String]? = nil {
         didSet{
             self.nonRatingEmojiLabel.text = nonRatingEmoji?.joined()
-            updateSelectedEmojis()
+            updateselectEmojis()
         }
     }
 
@@ -154,12 +181,12 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
 
 // Emoji Functions
     
-    func updateSelectedEmojis(){
+    func updateselectEmojis(){
         var ratingEmojiValue = self.ratingEmojiLabel.text ?? ""
         var nonRatingEmojiValue = self.nonRatingEmojiLabel.text ?? ""
-        self.selectedEmojis = ratingEmojiValue + nonRatingEmojiValue
+        self.selectEmojis = ratingEmojiValue + nonRatingEmojiValue
         
-        print("Selected Emojis: ", self.selectedEmojis)
+        print("Selected Emojis: ", self.selectEmojis)
         
         // Emoji Cancel Buttons
         
@@ -324,8 +351,8 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         
         setupEmojiAutoComplete()
         setupImageAndTextViews()
-        updateSelectedEmojis()
-        self.captionTextView.becomeFirstResponder()
+        updateselectEmojis()
+//        self.captionTextView.becomeFirstResponder()
         
     }
     
@@ -397,11 +424,11 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
     
     
     func cancelRatingEmoji(){
-        self.setSelectedEmojis(rateEmoji: nil, nonRateEmoji: self.nonRatingEmoji?.joined())
+        self.setselectEmojis(rateEmoji: nil, nonRateEmoji: self.nonRatingEmoji?.joined())
     }
 
     func cancelNonRatingEmoji(){
-        self.setSelectedEmojis(rateEmoji: self.ratingEmoji, nonRateEmoji: nil)
+        self.setselectEmojis(rateEmoji: self.ratingEmoji, nonRateEmoji: nil)
     }
     
     let captionCancelButton: UIButton = {
@@ -421,10 +448,10 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
     func cancelCaption(){
         captionTextView.text = nil
         self.captionCancelButton.isHidden = true
-        self.setSelectedEmojis(rateEmoji: nil, nonRateEmoji: nil)
+        self.setselectEmojis(rateEmoji: nil, nonRateEmoji: nil)
     }
     
-    func setSelectedEmojis(rateEmoji: String?, nonRateEmoji: String?){
+    func setselectEmojis(rateEmoji: String?, nonRateEmoji: String?){
         
         if rateEmoji == nil {
             // Clear Rating Emoji
@@ -440,13 +467,14 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         self.EmojiCollectionView.reloadData()
     }
     
-    let locationNameLabel: UILabel = {
-        let tv = LocationLabel()
+    let locationNameLabel: RightButtonPaddedUILabel = {
+        let tv = RightButtonPaddedUILabel()
         tv.font = UIFont.systemFont(ofSize: 14)
         tv.backgroundColor = UIColor(white: 0, alpha: 0.03)
         tv.layer.borderWidth = 0.5
         tv.layer.cornerRadius = 5
         tv.isUserInteractionEnabled = true
+        
         let TapGesture = UITapGestureRecognizer(target: self, action: #selector(tapSearchBar))
         tv.addGestureRecognizer(TapGesture)
         return tv
@@ -472,15 +500,19 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
 
     let locationIcon: UIButton = {
         let button = UIButton()
-        button.setImage(#imageLiteral(resourceName: "mapcolor").withRenderingMode(.alwaysOriginal), for: .normal)
+        button.setImage(#imageLiteral(resourceName: "home").withRenderingMode(.alwaysOriginal), for: .normal)
         button.addTarget(self, action: #selector(locationIconPushed), for: .touchUpInside)
         return button
     }()
     
     func locationIconPushed(){
         print("Location Icon was Pushed")
-        self.refreshGoogleResults()
-        determineCurrentLocation()
+        
+        self.selectPostLocationName = self.defaultImageLocationName
+        self.selectPostLocationAdress = self.defaultImageLocationName
+//
+//        self.refreshGoogleResults()
+//        determineCurrentLocation()
     }
     
     func refreshGoogleResults(){
@@ -534,7 +566,7 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
     }()
     
     func timeIconPushed(){
-        self.selectedTime = currentDateTime
+        self.selectTime = currentDateTime
         let formatter = DateFormatter()
         formatter.dateFormat = "MMM d YYYY, h:mm a"
         let attributedText = NSMutableAttributedString(string: formatter.string(from: currentDateTime), attributes: [NSFontAttributeName: UIFont.boldSystemFont(ofSize: 14),NSForegroundColorAttributeName: UIColor.mainBlue()])
@@ -582,7 +614,7 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
     
     func doneClick() {
         let dateFormatter1 = DateFormatter()
-        self.selectedTime = datePicker.date
+        self.selectTime = datePicker.date
         self.toolBar.isHidden = true
         self.datePicker.isHidden = true
     }
@@ -597,7 +629,6 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
     
     
     let locationCancelButton: UIButton = {
-        
         let button = UIButton(type: .system)
         button.setImage(#imageLiteral(resourceName: "cancel_shadow").withRenderingMode(.alwaysOriginal), for: .normal)
         button.translatesAutoresizingMaskIntoConstraints = false
@@ -609,9 +640,21 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         return button
     } ()
     
+    let findCurrentLocationButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setImage(#imageLiteral(resourceName: "GeoFence").withRenderingMode(.alwaysOriginal), for: .normal)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.backgroundColor = UIColor.clear
+        button.layer.cornerRadius = 0.5 * button.bounds.size.width
+        button.layer.masksToBounds  = true
+        button.clipsToBounds = true
+        button.addTarget(self, action: #selector(determineCurrentLocation), for: .touchUpInside)
+        return button
+    } ()
+    
     
     func cancelLocation(){
-        selectedPostLocation = nil
+        selectPostLocation = nil
     }
     
     let timeCancelButton: UIButton = {
@@ -628,14 +671,14 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
 
     
     func cancelTime(){
-        if selectedTime != currentDateTime {
-            self.selectedTime = currentDateTime
+        if selectTime != currentDateTime {
+            self.selectTime = currentDateTime
             let formatter = DateFormatter()
             formatter.dateFormat = "MMM d YYYY, h:mm a"
             let attributedText = NSMutableAttributedString(string: formatter.string(from: currentDateTime), attributes: [NSFontAttributeName: UIFont.boldSystemFont(ofSize: 14),NSForegroundColorAttributeName: UIColor.mainBlue()])
             self.timeLabel.attributedText = attributedText
         } else {
-        selectedTime = nil
+        selectTime = nil
         }
     }
     
@@ -658,23 +701,23 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         let locationSearchController = LocationSearchController()
         var sentLocation: CLLocation?
         
-        if self.selectedPostLocation == nil {
+        if self.selectPostLocation == nil {
             self.determineCurrentLocation()
             let when = DispatchTime.now() + 1 // change 2 to desired number of seconds
             DispatchQueue.main.asyncAfter(deadline: when) {
                 sentLocation = CurrentUser.currentLocation
                 print(sentLocation)
                 locationSearchController.selectedLocation = sentLocation
-                locationSearchController.refreshMap(long: (sentLocation!.coordinate.longitude), lat: (sentLocation!.coordinate.latitude), name: self.locationNameLabel.text, adress: self.locationAdressLabel.text)
-                locationSearchController.selectedGooglePlaceID = self.selectedPostGooglePlaceID
+                locationSearchController.refreshMap(long: (sentLocation!.coordinate.longitude), lat: (sentLocation!.coordinate.latitude), name: self.selectPostLocationName, adress: self.selectPostLocationAdress)
+                locationSearchController.selectedGooglePlaceID = self.selectPostGooglePlaceID
                 locationSearchController.delegate = self
                 self.navigationController?.pushViewController(locationSearchController, animated: true)
             }
         } else {
-            sentLocation = self.selectedPostLocation
+            sentLocation = self.selectPostLocation
             locationSearchController.selectedLocation = sentLocation
-            locationSearchController.refreshMap(long: (sentLocation!.coordinate.longitude), lat: (sentLocation!.coordinate.latitude), name: self.locationNameLabel.text, adress: self.locationAdressLabel.text)
-            locationSearchController.selectedGooglePlaceID = self.selectedPostGooglePlaceID
+            locationSearchController.refreshMap(long: (sentLocation!.coordinate.longitude), lat: (sentLocation!.coordinate.latitude), name: self.selectPostLocationName, adress: self.selectPostLocationAdress)
+            locationSearchController.selectedGooglePlaceID = self.selectPostGooglePlaceID
             locationSearchController.delegate = self
             navigationController?.pushViewController(locationSearchController, animated: true)
         }
@@ -824,7 +867,7 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         view.addSubview(LocationContainerView)
         LocationContainerView.anchor(top: captionTextView.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 1, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 180)
         
-        // Add Tag Time
+    // Add Tag Time
         view.addSubview(timeIcon)
         timeIcon.anchor(top: LocationContainerView.topAnchor, left: LocationContainerView.leftAnchor, bottom: nil, right: nil, paddingTop: 10, paddingLeft: 10, paddingBottom: 10, paddingRight: 10, width: 30, height: 30)
         view.addSubview(timeLabel)
@@ -834,6 +877,8 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         timeLabel.addGestureRecognizer(TapGestureT)
         view.addSubview(timeCancelButton)
         timeCancelButton.anchor(top: timeLabel.topAnchor, left: nil, bottom: timeLabel.bottomAnchor, right: timeLabel.rightAnchor, paddingTop: 10, paddingLeft: 10, paddingBottom: 10, paddingRight: 10, width: 20, height: 20)
+        
+    // Add Location Name
         view.addSubview(locationIcon)
         locationIcon.anchor(top: timeLabel.bottomAnchor, left: LocationContainerView.leftAnchor, bottom: nil, right: nil, paddingTop: 10, paddingLeft: 10, paddingBottom: 10, paddingRight: 10, width: 30, height: 30)
         view.addSubview(locationNameLabel)
@@ -843,6 +888,13 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         locationNameLabel.addGestureRecognizer(TapGesture)
         view.addSubview(locationCancelButton)
         locationCancelButton.anchor(top: locationNameLabel.topAnchor, left: nil, bottom: locationNameLabel.bottomAnchor, right: locationNameLabel.rightAnchor, paddingTop: 10, paddingLeft: 10, paddingBottom: 10, paddingRight: 10, width: 20, height: 20)
+        locationCancelButton.isHidden = true
+        
+        view.addSubview(findCurrentLocationButton)
+        findCurrentLocationButton.anchor(top: locationNameLabel.topAnchor, left: nil, bottom: locationNameLabel.bottomAnchor, right: locationNameLabel.rightAnchor, paddingTop: 10, paddingLeft: 10, paddingBottom: 10, paddingRight: 10, width: 20, height: 20)
+        findCurrentLocationButton.isHidden = true
+        
+    // Add Location Adress
         view.addSubview(adressIcon)
         adressIcon.anchor(top: locationNameLabel.bottomAnchor, left: LocationContainerView.leftAnchor, bottom: nil, right: nil, paddingTop: 10, paddingLeft: 10, paddingBottom: 10, paddingRight: 10, width: 30, height: 30)
         view.addSubview(locationAdressLabel)
@@ -850,6 +902,8 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         locationAdressLabel.isUserInteractionEnabled = true
         let TapGesture1 = UITapGestureRecognizer(target: self, action: #selector(tapSearchBar))
         locationAdressLabel.addGestureRecognizer(TapGesture1)
+        
+    // Add Places Collection View
         view.addSubview(placesCollectionView)
         placesCollectionView.anchor(top: locationAdressLabel.bottomAnchor, left: LocationContainerView.leftAnchor, bottom: nil, right: LocationContainerView.rightAnchor, paddingTop: 5, paddingLeft: 5, paddingBottom: 5, paddingRight: 5, width: 0, height: 40)
         placesCollectionView.backgroundColor = UIColor.white
@@ -908,12 +962,12 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
     }
 
     func didUpdate(lat: Double?, long: Double?, locationAdress: String?, locationName: String?, locationGooglePlaceID: String?) {
-        self.selectedPostLocation = CLLocation.init(latitude: lat!, longitude: long!)
-        self.selectedPostGooglePlaceID = locationGooglePlaceID
-        self.selectedPostLocationName = locationName
-        self.selectedPostLocationAdress = locationAdress
-        self.googleReverseGPS(GPSLocation: selectedPostLocation!)
-        self.googleLocationSearch(GPSLocation: selectedPostLocation!)
+        self.selectPostLocation = CLLocation.init(latitude: lat!, longitude: long!)
+        self.selectPostGooglePlaceID = locationGooglePlaceID
+        self.selectPostLocationName = locationName
+        self.selectPostLocationAdress = locationAdress
+        self.googleReverseGPS(GPSLocation: selectPostLocation!)
+        self.googleLocationSearch(GPSLocation: selectPostLocation!)
         
     }
     
@@ -1307,7 +1361,7 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
             
             cell.uploadLocations.text = googlePlaceNames[indexPath.item]
             
-            if self.selectedPostLocation == self.googlePlaceLocations[indexPath.item] {
+            if self.selectPostLocation == self.googlePlaceLocations[indexPath.item] {
                 cell.backgroundColor = UIColor.rgb(red: 149, green: 204, blue: 244)
             } else {
                 cell.backgroundColor = UIColor.white
@@ -1321,7 +1375,7 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
 //            
 //                cell.uploadEmojis.text = EmoticonArray[collectionView.tag][(indexPath as IndexPath).row]
 //                
-//                if self.selectedEmojis.contains(cell.uploadEmojis.text!){
+//                if self.selectEmojis.contains(cell.uploadEmojis.text!){
 //                    cell.backgroundColor = UIColor.gray
 //                } else {
 //                    cell.backgroundColor = UIColor.white
@@ -1342,7 +1396,7 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
             
                     cell.uploadEmojis.text = EmoticonArray[(indexPath as IndexPath).section][newIndex]
             
-            if (self.selectedEmojis.contains(cell.uploadEmojis.text!)/*||self.captionTextView.text.contains(cell.uploadEmojis.text!)*/){
+            if (self.selectEmojis.contains(cell.uploadEmojis.text!)/*||self.captionTextView.text.contains(cell.uploadEmojis.text!)*/){
                 //Highlight only if emoji is tagged, dont care about caption
                 
                         cell.backgroundColor = UIColor.rgb(red: 149, green: 204, blue: 244)
@@ -1369,7 +1423,7 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
             let pressedEmoji = cell.uploadEmojis.text!
             
         
-            if /*self.captionTextView.text.contains(pressedEmoji) == false &&*/ self.selectedEmojis.contains(pressedEmoji) == false
+            if /*self.captionTextView.text.contains(pressedEmoji) == false &&*/ self.selectEmojis.contains(pressedEmoji) == false
             {   // Emoji not in caption or tag
                 
                 if self.captionTextView.text == "Insert Caption Here" {
@@ -1382,7 +1436,7 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
                 self.emojiTagUntag(emojiInput: cell.uploadEmojis.text, emojiInputTag: cell.uploadEmojis.text)
                 
                 
-            } else if self.selectedEmojis.contains(pressedEmoji) == true {
+            } else if self.selectEmojis.contains(pressedEmoji) == true {
                 // Emoji is Tagged, Remove emoji from captions and selected emoji
                 
                 captionTextView.text = captionTextView.text.replacingOccurrences(of: pressedEmoji, with: "")
@@ -1395,27 +1449,27 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
 
             // Unselects Location
             
-            if self.selectedPostLocation == self.googlePlaceLocations[indexPath.item] {
+            if self.selectPostLocation == self.googlePlaceLocations[indexPath.item] {
 
-                self.selectedPostLocation = self.selectedImageLocation
-                self.locationNameLabel.text = self.blankImageGPSName
-                self.locationAdressLabel.text = self.selectedPostLocationAdress
-                self.selectedPostGooglePlaceID = nil
-                self.selectedGoogleLocationIndex = nil
+                self.selectPostLocation = self.selectedImageLocation
+                self.selectPostLocationName = self.defaultImageLocationName
+                self.selectPostLocationAdress = self.defaultImageLocationName
+                self.selectPostGooglePlaceID = nil
+                self.selectGoogleLocationIndex = nil
                 
             } else {
             
-                self.selectedPostLocation = self.googlePlaceLocations[indexPath.item]
-                self.locationNameLabel.text = self.googlePlaceNames[indexPath.item]
-                self.locationAdressLabel.text = self.googlePlaceAdresses[indexPath.item]
-                self.selectedPostGooglePlaceID = self.googlePlaceIDs[indexPath.item]
-                self.selectedGoogleLocationIndex = indexPath.item
+                self.selectPostLocation = self.googlePlaceLocations[indexPath.item]
+                self.selectPostLocationName = self.googlePlaceNames[indexPath.item]
+                self.selectPostLocationAdress = self.googlePlaceAdresses[indexPath.item]
+                self.selectPostGooglePlaceID = self.googlePlaceIDs[indexPath.item]
+                self.selectGoogleLocationIndex = indexPath.item
         
                 print(self.googlePlaceLocations[indexPath.item])
                 print(self.googlePlaceAdresses[indexPath.item])
                 print(self.googlePlaceNames[indexPath.item])
-                print(self.selectedPostLocation ?? nil)
-                print(self.selectedPostGooglePlaceID ?? "")
+                print(self.selectPostLocation ?? nil)
+                print(self.selectPostGooglePlaceID ?? "")
             }
             collectionView.reloadData()
         }
@@ -1438,11 +1492,11 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         guard let caption = captionTextView.text, caption.characters.count > 0 else {
             self.alert(title: "Upload Post Requirement", message: "Please Insert Caption")
             return}
-        guard let postLocationName = self.locationNameLabel.text else {return}
-        if postLocationName == self.blankImageGPSName {
+        guard let postLocationName = self.selectPostLocationName else {return}
+        if postLocationName == self.blankGPSName {
             self.alert(title: "Upload Post Requirement", message: "Please Tag Location")
             return}
-        guard let postLocationAdress = self.locationAdressLabel.text else {
+        guard let postLocationAdress = self.selectPostLocationAdress else {
             self.alert(title: "Upload Post Requirement", message: "Please Tag Location")
             return}
         
@@ -1484,13 +1538,13 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         guard let postImage = selectedImage else {return}
         var caption = captionTextView.text
         if caption == captionDefault {caption = nil}
-        let selectedPostEmoji = selectedEmojis ?? nil
-        let googlePlaceID = selectedPostGooglePlaceID ?? nil
+        let selectedPostEmoji = selectEmojis ?? nil
+        let googlePlaceID = selectPostGooglePlaceID ?? nil
         
         // Upload Name Adress that matches inputs
-        guard let postLocationName = self.locationNameLabel.text else {return}
-        if postLocationName == self.blankImageGPSName {return}
-        guard let postLocationAdress = self.locationAdressLabel.text else {return}
+        guard let postLocationName = self.selectPostLocationName else {return}
+        if postLocationName == self.blankGPSName {return}
+        guard let postLocationAdress = self.selectPostLocationAdress else {return}
         guard let uid = Auth.auth().currentUser?.uid else {return}
         
         let ratingEmojiUpload = self.ratingEmoji ?? nil
@@ -1501,20 +1555,20 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         var uploadedlocationGPSLongitude: String?
         var uploadedLocationGPS: String?
         
-        if selectedPostLocation == nil {
+        if selectPostLocation == nil {
             uploadedLocationGPSLatitude = "0"
             uploadedlocationGPSLongitude = "0"
             uploadedLocationGPS = nil
         } else {
-            uploadedLocationGPSLatitude = String(format: "%f", (selectedPostLocation?.coordinate.latitude)!)
-            uploadedlocationGPSLongitude = String(format: "%f", (selectedPostLocation?.coordinate.longitude)!)
+            uploadedLocationGPSLatitude = String(format: "%f", (selectPostLocation?.coordinate.latitude)!)
+            uploadedlocationGPSLongitude = String(format: "%f", (selectPostLocation?.coordinate.longitude)!)
             uploadedLocationGPS = uploadedLocationGPSLatitude! + "," + uploadedlocationGPSLongitude!
         }
         
         let userPostRef = Database.database().reference().child("posts")
         let ref = userPostRef.childByAutoId()
         let uploadTime = Date().timeIntervalSince1970
-        let tagTime = self.selectedTime?.timeIntervalSince1970
+        let tagTime = self.selectTime?.timeIntervalSince1970
         
         let values = ["imageUrl": imageUrl, "caption": caption, "imageWidth": postImage.size.width, "imageHeight": postImage.size.height, "creationDate": uploadTime, "googlePlaceID": googlePlaceID, "locationName": postLocationName, "locationAdress": postLocationAdress, "postLocationGPS": uploadedLocationGPS, "creatorUID": uid, "tagTime": tagTime,"ratingEmoji": ratingEmojiUpload, "nonratingEmoji": nonratingEmojiUpload, "nonratingEmojiTags": nonratingEmojiTagsUpload] as [String:Any]
         
@@ -1552,7 +1606,7 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
             guard let geoFire = GeoFire(firebaseRef: geofireRef) else {return}
 //            let geofirekeytest = uid+","+postref
             
-            geoFire.setLocation(self.selectedPostLocation, forKey: postref) { (error) in
+            geoFire.setLocation(self.selectPostLocation, forKey: postref) { (error) in
                 if (error != nil) {
                     print("An error occured: \(error)")
                 } else {
@@ -1591,13 +1645,13 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         guard let postImage = selectedImage else {return}
         var caption = captionTextView.text
         if caption == captionDefault {caption = nil}
-        let selectedPostEmoji = selectedEmojis ?? nil
-        let googlePlaceID = selectedPostGooglePlaceID ?? nil
+        let selectedPostEmoji = selectEmojis ?? nil
+        let googlePlaceID = selectPostGooglePlaceID ?? nil
         
         // Upload Name Adress that matches inputs
-        guard let postLocationName = self.locationNameLabel.text else {return}
-        if postLocationName == self.blankImageGPSName {return}
-        guard let postLocationAdress = self.locationAdressLabel.text else {return}
+        guard let postLocationName = self.selectPostLocationName else {return}
+        if postLocationName == self.blankGPSName {return}
+        guard let postLocationAdress = self.selectPostLocationAdress else {return}
         guard let uid = Auth.auth().currentUser?.uid else {return}
         
         let ratingEmojiUpload = self.ratingEmoji ?? nil
@@ -1608,17 +1662,17 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         var uploadedlocationGPSLongitude: String?
         var uploadedLocationGPS: String?
         
-        if selectedPostLocation == nil {
+        if selectPostLocation == nil {
             uploadedLocationGPS = nil
         } else {
-            uploadedLocationGPSLatitude = String(format: "%f", (selectedPostLocation?.coordinate.latitude)!)
-            uploadedlocationGPSLongitude = String(format: "%f", (selectedPostLocation?.coordinate.longitude)!)
+            uploadedLocationGPSLatitude = String(format: "%f", (selectPostLocation?.coordinate.latitude)!)
+            uploadedlocationGPSLongitude = String(format: "%f", (selectPostLocation?.coordinate.longitude)!)
             uploadedLocationGPS = uploadedLocationGPSLatitude! + "," + uploadedlocationGPSLongitude!
         }
         
         let userPostRef = Database.database().reference().child("posts").child(postId)
         let uploadTime = Date().timeIntervalSince1970
-        let tagTime = self.selectedTime?.timeIntervalSince1970
+        let tagTime = self.selectTime?.timeIntervalSince1970
         
         let values = ["imageUrl": imageUrl, "caption": caption, "imageWidth": postImage.size.width, "imageHeight": postImage.size.height, "creationDate": uploadTime, "googlePlaceID": googlePlaceID, "locationName": postLocationName, "locationAdress": postLocationAdress, "postLocationGPS": uploadedLocationGPS, "creatorUID": uid, "tagTime": tagTime,"ratingEmoji": ratingEmojiUpload, "nonratingEmoji": nonratingEmojiUpload, "nonratingEmojiTags": nonratingEmojiTagsUpload, "editDate": uploadTime] as [String:Any]
         userPostRef.updateChildValues(values) { (err, ref) in
@@ -1654,7 +1708,7 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
             guard let geoFire = GeoFire(firebaseRef: geofireRef) else {return}
             //            let geofirekeytest = uid+","+postref
             
-            geoFire.setLocation(self.selectedPostLocation, forKey: postId) { (error) in
+            geoFire.setLocation(self.selectPostLocation, forKey: postId) { (error) in
                 if (error != nil) {
                     print("An error occured: \(error)")
                 } else {
@@ -1697,7 +1751,8 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         if userLocation != nil {
             print("Current User Location", userLocation)
             CurrentUser.currentLocation = userLocation
-            self.selectedPostLocation = userLocation
+            self.selectPostLocation = userLocation
+            googleReverseGPS(GPSLocation: userLocation)
             manager.stopUpdatingLocation()
         }
         
@@ -1750,7 +1805,7 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
             let state = (containsPlacemark.administrativeArea != nil) ? containsPlacemark.administrativeArea : ""
             let postalCode = (containsPlacemark.postalCode != nil) ? containsPlacemark.postalCode : ""
 
-            self.selectedPostLocationAdress = subThoroughfare! + " " + thoroughfare! + ", " + locality! + ", " + state! + " " + postalCode!
+            self.selectPostLocationAdress = subThoroughfare! + " " + thoroughfare! + ", " + locality! + ", " + state! + " " + postalCode!
             
         }
         
@@ -1778,7 +1833,9 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
                 
                 if let results = json["results"].array {
    //                 print("Google Map Results ",results[0]["formatted_address"])
-                    self.selectedPostLocationAdress = results[0]["formatted_address"].string
+                    self.defaultImageLocationName = results[0]["formatted_address"].string
+                    self.selectPostLocationName = self.defaultImageLocationName
+                    self.selectPostLocationAdress = self.defaultImageLocationName
 
                         }
                     }

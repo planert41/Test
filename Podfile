@@ -27,6 +27,7 @@ pod 'GoogleSignIn'
 pod 'IQKeyboardManagerSwift'
 pod 'SMSegmentView'
 pod ‘SearchTextField’
+pod 'Cosmos', '~> 13.0'
 
 
 

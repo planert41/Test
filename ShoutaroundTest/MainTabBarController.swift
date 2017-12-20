@@ -29,40 +29,40 @@ class MainTabBarController: UITabBarController, UITabBarControllerDelegate, UIIm
 
         _ = UICollectionViewFlowLayout()
         // Add photo function selected
-            
-            let alertController = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
-    
-            alertController.addAction(UIAlertAction(title: "Camera", style: .default, handler: { (_) in
-                self.presentCamera()
-            }))
-            
-            alertController.addAction(UIAlertAction(title: "Photo Roll", style: .default, handler: { (_) in
-                self.presentImagePicker()
-            }))
-
-            alertController.addAction(UIAlertAction(title: "Cancel", style: .destructive, handler: { (_) in
-                self.dismiss(animated: true, completion: nil)
-            }))
-            
-            present(alertController, animated: true) {
-                // Works if you tag subview for tabbarcontroller
-                alertController.view.superview?.subviews[1].isUserInteractionEnabled = true
-                let cancelTap = UITapGestureRecognizer(target: self, action:#selector(self.alertClose(gesture:)))
-                alertController.view.superview?.subviews[1].addGestureRecognizer(cancelTap)
-                print(alertController.view.superview?.subviews)
-
-            }
-            
-//            imagePicker.allowsEditing = true
-//            imagePicker.sourceType = .photoLibrary
-//            imagePicker.delegate = self
-//            imagePicker.modalPresentationStyle = UIModalPresentationStyle.overCurrentContext
-//            present(imagePicker, animated: true, completion: nil)
 //
-//            let photoSelectorController = PhotoSelectorControllerDummy()
-//            let navController = UINavigationController(rootViewController: photoSelectorController)
-//            
-//            present(navController, animated: true, completion: nil)
+//            let alertController = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+//
+//            alertController.addAction(UIAlertAction(title: "Camera", style: .default, handler: { (_) in
+//                self.presentCamera()
+//            }))
+//
+//            alertController.addAction(UIAlertAction(title: "Photo Roll", style: .default, handler: { (_) in
+//                self.presentImagePicker()
+//            }))
+//
+//            alertController.addAction(UIAlertAction(title: "Cancel", style: .destructive, handler: { (_) in
+//                self.dismiss(animated: true, completion: nil)
+//            }))
+//
+//            present(alertController, animated: true) {
+//                // Works if you tag subview for tabbarcontroller
+//                alertController.view.superview?.subviews[1].isUserInteractionEnabled = true
+//                let cancelTap = UITapGestureRecognizer(target: self, action:#selector(self.alertClose(gesture:)))
+//                alertController.view.superview?.subviews[1].addGestureRecognizer(cancelTap)
+//                print(alertController.view.superview?.subviews)
+//
+//            }
+            
+            imagePicker.allowsEditing = true
+            imagePicker.sourceType = .photoLibrary
+            imagePicker.delegate = self
+            imagePicker.modalPresentationStyle = UIModalPresentationStyle.overCurrentContext
+            present(imagePicker, animated: true, completion: nil)
+
+            let photoSelectorController = PhotoSelectorControllerDummy()
+            let navController = UINavigationController(rootViewController: photoSelectorController)
+            
+            present(navController, animated: true, completion: nil)
             
             return false
             

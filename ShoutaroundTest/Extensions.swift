@@ -64,10 +64,7 @@ extension UIView{
             heightAnchor.constraint(equalToConstant: height).isActive = true
             
         }
-        
-        
     }
-    
     
 }
 
@@ -262,6 +259,25 @@ class PaddedUILabel: UILabel {
     
     override func drawText(in rect: CGRect) {
         let insets = UIEdgeInsets.init(top: 0, left: 15, bottom: 0, right: 15)
+        super.drawText(in: UIEdgeInsetsInsetRect(rect, insets))
+    }
+    
+    func heightForView(text:String, font:UIFont, width:CGFloat) -> CGFloat{
+        let label:UILabel = UILabel(frame: CGRect(x: 0, y: 0, width: width, height: CGFloat.greatestFiniteMagnitude))
+        label.numberOfLines = 0
+        label.lineBreakMode = NSLineBreakMode.byWordWrapping
+        label.font = font
+        label.text = text
+        label.sizeToFit()
+        
+        return label.frame.height
+    }
+}
+
+class RightButtonPaddedUILabel: UILabel {
+    
+    override func drawText(in rect: CGRect) {
+        let insets = UIEdgeInsets.init(top: 0, left: 10, bottom: 0, right: 30)
         super.drawText(in: UIEdgeInsetsInsetRect(rect, insets))
     }
     

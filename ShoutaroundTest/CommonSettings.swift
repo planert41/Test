@@ -14,6 +14,7 @@ var geoFilterImageDefault:[UIImage] = [#imageLiteral(resourceName: "GeoFence"),#
 var geoFilterRangeDefault:[String] = ["5", "25", "100","250", "All"]
 
 var defaultPhotoResize = CGSize(width: 500, height: 500)
+var defaultEmptyGPSName: String = "No Location"
 
 // Filter Defaults
 
