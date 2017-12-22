@@ -1,15 +1,12 @@
 {
   "images" : [
     {
-      "idiom" : "universal"
-    },
-    {
       "idiom" : "universal",
       "scale" : "1x"
     },
     {
       "idiom" : "universal",
-      "filename" : "icons8-Star Filled-48.png",
+      "filename" : "1f60d.png",
       "scale" : "2x"
     },
     {

@@ -149,15 +149,55 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
     
 // Star Rating
 
+    var selectPostStarRating: Double = 0 {
+        didSet{
+            self.starRating.rating = selectPostStarRating
+            self.starRatingLabel.rating = selectPostStarRating
+            
+            if selectPostStarRating == 0 {
+                self.starRatingCancelButton.isHidden = true
+            } else {
+                self.starRatingCancelButton.isHidden = false
+            }
+        }
+    }
+    
     let starRating: CosmosView = {
         let iv = CosmosView()
         iv.settings.fillMode = .half
         iv.settings.totalStars = 7
-        iv.settings.filledImage = #imageLiteral(resourceName: "starfilled")
-        iv.settings.emptyImage = #imageLiteral(resourceName: "starunfill")
+        iv.settings.starSize = 30
+        iv.settings.filledImage = #imageLiteral(resourceName: "ratingstarfilled").withRenderingMode(.alwaysOriginal)
+        iv.settings.emptyImage = #imageLiteral(resourceName: "ratingstarunfilled").withRenderingMode(.alwaysOriginal)
+        iv.rating = 0
+        iv.settings.starMargin = 10
         return iv
     }()
     
+    var starRatingLabel = RatingLabel()
+    
+    let starRatingCancelButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setImage(#imageLiteral(resourceName: "cancel_shadow").withRenderingMode(.alwaysOriginal), for: .normal)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.backgroundColor = UIColor.clear
+        button.layer.cornerRadius = 0.5 * button.bounds.size.width
+        button.layer.masksToBounds  = true
+        button.clipsToBounds = true
+        button.imageView?.contentMode = .scaleAspectFit
+        button.addTarget(self, action: #selector(cancelStarRating), for: .touchUpInside)
+        return button
+    } ()
+    
+    func starRatingSelectFunction(rating: Double) {
+        print("Selected Rating: \(rating)")
+        self.selectPostStarRating = rating
+    }
+    
+    func cancelStarRating(){
+        self.selectPostStarRating = 0
+        self.starRatingLabel.rating = 0
+    }
 
 // Emoji Variables
     
@@ -419,7 +459,6 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         button.imageView?.contentMode = .scaleAspectFit
         button.addTarget(self, action: #selector(cancelNonRatingEmoji), for: .touchUpInside)
         return button
-        
     } ()
     
     
@@ -467,8 +506,8 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         self.EmojiCollectionView.reloadData()
     }
     
-    let locationNameLabel: RightButtonPaddedUILabel = {
-        let tv = RightButtonPaddedUILabel()
+    let locationNameLabel: UILabel = {
+        let tv = LocationLabel()
         tv.font = UIFont.systemFont(ofSize: 14)
         tv.backgroundColor = UIColor(white: 0, alpha: 0.03)
         tv.layer.borderWidth = 0.5
@@ -835,12 +874,16 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         nonRatingEmojiCancelButton.isHidden = true
         
 // Non Rating Emoji Tags
-        view.addSubview(blankRatingEmoji)
-        blankRatingEmoji.anchor(top: emojiLabelContainer.topAnchor, left: nil, bottom: emojiLabelContainer.bottomAnchor, right:emojiLabelContainer.rightAnchor, paddingTop: 5, paddingLeft: 5, paddingBottom: 5, paddingRight: 10, width: DefaultEmojiLabelSize + 2, height: DefaultEmojiLabelSize)
+//        view.addSubview(blankRatingEmoji)
+//        blankRatingEmoji.anchor(top: emojiLabelContainer.topAnchor, left: nil, bottom: emojiLabelContainer.bottomAnchor, right:emojiLabelContainer.rightAnchor, paddingTop: 5, paddingLeft: 5, paddingBottom: 5, paddingRight: 10, width: DefaultEmojiLabelSize + 2, height: DefaultEmojiLabelSize)
+        
+        view.addSubview(starRatingLabel)
+        starRatingLabel.anchor(top: emojiLabelContainer.topAnchor, left: nil, bottom: emojiLabelContainer.bottomAnchor, right:emojiLabelContainer.rightAnchor, paddingTop: 5, paddingLeft: 5, paddingBottom: 5, paddingRight: 10, width: DefaultEmojiLabelSize, height: DefaultEmojiLabelSize)
+        starRatingLabel.layer.cornerRadius = self.starRatingLabel.frame.width/2
 
         // Set Rating Emoji Label anchor wider than blank rating emoji to allow emoji text to display
         view.addSubview(ratingEmojiLabel)
-        ratingEmojiLabel.anchor(top: blankRatingEmoji.topAnchor, left: blankRatingEmoji.leftAnchor, bottom: blankRatingEmoji.bottomAnchor, right: emojiLabelContainer.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
+        ratingEmojiLabel.anchor(top: starRatingLabel.topAnchor, left: starRatingLabel.leftAnchor, bottom: starRatingLabel.bottomAnchor, right: emojiLabelContainer.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
         view.addSubview(ratingEmojiCancelButton)
         ratingEmojiCancelButton.anchor(top: emojiTagLabel.topAnchor, left: nil, bottom: emojiTagLabel.bottomAnchor, right: ratingEmojiLabel.leftAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 5, width: 15, height: 15)
         ratingEmojiCancelButton.centerYAnchor.constraint(equalTo: ratingEmojiLabel.centerYAnchor)
@@ -868,44 +911,65 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         LocationContainerView.anchor(top: captionTextView.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 1, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 180)
         
     // Add Tag Time
-        view.addSubview(timeIcon)
-        timeIcon.anchor(top: LocationContainerView.topAnchor, left: LocationContainerView.leftAnchor, bottom: nil, right: nil, paddingTop: 10, paddingLeft: 10, paddingBottom: 10, paddingRight: 10, width: 30, height: 30)
-        view.addSubview(timeLabel)
-        timeLabel.anchor(top: LocationContainerView.topAnchor, left: timeIcon.rightAnchor, bottom: nil, right: LocationContainerView.rightAnchor, paddingTop: 5, paddingLeft: 10, paddingBottom: 0, paddingRight: 10, width: 0, height: 40)
-        timeLabel.isUserInteractionEnabled = true
-        let TapGestureT = UITapGestureRecognizer(target: self, action: #selector(timeInput))
-        timeLabel.addGestureRecognizer(TapGestureT)
-        view.addSubview(timeCancelButton)
-        timeCancelButton.anchor(top: timeLabel.topAnchor, left: nil, bottom: timeLabel.bottomAnchor, right: timeLabel.rightAnchor, paddingTop: 10, paddingLeft: 10, paddingBottom: 10, paddingRight: 10, width: 20, height: 20)
+//        view.addSubview(timeIcon)
+//        timeIcon.anchor(top: LocationContainerView.topAnchor, left: LocationContainerView.leftAnchor, bottom: nil, right: nil, paddingTop: 10, paddingLeft: 10, paddingBottom: 10, paddingRight: 10, width: 30, height: 30)
+//        view.addSubview(timeLabel)
+//        timeLabel.anchor(top: LocationContainerView.topAnchor, left: timeIcon.rightAnchor, bottom: nil, right: LocationContainerView.rightAnchor, paddingTop: 5, paddingLeft: 10, paddingBottom: 0, paddingRight: 10, width: 0, height: 40)
+//        timeLabel.isUserInteractionEnabled = true
+//        let TapGestureT = UITapGestureRecognizer(target: self, action: #selector(timeInput))
+//        timeLabel.addGestureRecognizer(TapGestureT)
+//        view.addSubview(timeCancelButton)
+//        timeCancelButton.anchor(top: timeLabel.topAnchor, left: nil, bottom: timeLabel.bottomAnchor, right: timeLabel.rightAnchor, paddingTop: 10, paddingLeft: 10, paddingBottom: 10, paddingRight: 10, width: 20, height: 20)
+        
+        
+    // Add Rating
+
+        view.addSubview(starRatingCancelButton)
+        starRatingCancelButton.anchor(top: LocationContainerView.topAnchor, left: nil, bottom: nil, right: LocationContainerView.rightAnchor, paddingTop: 10, paddingLeft: 10, paddingBottom: 10, paddingRight: 10, width: 20, height: 20)
+        starRatingCancelButton.isHidden = true
+
+        view.addSubview(starRating)
+        starRating.anchor(top: LocationContainerView.topAnchor, left: LocationContainerView.leftAnchor, bottom: nil, right: starRatingCancelButton.leftAnchor, paddingTop: 5, paddingLeft: 15, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
+        starRating.didFinishTouchingCosmos = starRatingSelectFunction
         
     // Add Location Name
-        view.addSubview(locationIcon)
-        locationIcon.anchor(top: timeLabel.bottomAnchor, left: LocationContainerView.leftAnchor, bottom: nil, right: nil, paddingTop: 10, paddingLeft: 10, paddingBottom: 10, paddingRight: 10, width: 30, height: 30)
+//        view.addSubview(locationIcon)
+//        locationIcon.anchor(top: starRating.bottomAnchor, left: LocationContainerView.leftAnchor, bottom: nil, right: nil, paddingTop: 10, paddingLeft: 10, paddingBottom: 10, paddingRight: 10, width: 30, height: 30)
+        
+        view.addSubview(locationCancelButton)
+        locationCancelButton.anchor(top: starRating.bottomAnchor, left: nil, bottom: nil, right: LocationContainerView.rightAnchor, paddingTop: 15, paddingLeft: 10, paddingBottom: 15, paddingRight: 10, width: 20, height: 20)
+        
+        view.addSubview(findCurrentLocationButton)
+        findCurrentLocationButton.anchor(top: starRating.bottomAnchor, left: nil, bottom: nil, right: LocationContainerView.rightAnchor, paddingTop: 15, paddingLeft: 10, paddingBottom: 15, paddingRight: 10, width: 20, height: 20)
+        
         view.addSubview(locationNameLabel)
-        locationNameLabel.anchor(top: timeLabel.bottomAnchor, left: locationIcon.rightAnchor, bottom: nil, right: LocationContainerView.rightAnchor, paddingTop: 5, paddingLeft: 10, paddingBottom: 5, paddingRight: 10, width: 0, height: 40)
+        locationNameLabel.anchor(top: starRating.bottomAnchor, left: LocationContainerView.leftAnchor, bottom: nil, right: locationCancelButton.leftAnchor, paddingTop: 5, paddingLeft: 15, paddingBottom: 5, paddingRight: 10, width: 0, height: 40)
         locationNameLabel.isUserInteractionEnabled = true
         let TapGesture = UITapGestureRecognizer(target: self, action: #selector(tapSearchBar))
         locationNameLabel.addGestureRecognizer(TapGesture)
-        view.addSubview(locationCancelButton)
-        locationCancelButton.anchor(top: locationNameLabel.topAnchor, left: nil, bottom: locationNameLabel.bottomAnchor, right: locationNameLabel.rightAnchor, paddingTop: 10, paddingLeft: 10, paddingBottom: 10, paddingRight: 10, width: 20, height: 20)
-        locationCancelButton.isHidden = true
         
-        view.addSubview(findCurrentLocationButton)
-        findCurrentLocationButton.anchor(top: locationNameLabel.topAnchor, left: nil, bottom: locationNameLabel.bottomAnchor, right: locationNameLabel.rightAnchor, paddingTop: 10, paddingLeft: 10, paddingBottom: 10, paddingRight: 10, width: 20, height: 20)
-        findCurrentLocationButton.isHidden = true
+        if locationNameLabel.text == blankGPSName {
+            self.locationCancelButton.isHidden = true
+            self.findCurrentLocationButton.isHidden = false
+        } else {
+            self.locationCancelButton.isHidden = true
+            self.findCurrentLocationButton.isHidden = false
+        }
+
+
         
     // Add Location Adress
-        view.addSubview(adressIcon)
-        adressIcon.anchor(top: locationNameLabel.bottomAnchor, left: LocationContainerView.leftAnchor, bottom: nil, right: nil, paddingTop: 10, paddingLeft: 10, paddingBottom: 10, paddingRight: 10, width: 30, height: 30)
-        view.addSubview(locationAdressLabel)
-        locationAdressLabel.anchor(top: locationNameLabel.bottomAnchor, left: adressIcon.rightAnchor, bottom: nil, right: LocationContainerView.rightAnchor, paddingTop: 5, paddingLeft: 10, paddingBottom: 5, paddingRight: 10, width: 0, height: 40)
-        locationAdressLabel.isUserInteractionEnabled = true
-        let TapGesture1 = UITapGestureRecognizer(target: self, action: #selector(tapSearchBar))
-        locationAdressLabel.addGestureRecognizer(TapGesture1)
+//        view.addSubview(adressIcon)
+//        adressIcon.anchor(top: locationNameLabel.bottomAnchor, left: LocationContainerView.leftAnchor, bottom: nil, right: nil, paddingTop: 10, paddingLeft: 10, paddingBottom: 10, paddingRight: 10, width: 30, height: 30)
+//        view.addSubview(locationAdressLabel)
+//        locationAdressLabel.anchor(top: locationNameLabel.bottomAnchor, left: adressIcon.rightAnchor, bottom: nil, right: LocationContainerView.rightAnchor, paddingTop: 5, paddingLeft: 10, paddingBottom: 5, paddingRight: 10, width: 0, height: 40)
+//        locationAdressLabel.isUserInteractionEnabled = true
+//        let TapGesture1 = UITapGestureRecognizer(target: self, action: #selector(tapSearchBar))
+//        locationAdressLabel.addGestureRecognizer(TapGesture1)
         
     // Add Places Collection View
         view.addSubview(placesCollectionView)
-        placesCollectionView.anchor(top: locationAdressLabel.bottomAnchor, left: LocationContainerView.leftAnchor, bottom: nil, right: LocationContainerView.rightAnchor, paddingTop: 5, paddingLeft: 5, paddingBottom: 5, paddingRight: 5, width: 0, height: 40)
+        placesCollectionView.anchor(top: locationNameLabel.bottomAnchor, left: LocationContainerView.leftAnchor, bottom: nil, right: LocationContainerView.rightAnchor, paddingTop: 5, paddingLeft: 5, paddingBottom: 5, paddingRight: 5, width: 0, height: 40)
         placesCollectionView.backgroundColor = UIColor.white
         placesCollectionView.register(UploadLocationCell.self, forCellWithReuseIdentifier: locationCellID)
         placesCollectionView.delegate = self
@@ -938,6 +1002,9 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         emojiAutoComplete.anchor(top: LocationContainerView.topAnchor, left: view.leftAnchor, bottom: view.bottomAnchor, right: view.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
         emojiAutoComplete.isHidden = true
     }
+    
+
+    
     
 
 // Google Search Location Delegates
@@ -1731,6 +1798,7 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
     func determineCurrentLocation(){
         
         CurrentUser.currentLocation = nil
+        refreshGoogleResults()
         
         if CLLocationManager.locationServicesEnabled() {
             locationManager.delegate = self
@@ -1753,6 +1821,7 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
             CurrentUser.currentLocation = userLocation
             self.selectPostLocation = userLocation
             googleReverseGPS(GPSLocation: userLocation)
+            googleLocationSearch(GPSLocation: userLocation)
             manager.stopUpdatingLocation()
         }
         

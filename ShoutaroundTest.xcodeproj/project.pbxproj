@@ -36,6 +36,7 @@
 		A56868BD1F78A0FA0050C406 /* MessageController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A56868BC1F78A0FA0050C406 /* MessageController.swift */; };
 		A56868BF1F79C2FF0050C406 /* EmailHtmlFormat.swift in Sources */ = {isa = PBXBuildFile; fileRef = A56868BE1F79C2FF0050C406 /* EmailHtmlFormat.swift */; };
 		A56F4C361FD06621000BB676 /* ThreadMessageHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = A56F4C351FD06621000BB676 /* ThreadMessageHeader.swift */; };
+		A572BD781FEBF7B8000D358F /* RatingLabel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A572BD771FEBF7B8000D358F /* RatingLabel.swift */; };
 		A57941C41F6A2092004EC40D /* UploadEmojiFlowLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = A57941C31F6A2092004EC40D /* UploadEmojiFlowLayout.swift */; };
 		A57941C61F6A225D004EC40D /* UploadEmojiCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = A57941C51F6A225D004EC40D /* UploadEmojiCell.swift */; };
 		A57941C91F6A27A6004EC40D /* EmojiDictionary.swift in Sources */ = {isa = PBXBuildFile; fileRef = A57941C81F6A27A6004EC40D /* EmojiDictionary.swift */; };
@@ -121,6 +122,7 @@
 		A56868BC1F78A0FA0050C406 /* MessageController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MessageController.swift; sourceTree = "<group>"; };
 		A56868BE1F79C2FF0050C406 /* EmailHtmlFormat.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EmailHtmlFormat.swift; sourceTree = "<group>"; };
 		A56F4C351FD06621000BB676 /* ThreadMessageHeader.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ThreadMessageHeader.swift; sourceTree = "<group>"; };
+		A572BD771FEBF7B8000D358F /* RatingLabel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RatingLabel.swift; sourceTree = "<group>"; };
 		A57941C31F6A2092004EC40D /* UploadEmojiFlowLayout.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UploadEmojiFlowLayout.swift; sourceTree = "<group>"; };
 		A57941C51F6A225D004EC40D /* UploadEmojiCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UploadEmojiCell.swift; sourceTree = "<group>"; };
 		A57941C81F6A27A6004EC40D /* EmojiDictionary.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EmojiDictionary.swift; sourceTree = "<group>"; };
@@ -218,6 +220,7 @@
 		A51C13C11F4FBF1600CEB740 /* Utils */ = {
 			isa = PBXGroup;
 			children = (
+				A572BD771FEBF7B8000D358F /* RatingLabel.swift */,
 				A51C13C21F4FBF2F00CEB740 /* Extensions.swift */,
 				A5C645101F56547300C78244 /* CustomImageView.swift */,
 				A5C645191F57AB0000C78244 /* Firebase.swift */,
@@ -645,6 +648,7 @@
 				A51C13C91F51B6FD00CEB740 /* UserProfileController.swift in Sources */,
 				A546D6091FC0834900C89736 /* StickyHeaders.swift in Sources */,
 				A5A17BAB1FA582B4001F227D /* FilterController.swift in Sources */,
+				A572BD781FEBF7B8000D358F /* RatingLabel.swift in Sources */,
 				A51C13C71F51B59900CEB740 /* MainTabBarController.swift in Sources */,
 				A57C060C1F76037C00A0568F /* BookmarkPhotoCell.swift in Sources */,
 				A5C6451D1F57AE5A00C78244 /* UserSearchController.swift in Sources */,
