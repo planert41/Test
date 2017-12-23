@@ -14,6 +14,7 @@ class UploadLocationCell: UICollectionViewCell {
         
         let iv = UILabel()
         iv.backgroundColor = .clear
+        iv.font = UIFont.systemFont(ofSize: 15)
         
         return iv
         

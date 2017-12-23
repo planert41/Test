@@ -277,7 +277,7 @@ class PaddedUILabel: UILabel {
 class RightButtonPaddedUILabel: UILabel {
     
     override func drawText(in rect: CGRect) {
-        let insets = UIEdgeInsets.init(top: 0, left: 10, bottom: 0, right: 30)
+        let insets = UIEdgeInsets.init(top: 0, left: 15, bottom: 0, right: 30)
         super.drawText(in: UIEdgeInsetsInsetRect(rect, insets))
     }
     

@@ -16,6 +16,11 @@ var geoFilterRangeDefault:[String] = ["5", "25", "100","250", "All"]
 var defaultPhotoResize = CGSize(width: 500, height: 500)
 var defaultEmptyGPSName: String = "No Location"
 
+// Upload Defaults
+var UploadPostTypeDefault:[String] = ["Breakfast", "Lunch", "Dinner", "Snack"]
+var UploadPostPriceDefault:[String] = ["$5", "$10", "$20", "$50", "$$$"]
+
+
 // Filter Defaults
 
 var FilterSortTimeDefault:[String] = ["Breakfast", "Lunch", "Dinner", "All"]
@@ -29,7 +34,6 @@ let defaultSort = FilterSortDefault[FilterSortDefault.endIndex - 1]
 let defaultTime =  FilterSortTimeDefault[FilterSortTimeDefault.endIndex - 1]
 
 // Search Bar Defaults
-
 
 var searchBarPlaceholderText = "Search...."
 var searchScopeButtons = ["Posts","Users","Places"]

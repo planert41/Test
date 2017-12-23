@@ -86,6 +86,8 @@
 		A5F46C421FC6057100D69945 /* SMSegmentViewConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5F46C401FC6057100D69945 /* SMSegmentViewConstants.swift */; };
 		A5F990821FCF66EF0086E661 /* ThreadMessageController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5F990811FCF66EF0086E661 /* ThreadMessageController.swift */; };
 		A5F990841FCF84540086E661 /* ThreadMessageCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5F990831FCF84540086E661 /* ThreadMessageCell.swift */; };
+		A5F9FE221FED6A7700AF9542 /* ReselectableSegmentControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5F9FE211FED6A7700AF9542 /* ReselectableSegmentControl.swift */; };
+		A5F9FE241FEE044C00AF9542 /* UploadPhotoListController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5F9FE231FEE044B00AF9542 /* UploadPhotoListController.swift */; };
 		B1A3AC30339B082041E14A20 /* Pods_ShoutaroundTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B65B7D125931B939429672C6 /* Pods_ShoutaroundTest.framework */; };
 /* End PBXBuildFile section */
 
@@ -173,6 +175,8 @@
 		A5F46C401FC6057100D69945 /* SMSegmentViewConstants.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SMSegmentViewConstants.swift; sourceTree = "<group>"; };
 		A5F990811FCF66EF0086E661 /* ThreadMessageController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ThreadMessageController.swift; sourceTree = "<group>"; };
 		A5F990831FCF84540086E661 /* ThreadMessageCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ThreadMessageCell.swift; sourceTree = "<group>"; };
+		A5F9FE211FED6A7700AF9542 /* ReselectableSegmentControl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReselectableSegmentControl.swift; sourceTree = "<group>"; };
+		A5F9FE231FEE044B00AF9542 /* UploadPhotoListController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UploadPhotoListController.swift; sourceTree = "<group>"; };
 		A64D6DDCD46BE134C4B0B7C6 /* Pods-InstagramFirebase.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-InstagramFirebase.release.xcconfig"; path = "Pods/Target Support Files/Pods-InstagramFirebase/Pods-InstagramFirebase.release.xcconfig"; sourceTree = "<group>"; };
 		B65B7D125931B939429672C6 /* Pods_ShoutaroundTest.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_ShoutaroundTest.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		E6A7A43430193F3A7265A821 /* Pods-ShoutaroundTest.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ShoutaroundTest.debug.xcconfig"; path = "Pods/Target Support Files/Pods-ShoutaroundTest/Pods-ShoutaroundTest.debug.xcconfig"; sourceTree = "<group>"; };
@@ -230,6 +234,7 @@
 				A5F46C3C1FC5EBE400D69945 /* SMSegmentView.swift */,
 				A5F46C3F1FC6057100D69945 /* SMSegmentAppearance.swift */,
 				A5F46C401FC6057100D69945 /* SMSegmentViewConstants.swift */,
+				A5F9FE211FED6A7700AF9542 /* ReselectableSegmentControl.swift */,
 			);
 			name = Utils;
 			sourceTree = "<group>";
@@ -336,6 +341,7 @@
 				A57A674E1F5FA8CC0063D400 /* UploadLocationCell.swift */,
 				A58477A91F6EFFD7007DE06C /* LocationLabels.swift */,
 				A552EA601F99BE76005A0977 /* PhotoSelectorControllerDummy.swift */,
+				A5F9FE231FEE044B00AF9542 /* UploadPhotoListController.swift */,
 			);
 			name = AddPhoto;
 			sourceTree = "<group>";
@@ -620,6 +626,7 @@
 				A56F4C361FD06621000BB676 /* ThreadMessageHeader.swift in Sources */,
 				A54E1D731F4E736B00C2AA77 /* InstagramFirebase.xcdatamodeld in Sources */,
 				A5C645161F56604200C78244 /* HomePostCell.swift in Sources */,
+				A5F9FE241FEE044C00AF9542 /* UploadPhotoListController.swift in Sources */,
 				A552EA611F99BE76005A0977 /* PhotoSelectorControllerDummy.swift in Sources */,
 				A5C645281F5BB25100C78244 /* CustomAnimationDismisser.swift in Sources */,
 				A5C6452E1F5C481300C78244 /* Comment.swift in Sources */,
@@ -653,6 +660,7 @@
 				A57C060C1F76037C00A0568F /* BookmarkPhotoCell.swift in Sources */,
 				A5C6451D1F57AE5A00C78244 /* UserSearchController.swift in Sources */,
 				A5C6452C1F5C459500C78244 /* CommentCell.swift in Sources */,
+				A5F9FE221FED6A7700AF9542 /* ReselectableSegmentControl.swift in Sources */,
 				A5AEB9781F9956B500E88CAC /* InboxController.swift in Sources */,
 				A5BBD28C1FB26F4B004367E7 /* Notes2.swift in Sources */,
 				A57941C61F6A225D004EC40D /* UploadEmojiCell.swift in Sources */,

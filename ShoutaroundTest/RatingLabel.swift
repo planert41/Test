@@ -20,7 +20,7 @@ class RatingLabel: UILabel {
         super.init(frame: CGRect(x: 0, y: 0, width: 25, height: 25))
         self.layer.cornerRadius = self.frame.width/2
         self.layer.masksToBounds = true
-        self.layer.borderWidth = 0
+        self.layer.borderWidth = 0.5
         self.layer.borderColor = UIColor.darkGray.cgColor
         self.textAlignment = NSTextAlignment.center
         
@@ -38,20 +38,20 @@ class RatingLabel: UILabel {
         let cellRating = self.rating
         
         if cellRating == 0 {
-            self.text = ""
+            self.text = "0"
         } else {
             self.text = String(cellRating)
         }
-        
-        var img: UIImage = #imageLiteral(resourceName: "7rating")
-        var imgSize: CGSize = self.frame.size
-        
-        UIGraphicsBeginImageContext(imgSize)
-        
-        img.draw(in: CGRect(x: 0, y: 0, width: imgSize.width, height: imgSize.height))
-        var newImage: UIImage = UIGraphicsGetImageFromCurrentImageContext()!
-        
-        UIGraphicsEndImageContext();
+
+        // Add image as background
+//        var img: UIImage = #imageLiteral(resourceName: "7rating")
+//        var imgSize: CGSize = self.frame.size
+//        UIGraphicsBeginImageContext(imgSize)
+//        img.draw(in: CGRect(x: 0, y: 0, width: imgSize.width, height: imgSize.height))
+//        var newImage: UIImage = UIGraphicsGetImageFromCurrentImageContext()!
+//        UIGraphicsEndImageContext();
+//        self.backgroundColor = UIColor(patternImage: newImage).withAlphaComponent(0.5)
+
         
         if cellRating == 0 {
             self.backgroundColor = UIColor.white
@@ -68,9 +68,7 @@ class RatingLabel: UILabel {
         } else if cellRating <= Double(6) {
             self.backgroundColor = UIColor.rgb(red: 252, green: 227, blue: 0)
         } else if cellRating <= Double(7) {
-
-//            self.backgroundColor = UIColor.rgb(red: 91, green: 197, blue: 51)
-            self.backgroundColor = UIColor(patternImage: newImage).withAlphaComponent(0.5)
+            self.backgroundColor = UIColor.rgb(red: 91, green: 197, blue: 51)
         }
     }
     

@@ -368,7 +368,6 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         label.layer.borderColor = UIColor.lightGray.cgColor
         label.layer.masksToBounds = true
         return label
-        
     }()
     
     let usernameLabel: UILabel = {

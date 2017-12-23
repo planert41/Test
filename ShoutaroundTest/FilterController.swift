@@ -224,6 +224,15 @@ class FilterController: UIViewController, CLLocationManagerDelegate, GMSAutocomp
         let hour = calendar.component(.hour, from: date)
         print(hour)
         
+        // Morning 6-12, MidDay 12 - 6, Late, 6 - 6
+        if hour > 5 && hour <= 12 {
+            self.currentTime = 0
+        } else if hour > 12 && hour <= 18 {
+            self.currentTime = 1
+        } else {
+            self.currentTime = 2
+        }
+        
         let formatter = DateFormatter()
         formatter.dateFormat = "h:mm a" // "a" prints "pm" or "am"
         let hourString = formatter.string(from: Date()) // "12 AM"
@@ -256,15 +265,7 @@ class FilterController: UIViewController, CLLocationManagerDelegate, GMSAutocomp
 
         
         
-        // Morning 6-12, MidDay 12 - 6, Late, 6 - 6
-        
-        if hour > 5 && hour <= 12 {
-            self.currentTime = 0
-        } else if hour > 12 && hour <= 18 {
-            self.currentTime = 1
-        } else {
-            self.currentTime = 2
-        }
+
         
         
     }

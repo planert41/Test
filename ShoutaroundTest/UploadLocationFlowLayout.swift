@@ -35,7 +35,8 @@ class UploadLocationTagList: UICollectionViewFlowLayout {
      */
     func setupLayout() {
         
-        estimatedItemSize = CGSize(width: 40, height: 40)
+        estimatedItemSize = CGSize(width: 30, height: 30)
+//        itemSize = CGSize(width: 60, height: 30)
         minimumInteritemSpacing = 10
         minimumLineSpacing = 10
         scrollDirection = .horizontal

@@ -26,7 +26,7 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
     
     let currentDateTime = Date()
     let locationManager = CLLocationManager()
-    let emojiCollectionViewRows: Int = 5
+    let emojiCollectionViewRows: Int = 4
     let DefaultEmojiLabelSize = 25 as CGFloat
     let nonRatingEmojiLimit = 5
     
@@ -60,9 +60,11 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
     var selectedImageTime: Date? {
         didSet{
             if selectedImageTime == nil {
-                ("No Image Time, Defaulting to Current Upload Time: ")
+                self.selectTime = currentDateTime
+                print("No Image Time, Defaulting to Current Upload Time: \(currentDateTime)")
             } else {
-                self.selectTime = selectedImageTime
+                self.selectTime = selectedImageTime!
+                print("Setting Post Time to Selected Image Creation Time: \(selectedImageTime)")
             }
         }
     }
@@ -133,20 +135,7 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         }
     }
     
-    var selectTime: Date? = nil {
-        didSet{
-            // get the current date and time
-            let formatter = DateFormatter()
-            formatter.dateFormat = "MMM d YYYY, h:mm a"
-            if self.selectTime == nil {
-                self.timeLabel.text = ""
-            }
-            else {
-                self.timeLabel.text = formatter.string(from: self.selectTime!)
-            }
-        }
-    }
-    
+
 // Star Rating
 
     var selectPostStarRating: Double = 0 {
@@ -199,6 +188,90 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         self.starRatingLabel.rating = 0
     }
 
+// Post Type Variable
+    
+    var selectTime: Date = Date() {
+        didSet{
+            let calendar = Calendar.current // or e.g. Calendar(identifier: .persian)
+            let hour = calendar.component(.hour, from: selectTime)
+            
+            // Morning 6-11, MidDay 11 - 5, Late, 5 - 6
+            if hour > 5 && hour <= 11 {
+                self.selectPostType = UploadPostTypeDefault[0]
+                self.postTypeSegment.selectedSegmentIndex = 0
+            } else if hour > 11 && hour <= 17 {
+                self.selectPostType = UploadPostTypeDefault[1]
+                self.postTypeSegment.selectedSegmentIndex = 1
+            } else {
+                self.selectPostType = UploadPostTypeDefault[2]
+                self.postTypeSegment.selectedSegmentIndex = 2
+            }
+        }
+    }
+    
+    var selectedPostTypeIndex: Int? = nil
+    var selectPostType: String? = nil {
+        didSet {
+            if let selectPostType = selectPostType {
+                self.selectedPostTypeIndex = UploadPostTypeDefault.index(of: selectPostType)
+            } else {
+                self.selectedPostTypeIndex = nil
+            }
+        }
+    }
+    
+    var postTypeSegment: ReselectableSegmentedControl = {
+        var segment = ReselectableSegmentedControl(items: UploadPostTypeDefault)
+        segment.addTarget(self, action: #selector(handleSelectPostType), for: .valueChanged)
+        segment.tintColor = UIColor.rgb(red: 223, green: 85, blue: 78)
+        segment.selectedSegmentIndex = UISegmentedControlNoSegment
+        return segment
+    }()
+    
+    func handleSelectPostType(sender: UISegmentedControl) {
+        if (sender.selectedSegmentIndex == self.selectedPostTypeIndex) {
+            sender.selectedSegmentIndex =  UISegmentedControlNoSegment
+            self.selectPostType = nil
+        }
+        else {
+            self.selectPostType = UploadPostTypeDefault[sender.selectedSegmentIndex]
+        }
+        print("Selected Time is ",self.selectPostType)
+    }
+    
+    // Post Price Variable
+    
+    var selectedPostPriceIndex: Int? = nil
+    var selectPostPrice: String? = nil {
+        didSet {
+            if let selectPostPrice = selectPostPrice {
+                self.selectedPostPriceIndex = UploadPostPriceDefault.index(of: selectPostPrice)
+            } else {
+                self.selectedPostPriceIndex = nil
+            }
+        }
+    }
+    
+    var postPriceSegment: ReselectableSegmentedControl = {
+        var segment = ReselectableSegmentedControl(items: UploadPostPriceDefault)
+        segment.addTarget(self, action: #selector(handleSelectPostPrice), for: .valueChanged)
+        segment.tintColor = UIColor.mainBlue()
+        segment.selectedSegmentIndex = UISegmentedControlNoSegment
+        return segment
+    }()
+    
+    func handleSelectPostPrice(sender: UISegmentedControl) {
+        if (sender.selectedSegmentIndex == self.selectedPostPriceIndex) {
+            sender.selectedSegmentIndex =  UISegmentedControlNoSegment
+            self.selectPostPrice = nil
+        }
+        else {
+            self.selectPostPrice = UploadPostPriceDefault[sender.selectedSegmentIndex]
+        }
+        print("Selected Time is ",self.selectPostPrice)
+    }
+    
+    
 // Emoji Variables
     
     var emojiViews: Array<UICollectionView>?
@@ -378,12 +451,13 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         self.nonRatingEmojiTags = tempNonRatingEmojiTags
         self.EmojiCollectionView.reloadData()
     }
-
+    
     
 
     override func viewDidLoad() {
         super.viewDidLoad()
         
+//        view.backgroundColor = UIColor.white
         view.backgroundColor = UIColor.rgb(red: 204, green: 238, blue: 255)
         navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Share", style: .plain, target: self, action: #selector(handleShare))
         
@@ -470,6 +544,20 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         self.setselectEmojis(rateEmoji: self.ratingEmoji, nonRateEmoji: nil)
     }
     
+    let emojiDetailLabel: UILabel = {
+        let label = UILabel()
+        label.text = "Emojis"
+        label.font = UIFont.boldSystemFont(ofSize: 14)
+        label.textAlignment = NSTextAlignment.left
+//        label.backgroundColor = UIColor.mainBlue().withAlphaComponent(0.5)
+//        label.backgroundColor = UIColor.rgb(red: 204, green: 238, blue: 255)
+//        label.layer.cornerRadius = 30/2
+//        label.layer.borderWidth = 0.25
+        label.layer.borderColor = UIColor.lightGray.cgColor
+        label.layer.masksToBounds = true
+        return label
+    }()
+    
     let captionCancelButton: UIButton = {
         
         let button = UIButton(type: .system)
@@ -507,11 +595,13 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
     }
     
     let locationNameLabel: UILabel = {
-        let tv = LocationLabel()
-        tv.font = UIFont.systemFont(ofSize: 14)
-        tv.backgroundColor = UIColor(white: 0, alpha: 0.03)
-        tv.layer.borderWidth = 0.5
-        tv.layer.cornerRadius = 5
+        let tv = RightButtonPaddedUILabel()
+        tv.font = UIFont.boldSystemFont(ofSize: 15)
+        tv.backgroundColor = UIColor.white
+//        tv.backgroundColor = UIColor(white: 0, alpha: 0.03)
+        tv.layer.borderWidth = 1
+        tv.layer.borderColor = UIColor.rgb(red: 204, green: 238, blue: 255).cgColor
+//        tv.layer.cornerRadius = 5
         tv.isUserInteractionEnabled = true
         
         let TapGesture = UITapGestureRecognizer(target: self, action: #selector(tapSearchBar))
@@ -681,7 +771,7 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
     
     let findCurrentLocationButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setImage(#imageLiteral(resourceName: "GeoFence").withRenderingMode(.alwaysOriginal), for: .normal)
+        button.setImage(#imageLiteral(resourceName: "FilterHere").withRenderingMode(.alwaysOriginal), for: .normal)
         button.translatesAutoresizingMaskIntoConstraints = false
         button.backgroundColor = UIColor.clear
         button.layer.cornerRadius = 0.5 * button.bounds.size.width
@@ -694,32 +784,34 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
     
     func cancelLocation(){
         selectPostLocation = nil
+        // Refresh places collectionview to unselect selected place
+        self.placesCollectionView.reloadData()
     }
     
-    let timeCancelButton: UIButton = {
-        let button = UIButton(type: .system)
-        button.setImage(#imageLiteral(resourceName: "cancel_shadow").withRenderingMode(.alwaysOriginal), for: .normal)
-        button.translatesAutoresizingMaskIntoConstraints = false
-        button.backgroundColor = UIColor.clear
-        button.layer.cornerRadius = 0.5 * button.bounds.size.width
-        button.layer.masksToBounds  = true
-        button.clipsToBounds = true
-        button.addTarget(self, action: #selector(cancelTime), for: .touchUpInside)
-        return button
-    } ()
+//    let timeCancelButton: UIButton = {
+//        let button = UIButton(type: .system)
+//        button.setImage(#imageLiteral(resourceName: "cancel_shadow").withRenderingMode(.alwaysOriginal), for: .normal)
+//        button.translatesAutoresizingMaskIntoConstraints = false
+//        button.backgroundColor = UIColor.clear
+//        button.layer.cornerRadius = 0.5 * button.bounds.size.width
+//        button.layer.masksToBounds  = true
+//        button.clipsToBounds = true
+//        button.addTarget(self, action: #selector(cancelTime), for: .touchUpInside)
+//        return button
+//    } ()
 
     
-    func cancelTime(){
-        if selectTime != currentDateTime {
-            self.selectTime = currentDateTime
-            let formatter = DateFormatter()
-            formatter.dateFormat = "MMM d YYYY, h:mm a"
-            let attributedText = NSMutableAttributedString(string: formatter.string(from: currentDateTime), attributes: [NSFontAttributeName: UIFont.boldSystemFont(ofSize: 14),NSForegroundColorAttributeName: UIColor.mainBlue()])
-            self.timeLabel.attributedText = attributedText
-        } else {
-        selectTime = nil
-        }
-    }
+//    func cancelTime(){
+//        if selectTime != currentDateTime {
+//            self.selectTime = currentDateTime
+//            let formatter = DateFormatter()
+//            formatter.dateFormat = "MMM d YYYY, h:mm a"
+//            let attributedText = NSMutableAttributedString(string: formatter.string(from: currentDateTime), attributes: [NSFontAttributeName: UIFont.boldSystemFont(ofSize: 14),NSForegroundColorAttributeName: UIColor.mainBlue()])
+//            self.timeLabel.attributedText = attributedText
+//        } else {
+//        selectTime = nil
+//        }
+//    }
     
     
     let locationSearchButton: UIButton = {
@@ -864,12 +956,12 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
 // Non Rating Emoji Tags
         view.addSubview(emojiTagLabel)
         emojiTagLabel.anchor(top: emojiLabelContainer.topAnchor, left: emojiLabelContainer.leftAnchor, bottom: emojiLabelContainer.bottomAnchor, right: nil, paddingTop: 5, paddingLeft: 5, paddingBottom: 5, paddingRight: 0, width: 90, height: 0)
-        view.addSubview(nonRatingEmojiCancelButton)
-        nonRatingEmojiCancelButton.anchor(top: emojiTagLabel.topAnchor, left: emojiTagLabel.rightAnchor, bottom: emojiTagLabel.bottomAnchor, right: nil, paddingTop: 0, paddingLeft: 5, paddingBottom: 0, paddingRight: 0, width: 15, height: 15)
         view.addSubview(nonRatingEmojiStackView)
-        nonRatingEmojiStackView.anchor(top: emojiLabelContainer.topAnchor, left: nonRatingEmojiCancelButton.rightAnchor, bottom: nil, right: nil, paddingTop: 5, paddingLeft: 5, paddingBottom: 5, paddingRight: 5, width: (DefaultEmojiLabelSize + 2) * 4, height: DefaultEmojiLabelSize)
+        nonRatingEmojiStackView.anchor(top: emojiLabelContainer.topAnchor, left: emojiTagLabel.rightAnchor, bottom: nil, right: nil, paddingTop: 5, paddingLeft: 5, paddingBottom: 5, paddingRight: 5, width: (DefaultEmojiLabelSize + 2) * 4, height: DefaultEmojiLabelSize)
         view.addSubview(nonRatingEmojiLabel)
         nonRatingEmojiLabel.anchor(top: nonRatingEmojiStackView.topAnchor, left: nonRatingEmojiStackView.leftAnchor, bottom: nonRatingEmojiStackView.bottomAnchor, right: self.view.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
+        view.addSubview(nonRatingEmojiCancelButton)
+        nonRatingEmojiCancelButton.anchor(top: emojiTagLabel.topAnchor, left: nonRatingEmojiStackView.rightAnchor, bottom: emojiTagLabel.bottomAnchor, right: nil, paddingTop: 0, paddingLeft: 5, paddingBottom: 0, paddingRight: 0, width: 15, height: 15)
         nonRatingEmojiCancelButton.centerYAnchor.constraint(equalTo: nonRatingEmojiLabel.centerYAnchor)
         nonRatingEmojiCancelButton.isHidden = true
         
@@ -894,13 +986,22 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         view.addSubview(imageView)
         imageView.anchor(top: containerView.topAnchor, left: containerView.leftAnchor, bottom: containerView.bottomAnchor, right: nil, paddingTop: 8, paddingLeft: 8, paddingBottom: 8, paddingRight: 0, width: 84, height: 0)
         view.addSubview(captionTextView)
-        captionTextView.anchor(top: imageView.topAnchor, left: imageView.rightAnchor, bottom: containerView.bottomAnchor, right: containerView.rightAnchor, paddingTop: 0, paddingLeft: 4, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
+        captionTextView.anchor(top: containerView.topAnchor, left: imageView.rightAnchor, bottom: containerView.bottomAnchor, right: containerView.rightAnchor, paddingTop: 0, paddingLeft: 4, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
         captionTextView.delegate = self
+
+// Add Caption Cancel Button
+        
         view.addSubview(captionCancelButton)
         captionCancelButton.anchor(top: nil, left: nil, bottom: captionTextView.bottomAnchor, right: captionTextView.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 5, paddingRight: 5, width: 15, height: 15)
 //        captionCancelButton.centerYAnchor.constraint(equalTo: emojiTextView.centerYAnchor)
         captionCancelButton.isHidden = true
         
+// Add Emoji Detail Label
+        
+        view.addSubview(emojiDetailLabel)
+        emojiDetailLabel.anchor(top: nil, left: captionTextView.leftAnchor, bottom: captionTextView.bottomAnchor, right: captionCancelButton.leftAnchor, paddingTop: 0, paddingLeft: 5, paddingBottom: 5, paddingRight: 10, width: 0, height: 0)
+        emojiDetailLabel.alpha = 0
+
 
 // Location Container View
         
@@ -908,7 +1009,7 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         LocationContainerView.backgroundColor = .white
 
         view.addSubview(LocationContainerView)
-        LocationContainerView.anchor(top: captionTextView.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 1, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 180)
+        LocationContainerView.anchor(top: captionTextView.bottomAnchor, left: view.leftAnchor, bottom: view.bottomAnchor, right: view.rightAnchor, paddingTop: 1, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
         
     // Add Tag Time
 //        view.addSubview(timeIcon)
@@ -929,21 +1030,11 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         starRatingCancelButton.isHidden = true
 
         view.addSubview(starRating)
-        starRating.anchor(top: LocationContainerView.topAnchor, left: LocationContainerView.leftAnchor, bottom: nil, right: starRatingCancelButton.leftAnchor, paddingTop: 5, paddingLeft: 15, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
+        starRating.anchor(top: LocationContainerView.topAnchor, left: LocationContainerView.leftAnchor, bottom: nil, right: starRatingCancelButton.leftAnchor, paddingTop: 5, paddingLeft: 10, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
         starRating.didFinishTouchingCosmos = starRatingSelectFunction
         
-    // Add Location Name
-//        view.addSubview(locationIcon)
-//        locationIcon.anchor(top: starRating.bottomAnchor, left: LocationContainerView.leftAnchor, bottom: nil, right: nil, paddingTop: 10, paddingLeft: 10, paddingBottom: 10, paddingRight: 10, width: 30, height: 30)
-        
-        view.addSubview(locationCancelButton)
-        locationCancelButton.anchor(top: starRating.bottomAnchor, left: nil, bottom: nil, right: LocationContainerView.rightAnchor, paddingTop: 15, paddingLeft: 10, paddingBottom: 15, paddingRight: 10, width: 20, height: 20)
-        
-        view.addSubview(findCurrentLocationButton)
-        findCurrentLocationButton.anchor(top: starRating.bottomAnchor, left: nil, bottom: nil, right: LocationContainerView.rightAnchor, paddingTop: 15, paddingLeft: 10, paddingBottom: 15, paddingRight: 10, width: 20, height: 20)
-        
         view.addSubview(locationNameLabel)
-        locationNameLabel.anchor(top: starRating.bottomAnchor, left: LocationContainerView.leftAnchor, bottom: nil, right: locationCancelButton.leftAnchor, paddingTop: 5, paddingLeft: 15, paddingBottom: 5, paddingRight: 10, width: 0, height: 40)
+        locationNameLabel.anchor(top: starRating.bottomAnchor, left: LocationContainerView.leftAnchor, bottom: nil, right: LocationContainerView.rightAnchor, paddingTop: 10, paddingLeft: 0, paddingBottom: 5, paddingRight: 0, width: 0, height: 40)
         locationNameLabel.isUserInteractionEnabled = true
         let TapGesture = UITapGestureRecognizer(target: self, action: #selector(tapSearchBar))
         locationNameLabel.addGestureRecognizer(TapGesture)
@@ -952,11 +1043,18 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
             self.locationCancelButton.isHidden = true
             self.findCurrentLocationButton.isHidden = false
         } else {
-            self.locationCancelButton.isHidden = true
-            self.findCurrentLocationButton.isHidden = false
+            self.locationCancelButton.isHidden = false
+            self.findCurrentLocationButton.isHidden = true
         }
 
-
+        
+        view.addSubview(locationCancelButton)
+        locationCancelButton.anchor(top: nil, left: nil, bottom: nil, right: locationNameLabel.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 10, width: 20, height: 20)
+        locationCancelButton.centerYAnchor.constraint(equalTo: locationNameLabel.centerYAnchor).isActive = true
+        
+        view.addSubview(findCurrentLocationButton)
+        findCurrentLocationButton.anchor(top: nil, left: nil, bottom: nil, right: locationNameLabel.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 10, width: 20, height: 20)
+        findCurrentLocationButton.centerYAnchor.constraint(equalTo: locationNameLabel.centerYAnchor).isActive = true
         
     // Add Location Adress
 //        view.addSubview(adressIcon)
@@ -969,18 +1067,29 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         
     // Add Places Collection View
         view.addSubview(placesCollectionView)
-        placesCollectionView.anchor(top: locationNameLabel.bottomAnchor, left: LocationContainerView.leftAnchor, bottom: nil, right: LocationContainerView.rightAnchor, paddingTop: 5, paddingLeft: 5, paddingBottom: 5, paddingRight: 5, width: 0, height: 40)
+        placesCollectionView.anchor(top: locationNameLabel.bottomAnchor, left: LocationContainerView.leftAnchor, bottom: nil, right: LocationContainerView.rightAnchor, paddingTop: 0, paddingLeft: 5, paddingBottom: 0, paddingRight: 5, width: 0, height: 40)
         placesCollectionView.backgroundColor = UIColor.white
         placesCollectionView.register(UploadLocationCell.self, forCellWithReuseIdentifier: locationCellID)
         placesCollectionView.delegate = self
         placesCollectionView.dataSource = self
+
+        
+        // Add Post Type Segment
+        view.addSubview(postTypeSegment)
+        postTypeSegment.anchor(top: placesCollectionView.bottomAnchor, left: LocationContainerView.leftAnchor, bottom: nil, right: LocationContainerView.rightAnchor, paddingTop: 5, paddingLeft: 10, paddingBottom: 0, paddingRight: 10, width: 0, height: 30)
+        
+        // Add Post Price Segment
+        view.addSubview(postPriceSegment)
+        postPriceSegment.anchor(top: postTypeSegment.bottomAnchor, left: LocationContainerView.leftAnchor, bottom: nil, right: LocationContainerView.rightAnchor, paddingTop: 10, paddingLeft: 10, paddingBottom: 0, paddingRight: 10, width: 0, height: 30)
 
 // Emoji Container View
         let EmojiContainerView = UIView()
         EmojiContainerView.backgroundColor = .green
         view.addSubview(EmojiContainerView)
         let emojiContainerHeight: Int = (Int(EmojiSize.width) + 2) * self.emojiCollectionViewRows + 10
-        EmojiContainerView.anchor(top: LocationContainerView.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 1, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: CGFloat(emojiContainerHeight))
+        
+        EmojiContainerView.anchor(top: postPriceSegment.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 10, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: CGFloat(emojiContainerHeight))
+        
         view.addSubview(EmojiCollectionView)
         EmojiCollectionView.anchor(top: EmojiContainerView.topAnchor, left: EmojiContainerView.leftAnchor, bottom: EmojiContainerView.bottomAnchor, right: EmojiContainerView.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
         EmojiCollectionView.backgroundColor = UIColor.white
@@ -1399,7 +1508,8 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
     
     func numberOfSections(in collectionView: UICollectionView) -> Int {
         if collectionView == EmojiCollectionView {
-            return 6
+//            return 6
+            return 1
         } else {
             return 1
         }
@@ -1411,7 +1521,8 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
             return googlePlaceNames.count }
 
         else if collectionView == EmojiCollectionView {
-            return EmoticonArray[section].count
+//            return EmoticonArray[section].count
+            return UploadEmojiArray.count
         }
 //        else if emojiViews!.contains(collectionView) {
 //            
@@ -1426,7 +1537,7 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: locationCellID, for: indexPath) as! UploadLocationCell
             
-            cell.uploadLocations.text = googlePlaceNames[indexPath.item]
+            cell.uploadLocations.text = googlePlaceNames[indexPath.item].truncate(length: 20)
             
             if self.selectPostLocation == self.googlePlaceLocations[indexPath.item] {
                 cell.backgroundColor = UIColor.rgb(red: 149, green: 204, blue: 244)
@@ -1437,31 +1548,36 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
             return cell
         }
         
-//        if emojiViews!.contains(collectionView){
+//        if collectionView == EmojiCollectionView {
 //            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: emojiCellID, for: indexPath) as! UploadEmojiCell
-//            
-//                cell.uploadEmojis.text = EmoticonArray[collectionView.tag][(indexPath as IndexPath).row]
-//                
-//                if self.selectEmojis.contains(cell.uploadEmojis.text!){
-//                    cell.backgroundColor = UIColor.gray
-//                } else {
-//                    cell.backgroundColor = UIColor.white
-//                }
 //
+//            let columns = collectionView.numberOfItems(inSection: indexPath.section) / emojiCollectionViewRows
+//            let i = indexPath.item / emojiCollectionViewRows
+//            let j = indexPath.item % emojiCollectionViewRows
+//            let newIndex = j*columns+i
+//
+//
+//            cell.uploadEmojis.text = EmoticonArray[(indexPath as IndexPath).section][newIndex]
+//
+//            if (self.selectEmojis.contains(cell.uploadEmojis.text!)/*||self.captionTextView.text.contains(cell.uploadEmojis.text!)*/){
+//                //Highlight only if emoji is tagged, dont care about caption
+//
+//                cell.backgroundColor = UIColor.rgb(red: 149, green: 204, blue: 244)
+//            } else {
+//                cell.backgroundColor = UIColor.white
+//            }
 //            return cell
-//            
 //        }
-            
+//
         if collectionView == EmojiCollectionView {
-                let cell = collectionView.dequeueReusableCell(withReuseIdentifier: emojiCellID, for: indexPath) as! UploadEmojiCell
+            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: emojiCellID, for: indexPath) as! UploadEmojiCell
             
-                let columns = collectionView.numberOfItems(inSection: indexPath.section) / emojiCollectionViewRows
-                let i = indexPath.item / emojiCollectionViewRows
-                let j = indexPath.item % emojiCollectionViewRows
-                let newIndex = j*columns+i
+            let columns = collectionView.numberOfItems(inSection: indexPath.section) / emojiCollectionViewRows
+            let i = indexPath.item / emojiCollectionViewRows
+            let j = indexPath.item % emojiCollectionViewRows
+            let newIndex = j*columns+i
             
-            
-                    cell.uploadEmojis.text = EmoticonArray[(indexPath as IndexPath).section][newIndex]
+            cell.uploadEmojis.text = UploadEmojiArray[newIndex]
             
             if (self.selectEmojis.contains(cell.uploadEmojis.text!)/*||self.captionTextView.text.contains(cell.uploadEmojis.text!)*/){
                 //Highlight only if emoji is tagged, dont care about caption
@@ -1470,7 +1586,6 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
                     } else {
                         cell.backgroundColor = UIColor.white
                     }
-            
                     return cell
         }
         
@@ -1482,16 +1597,58 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         }
     }
     
+    func fadeViewInThenOut(view : UIView, delay: TimeInterval) {
+        
+        let animationDuration = 0.25
+        
+        // Fade in the view
+        UIView.animate(withDuration: animationDuration, animations: { () -> Void in
+            view.alpha = 1
+        }) { (Bool) -> Void in
+            
+            // After the animation completes, fade out the view after a delay
+            
+            UIView.animate(withDuration: animationDuration, delay: delay, options: .curveEaseInOut, animations: { () -> Void in
+                view.alpha = 0
+            },
+                completion: nil)
+        }
+    }
+    
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         
         
         if collectionView == EmojiCollectionView{
+            
+            print("Emoji Cell Selected")
+            
             let cell = collectionView.cellForItem(at: indexPath) as! UploadEmojiCell
             let pressedEmoji = cell.uploadEmojis.text!
+            
+//            cell.transform = CGAffineTransform(scaleX: 0.5, y: 0.5)
+//
+//            UIView.animate(withDuration: 1.0,
+//                           delay: 0,
+//                           usingSpringWithDamping: 0.2,
+//                           initialSpringVelocity: 6.0,
+//                           options: .allowUserInteraction,
+//                           animations: { [weak self] in
+//                            cell.contentView.layoutIfNeeded()
+//                            cell.transform = .identity
+//                },
+//                           completion: nil)
             
         
             if /*self.captionTextView.text.contains(pressedEmoji) == false &&*/ self.selectEmojis.contains(pressedEmoji) == false
             {   // Emoji not in caption or tag
+                
+                if let emojiTagLookup = ReverseEmojiDictionary.key(forValue: pressedEmoji) {
+                    emojiDetailLabel.text = pressedEmoji + " " + emojiTagLookup
+                    self.fadeViewInThenOut(view: emojiDetailLabel, delay: 1.5)
+                }
+                
+
+                
                 
                 if self.captionTextView.text == "Insert Caption Here" {
                     self.captionTextView.text = cell.uploadEmojis.text!
@@ -1635,7 +1792,7 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         let userPostRef = Database.database().reference().child("posts")
         let ref = userPostRef.childByAutoId()
         let uploadTime = Date().timeIntervalSince1970
-        let tagTime = self.selectTime?.timeIntervalSince1970
+        let tagTime = self.selectTime.timeIntervalSince1970
         
         let values = ["imageUrl": imageUrl, "caption": caption, "imageWidth": postImage.size.width, "imageHeight": postImage.size.height, "creationDate": uploadTime, "googlePlaceID": googlePlaceID, "locationName": postLocationName, "locationAdress": postLocationAdress, "postLocationGPS": uploadedLocationGPS, "creatorUID": uid, "tagTime": tagTime,"ratingEmoji": ratingEmojiUpload, "nonratingEmoji": nonratingEmojiUpload, "nonratingEmojiTags": nonratingEmojiTagsUpload] as [String:Any]
         
@@ -1739,7 +1896,7 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         
         let userPostRef = Database.database().reference().child("posts").child(postId)
         let uploadTime = Date().timeIntervalSince1970
-        let tagTime = self.selectTime?.timeIntervalSince1970
+        let tagTime = self.selectTime.timeIntervalSince1970
         
         let values = ["imageUrl": imageUrl, "caption": caption, "imageWidth": postImage.size.width, "imageHeight": postImage.size.height, "creationDate": uploadTime, "googlePlaceID": googlePlaceID, "locationName": postLocationName, "locationAdress": postLocationAdress, "postLocationGPS": uploadedLocationGPS, "creatorUID": uid, "tagTime": tagTime,"ratingEmoji": ratingEmojiUpload, "nonratingEmoji": nonratingEmojiUpload, "nonratingEmojiTags": nonratingEmojiTagsUpload, "editDate": uploadTime] as [String:Any]
         userPostRef.updateChildValues(values) { (err, ref) in
