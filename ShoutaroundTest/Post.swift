@@ -10,6 +10,20 @@ import Foundation
 import CoreLocation
 import UIKit
 
+struct List {
+    var id: String
+    var name: String
+    var creationDate: Date?
+    var postIds: [String:Double]?
+    var isSelected: Bool = false
+    
+    init(id: String, name: String){
+        self.id = id
+        self.name = name
+        self.creationDate = Date()
+    }
+    
+}
 
 
 struct PostId {

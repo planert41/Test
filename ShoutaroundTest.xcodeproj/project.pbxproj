@@ -89,6 +89,7 @@
 		A5F9FE221FED6A7700AF9542 /* ReselectableSegmentControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5F9FE211FED6A7700AF9542 /* ReselectableSegmentControl.swift */; };
 		A5F9FE241FEE044C00AF9542 /* UploadPhotoListController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5F9FE231FEE044B00AF9542 /* UploadPhotoListController.swift */; };
 		A5F9FE2A1FEF365200AF9542 /* SharePhotoListController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5F9FE291FEF365200AF9542 /* SharePhotoListController.swift */; };
+		A5F9FE2C1FF069D000AF9542 /* UploadListCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5F9FE2B1FF069D000AF9542 /* UploadListCell.swift */; };
 		B1A3AC30339B082041E14A20 /* Pods_ShoutaroundTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B65B7D125931B939429672C6 /* Pods_ShoutaroundTest.framework */; };
 /* End PBXBuildFile section */
 
@@ -179,6 +180,7 @@
 		A5F9FE211FED6A7700AF9542 /* ReselectableSegmentControl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReselectableSegmentControl.swift; sourceTree = "<group>"; };
 		A5F9FE231FEE044B00AF9542 /* UploadPhotoListController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UploadPhotoListController.swift; sourceTree = "<group>"; };
 		A5F9FE291FEF365200AF9542 /* SharePhotoListController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharePhotoListController.swift; sourceTree = "<group>"; };
+		A5F9FE2B1FF069D000AF9542 /* UploadListCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UploadListCell.swift; sourceTree = "<group>"; };
 		A64D6DDCD46BE134C4B0B7C6 /* Pods-InstagramFirebase.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-InstagramFirebase.release.xcconfig"; path = "Pods/Target Support Files/Pods-InstagramFirebase/Pods-InstagramFirebase.release.xcconfig"; sourceTree = "<group>"; };
 		B65B7D125931B939429672C6 /* Pods_ShoutaroundTest.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_ShoutaroundTest.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		E6A7A43430193F3A7265A821 /* Pods-ShoutaroundTest.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ShoutaroundTest.debug.xcconfig"; path = "Pods/Target Support Files/Pods-ShoutaroundTest/Pods-ShoutaroundTest.debug.xcconfig"; sourceTree = "<group>"; };
@@ -345,6 +347,7 @@
 				A58477A91F6EFFD7007DE06C /* LocationLabels.swift */,
 				A552EA601F99BE76005A0977 /* PhotoSelectorControllerDummy.swift */,
 				A5F9FE231FEE044B00AF9542 /* UploadPhotoListController.swift */,
+				A5F9FE2B1FF069D000AF9542 /* UploadListCell.swift */,
 			);
 			name = AddPhoto;
 			sourceTree = "<group>";
@@ -642,6 +645,7 @@
 				A5A17BB01FA6497F001F227D /* UIPicker.swift in Sources */,
 				A53E7E171F5E46DB0011C1CA /* GooglePlaces.swift in Sources */,
 				A5C6451A1F57AB0000C78244 /* Firebase.swift in Sources */,
+				A5F9FE2C1FF069D000AF9542 /* UploadListCell.swift in Sources */,
 				A562E5191F539C040095C7C1 /* PhotoSelectorController.swift in Sources */,
 				A56868BF1F79C2FF0050C406 /* EmailHtmlFormat.swift in Sources */,
 				A5C645221F5B5F2700C78244 /* CameraController.swift in Sources */,

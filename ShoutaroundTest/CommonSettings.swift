@@ -16,6 +16,11 @@ var geoFilterRangeDefault:[String] = ["5", "25", "100","250", "All"]
 var defaultPhotoResize = CGSize(width: 500, height: 500)
 var defaultEmptyGPSName: String = "No Location"
 
+var bookmarkList = List.init(id: "Bookmarks", name: "Bookmarks")
+var legitList = List.init(id: "Legit", name: "Legit")
+var listDefault:[List] = [bookmarkList, legitList]
+
+
 // Upload Defaults
 var UploadPostTypeDefault:[String] = ["Breakfast", "Lunch", "Dinner", "Snack"]
 var UploadPostPriceDefault:[String] = ["$5", "$10", "$20", "$35", "$50", "$$$"]
