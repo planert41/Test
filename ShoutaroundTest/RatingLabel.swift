@@ -25,7 +25,7 @@ class RatingLabel: UILabel {
         self.textAlignment = NSTextAlignment.center
         
         self.font = UIFont.systemFont(ofSize: 14)
-        self.textColor = UIColor.black
+        self.textColor = UIColor.darkGray
         setRatingView()
     }
     
@@ -39,8 +39,10 @@ class RatingLabel: UILabel {
         
         if cellRating == 0 {
             self.text = "0"
+            self.textColor = UIColor.darkGray
         } else {
             self.text = String(cellRating)
+            self.textColor = UIColor.black
         }
 
         // Add image as background

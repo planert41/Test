@@ -40,7 +40,7 @@ class UploadLocationTagList: UICollectionViewFlowLayout {
         minimumInteritemSpacing = 10
         minimumLineSpacing = 10
         scrollDirection = .horizontal
-        sectionInset = UIEdgeInsets(top: 0, left: 10, bottom: 0, right: 10)
+        sectionInset = UIEdgeInsets(top: 0, left: 15, bottom: 0, right: 15)
         
     }
     

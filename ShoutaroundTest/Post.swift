@@ -8,6 +8,7 @@
 
 import Foundation
 import CoreLocation
+import UIKit
 
 
 
@@ -39,6 +40,7 @@ struct PostId {
 
 struct Post {
     
+    var image: UIImage?
     let imageUrl: String
     let user: User
     let caption: String
@@ -57,6 +59,9 @@ struct Post {
     var emoji: String
     var nonRatingEmoji: [String]
     var nonRatingEmojiTags: [String]
+    
+    var price: String?
+    var type: String?
     
     //Social Stats
     var hasLiked: Bool = false
@@ -97,6 +102,9 @@ struct Post {
         self.bookmarkCount = dictionary["bookmarkCount"] as? Int ?? 0
         self.messageCount = dictionary["messageCount"] as? Int ?? 0
         self.voteCount = dictionary["voteCount"] as? Int ?? 0
+        
+        self.price = dictionary["price"] as? String ?? nil
+        self.type = dictionary["type"] as? String ?? nil
         
         
         

@@ -175,7 +175,6 @@ class PictureController: UICollectionViewController, HomePostCellDelegate, UICol
         editPost.selectPostLocationName = post.locationName
         editPost.selectPostLocationAdress = post.locationAdress
         editPost.selectTime = post.tagTime
-        editPost.ratingEmoji = post.ratingEmoji
         editPost.nonRatingEmoji = post.nonRatingEmoji
         editPost.nonRatingEmojiTags = post.nonRatingEmojiTags
         editPost.captionTextView.text = post.caption

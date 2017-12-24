@@ -12,7 +12,6 @@ import CoreData
 import FBSDKCoreKit
 import GooglePlaces
 import GoogleMaps
-import IQKeyboardManagerSwift
 
 
 @UIApplicationMain
@@ -29,8 +28,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         GMSPlacesClient.provideAPIKey(googlePlacesApiKey)
         GMSServices.provideAPIKey(googlePlacesApiKey)
-        IQKeyboardManager.sharedManager().enable = false
-        IQKeyboardManager.sharedManager().enableAutoToolbar = false
+
         
         
         window = UIWindow()

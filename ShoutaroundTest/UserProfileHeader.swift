@@ -9,7 +9,6 @@
 import UIKit
 import Firebase
 import FBSDKLoginKit
-import IQKeyboardManagerSwift
 
 protocol UserProfileHeaderDelegate {
     func didChangeToListView()

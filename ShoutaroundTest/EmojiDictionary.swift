@@ -180,7 +180,7 @@ var UploadCuisineEmojiArray: [String] = [
 "🇺🇸","🇨🇦","🇲🇽","🇨🇺","🇦🇷","🇫🇷","🇮🇹","🇩🇪","🇪🇸","🇧🇷","🇨🇳","🇯🇵","🇰🇷","🇮🇳","🇹🇭"
 ]
 
-var UploadEmojiArray = UploadFoodEmojiArray + UploadIngredientsEmojiArray + UploadSettingEmojiArray + UploadCuisineEmojiArray
+var UploadEmojiArray = UploadSettingEmojiArray + UploadFoodEmojiArray + UploadIngredientsEmojiArray + UploadCuisineEmojiArray
 
 
 //var EmoticonArray: [[String]] = [Emote1Display, Emote2Display, Emote3Display, Emote4Display]

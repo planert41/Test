@@ -8,7 +8,126 @@
 //
 //
 //import Foundation
+// Add Tag Time
+//        view.addSubview(timeIcon)
+//        timeIcon.anchor(top: LocationContainerView.topAnchor, left: LocationContainerView.leftAnchor, bottom: nil, right: nil, paddingTop: 10, paddingLeft: 10, paddingBottom: 10, paddingRight: 10, width: 30, height: 30)
+//        view.addSubview(timeLabel)
+//        timeLabel.anchor(top: LocationContainerView.topAnchor, left: timeIcon.rightAnchor, bottom: nil, right: LocationContainerView.rightAnchor, paddingTop: 5, paddingLeft: 10, paddingBottom: 0, paddingRight: 10, width: 0, height: 40)
+//        timeLabel.isUserInteractionEnabled = true
+//        let TapGestureT = UITapGestureRecognizer(target: self, action: #selector(timeInput))
+//        timeLabel.addGestureRecognizer(TapGestureT)
+//        view.addSubview(timeCancelButton)
+//        timeCancelButton.anchor(top: timeLabel.topAnchor, left: nil, bottom: timeLabel.bottomAnchor, right: timeLabel.rightAnchor, paddingTop: 10, paddingLeft: 10, paddingBottom: 10, paddingRight: 10, width: 20, height: 20)
 
+//    let timeCancelButton: UIButton = {
+//        let button = UIButton(type: .system)
+//        button.setImage(#imageLiteral(resourceName: "cancel_shadow").withRenderingMode(.alwaysOriginal), for: .normal)
+//        button.translatesAutoresizingMaskIntoConstraints = false
+//        button.backgroundColor = UIColor.clear
+//        button.layer.cornerRadius = 0.5 * button.bounds.size.width
+//        button.layer.masksToBounds  = true
+//        button.clipsToBounds = true
+//        button.addTarget(self, action: #selector(cancelTime), for: .touchUpInside)
+//        return button
+//    } ()
+
+
+//    func cancelTime(){
+//        if selectTime != currentDateTime {
+//            self.selectTime = currentDateTime
+//            let formatter = DateFormatter()
+//            formatter.dateFormat = "MMM d YYYY, h:mm a"
+//            let attributedText = NSMutableAttributedString(string: formatter.string(from: currentDateTime), attributes: [NSFontAttributeName: UIFont.boldSystemFont(ofSize: 14),NSForegroundColorAttributeName: UIColor.mainBlue()])
+//            self.timeLabel.attributedText = attributedText
+//        } else {
+//        selectTime = nil
+//        }
+//    }
+
+//var toolBar: UIToolbar = {
+//    let toolBar = UIToolbar()
+//    toolBar.barStyle = .default
+//    toolBar.isTranslucent = true
+//    toolBar.tintColor = UIColor(red: 92/255, green: 216/255, blue: 255/255, alpha: 1)
+//    toolBar.sizeToFit()
+//    return toolBar
+//}()
+//
+//func timeInput(){
+//    
+//    print("Time Input is activated")
+//    self.datePicker.isHidden = false
+//    self.toolBar.isHidden = false
+//    
+//    // Set some of UIDatePicker properties
+//    datePicker.timeZone = NSTimeZone.local
+//    datePicker.backgroundColor = UIColor.white
+//    
+//    // Adding Button ToolBar
+//    let doneButton = UIBarButtonItem(title: "Done", style: .plain, target: self, action: #selector(doneClick))
+//    let spaceButton = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
+//    let cancelButton = UIBarButtonItem(title: "Cancel", style: .plain, target: self, action: #selector(cancelClick))
+//    toolBar.setItems([cancelButton, spaceButton, doneButton], animated: false)
+//    toolBar.isUserInteractionEnabled = true
+//    
+//    // Add an event to call onDidChangeDate function when value is changed.
+//    datePicker.addTarget(self, action: #selector(self.datePickerValueChanged(_:)), for: .valueChanged)
+//    
+//    // Add DataPicker to the view
+//    self.view.addSubview(datePicker)
+//    datePicker.anchor(top: nil, left: self.view.leftAnchor, bottom: self.view.bottomAnchor, right: self.view.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 200)
+//    self.view.addSubview(toolBar)
+//    toolBar.anchor(top: nil, left: self.view.leftAnchor, bottom: datePicker.topAnchor, right: self.view.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 50)
+//}
+//
+//
+//func doneClick() {
+//    let dateFormatter1 = DateFormatter()
+//    self.selectTime = datePicker.date
+//    self.toolBar.isHidden = true
+//    self.datePicker.isHidden = true
+//}
+//func cancelClick() {
+//    self.toolBar.isHidden = true
+//    self.datePicker.isHidden = true
+//}
+//
+//
+//func datePickerValueChanged(_ sender: UIDatePicker){
+//}
+
+
+//
+//
+//let timeLabel: UILabel = {
+//    let tv = LocationLabel()
+//    tv.font = UIFont.systemFont(ofSize: 14)
+//    tv.backgroundColor = UIColor(white: 0, alpha: 0.03)
+//    tv.layer.borderWidth = 0.5
+//    tv.layer.cornerRadius = 5
+//    tv.isUserInteractionEnabled = true
+//    let TapGesturet = UITapGestureRecognizer(target: self, action: #selector(timeInput))
+//    tv.addGestureRecognizer(TapGesturet)
+//    return tv
+//}()
+//
+//
+//let timeIcon: UIButton = {
+//    let button = UIButton()
+//    button.setImage(#imageLiteral(resourceName: "hours").withRenderingMode(.alwaysOriginal), for: .normal)
+//    button.addTarget(self, action: #selector(timeIconPushed), for: .touchUpInside)
+//    return button
+//}()
+//
+//func timeIconPushed(){
+//    self.selectTime = currentDateTime
+//    let formatter = DateFormatter()
+//    formatter.dateFormat = "MMM d YYYY, h:mm a"
+//    let attributedText = NSMutableAttributedString(string: formatter.string(from: currentDateTime), attributes: [NSFontAttributeName: UIFont.boldSystemFont(ofSize: 14),NSForegroundColorAttributeName: UIColor.mainBlue()])
+//    self.timeLabel.attributedText = attributedText
+//}
+//
+//var datePicker: UIDatePicker = UIDatePicker()
 
 //    func fetchBookmarkPosts(){
 //

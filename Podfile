@@ -24,10 +24,10 @@ pod 'Alamofire', '~> 4.4'
 pod 'mailgun', '~> 1.0.3'
 pod 'GoogleAPIClientForREST/Gmail', '~> 1.2.1'
 pod 'GoogleSignIn'
-pod 'IQKeyboardManagerSwift'
 pod 'SMSegmentView'
 pod ‘SearchTextField’
 pod 'Cosmos', '~> 13.0'
+pod 'IQKeyboardManagerSwift'
 
 
 

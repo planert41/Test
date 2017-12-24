@@ -9,7 +9,6 @@
 import UIKit
 import Firebase
 import FBSDKLoginKit
-import IQKeyboardManagerSwift
 import CoreLocation
 
 class UserProfileController: UICollectionViewController, UICollectionViewDelegateFlowLayout, UserProfileHeaderDelegate, HomePostCellDelegate,BookmarkPhotoCellDelegate, UserProfilePhotoCellDelegate, UISearchBarDelegate, HomePostSearchDelegate, FilterControllerDelegate, UISearchControllerDelegate, UIGestureRecognizerDelegate{
@@ -197,7 +196,6 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
         setupSearchController()
         fetchUser()
         // Pagination happens after post ids are fetched
-        IQKeyboardManager.sharedManager().enable = false
         setupLogOutButton()
         self.scrolltoFirst = false
         
@@ -335,7 +333,6 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
     }
 
     override func viewWillDisappear(_ animated: Bool) {
-        IQKeyboardManager.sharedManager().enable = true
     }
     
     // IOS9 - let refreshControl = UIRefreshControl()
@@ -436,7 +433,6 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
         editPost.selectPostLocationName = post.locationName
         editPost.selectPostLocationAdress = post.locationAdress
         editPost.selectTime = post.tagTime
-        editPost.ratingEmoji = post.ratingEmoji
         editPost.nonRatingEmoji = post.nonRatingEmoji
         editPost.nonRatingEmojiTags = post.nonRatingEmojiTags
         editPost.captionTextView.text = post.caption

@@ -38,8 +38,12 @@ class BookmarkPhotoCell: UICollectionViewCell {
     var post: Post? {
         didSet {
             
+            if post?.image == nil {
             guard let imageUrl = post?.imageUrl else {return}
-            photoImageView.loadImage(urlString: imageUrl)
+                photoImageView.loadImage(urlString: imageUrl)
+            } else {
+                photoImageView.image = post?.image
+            }
             usernameLabel.text = post?.user.username
             
             if let locationNameDisplay = post?.locationName {

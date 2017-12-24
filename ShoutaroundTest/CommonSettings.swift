@@ -18,7 +18,7 @@ var defaultEmptyGPSName: String = "No Location"
 
 // Upload Defaults
 var UploadPostTypeDefault:[String] = ["Breakfast", "Lunch", "Dinner", "Snack"]
-var UploadPostPriceDefault:[String] = ["$5", "$10", "$20", "$50", "$$$"]
+var UploadPostPriceDefault:[String] = ["$5", "$10", "$20", "$35", "$50", "$$$"]
 
 
 // Filter Defaults
