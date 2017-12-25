@@ -12,14 +12,15 @@ import Firebase
 
 class SharePhotoListController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, UITextFieldDelegate, UITableViewDelegate, UITableViewDataSource {
     
+    var uploadPostDictionary: [String: Any] = [:]
     var uploadPost: Post? = nil {
         didSet{
-            print(uploadPost)
+            print("Uploaded Post: ", uploadPost)
             collectionView.reloadData()
         }
     }
     
-    var displayList: [List] = listDefault
+    var displayList: [List] = defaultList
     var selectedList: [List] {
         return displayList.filter { return $0.isSelected }
     }
@@ -72,7 +73,17 @@ class SharePhotoListController: UIViewController, UICollectionViewDelegate, UICo
     
     func addList(){
         let listId = NSUUID().uuidString
-        guard let listName = addListTextField.text else {
+        checkListName(listName: addListTextField.text) { (listName) in
+            let newList = List.init(id: listId, name: listName)
+            self.displayList.append(newList)
+            self.tableView.reloadData()
+            self.addListTextField.text?.removeAll()
+        }
+        self.addListTextField.resignFirstResponder()
+    }
+    
+    func checkListName(listName: String?, completion: @escaping (String) -> ()){
+        guard let listName = listName else {
             self.alert(title: "New List Requirement", message: "Please Insert List Name")
             return
         }
@@ -82,18 +93,13 @@ class SharePhotoListController: UIViewController, UICollectionViewDelegate, UICo
         }
         
         if displayList.contains(where: { (displayList) -> Bool in
-            return displayList.name == listName
+            return displayList.name.lowercased() == listName.lowercased()
         }) {
             self.alert(title: "Duplicate List Name", message: "Please Insert Different List Name")
             return
         }
         
-        let newList = List.init(id: listId, name: listName)
-        displayList.append(newList)
-        tableView.reloadData()
-        
-        addListTextField.text?.removeAll()
-        addListTextField.resignFirstResponder()
+        completion(listName)
     }
     
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
@@ -111,9 +117,6 @@ class SharePhotoListController: UIViewController, UICollectionViewDelegate, UICo
         tv.allowsMultipleSelection = true
         return tv
     }()
-    
-
-    
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -150,7 +153,7 @@ class SharePhotoListController: UIViewController, UICollectionViewDelegate, UICo
     
     func setupList(){
 //        if displayList.count == 0 {
-//            displayList = listDefault
+//            displayList = defaultList
 //        }
 //        tableView.reloadData()
     }
@@ -216,6 +219,65 @@ class SharePhotoListController: UIViewController, UICollectionViewDelegate, UICo
         return 50
     }
 
+
+    func tableView(_ tableView: UITableView, editActionsForRowAt indexPath: IndexPath) -> [UITableViewRowAction]? {
+        
+        let delete = UITableViewRowAction(style: .destructive, title: "Delete") { (action, indexPath) in
+            // Check For Default List
+            if (defaultList.contains(where: { (list) -> Bool in
+                list.name == self.displayList[indexPath.row].name})){
+                self.alert(title: "Delete List Error", message: "Cannot Delete Default List: \(self.displayList[indexPath.row].name)")
+                return
+            }
+            
+            self.displayList.remove(at: indexPath.row)
+            tableView.deleteRows(at: [indexPath], with: .fade)
+            print(self.displayList)
+        }
+        
+        let edit = UITableViewRowAction(style: .default, title: "Edit") { (action, indexPath) in
+            // Check For Default List
+            if (defaultList.contains(where: { (list) -> Bool in
+                list.name == self.displayList[indexPath.row].name})){
+                self.alert(title: "Edit List Error", message: "Cannot Edit Default List: \(self.displayList[indexPath.row].name)")
+                return
+            }
+            
+            print("I want to change: \(self.displayList[indexPath.row])")
+
+         
+            //1. Create the alert controller.
+            let alert = UIAlertController(title: "Change List Name", message: "Enter a New Name", preferredStyle: .alert)
+            
+            //2. Add the text field. You can configure it however you need.
+            alert.addTextField { (textField) in
+                textField.text = self.displayList[indexPath.row].name
+            }
+            
+            // 3. Grab the value from the text field, and print it when the user clicks OK.
+            alert.addAction(UIAlertAction(title: "OK", style: .default, handler: { [weak alert] (_) in
+                let textField = alert?.textFields![0] // Force unwrapping because we know it exists.
+                print("Text field: \(textField?.text)")
+                
+                // Change List Name
+                self.checkListName(listName: textField?.text, completion: { (listName) in
+                    self.displayList[indexPath.row].name = listName
+                    self.tableView.reloadData()
+                })
+            }))
+            
+            // 4. Present the alert.
+            self.present(alert, animated: true, completion: nil)
+            
+            
+        }
+        
+        edit.backgroundColor = UIColor.lightGray
+        
+        return [delete, edit]
+        
+    }
+    
     
     
     

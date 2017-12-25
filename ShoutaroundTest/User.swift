@@ -24,6 +24,8 @@ struct User {
     var bookmarkedCount: Int = 0
     var likedCount: Int = 0
     
+    var lists: [List]? = nil
+    
     
     init(uid: String, dictionary: [String:Any]) {
         self.username = dictionary["username"] as? String ?? ""
@@ -38,6 +40,15 @@ struct User {
         self.bookmarkCount = social["bookmarkCount"] as? Int ?? 0
         self.bookmarkedCount = social["bookmarkedCount"] as? Int ?? 0
         self.likedCount = social["likedCount"] as? Int ?? 0
+        
+        //lists
+        let lists = dictionary["lists"] as? [String:Any] ?? [:]
+        
+        for (listId, values) in lists {
+            let listDictionary = values as! [String:Any]
+            var tempList = List.init(id: listId, dictionary: listDictionary)
+            self.lists?.append(tempList)
+        }
     }
     
 }
@@ -52,7 +63,7 @@ struct CurrentUser {
     static var followingUids: [String] = []
     static var groupUids: [String] = []
     static var user: User?
-    
+    static var lists: List?
     //static var currentLocation: CLLocation? = CLLocation(latitude: 41.9735039, longitude: -87.66775139999999)
     
 }

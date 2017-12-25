@@ -1552,14 +1552,17 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         let type = self.selectPostType ?? nil
         
         let values = ["caption": caption,"rating": rating, "nonratingEmoji": nonratingEmojiUpload, "nonratingEmojiTags": nonratingEmojiTagsUpload, "imageWidth": postImage.size.width, "imageHeight": postImage.size.height, "creationDate": uploadTime, "googlePlaceID": googlePlaceID, "locationName": postLocationName, "locationAdress": postLocationAdress, "postLocationGPS": uploadedLocationGPS, "creatorUID": uid, "price": price, "type": type] as [String:Any]
+        print(values)
         
         // Upload Post to List Controller
         
         var uploadPost = Post.init(user: CurrentUser.user!, dictionary: values)
         uploadPost.image = postImage
+        uploadPost.id = NSUUID().uuidString
         
         let sharePhotoListController = SharePhotoListController()
         sharePhotoListController.uploadPost = uploadPost
+        sharePhotoListController.uploadPostDictionary = values
         navigationController?.pushViewController(sharePhotoListController, animated: true)
     }
     

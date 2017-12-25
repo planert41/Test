@@ -14,13 +14,21 @@ struct List {
     var id: String
     var name: String
     var creationDate: Date?
-    var postIds: [String:Double]?
+    var postIds: [String:Any]?
     var isSelected: Bool = false
     
     init(id: String, name: String){
         self.id = id
         self.name = name
         self.creationDate = Date()
+    }
+    
+    init(id: String, dictionary: [String: Any]){
+        self.id = id
+        self.name = dictionary["name"] as? String ?? ""
+        let fetchedDate = dictionary["createdDate"] as? Double ?? 0
+        self.creationDate = Date(timeIntervalSince1970: fetchedDate)
+        self.postIds = dictionary["posts"] as? [String:Any] ?? [:]
     }
     
 }

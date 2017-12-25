@@ -13,6 +13,21 @@ var postCache = [String: Post]()
 
 extension Database{
 
+// Alerts
+    static func alert(title: String, message: String) {
+        
+        let alert = UIAlertController(title: title, message: message, preferredStyle: UIAlertControllerStyle.alert)
+        alert.addAction(UIAlertAction(title: "OK", style: UIAlertActionStyle.default, handler: nil))
+        
+        var topController = UIApplication.shared.keyWindow!.rootViewController as! UIViewController
+        
+        while ((topController.presentedViewController) != nil) {
+            topController = topController.presentedViewController!;
+        }
+        topController.present(alert, animated:true, completion:nil)
+    }
+    
+    
 // Fetching User Functions
     
     static func fetchUserWithUID(uid: String, completion: @escaping (User) -> ()) {
@@ -195,6 +210,98 @@ extension Database{
             }
         }
     }
+    
+    
+// Create Posts Functions
+    
+    static func savePostToDatabase(uploadImage: UIImage?, uploadDictionary:[String:Any]?, listIds:[String]?){
+        
+        
+    }
+    
+    static func saveImageToDatabase(uploadImage:UIImage?, completion: @escaping (String) -> ()){
+        
+        guard let image = uploadImage?.resizeImageWith(newSize: defaultPhotoResize) else {
+            self.alert(title: "Upload Post Requirement", message: "Please Insert Picture")
+            return }
+        guard let uploadData = UIImageJPEGRepresentation(image, 0.5) else {
+            self.alert(title: "Upload Post Requirement", message: "Please Insert Picture")
+            return}
+        
+        let filename = NSUUID().uuidString
+        Storage.storage().reference().child("posts").child(filename).putData(uploadData, metadata: nil) { (metadata, err) in
+            if let err = err {
+                print("Failed to upload post image:", err)
+                return
+            }
+            guard let imageUrl = metadata?.downloadURL()?.absoluteString else {return}
+            print("Successfully uploaded post image:",  imageUrl)
+            completion(filename)
+        }
+    }
+    
+//    static func savePostDictionaryToDatabase(imageUrl: String, uploadDictionary:[String:Any]?, completion: @escaping (String) -> ()){
+//
+//        guard let uploadDictionary = uploadDictionary else {
+//            self.alert(title: "Upload Post Requirement", message: "Please Insert Post Dictionary")
+//            return
+//        }
+//        let userPostRef = Database.database().reference().child("posts")
+//        let postId = NSUUID().uuidString
+//        let ref = Database.database().reference().child("posts").child(postId)
+//        let uploadTime = Date().timeIntervalSince1970
+//        guard let uid = Auth.auth().currentUser?.uid else {return}
+//
+//        var uploadValues = uploadDictionary
+//        uploadValues["imageUrl"] = imageUrl
+//
+//        // SAVE POST IN POST DATABASE
+//
+//        ref.updateChildValues(uploadValues) { (err, ref) in
+//            if let err = err {
+//                print("Failed to save post to DB", err)
+//                return}
+//
+//            print("Successfully save post to DB")
+//            Database.spotUpdateSocialCount(creatorUid: uid, receiverUid: nil, action: "post", change: 1)
+//
+//            // Put new post in cache
+//            self.uploadnewPostCache(uid: uid,postid: ref.key, dictionary: values)
+//
+//            // SAVE USER AND POSTID IN USERPOSTS
+//
+//            let postref = ref.key
+//            let userPostRef = Database.database().reference().child("userposts").child(uid).child(postref)
+//            let values = ["creationDate": uploadTime, "tagTime": tagTime, "emoji": nonratingEmojiUpload] as [String:Any]
+//
+//            userPostRef.updateChildValues(values) { (err, ref) in
+//                if let err = err {
+//                    print("Failed to save post to user", err)
+//                    return
+//                }
+//                print("Successfully save post to user")
+//            }
+//
+//
+//            // SAVE GEOFIRE LOCATION DATA
+//            let geofireRef = Database.database().reference().child("postlocations")
+//            guard let geoFire = GeoFire(firebaseRef: geofireRef) else {return}
+//            //            let geofirekeytest = uid+","+postref
+//
+//            geoFire.setLocation(self.selectPostLocation, forKey: postref) { (error) in
+//                if (error != nil) {
+//                    print("An error occured: \(error)")
+//                } else {
+//                    print("Saved location successfully!")
+//                }
+//            }
+//
+//            self.dismiss(animated: true, completion: nil)
+//            NotificationCenter.default.post(name: SharePhotoController.updateFeedNotificationName, object: nil)
+//        }
+//
+//
+//    }
 
     
 // Fetch Posts Functions
@@ -870,6 +977,71 @@ extension Database{
                 print("Error fetching message thread: \(threadId)", error)
         }
     }
+    
+    // List
+    
+    static func createList(uploadList: List){
+        guard let uid = Auth.auth().currentUser?.uid else {return}
+        if defaultListNames.contains(uploadList.id) {
+            print("Creating Default List Name Error")
+            return
+        }
+        
+        let listRef = Database.database().reference().child("users").child(uid).child("lists")
+        
+        let ref = listRef.childByAutoId()
+
+        let createdDate = Date().timeIntervalSince1970
+        let listName = uploadList.name
+        
+        let values = ["name": listName, "createdDate": createdDate] as [String:Any]
+        
+        ref.updateChildValues(values) { (err, ref) in
+            if let err = err {
+                print("Failed to save List to user", err)
+                return
+            }
+            print("Successfully save List to user")
+        }
+        
+    }
+    
+    static func deleteList(uploadList: List){
+        guard let uid = Auth.auth().currentUser?.uid else {return}
+        let listUid = uploadList.id
+        
+        if defaultListNames.contains(uploadList.id) {
+            print("Delete Default List Name Error")
+            return
+        }
+        
+        Database.database().reference().child("users").child(uid).child("lists").child(listUid).removeValue()
+        print("List Name: \(uploadList.name) is deleted")
+    }
+    
+    static func addPostForList(postId: String, uploadList: List){
+        guard let uid = Auth.auth().currentUser?.uid else {return}
+        let listUid = uploadList.id
+        let createdDate = Date().timeIntervalSince1970
+        
+        let listRef = Database.database().reference().child("users").child(uid).child("lists").child(listUid).child("posts")
+        let values = [postId: createdDate] as [String:Any]
+        
+        listRef.updateChildValues(values) { (err, ref) in
+            if let err = err {
+                print("Failed to save post \(postId) to List \(listUid) for user", err)
+                return
+            }
+            print("Successfully save post \(postId) to List \(listUid) for user")
+        }
+    }
+    
+    static func DeletePostForList(postId: String, uploadList: List){
+        guard let uid = Auth.auth().currentUser?.uid else {return}
+        let listUid = uploadList.id        
+        Database.database().reference().child("users").child(uid).child("lists").child(listUid).child("posts").child(postId).removeValue()
+    }
+    
     
     
     // Messages
