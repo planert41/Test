@@ -1563,6 +1563,7 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         let sharePhotoListController = SharePhotoListController()
         sharePhotoListController.uploadPost = uploadPost
         sharePhotoListController.uploadPostDictionary = values
+        sharePhotoListController.userList = CurrentUser.lists
         sharePhotoListController.uploadPostLocation = self.selectPostLocation
         navigationController?.pushViewController(sharePhotoListController, animated: true)
     }

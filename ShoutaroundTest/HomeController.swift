@@ -601,7 +601,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         fetchUserPostIds()
         fetchFollowingUserPostIds()
     }
-
+    
     
     fileprivate func fetchUserPostIds(){
         

@@ -1032,64 +1032,135 @@ extension Database{
     
     static func createList(uploadList: List){
         guard let uid = Auth.auth().currentUser?.uid else {return}
-        if defaultListNames.contains(uploadList.id) {
+        
+        if uploadList.id == nil {
+            print("Create List: ERROR, No List ID")
+            return
+        }
+        
+        if defaultListNames.contains(uploadList.name) {
             print("Creating Default List Name Error")
             return
         }
         
-        let listRef = Database.database().reference().child("users").child(uid).child("lists")
+        guard let listId = uploadList.id else {return}
         
-        let ref = listRef.childByAutoId()
-
+        // Create List Object
+        
+        let listRef = Database.database().reference().child("lists").child(listId)
         let createdDate = Date().timeIntervalSince1970
         let listName = uploadList.name
         
-        let values = ["name": listName, "createdDate": createdDate] as [String:Any]
+        let values = ["name": listName, "createdDate": createdDate, "creatorUID": uid] as [String:Any]
         
-        ref.updateChildValues(values) { (err, ref) in
+        listRef.updateChildValues(values) { (err, ref) in
             if let err = err {
-                print("Failed to save List to user", err)
+                print("Create List Object: ERROR: \(listId)", err)
                 return
             }
-            print("Successfully save List to user")
+            
+            print("Create List Object: Success: \(listId)")
+            
+        // Create List Id in User
+            let userRef = Database.database().reference().child("users").child(uid).child("lists")
+            let values = [listId: createdDate] as [String:Any]
+            userRef.updateChildValues(values) { (err, ref) in
+                if let err = err {
+                    print("Create List ID with User: ERROR: \(listId), User: \(uid)", err)
+                    return
+                }
+            
+                print("Create List ID with User: SUCCESS: \(listId), User: \(uid)")
+            }
         }
-        
     }
     
     static func deleteList(uploadList: List){
         guard let uid = Auth.auth().currentUser?.uid else {return}
-        let listUid = uploadList.id
         
-        if defaultListNames.contains(uploadList.id) {
-            print("Delete Default List Name Error")
+        guard let listId = uploadList.id else {
+            print("Delete List: ERROR, No List ID")
             return
         }
         
-        Database.database().reference().child("users").child(uid).child("lists").child(listUid).removeValue()
+        if defaultListNames.contains(listId) {
+            print("Delete Default List Name Error")
+            return
+        }
+        Database.database().reference().child("users").child(uid).child("lists").child(listId).removeValue()
         print("List Name: \(uploadList.name) is deleted")
     }
     
     static func addPostForList(postId: String, uploadList: List){
         guard let uid = Auth.auth().currentUser?.uid else {return}
-        let listUid = uploadList.id
+        guard let listId = uploadList.id else {
+            print("Add Post to List: ERROR, No List ID")
+            return
+        }
+        
         let createdDate = Date().timeIntervalSince1970
         
-        let listRef = Database.database().reference().child("users").child(uid).child("lists").child(listUid).child("posts")
+        let listRef = Database.database().reference().child("users").child(uid).child("lists").child(listId).child("posts")
         let values = [postId: createdDate] as [String:Any]
         
         listRef.updateChildValues(values) { (err, ref) in
             if let err = err {
-                print("Failed to save post \(postId) to List \(listUid) for user", err)
+                print("Failed to save post \(postId) to List \(listId) for user", err)
                 return
             }
-            print("Successfully save post \(postId) to List \(listUid) for user")
+            print("Successfully save post \(postId) to List \(listId) for user")
         }
     }
     
     static func DeletePostForList(postId: String, uploadList: List){
         guard let uid = Auth.auth().currentUser?.uid else {return}
-        let listUid = uploadList.id        
-        Database.database().reference().child("users").child(uid).child("lists").child(listUid).child("posts").child(postId).removeValue()
+        guard let listId = uploadList.id else {
+            print("Delete Post in List: ERROR, No List ID")
+            return}
+    Database.database().reference().child("users").child(uid).child("lists").child(listId).child("posts").child(postId).removeValue()
+    }
+    
+    static func fetchListForMultListIds(listUid: [String]?, completion: @escaping ([List]) -> ()){
+        
+        guard let listUid = listUid else {
+            print("Fetch Lists: ERROR, No List Ids")
+            return
+        }
+        
+        if listUid.count == 0 {
+            print("Fetch Lists: ERROR, No List Ids")
+            completion([])
+        }
+        
+        let myGroup = DispatchGroup()
+        var fetchedLists = [] as [List]
+        
+        listUid.forEach { (key) in
+            myGroup.enter()
+            self.fetchListforSingleListId(listId: key, completion: { (fetchedList) in
+                fetchedLists.append(fetchedList)
+                myGroup.leave()
+            })
+        }
+        
+        myGroup.notify(queue: .main) {
+            fetchedLists.sort(by: { (p1, p2) -> Bool in
+                return p1.creationDate.compare(p2.creationDate) == .orderedAscending
+            })
+            completion(fetchedLists)
+        }
+    }
+    
+    static func fetchListforSingleListId(listId: String, completion: @escaping(List) -> ()){
+        let ref = Database.database().reference().child("lists").child(listId)
+        ref.observeSingleEvent(of: .value, with: {(snapshot) in
+            guard let listDictionary = snapshot.value as? [String: Any] else {return}
+            
+            let fetchedList = List.init(id: listId, dictionary: listDictionary)
+            completion(fetchedList)
+        }){ (error) in
+            print("Fetch List ID: ERROR, \(listId)", error)
+        }
     }
     
     

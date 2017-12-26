@@ -9,26 +9,32 @@
 import Foundation
 import CoreLocation
 import UIKit
+import Firebase
 
 struct List {
-    var id: String
+    var id: String? = nil
     var name: String
-    var creationDate: Date?
-    var postIds: [String:Any]?
+    var creationDate: Date = Date()
+    var postIds: [String:Any]? = [:]
     var isSelected: Bool = false
-    
-    init(id: String, name: String){
+    var creatorUID: String?
+
+    init(id: String?, name: String){
+        guard let uid = Auth.auth().currentUser?.uid else {return}
+        
         self.id = id
         self.name = name
         self.creationDate = Date()
+        self.creatorUID = uid
     }
     
-    init(id: String, dictionary: [String: Any]){
+    init(id: String?, dictionary: [String: Any]){
         self.id = id
         self.name = dictionary["name"] as? String ?? ""
         let fetchedDate = dictionary["createdDate"] as? Double ?? 0
         self.creationDate = Date(timeIntervalSince1970: fetchedDate)
         self.postIds = dictionary["posts"] as? [String:Any] ?? [:]
+        self.creatorUID = dictionary["creatorUID"] as? String ?? ""
     }
     
 }

@@ -9,6 +9,7 @@
 import Foundation
 import UIKit
 import Firebase
+import CoreLocation
 
 class SharePhotoListController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, UITextFieldDelegate, UITableViewDelegate, UITableViewDataSource {
     
@@ -21,7 +22,10 @@ class SharePhotoListController: UIViewController, UICollectionViewDelegate, UICo
         }
     }
     
-    var displayList: [List] = defaultList
+    var userList:[List]? = []
+    var bookmarkList: List = emptyBookmarkList
+    var legitList: List = emptyLegitList
+    var displayList: [List] = []
     var selectedList: [List] {
         return displayList.filter { return $0.isSelected }
     }
@@ -74,8 +78,18 @@ class SharePhotoListController: UIViewController, UICollectionViewDelegate, UICo
     
     func addList(){
         let listId = NSUUID().uuidString
+        guard let uid = Auth.auth().currentUser?.uid else {return}
         checkListName(listName: addListTextField.text) { (listName) in
             let newList = List.init(id: listId, name: listName)
+            
+            // Create New List in Database
+            Database.createList(uploadList: newList)
+            
+            // Update New List in Current User Cache
+            CurrentUser.addList(list: newList)
+
+            
+            
             self.displayList.append(newList)
             self.tableView.reloadData()
             self.addListTextField.text?.removeAll()
@@ -108,7 +122,6 @@ class SharePhotoListController: UIViewController, UICollectionViewDelegate, UICo
         self.addList()
         return true
     }
-    
     
     lazy var tableView : UITableView = {
         let tv = UITableView()
@@ -150,16 +163,47 @@ class SharePhotoListController: UIViewController, UICollectionViewDelegate, UICo
         view.addSubview(tableView)
         tableView.anchor(top: addListView.bottomAnchor, left: view.leftAnchor, bottom: view.bottomAnchor, right: view.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
         
+        setupLists()
+        
+        
     }
     
-    func setupList(){
-//        if displayList.count == 0 {
-//            displayList = defaultList
-//        }
-//        tableView.reloadData()
+    func setupLists(){
+        // Check for Bookmark List first
+        var tempList: List? = nil
+        
+        if let tempList = userList?.first(where:{$0.name == "Bookmarks"}) {
+            bookmarkList = tempList
+            userList?.remove(at: (userList?.index(where:{$0.name == "Bookmarks"}))!)
+        } 
+        displayList.append(bookmarkList)
+        
+        
+        if let tempList = userList?.first(where:{$0.name == "Legit"}) {
+            legitList = tempList
+            userList?.remove(at: (userList?.index(where:{$0.name == "Legit"}))!)
+        }
+        displayList.append(legitList)
+        
+        // Add remaining list to Display List. List is sorted by creation date when pulling
+        
+        if userList?.count != 0 {
+            displayList = displayList + userList!
+        }
+
+        print(displayList)
+        self.tableView.reloadData()
+        
     }
     
     func handleShare(){
+        // Create List if List did not exist
+        for list in self.selectedList {
+            if list.id == nil {
+                Database.createList(uploadList: list)
+            }
+        }
+        
         print(self.selectedList)
     }
     
@@ -225,21 +269,29 @@ class SharePhotoListController: UIViewController, UICollectionViewDelegate, UICo
         
         let delete = UITableViewRowAction(style: .destructive, title: "Delete") { (action, indexPath) in
             // Check For Default List
-            if (defaultList.contains(where: { (list) -> Bool in
-                list.name == self.displayList[indexPath.row].name})){
+            if (defaultListNames.contains(where: { (listNames) -> Bool in
+                listNames == self.displayList[indexPath.row].name})){
                 self.alert(title: "Delete List Error", message: "Cannot Delete Default List: \(self.displayList[indexPath.row].name)")
                 return
             }
+            var list = self.displayList[indexPath.row]
             
             self.displayList.remove(at: indexPath.row)
             tableView.deleteRows(at: [indexPath], with: .fade)
+            
+            // Delete List in Database
+            Database.deleteList(uploadList: list)
+            
+            // Delete List in Current User Cache
+            CurrentUser.removeList(list: list)
+            
             print(self.displayList)
         }
         
         let edit = UITableViewRowAction(style: .default, title: "Edit") { (action, indexPath) in
             // Check For Default List
-            if (defaultList.contains(where: { (list) -> Bool in
-                list.name == self.displayList[indexPath.row].name})){
+            if (defaultListNames.contains(where: { (listNames) -> Bool in
+                listNames == self.displayList[indexPath.row].name})){
                 self.alert(title: "Edit List Error", message: "Cannot Edit Default List: \(self.displayList[indexPath.row].name)")
                 return
             }
@@ -264,6 +316,18 @@ class SharePhotoListController: UIViewController, UICollectionViewDelegate, UICo
                 self.checkListName(listName: textField?.text, completion: { (listName) in
                     self.displayList[indexPath.row].name = listName
                     self.tableView.reloadData()
+                    
+                    var list = self.displayList[indexPath.row]
+                    
+                    // Replace Database List
+                    Database.createList(uploadList: list)
+                    
+                    // Update Current User
+                    if let listIndex = CurrentUser.lists?.index(where: { (currentList) -> Bool in
+                        currentList.id == list.id
+                    }) {
+                        CurrentUser.lists![listIndex].name = listName
+                    }
                 })
             }))
             

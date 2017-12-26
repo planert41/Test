@@ -51,10 +51,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         FBSDKApplicationDelegate.sharedInstance().application(application, didFinishLaunchingWithOptions: launchOptions)
         
-        Database.fetchUserWithUsername(username: "xinahui") { (user, error) in
-            print("User : \(user)")
-            print("Error : \(error)")
-        }
+//        Database.fetchUserWithUsername(username: "xinahui") { (user, error) in
+//            print("User : \(user)")
+//            print("Error : \(error)")
+//        }
         
         return true
     }

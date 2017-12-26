@@ -181,7 +181,32 @@ class MainTabBarController: UITabBarController, UITabBarControllerDelegate, UIIm
         }
         
         setupViewControllers()
+        fetchCurrentUser()
     
+    }
+    
+    func fetchCurrentUser() {
+        
+        // uid using userID if exist, if not, uses current user, if not uses blank
+        
+        guard let uid = Auth.auth().currentUser?.uid else {
+            print("Fetch Current User: ERROR, No User UID")
+            return}
+        
+        //        1. Pull User Information (Profile Img, Name, status, ListIds, social stats)
+        //        2. Pull Lists
+        //        3. Pull Social Stat Details (Voted Post Ids, Following, Followers)
+        
+        Database.fetchUserWithUID(uid: uid) { (user) in
+            CurrentUser.user = user
+            print("Current User: \(CurrentUser.user)")
+            
+            // Fetch Lists
+            Database.fetchListForMultListIds(listUid: CurrentUser.listIds, completion: { (fetchedLists) in
+                CurrentUser.lists = fetchedLists
+                print("Current User List: \(CurrentUser.lists)")
+            })
+        }
     }
     
 

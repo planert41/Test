@@ -206,6 +206,9 @@ extension UICollectionViewController {
         
         //        guard let uid = Auth.auth().currentUser?.uid else {return}
         
+//        1. Pull User Information (Profile Img, Name, status, ListIds, social stats)
+//        2. Pull Lists
+//        3. Pull Social Stat Details (Voted Post Ids, Following, Followers)
         
         Database.fetchUserWithUID(uid: uid) { (user) in
             
