@@ -214,8 +214,40 @@ extension Database{
     
 // Create Posts Functions
     
-    static func savePostToDatabase(uploadImage: UIImage?, uploadDictionary:[String:Any]?, listIds:[String]?){
+//    Sequence
+//    1. Save Post Image: Create Image URL
+//    2. Save Post Dictionary with Image URL: create Post ID
+//    3. Save Post Location in GeoFire with Post ID
+//    4. Save Post ID to User Posts
+//    5. Create List if Needed
+//    6. Add PostId to List if Needed
+    
+    static func savePostToDatabase(uploadImage: UIImage?, uploadDictionary:[String:Any]?,uploadLocation: CLLocation?, listIds:[String]?){
         
+        guard let uid = Auth.auth().currentUser?.uid else {return}
+        guard let uploadImage = uploadImage else {
+            print("Save Post: ERROR, No Image")
+            return
+        }
+        guard let uploadDictionary = uploadDictionary else {
+            print("Save Post: ERROR, No Upload Dictionary")
+            return
+        }
+        
+        let uploadTime = uploadDictionary["creationDate"] as! Double?
+        
+        // Save Image
+        self.saveImageToDatabase(uploadImage: uploadImage) { (imageId) in
+            
+            self.savePostDictionaryToDatabase(imageUrl: imageId, uploadDictionary: uploadDictionary, completion: { (postId) in
+                
+                self.savePostLocationToFirebase(postId: postId, uploadLocation: uploadLocation)
+                self.savePostIdForUser(postId: postId, userId: uid, uploadTime: uploadTime)
+                
+                
+                
+            })
+        }
         
     }
     
@@ -228,80 +260,98 @@ extension Database{
             self.alert(title: "Upload Post Requirement", message: "Please Insert Picture")
             return}
         
-        let filename = NSUUID().uuidString
-        Storage.storage().reference().child("posts").child(filename).putData(uploadData, metadata: nil) { (metadata, err) in
+        let imageId = NSUUID().uuidString
+        Storage.storage().reference().child("posts").child(imageId).putData(uploadData, metadata: nil) { (metadata, err) in
             if let err = err {
-                print("Failed to upload post image:", err)
+                print("Save Post Image: ERROR", err)
                 return
             }
             guard let imageUrl = metadata?.downloadURL()?.absoluteString else {return}
-            print("Successfully uploaded post image:",  imageUrl)
-            completion(filename)
+            print("Save Post Image: SUCCESS:",  imageUrl)
+            // Returns ImageURL
+            completion(imageId)
         }
     }
     
-//    static func savePostDictionaryToDatabase(imageUrl: String, uploadDictionary:[String:Any]?, completion: @escaping (String) -> ()){
-//
-//        guard let uploadDictionary = uploadDictionary else {
-//            self.alert(title: "Upload Post Requirement", message: "Please Insert Post Dictionary")
-//            return
-//        }
-//        let userPostRef = Database.database().reference().child("posts")
-//        let postId = NSUUID().uuidString
-//        let ref = Database.database().reference().child("posts").child(postId)
-//        let uploadTime = Date().timeIntervalSince1970
-//        guard let uid = Auth.auth().currentUser?.uid else {return}
-//
-//        var uploadValues = uploadDictionary
-//        uploadValues["imageUrl"] = imageUrl
-//
-//        // SAVE POST IN POST DATABASE
-//
-//        ref.updateChildValues(uploadValues) { (err, ref) in
-//            if let err = err {
-//                print("Failed to save post to DB", err)
-//                return}
-//
-//            print("Successfully save post to DB")
-//            Database.spotUpdateSocialCount(creatorUid: uid, receiverUid: nil, action: "post", change: 1)
-//
+    static func savePostDictionaryToDatabase(imageUrl: String, uploadDictionary:[String:Any]?, completion: @escaping (String) -> ()){
+
+        guard let uploadDictionary = uploadDictionary else {
+            self.alert(title: "Upload Post Requirement", message: "Please Insert Post Dictionary")
+            return
+        }
+        let userPostRef = Database.database().reference().child("posts")
+        let postId = NSUUID().uuidString
+        let ref = Database.database().reference().child("posts").child(postId)
+        let uploadTime = Date().timeIntervalSince1970
+        let uploadTimeDictionary = uploadDictionary["creationDate"]
+
+        guard let uid = Auth.auth().currentUser?.uid else {return}
+
+        var uploadValues = uploadDictionary
+        uploadValues["imageUrl"] = imageUrl
+
+        // SAVE POST IN POST DATABASE
+
+        ref.updateChildValues(uploadValues) { (err, ref) in
+            if let err = err {
+                print("Save Post Dictionary: ERROR", err)
+                return}
+
+            print("Save Post Dictionary: SUCCESS")
+            
+            
+            Database.spotUpdateSocialCount(creatorUid: uid, receiverUid: nil, action: "post", change: 1)
+
 //            // Put new post in cache
-//            self.uploadnewPostCache(uid: uid,postid: ref.key, dictionary: values)
-//
-//            // SAVE USER AND POSTID IN USERPOSTS
-//
-//            let postref = ref.key
-//            let userPostRef = Database.database().reference().child("userposts").child(uid).child(postref)
-//            let values = ["creationDate": uploadTime, "tagTime": tagTime, "emoji": nonratingEmojiUpload] as [String:Any]
-//
-//            userPostRef.updateChildValues(values) { (err, ref) in
-//                if let err = err {
-//                    print("Failed to save post to user", err)
-//                    return
-//                }
-//                print("Successfully save post to user")
-//            }
-//
-//
-//            // SAVE GEOFIRE LOCATION DATA
-//            let geofireRef = Database.database().reference().child("postlocations")
-//            guard let geoFire = GeoFire(firebaseRef: geofireRef) else {return}
-//            //            let geofirekeytest = uid+","+postref
-//
-//            geoFire.setLocation(self.selectPostLocation, forKey: postref) { (error) in
-//                if (error != nil) {
-//                    print("An error occured: \(error)")
-//                } else {
-//                    print("Saved location successfully!")
-//                }
-//            }
-//
-//            self.dismiss(animated: true, completion: nil)
-//            NotificationCenter.default.post(name: SharePhotoController.updateFeedNotificationName, object: nil)
-//        }
-//
-//
-//    }
+//            self.uploadnewPostCache(uid: uid,postid: ref.key, dictionary: uploadValues)
+
+        }
+    }
+    
+    static func savePostIdForUser(postId: String?, userId: String?, uploadTime: Double?){
+        guard let postId = postId else {
+            print("Save User PostID: ERROR, No Post ID")
+            return
+        }
+        guard let userId = userId else {
+            print("Save User PostID: ERROR, No User ID")
+            return
+        }
+        guard let uploadTime = uploadTime else {
+            print("Save User PostID: ERROR, No Upload Time")
+            return
+        }
+        
+        let userPostRef = Database.database().reference().child("userposts").child(userId).child(postId)
+        let values = ["creationDate": uploadTime] as [String:Any]
+        
+        userPostRef.updateChildValues(values) { (err, ref) in
+            if let err = err {
+                print("Save User PostID: ERROR, \(postId)", err)
+                return
+            }
+            print("Save User PostID: SUCCESS, \(postId)")
+        }
+    }
+    
+    
+    static func savePostLocationToFirebase(postId: String, uploadLocation: CLLocation?){
+        guard let uploadLocation = uploadLocation else {
+            print("No Upload Location Saved to Firebase for \(postId)")
+            return
+        }
+        
+        let geofireRef = Database.database().reference().child("postlocations")
+        guard let geoFire = GeoFire(firebaseRef: geofireRef) else {return}
+        
+        geoFire.setLocation(uploadLocation, forKey: postId) { (error) in
+            if (error != nil) {
+                print("An error occured when saving Location \(uploadLocation) for Post \(postId) : \(error)")
+            } else {
+                print("Saved location successfully! for Post \(postId)")
+            }
+        }
+    }
 
     
 // Fetch Posts Functions

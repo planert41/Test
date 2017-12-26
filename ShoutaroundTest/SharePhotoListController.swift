@@ -13,6 +13,7 @@ import Firebase
 class SharePhotoListController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, UITextFieldDelegate, UITableViewDelegate, UITableViewDataSource {
     
     var uploadPostDictionary: [String: Any] = [:]
+    var uploadPostLocation: CLLocation? = nil
     var uploadPost: Post? = nil {
         didSet{
             print("Uploaded Post: ", uploadPost)
