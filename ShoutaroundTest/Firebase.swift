@@ -222,7 +222,7 @@ extension Database{
 //    5. Create List if Needed
 //    6. Add PostId to List if Needed
     
-    static func savePostToDatabase(uploadImage: UIImage?, uploadDictionary:[String:Any]?,uploadLocation: CLLocation?, listIds:[String]?){
+    static func savePostToDatabase(uploadImage: UIImage?, uploadDictionary:[String:Any]?,uploadLocation: CLLocation?, lists:[List]?, completion:@escaping () ->()){
         
         guard let uid = Auth.auth().currentUser?.uid else {return}
         guard let uploadImage = uploadImage else {
@@ -237,15 +237,22 @@ extension Database{
         let uploadTime = uploadDictionary["creationDate"] as! Double?
         
         // Save Image
-        self.saveImageToDatabase(uploadImage: uploadImage) { (imageId) in
+        self.saveImageToDatabase(uploadImage: uploadImage) { (imageUrl) in
             
-            self.savePostDictionaryToDatabase(imageUrl: imageId, uploadDictionary: uploadDictionary, completion: { (postId) in
+            self.savePostDictionaryToDatabase(imageUrl: imageUrl, uploadDictionary: uploadDictionary, completion: { (postId) in
                 
                 self.savePostLocationToFirebase(postId: postId, uploadLocation: uploadLocation)
                 self.savePostIdForUser(postId: postId, userId: uid, uploadTime: uploadTime)
-                
-                
-                
+                guard let lists = lists else {
+                    print("Save Post to List: NO LIST For \(postId)")
+                    return
+                }
+                if lists.count > 0 {
+                    for list in lists {
+                        self.addPostForList(postId: postId, listId: list.id)
+                    }
+                }
+                completion()
             })
         }
         
@@ -269,7 +276,7 @@ extension Database{
             guard let imageUrl = metadata?.downloadURL()?.absoluteString else {return}
             print("Save Post Image: SUCCESS:",  imageUrl)
             // Returns ImageURL
-            completion(imageId)
+            completion(imageUrl)
         }
     }
     
@@ -298,10 +305,8 @@ extension Database{
                 return}
 
             print("Save Post Dictionary: SUCCESS")
-            
-            
-            Database.spotUpdateSocialCount(creatorUid: uid, receiverUid: nil, action: "post", change: 1)
-
+            Database.spotUpdateSocialCount(creatorUid: uid, receiverUid: uid, action: "post", change: 1)
+            completion(postId)
 //            // Put new post in cache
 //            self.uploadnewPostCache(uid: uid,postid: ref.key, dictionary: uploadValues)
 
@@ -1038,12 +1043,10 @@ extension Database{
             return
         }
         
-        if defaultListNames.contains(uploadList.name) {
-            print("Creating Default List Name Error")
-            return
-        }
-        
         guard let listId = uploadList.id else {return}
+        
+        // Update New List in Current User Cache
+        CurrentUser.addList(list: uploadList)
         
         // Create List Object
         
@@ -1055,22 +1058,21 @@ extension Database{
         
         listRef.updateChildValues(values) { (err, ref) in
             if let err = err {
-                print("Create List Object: ERROR: \(listId)", err)
+                print("Create List Object: ERROR: \(listId):\(listName)", err)
                 return
             }
-            
-            print("Create List Object: Success: \(listId)")
+            print("Create List Object: Success: \(listId):\(listName)")
             
         // Create List Id in User
             let userRef = Database.database().reference().child("users").child(uid).child("lists")
             let values = [listId: createdDate] as [String:Any]
             userRef.updateChildValues(values) { (err, ref) in
                 if let err = err {
-                    print("Create List ID with User: ERROR: \(listId), User: \(uid)", err)
+                    print("Create List ID with User: ERROR: \(listId):\(listName), User: \(uid)", err)
                     return
                 }
             
-                print("Create List ID with User: SUCCESS: \(listId), User: \(uid)")
+                print("Create List ID with User: SUCCESS: \(listId):\(listName), User: \(uid)")
             }
         }
     }
@@ -1087,29 +1089,49 @@ extension Database{
             print("Delete Default List Name Error")
             return
         }
+        
+        // Delete List in Current User Cache
+        CurrentUser.removeList(list: uploadList)
+    
+        Database.database().reference().child("lists").child(listId).removeValue()
+        print("Delete List Oject: Success \(uploadList.name)")
+        
         Database.database().reference().child("users").child(uid).child("lists").child(listId).removeValue()
-        print("List Name: \(uploadList.name) is deleted")
+        print("Delete List Oject: Success: \(uploadList.name), User: \(uid)")
+        
     }
     
-    static func addPostForList(postId: String, uploadList: List){
+    static func addPostForList(postId: String, listId: String?){
         guard let uid = Auth.auth().currentUser?.uid else {return}
-        guard let listId = uploadList.id else {
+        guard let listId = listId else {
             print("Add Post to List: ERROR, No List ID")
             return
         }
         
         let createdDate = Date().timeIntervalSince1970
+        let listRef = Database.database().reference().child("lists").child(listId).child("posts")
         
-        let listRef = Database.database().reference().child("users").child(uid).child("lists").child(listId).child("posts")
+        let userListRef = Database.database().reference().child("users").child(uid).child("lists").child(listId).child("posts")
         let values = [postId: createdDate] as [String:Any]
         
+        // Add Post to List
         listRef.updateChildValues(values) { (err, ref) in
             if let err = err {
-                print("Failed to save post \(postId) to List \(listId) for user", err)
+                print("Failed to save post \(postId) to List \(listId)", err)
                 return
             }
-            print("Successfully save post \(postId) to List \(listId) for user")
+            print("Successfully save post \(postId) to List \(listId)")
         }
+        
+//        // Add Post Id to List
+//        userListRef.updateChildValues(values) { (err, ref) in
+//            if let err = err {
+//                print("Failed to save post \(postId) to List \(listId) for user", err)
+//                return
+//            }
+//            print("Successfully save post \(postId) to List \(listId) for user")
+//        }
+        
     }
     
     static func DeletePostForList(postId: String, uploadList: List){
@@ -1117,7 +1139,8 @@ extension Database{
         guard let listId = uploadList.id else {
             print("Delete Post in List: ERROR, No List ID")
             return}
-    Database.database().reference().child("users").child(uid).child("lists").child(listId).child("posts").child(postId).removeValue()
+        Database.database().reference().child("lists").child(listId).child("posts").child(postId).removeValue()
+        print("Delete PostId: Success : \(postId) from ListId: \(listId)")
     }
     
     static func fetchListForMultListIds(listUid: [String]?, completion: @escaping ([List]) -> ()){

@@ -20,12 +20,10 @@ struct List {
     var creatorUID: String?
 
     init(id: String?, name: String){
-        guard let uid = Auth.auth().currentUser?.uid else {return}
-        
         self.id = id
         self.name = name
         self.creationDate = Date()
-        self.creatorUID = uid
+        self.creatorUID = Auth.auth().currentUser?.uid
     }
     
     init(id: String?, dictionary: [String: Any]){

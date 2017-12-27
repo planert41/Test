@@ -68,7 +68,7 @@ struct CurrentUser {
     static var followerUids: [String] = []
     static var groupUids: [String] = []
     
-    static var lists: [List]? = []
+    static var lists: [List] = []
     //static var currentLocation: CLLocation? = CLLocation(latitude: 41.9735039, longitude: -87.66775139999999)
     
     static var user: User? {
@@ -86,7 +86,7 @@ struct CurrentUser {
             return
         }
         self.listIds.append(listId)
-        self.lists?.append(list)
+        self.lists.append(list)
     }
     
     static func removeList(list: List){

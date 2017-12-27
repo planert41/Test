@@ -232,7 +232,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         
 //        self.automaticallyAdjustsScrollViewInsets = false
         
-        NotificationCenter.default.addObserver(self, selector: #selector(handleUpdateFeed), name: SharePhotoController.updateFeedNotificationName, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(handleUpdateFeed), name: SharePhotoListController.updateFeedNotificationName, object: nil)
         
         NotificationCenter.default.addObserver(self, selector: #selector(handleUpdateFeedWithFilter), name: FilterController.updateFeedWithFilterNotificationName, object: nil)
         

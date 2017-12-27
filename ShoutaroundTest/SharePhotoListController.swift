@@ -26,7 +26,7 @@ class SharePhotoListController: UIViewController, UICollectionViewDelegate, UICo
     var bookmarkList: List = emptyBookmarkList
     var legitList: List = emptyLegitList
     var displayList: [List] = []
-    var selectedList: [List] {
+    var selectedList: [List]? {
         return displayList.filter { return $0.isSelected }
     }
     
@@ -85,11 +85,6 @@ class SharePhotoListController: UIViewController, UICollectionViewDelegate, UICo
             // Create New List in Database
             Database.createList(uploadList: newList)
             
-            // Update New List in Current User Cache
-            CurrentUser.addList(list: newList)
-
-            
-            
             self.displayList.append(newList)
             self.tableView.reloadData()
             self.addListTextField.text?.removeAll()
@@ -132,12 +127,14 @@ class SharePhotoListController: UIViewController, UICollectionViewDelegate, UICo
         return tv
     }()
     
+    static let updateFeedNotificationName = NSNotification.Name(rawValue: "UpdateFeed")
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = UIColor.white
         
         // Setup Navigation
-        navigationController?.title = "Add To List"
+        navigationItem.title = "Add To List"
         navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Share", style: .plain, target: self, action: #selector(handleShare))
         
         
@@ -164,30 +161,47 @@ class SharePhotoListController: UIViewController, UICollectionViewDelegate, UICo
         tableView.anchor(top: addListView.bottomAnchor, left: view.leftAnchor, bottom: view.bottomAnchor, right: view.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
         
         setupLists()
-        
-        
     }
     
     func setupLists(){
         // Check for Bookmark List first
-        var tempList: List? = nil
+        guard let uid = Auth.auth().currentUser?.uid else {return}
         
-        if let tempList = userList?.first(where:{$0.name == "Bookmarks"}) {
-            bookmarkList = tempList
-            userList?.remove(at: (userList?.index(where:{$0.name == "Bookmarks"}))!)
-        } 
+        if let tempBookmarkList = userList?.first(where:{$0.name == "Bookmarks"}) {
+            bookmarkList = tempBookmarkList
+        } else {
+            // Create Bookmark List
+            let listId = NSUUID().uuidString
+            print("No Bookmark List, Creating Bookmark List: \(listId), User: \(uid)")
+            bookmarkList.id = listId
+            Database.createList(uploadList: bookmarkList)
+        }
         displayList.append(bookmarkList)
         
         
-        if let tempList = userList?.first(where:{$0.name == "Legit"}) {
-            legitList = tempList
-            userList?.remove(at: (userList?.index(where:{$0.name == "Legit"}))!)
+        if let tempLegitList = userList?.first(where:{$0.name == "Legit"}) {
+            legitList = tempLegitList
+        } else {
+            // Create Legit List
+            let listId = NSUUID().uuidString
+            print("No Legit List, Creating Legit List: \(listId), User: \(uid)")
+            legitList.id = listId
+            Database.createList(uploadList: legitList)
         }
+        
         displayList.append(legitList)
         
         // Add remaining list to Display List. List is sorted by creation date when pulling
         
         if userList?.count != 0 {
+            if let bookmarkIndex = (userList?.index(where:{$0.name == "Bookmarks"})) {
+                userList?.remove(at: bookmarkIndex)
+            }
+            
+            if let legitIndex = (userList?.index(where:{$0.name == "Legit"})) {
+                userList?.remove(at: legitIndex)
+            }
+            
             displayList = displayList + userList!
         }
 
@@ -197,14 +211,23 @@ class SharePhotoListController: UIViewController, UICollectionViewDelegate, UICo
     }
     
     func handleShare(){
-        // Create List if List did not exist
-        for list in self.selectedList {
-            if list.id == nil {
-                Database.createList(uploadList: list)
+        
+        if self.selectedList != nil {
+            // Add list id to post dictionary for display
+            var listIds: [String]? = []
+            
+            for list in self.selectedList! {
+                listIds?.append(list.id!)
             }
+            uploadPostDictionary["lists"] = listIds
         }
         
-        print(self.selectedList)
+        Database.savePostToDatabase(uploadImage: uploadPost?.image, uploadDictionary: uploadPostDictionary, uploadLocation: uploadPostLocation, lists: self.selectedList){
+         
+            self.dismiss(animated: true, completion: nil)
+            NotificationCenter.default.post(name: SharePhotoListController.updateFeedNotificationName, object: nil)
+            
+        }
     }
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
@@ -282,9 +305,6 @@ class SharePhotoListController: UIViewController, UICollectionViewDelegate, UICo
             // Delete List in Database
             Database.deleteList(uploadList: list)
             
-            // Delete List in Current User Cache
-            CurrentUser.removeList(list: list)
-            
             print(self.displayList)
         }
         
@@ -323,10 +343,10 @@ class SharePhotoListController: UIViewController, UICollectionViewDelegate, UICo
                     Database.createList(uploadList: list)
                     
                     // Update Current User
-                    if let listIndex = CurrentUser.lists?.index(where: { (currentList) -> Bool in
+                    if let listIndex = CurrentUser.lists.index(where: { (currentList) -> Bool in
                         currentList.id == list.id
                     }) {
-                        CurrentUser.lists![listIndex].name = listName
+                        CurrentUser.lists[listIndex].name = listName
                     }
                 })
             }))
