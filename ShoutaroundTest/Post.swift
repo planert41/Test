@@ -81,11 +81,13 @@ struct Post {
     
 
     var creatorUID: String?
+    var creatorListId: [String]?
     var ratingEmoji: String?
     var emoji: String
     var nonRatingEmoji: [String]
     var nonRatingEmojiTags: [String]
     
+    var rating: Double?
     var price: String?
     var type: String?
     
@@ -108,7 +110,8 @@ struct Post {
         // ?? "" gives default value
         self.imageUrl = dictionary["imageUrl"] as? String ?? ""
         self.caption = dictionary["caption"] as? String ?? ""
-
+        
+        self.rating = dictionary["rating"] as? Double ?? 0
         self.ratingEmoji = dictionary["ratingEmoji"] as? String ?? ""
         self.nonRatingEmoji = dictionary["nonratingEmoji"] as? [String] ?? []
         self.nonRatingEmojiTags = dictionary["nonratingEmojiTags"] as? [String] ?? []
@@ -123,6 +126,7 @@ struct Post {
         self.locationAdress = dictionary["locationAdress"] as? String ?? ""
         self.locationGooglePlaceID = dictionary["googlePlaceID"] as? String ?? ""
         self.creatorUID = dictionary["creatorUID"] as? String ?? ""
+        self.creatorListId = dictionary["lists"] as? [String] ?? []
         
         self.likeCount = dictionary["likeCount"] as? Int ?? 0
         self.bookmarkCount = dictionary["bookmarkCount"] as? Int ?? 0

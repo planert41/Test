@@ -382,7 +382,7 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         let uv = UIView()
         let locationTapGesture = UITapGestureRecognizer(target: self, action: #selector(locationTap))
         uv.addGestureRecognizer(locationTapGesture)
-        uv.isUserInteractionEnabled = true
+//        uv.isUserInteractionEnabled = true
         return uv
     }()
     
@@ -453,6 +453,7 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
     func handleOptions() {
         
         guard let post = post else {return}
+        print("Options Button Pressed")
         delegate?.userOptionPost(post: post)
 
     }
@@ -552,8 +553,8 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         
         adressLabel.anchor(top: locationLabel.bottomAnchor, left: leftAnchor, bottom: locationView.bottomAnchor, right: optionsButton.leftAnchor, paddingTop: 2, paddingLeft: 15, paddingBottom: 5, paddingRight: 0, width: 0, height: 0)
         
-        addSubview(locationButton)
-        locationButton.anchor(top: locationView.topAnchor, left: locationView.leftAnchor, bottom: locationView.bottomAnchor, right: locationView.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
+//        addSubview(locationButton)
+//        locationButton.anchor(top: locationView.topAnchor, left: locationView.leftAnchor, bottom: locationView.bottomAnchor, right: locationView.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
         
 
         

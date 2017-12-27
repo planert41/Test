@@ -164,7 +164,7 @@ class PictureController: UICollectionViewController, HomePostCellDelegate, UICol
         let editPost = SharePhotoController()
         
         // Post Edit Inputs
-        editPost.editPost = true
+        editPost.editPostInd = true
         editPost.editPostImageUrl = post.imageUrl
         editPost.editPostId = post.id
         

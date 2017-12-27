@@ -1023,20 +1023,8 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         let editPost = SharePhotoController()
         
         // Post Edit Inputs
-        editPost.editPost = true
-        editPost.editPostImageUrl = post.imageUrl
-        editPost.editPostId = post.id
-        
-        // Post Details
-        editPost.selectPostGooglePlaceID = post.locationGooglePlaceID
-        editPost.selectedImageLocation = post.locationGPS
-        editPost.selectPostLocation = post.locationGPS
-        editPost.selectPostLocationName = post.locationName
-        editPost.selectPostLocationAdress = post.locationAdress
-        editPost.selectTime = post.tagTime
-        editPost.nonRatingEmoji = post.nonRatingEmoji
-        editPost.nonRatingEmojiTags = post.nonRatingEmojiTags
-        editPost.captionTextView.text = post.caption
+        editPost.editPostInd = true
+        editPost.editPost = post
         
         let navController = UINavigationController(rootViewController: editPost)
         self.present(navController, animated: false, completion: nil)

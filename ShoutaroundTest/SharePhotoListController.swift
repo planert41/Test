@@ -13,11 +13,16 @@ import CoreLocation
 
 class SharePhotoListController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, UITextFieldDelegate, UITableViewDelegate, UITableViewDataSource {
     
+    var editPostInd: Bool = false
+    var editPrevList: [String]? = []
+    
     var uploadPostDictionary: [String: Any] = [:]
     var uploadPostLocation: CLLocation? = nil
     var uploadPost: Post? = nil {
         didSet{
-            print("Uploaded Post: ", uploadPost)
+            if uploadPost?.creatorListId?.count != 0 {
+                self.editPrevList = uploadPost?.creatorListId
+            }
             collectionView.reloadData()
         }
     }
@@ -206,6 +211,20 @@ class SharePhotoListController: UIViewController, UICollectionViewDelegate, UICo
         }
 
         print(displayList)
+        
+        // Highlight Selected List if In Editing Post
+        if self.editPostInd {
+            if uploadPost?.creatorListId?.count != 0 {
+                for listId in (uploadPost?.creatorListId)!{
+                    if let index = displayList.index(where: { (list) -> Bool in
+                        return list.id == listId
+                    }) {
+                        displayList[index].isSelected = true
+                    }
+                }
+            }
+        }
+        
         self.tableView.reloadData()
         
     }

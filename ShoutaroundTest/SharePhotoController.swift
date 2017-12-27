@@ -53,10 +53,10 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         didSet{
             selectPostLocation = selectedImageLocation
             // Updates Adress and Finds Restaurants near location
-            if selectPostLocation != nil && (selectPostLocation?.coordinate.latitude != 0) && (selectPostLocation?.coordinate.longitude != 0){
-                googleReverseGPS(GPSLocation: selectPostLocation!)
-                googleLocationSearch(GPSLocation: selectPostLocation!)
-            }
+//            if selectPostLocation != nil && (selectPostLocation?.coordinate.latitude != 0) && (selectPostLocation?.coordinate.longitude != 0){
+//                googleReverseGPS(GPSLocation: selectPostLocation!)
+//                googleLocationSearch(GPSLocation: selectPostLocation!)
+//            }
         }
     }
     
@@ -76,7 +76,49 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
     
     // Editing Post Information
     
-    var editPost: Bool = false
+    var editPostInd: Bool = false
+    var editPost: Post? = nil {
+        didSet{
+            // Upload Name Adress that matches inputs
+            guard let uid = Auth.auth().currentUser?.uid else {return}
+            
+            self.editPostImageUrl = editPost?.imageUrl
+            
+            // Post Location Details
+            self.selectPostLocation = editPost?.locationGPS
+            self.googleLocationSearch(GPSLocation: self.selectPostLocation)
+            self.selectPostLocationName = editPost?.locationName
+            self.selectPostLocationAdress = editPost?.locationAdress
+            self.selectPostGooglePlaceID = editPost?.locationGooglePlaceID
+            
+            // Caption
+            if editPost?.caption == "" {
+                self.captionTextView.text = captionDefault
+            } else {
+            self.captionTextView.text = editPost?.caption
+            }
+            
+            // rating
+            self.selectPostStarRating = editPost?.rating ?? 0
+            
+            // Emojis
+            self.nonRatingEmoji = (editPost?.nonRatingEmoji)!
+            self.nonRatingEmojiTags = (editPost?.nonRatingEmojiTags)!
+            
+            let uploadTime = Date().timeIntervalSince1970
+            
+            self.selectPostPrice = editPost?.price
+            if self.selectPostPrice != nil {
+                self.postPriceSegment.selectedSegmentIndex = UploadPostPriceDefault.index(of: selectPostPrice!)!
+            }
+            
+            self.selectPostType = editPost?.type
+            if self.selectPostType != nil {
+                self.postTypeSegment.selectedSegmentIndex = UploadPostTypeDefault.index(of: selectPostType!)!
+            }
+            
+        }
+    }
     
     var editPostImageUrl: String? = nil {
         didSet{
@@ -414,7 +456,11 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         
         //        view.backgroundColor = UIColor.white
         view.backgroundColor = UIColor.rgb(red: 204, green: 238, blue: 255)
-        navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Next", style: .plain, target: self, action: #selector(handleNext))
+        if self.editPostInd {
+            navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Edit", style: .plain, target: self, action: #selector(handleNext))
+        } else {
+            navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Next", style: .plain, target: self, action: #selector(handleNext))
+        }
         
         navigationItem.leftBarButtonItem = UIBarButtonItem(title: "Back", style: .plain, target: self, action: #selector(handleBack))
         
@@ -1526,6 +1572,10 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         var uploadedlocationGPSLongitude: String?
         var uploadedLocationGPS: String?
         
+        var uploadedImageLocationGPSLatitude: String?
+        var uploadedImageLocationGPSLongitude: String?
+        var uploadedImageLocationGPS: String?
+        
         if selectPostLocation == nil {
             uploadedLocationGPSLatitude = "0"
             uploadedlocationGPSLongitude = "0"
@@ -1534,6 +1584,14 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
             uploadedLocationGPSLatitude = String(format: "%f", (selectPostLocation?.coordinate.latitude)!)
             uploadedlocationGPSLongitude = String(format: "%f", (selectPostLocation?.coordinate.longitude)!)
             uploadedLocationGPS = uploadedLocationGPSLatitude! + "," + uploadedlocationGPSLongitude!
+        }
+        
+        if selectedImageLocation == nil {
+            uploadedImageLocationGPS = nil
+        } else {
+             uploadedImageLocationGPSLatitude = String(format: "%f", (selectedImageLocation?.coordinate.latitude)!)
+             uploadedImageLocationGPSLongitude = String(format: "%f", (selectedImageLocation?.coordinate.longitude)!)
+             uploadedImageLocationGPS = uploadedLocationGPSLatitude! + "," + uploadedlocationGPSLongitude!
         }
         
         // Caption
@@ -1551,7 +1609,13 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         let price = self.selectPostPrice ?? nil
         let type = self.selectPostType ?? nil
         
-        let values = ["caption": caption,"rating": rating, "nonratingEmoji": nonratingEmojiUpload, "nonratingEmojiTags": nonratingEmojiTagsUpload, "imageWidth": postImage.size.width, "imageHeight": postImage.size.height, "creationDate": uploadTime, "googlePlaceID": googlePlaceID, "locationName": postLocationName, "locationAdress": postLocationAdress, "postLocationGPS": uploadedLocationGPS, "creatorUID": uid, "price": price, "type": type] as [String:Any]
+        // Previous List for Editing
+        var listId = nil as [String]?
+        if self.editPostInd {
+            listId = editPost?.creatorListId
+        }
+        
+        let values = ["caption": caption,"rating": rating, "nonratingEmoji": nonratingEmojiUpload, "nonratingEmojiTags": nonratingEmojiTagsUpload, "imageWidth": postImage.size.width, "imageHeight": postImage.size.height, "creationDate": uploadTime, "googlePlaceID": googlePlaceID, "locationName": postLocationName, "locationAdress": postLocationAdress, "postLocationGPS": uploadedLocationGPS, "imageLocationGPS": uploadedImageLocationGPS, "creatorUID": uid, "price": price, "type": type, "lists": listId] as [String:Any]
         print(values)
         
         // Upload Post to List Controller
@@ -1565,6 +1629,7 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         sharePhotoListController.uploadPostDictionary = values
         sharePhotoListController.userList = CurrentUser.lists
         sharePhotoListController.uploadPostLocation = self.selectPostLocation
+        sharePhotoListController.editPostInd = self.editPostInd
         navigationController?.pushViewController(sharePhotoListController, animated: true)
     }
     
@@ -1586,7 +1651,7 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
             self.alert(title: "Upload Post Requirement", message: "Please Tag Location")
             return}
         
-        if editPost{
+        if editPostInd{
             // Editing Post
             guard let postId = self.editPostId else {return}
             guard let imageUrl = self.editPostImageUrl else {return}
@@ -1897,7 +1962,18 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
     
     // GOOGLE PLACES QUERY
     
-    func googleReverseGPS(GPSLocation: CLLocation){
+    func googleReverseGPS(GPSLocation: CLLocation?){
+        
+        guard let GPSLocation = GPSLocation else {
+            print("Google Reverse GPS: ERROR, No GPS Location")
+            return
+        }
+        
+        if (GPSLocation.coordinate.latitude == 0) && (GPSLocation.coordinate.longitude == 0){
+            print("Google Reverse GPS: ERROR, No GPS Location")
+            return
+        }
+        
         let URL_Search = "https://maps.googleapis.com/maps/api/geocode/json?"
         let API_iOSKey = GoogleAPIKey()
         
@@ -1927,7 +2003,17 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
     }
     
     
-    func googleLocationSearch(GPSLocation: CLLocation){
+    func googleLocationSearch(GPSLocation: CLLocation?){
+        
+        guard let GPSLocation = GPSLocation else {
+            print("Google Place Query: ERROR, No GPS Location")
+            return
+        }
+        
+        if (GPSLocation.coordinate.latitude == 0) && (GPSLocation.coordinate.longitude == 0){
+            print("Google Place Query: ERROR, No GPS Location")
+            return
+        }
         
         let dataProvider = GoogleDataProvider()
         let searchRadius: Double = 100

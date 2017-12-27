@@ -237,6 +237,13 @@ class PhotoSelectorController: UICollectionViewController, UICollectionViewDeleg
         let sharePhotoController = SharePhotoController()
         sharePhotoController.selectedImage = header?.photoImageView.image
         sharePhotoController.selectedImageLocation  = selectedPhotoLocation
+        
+        // Search Locations for New Location
+        if selectedPhotoLocation != nil && (selectedPhotoLocation?.coordinate.latitude != 0) && (selectedPhotoLocation?.coordinate.longitude != 0){
+            sharePhotoController.googleReverseGPS(GPSLocation: sharePhotoController.selectedImageLocation!)
+            sharePhotoController.googleLocationSearch(GPSLocation: sharePhotoController.selectedImageLocation!)
+        }
+        
         navigationController?.pushViewController(sharePhotoController, animated: true)
         
         
