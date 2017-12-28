@@ -1616,13 +1616,19 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         }
         
         let values = ["caption": caption,"rating": rating, "nonratingEmoji": nonratingEmojiUpload, "nonratingEmojiTags": nonratingEmojiTagsUpload, "imageWidth": postImage.size.width, "imageHeight": postImage.size.height, "creationDate": uploadTime, "googlePlaceID": googlePlaceID, "locationName": postLocationName, "locationAdress": postLocationAdress, "postLocationGPS": uploadedLocationGPS, "imageLocationGPS": uploadedImageLocationGPS, "creatorUID": uid, "price": price, "type": type, "lists": listId] as [String:Any]
-        print(values)
+        print("Uploaded Post Dictionary: \(values)")
         
         // Upload Post to List Controller
         
         var uploadPost = Post.init(user: CurrentUser.user!, dictionary: values)
         uploadPost.image = postImage
-        uploadPost.id = NSUUID().uuidString
+        if self.editPostInd {
+            // Use Current Image URL and post id
+            uploadPost.imageUrl = (editPost?.imageUrl)!
+            uploadPost.id = editPost?.id
+        } else {
+            uploadPost.id = NSUUID().uuidString
+        }
         
         let sharePhotoListController = SharePhotoListController()
         sharePhotoListController.uploadPost = uploadPost

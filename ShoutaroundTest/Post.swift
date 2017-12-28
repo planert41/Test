@@ -67,7 +67,7 @@ struct PostId {
 struct Post {
     
     var image: UIImage?
-    let imageUrl: String
+    var imageUrl: String
     let user: User
     let caption: String
     let creationDate: Date

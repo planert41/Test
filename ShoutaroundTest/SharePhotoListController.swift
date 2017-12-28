@@ -140,7 +140,11 @@ class SharePhotoListController: UIViewController, UICollectionViewDelegate, UICo
         
         // Setup Navigation
         navigationItem.title = "Add To List"
+        if self.editPostInd{
+        navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Edit", style: .plain, target: self, action: #selector(handleEdit))
+        } else {
         navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Share", style: .plain, target: self, action: #selector(handleShare))
+        }
         
         
         // Setup CollectionView for Post
@@ -210,7 +214,6 @@ class SharePhotoListController: UIViewController, UICollectionViewDelegate, UICo
             displayList = displayList + userList!
         }
 
-        print(displayList)
         
         // Highlight Selected List if In Editing Post
         if self.editPostInd {
@@ -230,7 +233,7 @@ class SharePhotoListController: UIViewController, UICollectionViewDelegate, UICo
     }
     
     func handleShare(){
-        
+        print("Selected List: \(self.selectedList)")
         if self.selectedList != nil {
             // Add list id to post dictionary for display
             var listIds: [String]? = []
@@ -243,6 +246,36 @@ class SharePhotoListController: UIViewController, UICollectionViewDelegate, UICo
         
         Database.savePostToDatabase(uploadImage: uploadPost?.image, uploadDictionary: uploadPostDictionary, uploadLocation: uploadPostLocation, lists: self.selectedList){
          
+            self.dismiss(animated: true, completion: nil)
+            NotificationCenter.default.post(name: SharePhotoListController.updateFeedNotificationName, object: nil)
+            
+        }
+    }
+    
+    func handleEdit(){
+        print("Selected List: \(self.selectedList)")
+        if self.selectedList != nil {
+            // Add list id to post dictionary for display
+            var listIds: [String]? = []
+            
+            for list in self.selectedList! {
+                listIds?.append(list.id!)
+            }
+            uploadPostDictionary["lists"] = listIds
+        }
+        
+        guard let postId = uploadPost?.id else {
+            print("Edit Post: ERROR, No Post ID")
+            return
+        }
+        
+        guard let imageUrl = uploadPost?.imageUrl else {
+            print("Edit Post: ERROR, No Image URL")
+            return
+        }
+        
+        Database.editPostToDatabase(imageUrl: imageUrl, postId: postId, uploadDictionary: uploadPostDictionary, uploadLocation: uploadPostLocation, prevList: editPrevList) {
+            
             self.dismiss(animated: true, completion: nil)
             NotificationCenter.default.post(name: SharePhotoListController.updateFeedNotificationName, object: nil)
             
@@ -324,7 +357,6 @@ class SharePhotoListController: UIViewController, UICollectionViewDelegate, UICo
             // Delete List in Database
             Database.deleteList(uploadList: list)
             
-            print(self.displayList)
         }
         
         let edit = UITableViewRowAction(style: .default, title: "Edit") { (action, indexPath) in

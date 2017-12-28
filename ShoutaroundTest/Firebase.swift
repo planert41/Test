@@ -358,14 +358,24 @@ extension Database{
     }
 
 // Edit Posts Function
-    static func editPostToDatabase(postId: String?, uploadDictionary:[String:Any]?,uploadLocation: CLLocation?, lists:[List]?, completion:@escaping () ->()){
+    static func editPostToDatabase(imageUrl: String?, postId: String?, uploadDictionary:[String:Any]?,uploadLocation: CLLocation?, prevList:[String]?, completion:@escaping () ->()){
     
         //    1. Update Post Dictionary
         //    2. Update Post Geofire Location
         //    3. Create List if Needed
         //    4. Add PostId to List if Needed
         
+        guard let imageUrl = imageUrl else {
+            print("Update Post: ERROR, No Image URL")
+            return
+        }
+        
         guard let postId = postId else {
+            print("Update Post: ERROR, No Post ID")
+            return
+        }
+        
+        guard let uploadDictionary = uploadDictionary else {
             print("Update Post: ERROR, No Post ID")
             return
         }
@@ -374,9 +384,10 @@ extension Database{
         guard let uid = Auth.auth().currentUser?.uid else {return}
         
         var uploadValues = uploadDictionary
-        
+        uploadValues["imageUrl"] = imageUrl
+
         // SAVE EDITED POST IN POST DATABASE
-        userPostRef.updateChildValues(uploadValues!) { (err, ref) in
+        userPostRef.updateChildValues(uploadValues) { (err, ref) in
             if let err = err {
                 print("Update Post Dictionary: ERROR: \(postId)", err)
                 return}
@@ -388,20 +399,41 @@ extension Database{
         savePostLocationToFirebase(postId: postId, uploadLocation: uploadLocation)
         
         // UPDATE LISTS
-//        guard let lists = lists else {
-//            print("Save Post to List: NO LIST For \(postId)")
-//            return
-//        }
-//        
-//        if lists.count > 0 {
-//            for list in lists {
-//                self.addPostForList(postId: postId, listId: list.id)
-//            }
-//        }
-//        completion()
-//        
+        
+        // Find Deleted List
+        let currentList = uploadValues["lists"] as! [String] ?? []
+        let previousList = prevList as! [String] ?? []
+        var deletedList: [String] = []
+        var addedList: [String] = []
+        
+        for list in previousList {
+            if currentList.contains(list) {
+                // Is in current list ignore
+            } else {
+                deletedList.append(list)
+            }
+        }
         
         
+        for list in currentList {
+            if previousList.contains(list){
+                // Is in previous list ignore
+            } else {
+                addedList.append(list)
+            }
+        }
+        
+        for list in deletedList {
+            Database.DeletePostForList(postId: postId, listId: list)
+        }
+        
+        for list in addedList {
+            Database.addPostForList(postId: postId, listId: list)
+        }
+        
+        // Replace Post Cache
+        postCache[postId] = Post.init(user: CurrentUser.user!, dictionary: uploadValues)
+        completion()
     
     }
     
@@ -1180,9 +1212,9 @@ extension Database{
         
     }
     
-    static func DeletePostForList(postId: String, uploadList: List){
+    static func DeletePostForList(postId: String, listId: String?){
         guard let uid = Auth.auth().currentUser?.uid else {return}
-        guard let listId = uploadList.id else {
+        guard let listId = listId else {
             print("Delete Post in List: ERROR, No List ID")
             return}
         Database.database().reference().child("lists").child(listId).child("posts").child(postId).removeValue()
