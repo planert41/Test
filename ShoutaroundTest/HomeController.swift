@@ -19,6 +19,25 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     let cellId = "cellId"
     var scrolltoFirst: Bool = false
     
+//    1. Fetch All Post Ids to fetchedPostIds
+//    2. Fetch All Posts to fetchedPosts
+//    3. Filter Posts based on Conditions/Sorting to displayedPosts
+//    4. Control Pagination by increasing count of posts to max
+    
+    
+    var fetchedPostIds: [PostId] = [] {
+        didSet{
+        }
+    }
+    
+    var fetchedPosts: [Post] = [] {
+        didSet{
+            
+        }
+    }
+    
+    var displayedPostsCount: Int = 0
+    
     var displayedPosts = [Post](){
         didSet{
             if displayedPosts.count == 0 {
@@ -40,10 +59,8 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         }
     }
 
-    var fetchedPostIds: [PostId] = [] {
-        didSet{
-        }
-    }
+// Header Sort Variables
+    var currentHeaderSort = HeaderSortDefault
     
     
 // Geo Filter Variables
@@ -88,6 +105,8 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
             setupNavigationItems()
         }
     }
+    
+    
     
     var filterSort: String = defaultSort
     var filterTime: String = defaultTime{
@@ -231,21 +250,25 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         self.navigationController?.navigationBar.backgroundColor = UIColor.clear
         
 //        self.automaticallyAdjustsScrollViewInsets = false
+
+        NotificationCenter.default.addObserver(self, selector: #selector(finishFetchingPostIds), name: HomeController.finishFetchingUserPostIdsNotificationName, object: nil)
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(finishFetchingPostIds), name: HomeController.finishFetchingFollowingPostIdsNotificationName, object: nil)
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(finishPaginationCheck), name: HomeController.finishPaginationNotificationName, object: nil)
+        
         
         NotificationCenter.default.addObserver(self, selector: #selector(handleUpdateFeed), name: SharePhotoListController.updateFeedNotificationName, object: nil)
         
         NotificationCenter.default.addObserver(self, selector: #selector(handleUpdateFeedWithFilter), name: FilterController.updateFeedWithFilterNotificationName, object: nil)
         
-        NotificationCenter.default.addObserver(self, selector: #selector(finishFetchingPosts), name: HomeController.finishFetchingUserPostIdsNotificationName, object: nil)
-        
-        NotificationCenter.default.addObserver(self, selector: #selector(finishFetchingPosts), name: HomeController.finishFetchingFollowingPostIdsNotificationName, object: nil)
-        
-        NotificationCenter.default.addObserver(self, selector: #selector(finishPaginationCheck), name: HomeController.finishPaginationNotificationName, object: nil)
 
         view.addSubview(noResultsLabel)
         noResultsLabel.anchor(top: topLayoutGuide.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 50)
         collectionView?.backgroundColor = .white
         collectionView?.register(HomePostCell.self, forCellWithReuseIdentifier: cellId)
+        
+        collectionView?.register(SortFilterHeader.self, forSupplementaryViewOfKind: UICollectionElementKindSectionHeader, withReuseIdentifier: "headerId")
         
         let refreshControl = UIRefreshControl()
         refreshControl.addTarget(self, action: #selector(handleRefresh), for: .valueChanged)
@@ -266,12 +289,16 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         }
 
 
-// Fetch Post Informations
+// 1. Clear out all Filters and Pagination Variables
         
         self.clearFilter()
         self.refreshPagination()
+
+// 2. Fetch All Relevant Post Ids, then pull in all Post information to fetchedPosts
+        
         fetchAllPostIds()
-        fetchGroupUserIds()
+        
+//        fetchGroupUserIds()
         self.scrolltoFirst = false
         
         // Search Controller
@@ -317,7 +344,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         self.fetchedPostIds.removeAll()
     }
     
-    func finishFetchingPosts(){
+    func finishFetchingPostIds(){
 
         // Function is called after User Post are called AND following user post ids are called. So need to check that all post are picked up before refresh
         print("User PostIds Fetched: \(self.userPostIdFetched), Following PostIds Fetched: \(self.followingPostIdFetched)")
@@ -337,7 +364,16 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
 //            }
 //            print("Final Post Ids: \(postIdTest)")
             
-            self.paginatePosts()
+            
+            Database.fetchAllPosts(fetchedPostIds: self.fetchedPostIds){fetchedPostsFirebase in
+                self.fetchedPosts = fetchedPostsFirebase
+
+                self.sortFilterFetchedPosts(){
+                    print("Paginate Posts after fetching postIds")
+                    self.paginatePosts()
+                }
+            }
+            
         } else {
             print("Wait for user/following user post ids to be fetched")
         }
@@ -463,6 +499,27 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
                 return p1.creationDate!.compare(p2.creationDate!) == .orderedDescending
         })
         }
+    }
+    
+    func sortFilterFetchedPosts(completion: @escaping () ->()){
+        if self.currentHeaderSort == HeaderSortOptions[0] {
+            // Recent
+            self.fetchedPosts.sort(by: { (p1, p2) -> Bool in
+                return p1.creationDate.compare(p2.creationDate) == .orderedDescending
+            })
+        } else if self.filterSort == FilterSortDefault[1] {
+            // Nearest
+            self.fetchedPosts.sort(by: { (p1, p2) -> Bool in
+                return (p1.distance! < p2.distance!)
+            })
+        } else {
+            //Trending/Oldest For Now
+            self.fetchedPosts.sort(by: { (p1, p2) -> Bool in
+                return p1.creationDate.compare(p2.creationDate) == .orderedAscending
+            })
+        }
+        
+        completion()
     }
     
     func sortDisplayedPosts(){
@@ -742,107 +799,82 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     
     
     func paginatePosts(){
-        
+
         let paginateFetchPostSize = 4
-        var paginateFetchPostsLimit = min(self.fetchedPostCount + paginateFetchPostSize, self.fetchedPostIds.count)
+
+        self.displayedPostsCount = min(self.displayedPostsCount + paginateFetchPostSize, self.fetchedPostIds.count)
+        collectionView?.reloadData()
+
         
-        print("Home Paginate \(self.fetchedPostCount) to \(paginateFetchPostsLimit) : \(self.fetchedPostIds.count)")
-        
-        for i in self.fetchedPostCount ..< paginateFetchPostsLimit  {
-            
-//            print("Current number: ", i, "from", self.fetchedPostCount, " to ",paginateFetchPostsLimit)
-            let fetchPostId = fetchedPostIds[i]
-//            print(" Paginate \(i): \(fetchPostId.id)")
-            
-            // Filter Time
-            if self.filterTime != defaultTime  {
-                
-                let calendar = Calendar.current
-                let tagHour = Double(calendar.component(.hour, from: fetchPostId.tagTime!))
-                guard let filterIndex = FilterSortTimeDefault.index(of: self.filterTime) else {return}
-                
-                if FilterSortTimeStart[filterIndex] > tagHour || tagHour > FilterSortTimeEnd[filterIndex] {
-                    // Skip Post If not within selected time frame
-//                    print("Skipped Post: ", fetchPostId.id, " TagHour: ",tagHour, " Start: ", FilterSortTimeStart[filterIndex]," End: ",FilterSortTimeEnd[filterIndex])
-                    self.fetchedPostCount += 1
-                    if self.fetchedPostCount == paginateFetchPostsLimit {
-                        // End of loop functions are checked every iteration. Skipping iteration skipped the check
-//                        print("Finish Paging @ TimeCheck")
-                        NotificationCenter.default.post(name: HomeController.finishPaginationNotificationName, object: nil)
-                    }
-                    continue
-                }
-            }
-            
-            
-            // Filter Group
-            
-            if self.filterGroup != defaultGroup{
-                if CurrentUser.groupUids.contains(fetchPostId.creatorUID!){
-                } else {
-                    // Skip Post if not in group
-//                    print("Skipped Post: ", fetchPostId.id, " Creator Not in Group: ",fetchPostId.creatorUID!)
-                    
-                    self.fetchedPostCount += 1
-                    if self.fetchedPostCount == paginateFetchPostsLimit {
-                        // End of loop functions are checked every iteration. Skipping iteration skipped the check
-//                        print("Finish Paging @ GroupCheck")
-                        NotificationCenter.default.post(name: HomeController.finishPaginationNotificationName, object: nil)
+        print("Home Paginate \(self.displayedPostsCount) : \(self.fetchedPostIds.count)")
+
+        //                print("Finish Paging")
+//        NotificationCenter.default.post(name: HomeController.finishPaginationNotificationName, object: nil)
+
+    }
     
-                    continue
-                }
-            }
-            }
-            
-            Database.fetchPostWithPostID(postId: fetchPostId.id, completion: { (post, error) in
-                self.fetchedPostCount += 1
-                
-                guard var fetchedPost = post else {return}
-                
-                // Update Post with Location Distance from selected Location
-                if self.filterLocation != nil {
-                    fetchedPost.distance = Double((fetchedPost.locationGPS?.distance(from: self.filterLocation!))!)
-                }
-                
-                var tempPost = [fetchedPost]
-                
-                if let error = error {
-//                    print("Failed to fetch post for: ", fetchPostId.id)
-                    return
-                }
-                
-                
-                
-                
-                // Filter Caption
-                
-                if self.filterCaption != nil && self.filterCaption != "" {
-                    guard let searchedText = self.filterCaption else {return}
-                    tempPost = tempPost.filter { (post) -> Bool in
-                        
-                        let searchedEmoji = ReverseEmojiDictionary[searchedText.lowercased()] ?? ""
-                        
-                        return post.caption.lowercased().contains(searchedText.lowercased()) || post.emoji.contains(searchedText.lowercased()) || post.nonRatingEmojiTags.joined(separator: " ").lowercased().contains(searchedText.lowercased()) || post.nonRatingEmojiTags.joined(separator: " ").lowercased().contains(searchedEmoji) || post.locationName.lowercased().contains(searchedText.lowercased()) || post.locationAdress.lowercased().contains(searchedText.lowercased())
-                    }
-                }
-
-                if tempPost.count > 0 {print("Adding Temp Post id: ", tempPost[0].id)}
-                
-                // Update Location if nil
-                
-                self.displayedPosts += tempPost
-
-//                print("Current: ", i, "fetchedPostCount: ", self.fetchedPostCount, "Total: ", self.fetchPostIds.count, "Display: ", self.displayedPosts.count, "finished: ", self.isFinishedPaging, "paginate:", paginateFetchPostsLimit)
-                
-                if self.fetchedPostCount == paginateFetchPostsLimit {
-
-//                print("Finish Paging")
-                NotificationCenter.default.post(name: HomeController.finishPaginationNotificationName, object: nil)
-                    
-                    }
-                })
-            }
-        }
+//    func paginatePosts(){
+//
+//        let paginateFetchPostSize = 4
+//
+//        var paginateFetchPostsLimit = min(self.displayedPostsCount + paginateFetchPostSize, self.fetchedPostIds.count)
+//
+//        print("Home Paginate \(self.displayedPostsCount) to \(paginateFetchPostsLimit) : \(self.fetchedPostIds.count)")
+//
+//        for i in self.displayedPostsCount ..< paginateFetchPostsLimit  {
+//
+//            let fetchPostId = fetchedPostIds[i]
+//
+////            print("Current number: ", i, "from", self.fetchedPostCount, " to ",paginateFetchPostsLimit)
+////            print(" Paginate \(i): \(fetchPostId.id)")
+//
+//
+//            Database.fetchPostWithPostID(postId: fetchPostId.id, completion: { (post, error) in
+//                self.fetchedPostCount += 1
+//
+//                guard var fetchedPost = post else {return}
+//
+//                // Update Post with Location Distance from selected Location
+//                if self.filterLocation != nil {
+//                    fetchedPost.distance = Double((fetchedPost.locationGPS?.distance(from: self.filterLocation!))!)
+//                }
+//
+//                var tempPost = [fetchedPost]
+//
+//                if let error = error {
+////                    print("Failed to fetch post for: ", fetchPostId.id)
+//                    return
+//                }
+//
+//                // Filter Caption
+//
+//                if self.filterCaption != nil && self.filterCaption != "" {
+//                    guard let searchedText = self.filterCaption else {return}
+//                    tempPost = tempPost.filter { (post) -> Bool in
+//
+//                        let searchedEmoji = ReverseEmojiDictionary[searchedText.lowercased()] ?? ""
+//
+//                        return post.caption.lowercased().contains(searchedText.lowercased()) || post.emoji.contains(searchedText.lowercased()) || post.nonRatingEmojiTags.joined(separator: " ").lowercased().contains(searchedText.lowercased()) || post.nonRatingEmojiTags.joined(separator: " ").lowercased().contains(searchedEmoji) || post.locationName.lowercased().contains(searchedText.lowercased()) || post.locationAdress.lowercased().contains(searchedText.lowercased())
+//                    }
+//                }
+//
+//                if tempPost.count > 0 {print("Adding Temp Post id: ", tempPost[0].id)}
+//
+//                // Update Location if nil
+//
+//                self.displayedPosts += tempPost
+//
+////                print("Current: ", i, "fetchedPostCount: ", self.fetchedPostCount, "Total: ", self.fetchPostIds.count, "Display: ", self.displayedPosts.count, "finished: ", self.isFinishedPaging, "paginate:", paginateFetchPostsLimit)
+//
+//                if self.fetchedPostCount == paginateFetchPostsLimit {
+//
+////                print("Finish Paging")
+//                NotificationCenter.default.post(name: HomeController.finishPaginationNotificationName, object: nil)
+//
+//                    }
+//                })
+//            }
+//        }
     
     
 
@@ -917,19 +949,27 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     
     override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         
-
-        return displayedPosts.count
+//        return min(4, self.displayedPostsCount)
+        return displayedPostsCount
+//        return displayedPosts.count
     }
     
     override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         
-        if indexPath.item == self.displayedPosts.count - 1 && !isFinishedPaging{
+//        if indexPath.item == self.displayedPosts.count - 1 && !isFinishedPaging{
+//            print("CollectionView Paginate")
+//            paginatePosts()
+//        }
+        
+        if indexPath.item == self.displayedPostsCount - 1 && !isFinishedPaging{
             print("CollectionView Paginate")
             paginatePosts()
         }
         
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: cellId, for: indexPath) as! HomePostCell
-        cell.post = displayedPosts[indexPath.item]
+//        cell.post = displayedPosts[indexPath.item]
+        cell.post = fetchedPosts[indexPath.item]
+
         
         if self.filterLocation != nil {
             cell.post?.distance = Double((cell.post?.locationGPS?.distance(from: self.filterLocation!))!)
@@ -943,6 +983,30 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         //print(displayedPosts[indexPath.item])
     }
+    
+// SORT FILTER HEADER
+    
+    override func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
+        let header = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: "headerId", for: indexPath) as! SortFilterHeader
+        
+//        header.user = self.user
+//        header.delegate = self
+//        header.defaultSearchBar.text = self.filterCaption
+//        if self.filterGroup == defaultGroup && self.filterRange == defaultRange && self.filterTime == defaultTime && self.filterSort == defaultSort {
+//            header.isFiltering = false
+//        } else {
+//            header.isFiltering = true
+//        }
+        
+        return header
+        
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
+        return CGSize(width: view.frame.width, height: 30 + 2)
+    }
+    
+    
     
     
     

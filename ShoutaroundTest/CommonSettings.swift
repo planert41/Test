@@ -24,6 +24,11 @@ var defaultListNames:[String] = ["Bookmarks", "Legit"]
 var UploadPostTypeDefault:[String] = ["Breakfast", "Lunch", "Dinner", "Snack"]
 var UploadPostPriceDefault:[String] = ["$5", "$10", "$20", "$35", "$50", "$$$"]
 
+// Header Sort Defaults
+var HeaderSortOptions:[String] = ["Recent", "Nearest", "Trending"]
+let HeaderSortDefault:String = HeaderSortOptions[0]
+
+
 
 // Filter Defaults
 

@@ -25,6 +25,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         
         FirebaseApp.configure()
+        Database.database().isPersistenceEnabled = true
         
         GMSPlacesClient.provideAPIKey(googlePlacesApiKey)
         GMSServices.provideAPIKey(googlePlacesApiKey)

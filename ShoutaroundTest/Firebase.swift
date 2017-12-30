@@ -12,7 +12,7 @@ import GeoFire
 var postCache = [String: Post]()
 
 extension Database{
-
+    
 // Alerts
     static func alert(title: String, message: String) {
         
@@ -705,6 +705,35 @@ extension Database{
             })
             print("Geofire Fetched Posts: \(fetchedPostIds.count)" )
             completion(fetchedPostIds)
+        }
+    }
+    
+    static func fetchAllPosts(fetchedPostIds: [PostId], completion: @escaping ([Post])-> ()){
+        
+        let thisGroup = DispatchGroup()
+        var fetchedPostsTemp: [Post] = []
+        
+        for postId in fetchedPostIds {
+            thisGroup.enter()
+            Database.fetchPostWithPostID(postId: postId.id, completion: { (post, error) in
+                if let error = error {
+                    print("Fetch Post: ERROR: \(postId)", error)
+                }
+                
+                guard let post = post else {
+                    print("Fetch Post: ERROR: No Post for \(postId)", error)
+                    thisGroup.leave()
+                    return
+                }
+                
+                fetchedPostsTemp.append(post)
+                thisGroup.leave()
+            })
+        }
+        
+        thisGroup.notify(queue: .main) {
+            print("Fetched All Posts: ", fetchedPostsTemp.count)
+            completion(fetchedPostsTemp)
         }
     }
     
