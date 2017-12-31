@@ -346,6 +346,8 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         self.filterSort = selectedSort
         self.filterTime = selectedTime
         self.refreshPagination()
+        self.collectionView?.reloadData()
+        self.filterSortFetchedPosts()
         self.scrolltoFirst = true
 //        self.collectionView?.refreshControl?.endRefreshing()
 //        self.collectionView?.setContentOffset(CGPoint.zero, animated: true)
@@ -453,7 +455,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
 //            self.collectionView?.refreshControl?.endRefreshing()
 //            self.collectionView?.setContentOffset(CGPoint.zero, animated: true)
             self.collectionView?.reloadData()
-            self.paginatePosts()
+            self.fetchAllPosts()
         }
         
     }
@@ -699,14 +701,17 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         
         if self.userPostIdFetched && self.followingPostIdFetched {
             print("Finish Fetching Post Ids: \(fetchedPostIds.count)")
-            var postIdTest: [String] = []
-            
-            Database.fetchAllPosts(fetchedPostIds: self.fetchedPostIds){fetchedPostsFirebase in
-                self.fetchedPosts = fetchedPostsFirebase
-                self.filterSortFetchedPosts()
-            }
+            self.fetchAllPosts()
         } else {
             print("Wait for user/following user post ids to be fetched")
+        }
+    }
+    
+    func fetchAllPosts(){
+        print("Fetching All Post, Current User Location: ", CurrentUser.currentLocation)
+        Database.fetchAllPosts(fetchedPostIds: self.fetchedPostIds){fetchedPostsFirebase in
+            self.fetchedPosts = fetchedPostsFirebase
+            self.filterSortFetchedPosts()
         }
     }
     
@@ -786,10 +791,15 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
 
         let paginateFetchPostSize = 4
 
-        self.displayedPostsCount = min(self.displayedPostsCount + paginateFetchPostSize, self.fetchedPostIds.count)
+        self.displayedPostsCount = min(self.displayedPostsCount + paginateFetchPostSize, self.fetchedPosts.count)
+        
+        if self.displayedPostsCount == self.fetchedPosts.count {
+            self.isFinishedPaging = true
+        }
+        
         collectionView?.reloadData()
 
-        print("Home Paginate \(self.displayedPostsCount) : \(self.fetchedPostIds.count)")
+        print("Home Paginate \(self.displayedPostsCount) : \(self.fetchedPosts.count)")
 
         //                print("Finish Paging")
 //        NotificationCenter.default.post(name: HomeController.finishPaginationNotificationName, object: nil)

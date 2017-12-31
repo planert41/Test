@@ -572,8 +572,13 @@ extension Database{
         if let cachedPost = postCache[postId] {
             if cachedPost != nil {
 //                print("Using post cache for \(postId)")
+                var tempCachePost = cachedPost
                 
-                completion(cachedPost, nil)
+                // Need to update cache post if current user location is not nil
+                if CurrentUser.currentLocation != nil {
+                    tempCachePost.distance = Double((tempCachePost.locationGPS?.distance(from: CurrentUser.currentLocation!))!)
+                }
+                completion(tempCachePost, nil)
                 return
             }
         }
@@ -726,7 +731,9 @@ extension Database{
                     return
                 }
                 
-                fetchedPostsTemp.append(post)
+                var tempPost = post
+                
+                fetchedPostsTemp.append(tempPost)
                 thisGroup.leave()
             })
         }
