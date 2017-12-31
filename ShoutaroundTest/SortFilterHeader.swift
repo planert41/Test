@@ -14,6 +14,7 @@ protocol SortFilterHeaderDelegate {
 //    func didSignOut()
 //    func activateSearchBar()
     func activateFilter()
+    func headerSortSelected(sort: String)
 }
 
 class SortFilterHeader: UICollectionViewCell {
@@ -75,6 +76,7 @@ class SortFilterHeader: UICollectionViewCell {
 //
 //        }
         self.selectedSort = HeaderSortOptions[sender.selectedSegmentIndex]
+        delegate?.headerSortSelected(sort: self.selectedSort)
         print("Selected Sort is ",self.selectedSort)
     }
     

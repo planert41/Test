@@ -272,4 +272,97 @@ class MainTabBarController: UITabBarController, UITabBarControllerDelegate, UIIm
         return navController
     }
     
+    
+    func updateFirebaseData(){
+        let firebaseAlert = UIAlertController(title: "Firebase Update", message: "Do you want to update Firebase Data?", preferredStyle: UIAlertControllerStyle.alert)
+        
+        firebaseAlert.addAction(UIAlertAction(title: "Ok", style: .default, handler: { (action: UIAlertAction!) in
+            
+            let ref = Database.database().reference().child("posts")
+            
+            ref.observeSingleEvent(of: .value, with: {(snapshot) in
+                
+                guard let userposts = snapshot.value as? [String:Any]  else {return}
+                
+                userposts.forEach({ (key,value) in
+                    
+                    guard let messageDetails = value as? [String: Any] else {return}
+                    guard let selectedEmojis = messageDetails["emoji"] as? String else {return}
+                    guard let creationDate = messageDetails["creationDate"] as? Double else {return}
+                    
+                    var fetchedTagDate = messageDetails["tagTime"] as? Double
+                    var fetchedRatingEmoji = messageDetails["ratingEmoji"] as? String
+                    var fetchedNonratingEmoji = messageDetails["nonRatingEmoji"] as? [String]
+                    var fetchedNonratingEmojiTags = messageDetails["nonRatingEmojiTags"] as? [String]
+                    var creatorUid = messageDetails["creatorUID"] as? String
+                    
+                    let tempEmojis = String(selectedEmojis.characters.prefix(1))
+                    var selectedEmojisSplit = selectedEmojis.characters.map { String($0) }
+                    
+                    var newRatingEmoji: String? = nil
+                    var newNonratingEmoji: [String]? = nil
+                    var newNonratingEmojiTags: [String]? = nil
+                    var newTagTime: Double? = nil
+                    
+                    print("Fetched Rating Emoji: ",fetchedRatingEmoji)
+                    print("Fetched NonRating Emoji: ",fetchedNonratingEmoji)
+                    print("Selected Emoji splits: ", selectedEmojisSplit)
+                    
+                    if (fetchedRatingEmoji == nil || fetchedRatingEmoji == "" || fetchedNonratingEmoji == nil) && selectedEmojisSplit != [] {
+                        // Replace Rating emoji with First of NR emoji if its rating emoji
+                        
+                        if String(selectedEmojisSplit[0]).containsRatingEmoji {
+                            print("First Emoji Char: ",tempEmojis)
+                            newRatingEmoji = String(selectedEmojisSplit[0])
+                            newNonratingEmoji = Array(selectedEmojisSplit.dropFirst(1))
+                            newNonratingEmojiTags = Array(selectedEmojisSplit.dropFirst(1))
+                            
+                        } else {
+                            newRatingEmoji = fetchedRatingEmoji
+                            newNonratingEmoji = selectedEmojisSplit
+                            newNonratingEmojiTags = selectedEmojisSplit
+                        }
+                    } else {
+                        newRatingEmoji = fetchedRatingEmoji
+                        newNonratingEmoji = fetchedNonratingEmoji
+                        newNonratingEmojiTags = fetchedNonratingEmojiTags
+                    }
+                    
+                    print("New R Emoji: ", newRatingEmoji, " New NR Emoji: ", newNonratingEmoji, " New NR Emoji Tags: ", newNonratingEmojiTags)
+                    
+                    if fetchedTagDate == nil {
+                        newTagTime = creationDate
+                        print("Update New Tag Time with: ", creationDate)
+                    } else {
+                        newTagTime = fetchedTagDate!
+                    }
+                    
+                    let values = ["ratingEmoji": newRatingEmoji, "nonratingEmoji": newNonratingEmoji, "nonratingEmojiTags": newNonratingEmojiTags, "tagTime": newTagTime] as [String: Any]
+                    
+                    
+                    print("Updating PostId: ",key," Values: ", values)
+                    Database.updatePostwithPostID(postId: key, values: values)
+                    
+                    var saveNewRatingEmoji = newRatingEmoji ?? ""
+                    var saveNewNonratingEmoji = newNonratingEmoji?.joined() ?? ""
+                    
+                    let emojiString = String(saveNewRatingEmoji + saveNewNonratingEmoji)
+                    
+                    // Update User Posts
+                    let userPostValues = ["tagTime": newTagTime, "emoji": emojiString] as [String: Any]
+                    Database.updateUserPostwithPostID(creatorId: creatorUid!, postId: key, values: userPostValues)
+                    
+                    
+                })
+            })
+        }))
+        
+        firebaseAlert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: { (action: UIAlertAction!) in
+            print("Handle Cancel Logic here")
+        }))
+        
+        self.present(firebaseAlert, animated: true)
+    }
+    
+    
 }

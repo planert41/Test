@@ -44,11 +44,18 @@ class HomePostSearch : UITableViewController, UISearchResultsUpdating, UISearchC
         }
     }
     var delegate: HomePostSearchDelegate?
-    
+
     
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = UIColor.white
+        
+        
+//        let searchBar = resultSearchController?.searchBar
+//        searchBar?.backgroundColor = UIColor.white
+//        searchBar?.scopeButtonTitles = searchScopeButtons
+//        searchBar?.placeholder =  searchBarPlaceholderText
+//        searchBar?.delegate = homePostSearchResults
         
         tableView.register(EmojiCell.self, forCellReuseIdentifier: EmojiCellId)
         tableView.register(UserCell.self, forCellReuseIdentifier: UserCellId)
@@ -61,6 +68,8 @@ class HomePostSearch : UITableViewController, UISearchResultsUpdating, UISearchC
             self.filteredUsers = self.allUsers
         }
         
+    
+        
         // Google Locations are only loaded when Locations are selected
         
         tableDataSource = GMSAutocompleteTableDataSource()
@@ -69,6 +78,15 @@ class HomePostSearch : UITableViewController, UISearchResultsUpdating, UISearchC
         tableView.rowHeight = UITableViewAutomaticDimension
         tableView.estimatedRowHeight = 140
         
+        
+    }
+    
+    override func viewWillLayoutSubviews() {
+//        if #available(iOS 11.0, *) {
+//            navigationItem.searchController?.searchBar.frame = CGRect(x: 0, y: 0, width: view.frame.width, height: 200)
+//        } else {
+//            // Fallback on earlier versions
+//        }
     }
 
     override func numberOfSections(in tableView: UITableView) -> Int {
