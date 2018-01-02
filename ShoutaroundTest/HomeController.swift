@@ -14,7 +14,7 @@ import CoreGraphics
 import CoreLocation
 
 
-class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLayout, HomePostCellDelegate, CLLocationManagerDelegate, UISearchControllerDelegate, HomePostSearchDelegate, UIGestureRecognizerDelegate, FilterControllerDelegate, UISearchBarDelegate, SortFilterHeaderDelegate  {
+class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLayout, HomePostCellDelegate, CLLocationManagerDelegate, UISearchControllerDelegate, HomePostSearchDelegate, UIGestureRecognizerDelegate, FilterControllerDelegate, UISearchBarDelegate, SortFilterHeaderDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate  {
     
     let cellId = "cellId"
     var scrolltoFirst: Bool = false
@@ -67,18 +67,11 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     
     var filterLocation: CLLocation? = nil{
         didSet{
-            if let filterLocation = filterLocation {
-                let count = fetchedPosts.count
-                for i in 0 ..< count {
-                    var tempPost = fetchedPosts[i]
-                    tempPost.distance = Double((tempPost.locationGPS?.distance(from: filterLocation))!)
-                    fetchedPosts[i] = tempPost
-                }
-            } else {
-                print("No Filter Location")
-            }
+            self.updatePostDistances(refLocation: filterLocation){}
         }
     }
+    
+
     
     var filterGoogleLocationID: String? = nil {
         didSet{
@@ -320,6 +313,9 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     
     func filterControllerFinished(selectedRange: String?, selectedLocation: CLLocation?, selectedGooglePlaceID: String?, selectedMinRating: Double, selectedType: String?, selectedMaxPrice: String?, selectedSort: String){
         
+        // Clears all Filters, Puts in new Filters, Refreshes all Post IDS and Posts
+        
+        
         self.clearFilter()
         
         self.filterRange = selectedRange
@@ -335,7 +331,8 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         self.refreshPagination()
         self.collectionView?.reloadData()
         
-        self.fetchAllPosts()
+        self.clearAllPosts()
+        self.fetchAllPostIds()
         self.scrolltoFirst = true
         
         // Check for filtering
@@ -423,6 +420,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     func refreshAll(){
         self.clearSearch()
         self.clearFilter()
+        self.clearSort()
         self.clearPostIds()
         self.refreshPagination()
         self.collectionView?.reloadData()
@@ -603,7 +601,10 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         print("Fetching All Post, Current User Location: ", CurrentUser.currentLocation)
         Database.fetchAllPosts(fetchedPostIds: self.fetchedPostIds){fetchedPostsFirebase in
             self.fetchedPosts = fetchedPostsFirebase
-            self.filterSortFetchedPosts()
+            // Update Post Distances
+            self.updatePostDistances(refLocation: self.filterLocation, completion: {
+                self.filterSortFetchedPosts()
+            })
         }
     }
     
@@ -709,10 +710,12 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
                     completion()
                 }
             } else {
-                self.fetchedPosts.sort(by: { (p1, p2) -> Bool in
-                    return (p1.distance! < p2.distance!)
-                })
-                completion()
+                self.updatePostDistances(refLocation: filterLocation){
+                    self.fetchedPosts.sort(by: { (p1, p2) -> Bool in
+                        return (p1.distance! < p2.distance!)
+                    })
+                    completion()
+                }
             }
         }
             
@@ -769,21 +772,11 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         defaultSearchBar.delegate = self
         defaultSearchBar.placeholder = "Food, User, Location"
         
-        navigationItem.leftBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "mailbox").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(openInbox))
+        // Camera
+        navigationItem.leftBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "camera3").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(openCamera))
         
-        if self.filterRange == defaultRange && self.filterType == defaultTime {
-            filterButton.image = #imageLiteral(resourceName: "filter").withRenderingMode(.alwaysOriginal)
-            filterButton.backgroundColor = UIColor.clear
-            filterButton.addGestureRecognizer(singleTap)
-        } else {
-            filterButton.image = #imageLiteral(resourceName: "filter").withRenderingMode(.alwaysOriginal)
-            filterButton.backgroundColor = UIColor.mainBlue()
-//            filterButton.layer.cornerRadius = filterButton.layer.frame.width / 2
-            filterButton.addGestureRecognizer(singleTap)
-        }
-        
-        let rangeBarButton = UIBarButtonItem.init(customView: filterButton)
-        navigationItem.rightBarButtonItem = rangeBarButton
+        // Inbox
+        navigationItem.rightBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "mailbox").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(openInbox))
         
     }
 
@@ -1005,7 +998,53 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         print("GPS Location Not Found")
     }
     
+    func updatePostDistances(refLocation: CLLocation?, completion:() -> ()){
+        if let refLocation = refLocation {
+            let count = fetchedPosts.count
+            for i in 0 ..< count {
+                var tempPost = fetchedPosts[i]
+                tempPost.distance = Double((tempPost.locationGPS?.distance(from: refLocation))!)
+                fetchedPosts[i] = tempPost
+            }
+            completion()
+        } else {
+            print("No Filter Location")
+            completion()
+        }
+    }
+    
+    // Camera Functions
+    func openCamera(){
+        if UIImagePickerController.isSourceTypeAvailable(.camera) {
+            var imagePicker = UIImagePickerController()
+            imagePicker.delegate = self
+            imagePicker.sourceType = .camera;
+            imagePicker.allowsEditing = true
+            self.present(imagePicker, animated: true, completion: nil)
+
+            // Detect Current Location for Photo
+            self.determineCurrentLocation()
+
+        }
+    }
+    
+    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : Any]) {
+        
+        picker.dismiss(animated: true) {
+            let image = info[UIImagePickerControllerEditedImage] as! UIImage
+
+            let sharePhotoController = SharePhotoController()
+            sharePhotoController.selectedImage = image
+            sharePhotoController.selectedImageLocation  = CurrentUser.currentLocation
+            sharePhotoController.selectedImageTime  = Date()
+            let navController = UINavigationController(rootViewController: sharePhotoController)
+            self.present(navController, animated: false, completion: nil)
+            print("Upload Picture")
+        }
+    }
+    
 }
+
 
 
 

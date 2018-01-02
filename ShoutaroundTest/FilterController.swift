@@ -442,8 +442,8 @@ class FilterController: UIViewController, CLLocationManagerDelegate, GMSAutocomp
     
     func viewController(_ viewController: GMSAutocompleteViewController, didAutocompleteWith place: GMSPlace) {
         
-        selectedLocation = CLLocation.init(latitude: place.coordinate.latitude, longitude: place.coordinate.longitude)
-        selectedGooglePlaceID = place.placeID
+        self.selectedLocation = CLLocation.init(latitude: place.coordinate.latitude, longitude: place.coordinate.longitude)
+        self.selectedGooglePlaceID = place.placeID
         locationNameLabel.text = place.name
         
         // Auto Select Closest Distance (5 KM)

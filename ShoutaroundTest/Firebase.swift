@@ -575,9 +575,9 @@ extension Database{
                 var tempCachePost = cachedPost
                 
 // Need to update cache post distance if current user location is not nil
-                if CurrentUser.currentLocation != nil {
-                    tempCachePost.distance = Double((tempCachePost.locationGPS?.distance(from: CurrentUser.currentLocation!))!)
-                }
+//                if CurrentUser.currentLocation != nil {
+//                    tempCachePost.distance = Double((tempCachePost.locationGPS?.distance(from: CurrentUser.currentLocation!))!)
+//                }
                 completion(tempCachePost, nil)
                 return
             }
