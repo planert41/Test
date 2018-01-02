@@ -364,17 +364,19 @@ class FilterController: UIViewController, CLLocationManagerDelegate, GMSAutocomp
         let hour = calendar.component(.hour, from: date)
         print(hour)
         
-        // Morning 6-11, MidDay 11 - 5, Late, 5 - 6
-        if hour > 5 && hour <= 11 {
-            self.selectedType = UploadPostTypeDefault[0]
-            self.typeSegment.selectedSegmentIndex = 0
-        } else if hour > 11 && hour <= 17 {
-            self.selectedType = UploadPostTypeDefault[1]
-            self.typeSegment.selectedSegmentIndex = 1
-        } else {
-            self.selectedType = UploadPostTypeDefault[2]
-            self.typeSegment.selectedSegmentIndex = 2
-        }
+        // Don't Set Type Filter For Now
+        
+//        // Morning 6-11, MidDay 11 - 5, Late, 5 - 6
+//        if hour > 5 && hour <= 11 {
+//            self.selectedType = UploadPostTypeDefault[0]
+//            self.typeSegment.selectedSegmentIndex = 0
+//        } else if hour > 11 && hour <= 17 {
+//            self.selectedType = UploadPostTypeDefault[1]
+//            self.typeSegment.selectedSegmentIndex = 1
+//        } else {
+//            self.selectedType = UploadPostTypeDefault[2]
+//            self.typeSegment.selectedSegmentIndex = 2
+//        }
         
         let formatter = DateFormatter()
         formatter.dateFormat = "h:mm a" // "a" prints "pm" or "am"

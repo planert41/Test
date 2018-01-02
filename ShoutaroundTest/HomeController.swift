@@ -51,6 +51,8 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     
 // Filter Variables
     
+    var isFiltering: Bool = false
+    
     var filterCaption: String? = nil{
         didSet{
         }
@@ -332,8 +334,16 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         // Refresh Everything
         self.refreshPagination()
         self.collectionView?.reloadData()
-        self.filterSortFetchedPosts()
+        
+        self.fetchAllPosts()
         self.scrolltoFirst = true
+        
+        // Check for filtering
+        if (self.filterRange != nil) || (self.filterMinRating != 0) || (self.filterType != nil) || (self.filterMaxPrice != nil) {
+            self.isFiltering = true
+        } else {
+            self.isFiltering = false
+        }
         
         
     }
@@ -377,6 +387,11 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         self.fetchedPostIds.removeAll()
     }
     
+    func clearAllPosts(){
+        self.fetchedPostIds.removeAll()
+        self.fetchedPosts.removeAll()
+    }
+    
     func clearSort(){
         self.selectedHeaderSort = defaultSort
     }
@@ -395,6 +410,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         self.filterType = nil
         self.filterMaxPrice = nil
         self.selectedHeaderSort = defaultSort
+        self.isFiltering = false
     }
     
     func refreshPagination(){
@@ -410,6 +426,10 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         self.clearPostIds()
         self.refreshPagination()
         self.collectionView?.reloadData()
+    }
+    
+    func refreshPosts(){
+        self.clearAllPosts()
     }
     
 
@@ -613,11 +633,11 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         // Filter Range
         if self.filterLocation != nil && self.filterRange != nil {
             self.fetchedPosts = self.fetchedPosts.filter { (post) -> Bool in
-                var filterDistance:Double = 99999
+                var filterDistance:Double = 99999999
                 if post.distance != nil {
                     filterDistance = post.distance!
                 }
-                return filterDistance <= Double(self.filterRange!)!
+                return filterDistance <= (Double(self.filterRange!)! * 1000)
             }
             print("Filtered Post By Range: \(self.filterRange) AT \(self.filterLocation): \(self.fetchedPosts.count)")
         }
@@ -829,16 +849,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     
     override func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
         let header = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: "headerId", for: indexPath) as! SortFilterHeader
-        
-//        header.user = self.user
-//        header.delegate = self
-//        header.defaultSearchBar.text = self.filterCaption
-//        if self.filterGroup == defaultGroup && self.filterRange == defaultRange && self.filterTime == defaultTime && self.filterSort == defaultSort {
-//            header.isFiltering = false
-//        } else {
-//            header.isFiltering = true
-//        }
-        
+        header.isFiltering = self.isFiltering
         header.delegate = self
         return header
         

@@ -23,12 +23,17 @@ class SortFilterHeader: UICollectionViewCell {
 
     var headerSortSegment = UISegmentedControl()
     var selectedSort: String = defaultSort
+    var isFiltering: Bool = false {
+        didSet{
+            filterButton.backgroundColor = isFiltering ? UIColor.mainBlue() : UIColor.clear
+        }
+    }
     
     lazy var filterButton: UIButton = {
         let button = UIButton(type: .system)
         button.setImage(#imageLiteral(resourceName: "filter").withRenderingMode(.alwaysOriginal), for: .normal)
         button.addTarget(self, action: #selector(activateFilter), for: .touchUpInside)
-        button.layer.borderWidth = 1
+        button.layer.borderWidth = 0
         button.layer.borderColor = UIColor.darkGray.cgColor
         button.clipsToBounds = true
         return button
@@ -46,14 +51,14 @@ class SortFilterHeader: UICollectionViewCell {
         headerSortSegment.addTarget(self, action: #selector(selectSort), for: .valueChanged)
         
         addSubview(filterButton)
-        filterButton.anchor(top: topAnchor, left: nil, bottom: bottomAnchor, right: rightAnchor, paddingTop: 1, paddingLeft: 1, paddingBottom: 1, paddingRight: 0, width: 0, height: 0)
+        filterButton.anchor(top: topAnchor, left: nil, bottom: bottomAnchor, right: rightAnchor, paddingTop: 1, paddingLeft: 1, paddingBottom: 1, paddingRight: 3, width: 0, height: 0)
         filterButton.widthAnchor.constraint(equalTo: filterButton.heightAnchor, multiplier: 1).isActive = true
         filterButton.layer.cornerRadius = filterButton.frame.width/2
         filterButton.backgroundColor = UIColor.mainBlue()
         filterButton.layer.masksToBounds = true
         
         addSubview(headerSortSegment)
-        headerSortSegment.anchor(top: topAnchor, left: leftAnchor, bottom: bottomAnchor, right: filterButton.leftAnchor, paddingTop: 1, paddingLeft: 1, paddingBottom: 1, paddingRight: 1, width: 0, height: 0)
+        headerSortSegment.anchor(top: topAnchor, left: leftAnchor, bottom: bottomAnchor, right: filterButton.leftAnchor, paddingTop: 1, paddingLeft: 3, paddingBottom: 1, paddingRight: 1, width: 0, height: 0)
         
     }
     
