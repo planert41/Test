@@ -9,27 +9,67 @@
 import Foundation
 import UIKit
 import GooglePlaces
+import Cosmos
 
 
 protocol FilterControllerDelegate: class {
-    func filterControllerFinished(selectedRange: String, selectedLocation: CLLocation?, selectedGooglePlaceID: String?, selectedTime: String, selectedGroup: String, selectedSort: String)
+    func filterControllerFinished(selectedRange: String?, selectedLocation: CLLocation?, selectedGooglePlaceID: String?, selectedMinRating: Double, selectedType: String?, selectedMaxPrice: String?, selectedSort: String)
 }
 
 class FilterController: UIViewController, CLLocationManagerDelegate, GMSAutocompleteViewControllerDelegate {
     
-    let optionRanges = geoFilterRangeDefault
-    let optionGroups = ["Favs", "All"]
-    let optionSort = FilterSortDefault
-    let optionTime = FilterSortTimeDefault
+
     let locationManager = CLLocationManager()
     
-    var selectedRange: String = defaultRange
-    var selectedGroup: String = defaultGroup
-    var selectedSort: String = defaultSort
-    var selectedTime: String = defaultTime
-    var currentTime: Int = 0
-    
-    
+    var selectedRange: String? = nil {
+        didSet{
+            guard let selectedRange = selectedRange else {
+                return
+            }
+            
+            if let index = geoFilterRangeDefault.index(of: selectedRange){
+                self.distanceSegment.selectedSegmentIndex = index
+            }
+        }
+    }
+    var selectedMinRating: Double = 0 {
+        didSet {
+            if selectedMinRating > 0 {
+                starRating.rating = selectedMinRating
+            }
+        }
+    }
+    var selectedType: String? = nil {
+        didSet{
+            guard let selectedType = selectedType else {
+                return
+            }
+            
+            if let index = UploadPostTypeDefault.index(of: selectedType){
+                self.typeSegment.selectedSegmentIndex = index
+            }
+        }
+    }
+    var selectedMaxPrice: String? = nil {
+        didSet{
+            guard let selectedMaxPrice = selectedMaxPrice else {
+                return
+            }
+            
+            if let index = UploadPostPriceDefault.index(of: selectedMaxPrice){
+                self.priceSegment.selectedSegmentIndex = index
+            }
+        }
+    }
+    var selectedSort: String = defaultSort {
+        didSet{
+            if let index = HeaderSortOptions.index(of: selectedSort){
+                self.sortSegment.selectedSegmentIndex = index
+            }
+        }
+    }
+
+    let segmentHeight: CGFloat = 35
     
     weak var delegate: FilterControllerDelegate?
 
@@ -93,6 +133,20 @@ class FilterController: UIViewController, CLLocationManagerDelegate, GMSAutocomp
         return ul
     }()
     
+    lazy var filterRatingLabel: UILabel = {
+        let ul = UILabel()
+        ul.text = "Min Rating"
+        ul.font = UIFont.boldSystemFont(ofSize: 14.0)
+        return ul
+    }()
+    
+    lazy var filterPriceLabel: UILabel = {
+        let ul = UILabel()
+        ul.text = "Max Price"
+        ul.font = UIFont.boldSystemFont(ofSize: 14.0)
+        return ul
+    }()
+    
     lazy var currentLocationButton: UIButton = {
         let button = UIButton(type: .system)
         button.setTitleColor(.black, for: .normal)
@@ -130,11 +184,88 @@ class FilterController: UIViewController, CLLocationManagerDelegate, GMSAutocomp
         return button
     }()
     
-    var distanceSegment = UISegmentedControl()
-    var groupSegment = UISegmentedControl()
-    var sortSegment = UISegmentedControl()
-    var timeSegment = UISegmentedControl()
+    let starRating: CosmosView = {
+        let iv = CosmosView()
+        iv.settings.fillMode = .half
+        iv.settings.totalStars = 7
+        iv.settings.starSize = 30
+        iv.settings.filledImage = #imageLiteral(resourceName: "ratingstarfilled").withRenderingMode(.alwaysOriginal)
+        iv.settings.emptyImage = #imageLiteral(resourceName: "ratingstarunfilled").withRenderingMode(.alwaysOriginal)
+        iv.rating = 0
+        iv.settings.starMargin = 10
+        return iv
+    }()
     
+    var distanceSegment:ReselectableSegmentedControl = {
+        var segment = ReselectableSegmentedControl(items: geoFilterRangeDefault)
+        segment.addTarget(self, action: #selector(handleSelectRange), for: .valueChanged)
+        segment.tintColor = UIColor.rgb(red: 223, green: 85, blue: 78)
+        segment.selectedSegmentIndex = UISegmentedControlNoSegment
+        return segment
+    }()
+    
+    func handleSelectRange(sender: UISegmentedControl) {
+        if (geoFilterRangeDefault[sender.selectedSegmentIndex] == self.selectedRange) {
+            sender.selectedSegmentIndex =  UISegmentedControlNoSegment
+            self.selectedRange = nil
+        }
+        else {
+            self.selectedRange = geoFilterRangeDefault[sender.selectedSegmentIndex]
+        }
+        print("Selected Range is ",self.selectedRange)
+    }
+    
+    var typeSegment:ReselectableSegmentedControl = {
+        var segment = ReselectableSegmentedControl(items: UploadPostTypeDefault)
+        segment.addTarget(self, action: #selector(handleSelectType), for: .valueChanged)
+        segment.tintColor = UIColor.rgb(red: 223, green: 85, blue: 78)
+        segment.selectedSegmentIndex = UISegmentedControlNoSegment
+        return segment
+    }()
+
+    func handleSelectType(sender: UISegmentedControl) {
+        if (UploadPostTypeDefault[sender.selectedSegmentIndex] == self.selectedType) {
+            sender.selectedSegmentIndex =  UISegmentedControlNoSegment
+            self.selectedType = nil
+        }
+        else {
+            self.selectedType = UploadPostTypeDefault[sender.selectedSegmentIndex]
+        }
+        print("Selected Type is ",self.selectedType)
+    }
+    
+    
+    var priceSegment:ReselectableSegmentedControl = {
+        var segment = ReselectableSegmentedControl(items: UploadPostPriceDefault)
+        segment.addTarget(self, action: #selector(handleSelectPrice), for: .valueChanged)
+        segment.tintColor = UIColor.rgb(red: 223, green: 85, blue: 78)
+        segment.selectedSegmentIndex = UISegmentedControlNoSegment
+        return segment
+    }()
+    
+    func handleSelectPrice(sender: UISegmentedControl) {
+        if (UploadPostPriceDefault[sender.selectedSegmentIndex] == self.selectedMaxPrice) {
+            sender.selectedSegmentIndex =  UISegmentedControlNoSegment
+            self.selectedMaxPrice = nil
+        }
+        else {
+            self.selectedMaxPrice = UploadPostPriceDefault[sender.selectedSegmentIndex]
+        }
+        print("Selected Price is ",self.selectedMaxPrice)
+    }
+    
+    var sortSegment: UISegmentedControl = {
+        var segment = UISegmentedControl(items: HeaderSortOptions)
+        segment.addTarget(self, action: #selector(handleSelectSort), for: .valueChanged)
+        segment.tintColor = UIColor.rgb(red: 223, green: 85, blue: 78)
+        segment.selectedSegmentIndex = 0
+        return segment
+    }()
+    
+    func handleSelectSort(sender: UISegmentedControl) {
+        self.selectedSort = HeaderSortOptions[sender.selectedSegmentIndex]
+        print("Selected Sort is ",self.selectedSort)
+    }
     
     func findCurrentLocation() {
         
@@ -169,33 +300,15 @@ class FilterController: UIViewController, CLLocationManagerDelegate, GMSAutocomp
         
         view.backgroundColor = UIColor.white
         
-        distanceSegment = UISegmentedControl(items: optionRanges)
-        distanceSegment.selectedSegmentIndex = optionRanges.index(of: self.selectedRange)!
-        distanceSegment.addTarget(self, action: #selector(selectRange), for: .valueChanged)
-        distanceSegment.tintColor = UIColor.orange
-        
-        timeSegment = UISegmentedControl(items: optionTime)
-        timeSegment.selectedSegmentIndex = optionTime.index(of: self.selectedTime)!
-        timeSegment.addTarget(self, action: #selector(selectTime), for: .valueChanged)
-//        timeSegment.tintColor = UIColor.orange
-        
-        groupSegment = UISegmentedControl(items: optionGroups)
-        groupSegment.selectedSegmentIndex = optionGroups.index(of: self.selectedGroup)!
-        groupSegment.addTarget(self, action: #selector(selectGroup), for: .valueChanged)
-
-        sortSegment = UISegmentedControl(items: optionSort)
-        sortSegment.selectedSegmentIndex = optionSort.index(of: self.selectedSort)!
-        sortSegment.addTarget(self, action: #selector(selectSort), for: .valueChanged)
-        
-        
-        
+    // 1. Filter By Distance
         scrollview.addSubview(filterDistanceLabel)
         scrollview.addSubview(distanceSegment)
         
         filterDistanceLabel.anchor(top: scrollview.topAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 20, paddingLeft: 20, paddingBottom: 0, paddingRight: 20, width: 0, height: 30)
         
-        distanceSegment.anchor(top: filterDistanceLabel.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 1, paddingLeft: 20, paddingBottom: 0, paddingRight: 20, width: 0, height: 50)
+        distanceSegment.anchor(top: filterDistanceLabel.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 1, paddingLeft: 20, paddingBottom: 0, paddingRight: 20, width: 0, height: segmentHeight)
         
+    // 2. Select Location
         scrollview.addSubview(locationLabel)
         scrollview.addSubview(locationNameLabel)
         scrollview.addSubview(currentLocationButton)
@@ -204,33 +317,63 @@ class FilterController: UIViewController, CLLocationManagerDelegate, GMSAutocomp
         let TapGesture = UITapGestureRecognizer(target: self, action: #selector(tapSearchBar))
         locationNameLabel.addGestureRecognizer(TapGesture)
         
-        locationLabel.anchor(top: distanceSegment.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 15, paddingLeft: 20, paddingBottom: 0, paddingRight: 20, width: 0, height: 30)
-        locationNameLabel.anchor(top: locationLabel.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 1, paddingLeft: 20, paddingBottom: 0, paddingRight: 20, width: 0, height: 50)
+        locationLabel.anchor(top: distanceSegment.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 10, paddingLeft: 20, paddingBottom: 0, paddingRight: 20, width: 0, height: 30)
+        locationNameLabel.anchor(top: locationLabel.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 1, paddingLeft: 20, paddingBottom: 0, paddingRight: 20, width: 0, height: segmentHeight)
         
         currentLocationButton.anchor(top: locationNameLabel.topAnchor, left: nil, bottom: locationNameLabel.bottomAnchor, right: locationNameLabel.rightAnchor, paddingTop: 5, paddingLeft: 0, paddingBottom: 5, paddingRight: 5, width: 0, height: 0)
         currentLocationButton.widthAnchor.constraint(equalTo: currentLocationButton.heightAnchor, multiplier: 1).isActive = true
         currentLocationButton.isHidden = true
         
+    // 3. Select Min Rating
+        scrollview.addSubview(filterRatingLabel)
+        scrollview.addSubview(starRating)
+        filterRatingLabel.anchor(top: locationNameLabel.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 10, paddingLeft: 20, paddingBottom: 0, paddingRight: 20, width: 0, height: 30)
+        starRating.anchor(top: filterRatingLabel.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 1, paddingLeft: 20, paddingBottom: 0, paddingRight: 20, width: 0, height: segmentHeight)
+        starRating.didFinishTouchingCosmos = starRatingSelectFunction
+
         
+    // 4. Select Post Type (Breakfast, Lunch, Dinner, Snack)
         scrollview.addSubview(filterTimeLabel)
-        scrollview.addSubview(timeSegment)
+        scrollview.addSubview(typeSegment)
+        filterTimeLabel.anchor(top: starRating.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 10, paddingLeft: 20, paddingBottom: 0, paddingRight: 20, width: 0, height: 30)
+        typeSegment.anchor(top: filterTimeLabel.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 1, paddingLeft: 20, paddingBottom: 0, paddingRight: 20, width: 0, height: segmentHeight)
         
-        filterTimeLabel.anchor(top: locationNameLabel.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 15, paddingLeft: 20, paddingBottom: 0, paddingRight: 20, width: 0, height: 30)
-        timeSegment.anchor(top: filterTimeLabel.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 1, paddingLeft: 20, paddingBottom: 0, paddingRight: 20, width: 0, height: 40)
+    // 5. Select Price Filter
+        scrollview.addSubview(filterPriceLabel)
+        scrollview.addSubview(priceSegment)
         
+        filterPriceLabel.anchor(top: typeSegment.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 10, paddingLeft: 20, paddingBottom: 0, paddingRight: 20, width: 0, height: 30)
+        priceSegment.anchor(top: filterPriceLabel.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 1, paddingLeft: 20, paddingBottom: 0, paddingRight: 20, width: 0, height: segmentHeight)
+        
+    // 6. Sort Filter
+        scrollview.addSubview(sortByLabel)
+        scrollview.addSubview(sortSegment)
+        
+        sortByLabel.anchor(top: priceSegment.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 10, paddingLeft: 20, paddingBottom: 0, paddingRight: 20, width: 0, height: 30)
+        sortSegment.anchor(top: sortByLabel.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 1, paddingLeft: 20, paddingBottom: 0, paddingRight: 20, width: 0, height: segmentHeight)
+
+    // 7. Sort button
+        scrollview.addSubview(filterButton)
+        filterButton.anchor(top: sortSegment.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 10, paddingLeft: 20, paddingBottom: 0, paddingRight: 20, width: 0, height: 40)
+        
+        scrollview.addSubview(clearFilterButton)
+        clearFilterButton.anchor(top: filterButton.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 10, paddingLeft: 20, paddingBottom: 0, paddingRight: 20, width: 0, height: 40)
         
         let date = Date() // save date, so all components use the same date
         let calendar = Calendar.current // or e.g. Calendar(identifier: .persian)
         let hour = calendar.component(.hour, from: date)
         print(hour)
         
-        // Morning 6-12, MidDay 12 - 6, Late, 6 - 6
-        if hour > 5 && hour <= 12 {
-            self.currentTime = 0
-        } else if hour > 12 && hour <= 18 {
-            self.currentTime = 1
+        // Morning 6-11, MidDay 11 - 5, Late, 5 - 6
+        if hour > 5 && hour <= 11 {
+            self.selectedType = UploadPostTypeDefault[0]
+            self.typeSegment.selectedSegmentIndex = 0
+        } else if hour > 11 && hour <= 17 {
+            self.selectedType = UploadPostTypeDefault[1]
+            self.typeSegment.selectedSegmentIndex = 1
         } else {
-            self.currentTime = 2
+            self.selectedType = UploadPostTypeDefault[2]
+            self.typeSegment.selectedSegmentIndex = 2
         }
         
         let formatter = DateFormatter()
@@ -238,125 +381,50 @@ class FilterController: UIViewController, CLLocationManagerDelegate, GMSAutocomp
         let hourString = formatter.string(from: Date()) // "12 AM"
         
         let filterTimeAttributedText = NSMutableAttributedString(string: "Sort By Time", attributes: [NSFontAttributeName: UIFont.boldSystemFont(ofSize: 14),NSForegroundColorAttributeName: UIColor.black])
-
+        
         filterTimeAttributedText.append(NSMutableAttributedString(string: "   ⏰ \(hourString) ", attributes: [NSFontAttributeName: UIFont.boldSystemFont(ofSize: 14),NSForegroundColorAttributeName: UIColor.mainBlue()]))
         filterTimeLabel.attributedText = filterTimeAttributedText
         
-// Remove Group Filter For now
-        
-//        view.addSubview(filterGroupLabel)
-//        view.addSubview(groupSegment)
-//        
-//        filterGroupLabel.anchor(top: timeSegment.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 15, paddingLeft: 20, paddingBottom: 0, paddingRight: 20, width: 0, height: 30)
-//        groupSegment.anchor(top: filterGroupLabel.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 1, paddingLeft: 20, paddingBottom: 0, paddingRight: 20, width: 0, height: 40)
-        
-        scrollview.addSubview(sortByLabel)
-        scrollview.addSubview(sortSegment)
-        
-        sortByLabel.anchor(top: timeSegment.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 15, paddingLeft: 20, paddingBottom: 0, paddingRight: 20, width: 0, height: 30)
-        sortSegment.anchor(top: sortByLabel.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 1, paddingLeft: 20, paddingBottom: 0, paddingRight: 20, width: 0, height: 40)
-
-        scrollview.addSubview(filterButton)
-        filterButton.anchor(top: sortSegment.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 15, paddingLeft: 20, paddingBottom: 0, paddingRight: 20, width: 0, height: 40)
-        
-        scrollview.addSubview(clearFilterButton)
-        clearFilterButton.anchor(top: filterButton.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 10, paddingLeft: 20, paddingBottom: 0, paddingRight: 20, width: 0, height: 40)
-        
-
-        
-        
-
-        
-        
     }
     
-    func selectRange(sender: UISegmentedControl) {
-        switch sender.selectedSegmentIndex {
-        case 0...optionRanges.count - 2:
-            
-            // Non-Zero search range is selected
-            
-            self.selectedRange = optionRanges[sender.selectedSegmentIndex]
-            self.sortSegment.selectedSegmentIndex = 0
-            self.selectedSort = optionSort[self.sortSegment.selectedSegmentIndex]
-
-            
-        case optionRanges.count - 1:
-            self.selectedRange = optionRanges[sender.selectedSegmentIndex]
-            self.sortSegment.selectedSegmentIndex = 2
-            self.selectedSort = optionSort[self.sortSegment.selectedSegmentIndex]
-            
-        default:
-            self.selectedRange = optionRanges[optionRanges.endIndex-1]
-            
+    func starRatingSelectFunction(rating: Double) {
+        if rating < 2 {
+            self.selectedMinRating = 0
+            self.starRating.rating = 0
+        } else {
+            self.selectedMinRating = rating
         }
-        print("Selected Range is ",self.selectedRange)
+        print("Selected Rating: \(self.selectedMinRating)")
     }
     
-    func selectGroup(sender: UISegmentedControl) {
-        switch sender.selectedSegmentIndex {
-        case 0...optionGroups.count:
-            self.selectedGroup = optionGroups[sender.selectedSegmentIndex]
-        default:
-            self.selectedGroup = optionGroups[optionGroups.endIndex-1]
-            
-        }
-        print("Selected Group is ",self.selectedGroup)
-    }
-    
-    func selectTime(sender: UISegmentedControl) {
-        switch sender.selectedSegmentIndex {
-        case 0...optionTime.count:
-            self.selectedTime = optionTime[sender.selectedSegmentIndex]
-        default:
-            self.selectedTime = optionTime[optionTime.endIndex-1]
-            
-        }
-        print("Selected Time is ",self.selectedTime)
-    }
-    
-    func selectSort(sender: UISegmentedControl) {
-        switch sender.selectedSegmentIndex {
-        case 0:
-            self.selectedSort = optionSort[sender.selectedSegmentIndex]
-            if self.selectedRange == optionRanges[optionRanges.endIndex - 1]
-            {
-                self.selectedRange = optionRanges[0]
-                self.distanceSegment.selectedSegmentIndex = 0
-                print(self.distanceSegment.selectedSegmentIndex)
-            }
-        case 1...optionSort.count - 2:
-            self.selectedSort = optionSort[sender.selectedSegmentIndex]
-        default:
-            self.selectedSort = optionSort[0]
-            
-        }
-        print("Selected Sort is ",self.selectedGroup)
-    }
     
     func filterSelected(){
-        delegate?.filterControllerFinished(selectedRange: self.selectedRange, selectedLocation: self.selectedLocation, selectedGooglePlaceID: self.selectedGooglePlaceID, selectedTime: self.selectedTime, selectedGroup: self.selectedGroup, selectedSort: self.selectedSort)
-    //    NotificationCenter.default.post(name: FilterController.updateFeedWithFilterNotificationName, object: nil)
-        print("Filter By ",self.selectedRange,self.selectedLocation, self.selectedGooglePlaceID, self.selectedGroup, self.selectedSort)
+        
+        delegate?.filterControllerFinished(selectedRange: self.selectedRange, selectedLocation: self.selectedLocation, selectedGooglePlaceID: self.selectedGooglePlaceID, selectedMinRating: self.selectedMinRating, selectedType: self.selectedType, selectedMaxPrice: self.selectedMaxPrice, selectedSort: self.selectedSort)
+
+        print("Filter By ",self.selectedRange,self.selectedLocation, self.selectedGooglePlaceID, self.selectedMinRating, self.selectedType, self.selectedMaxPrice,  self.selectedSort)
+
         self.navigationController?.popViewController(animated: true)
 
     }
     
     func refreshFilter(){
-        self.distanceSegment.selectedSegmentIndex = optionRanges.endIndex-1
-        self.selectedRange = optionRanges[optionRanges.endIndex-1]
-        
-        self.timeSegment.selectedSegmentIndex = optionTime.endIndex-1
-        self.selectedTime = optionTime[optionTime.endIndex-1]
-        
-        self.groupSegment.selectedSegmentIndex = optionGroups.endIndex-1
-        self.selectedGroup = optionGroups[optionGroups.endIndex-1]
-        
-        self.sortSegment.selectedSegmentIndex = optionSort.endIndex - 1
-        self.selectedSort = optionSort[optionSort.endIndex-1]
+        self.distanceSegment.selectedSegmentIndex = UISegmentedControlNoSegment
+        self.selectedRange = nil
         
         self.selectedLocation = CurrentUser.currentLocation
         
+        self.selectedMinRating = 0
+        self.starRating.rating = 0
+        
+        self.typeSegment.selectedSegmentIndex = UISegmentedControlNoSegment
+        self.selectedType = nil
+        
+        self.priceSegment.selectedSegmentIndex = UISegmentedControlNoSegment
+        self.selectedMaxPrice = nil
+        
+        self.sortSegment.selectedSegmentIndex = 0
+        self.selectedSort = defaultSort
         
     }
     
@@ -372,10 +440,15 @@ class FilterController: UIViewController, CLLocationManagerDelegate, GMSAutocomp
     
     func viewController(_ viewController: GMSAutocompleteViewController, didAutocompleteWith place: GMSPlace) {
         
-        print(place)
         selectedLocation = CLLocation.init(latitude: place.coordinate.latitude, longitude: place.coordinate.longitude)
         selectedGooglePlaceID = place.placeID
         locationNameLabel.text = place.name
+        
+        // Auto Select Closest Distance (5 KM)
+        self.distanceSegment.selectedSegmentIndex = 1
+        self.selectedRange = geoFilterRangeDefault[1]
+        
+        print("Selected Google Location: \(place.name), \(place.placeID), \(selectedLocation)")
         dismiss(animated: true, completion: nil)
         
     }

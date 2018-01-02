@@ -126,9 +126,8 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
         let filterController = FilterController()
         filterController.delegate = self
         filterController.selectedRange = self.filterRange
-        filterController.selectedGroup = self.filterGroup
         filterController.selectedSort = self.filterSort
-        filterController.selectedTime = self.filterTime
+        filterController.selectedType = self.filterTime
         self.navigationController?.pushViewController(filterController, animated: true)
     }
     
@@ -498,13 +497,11 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
     
 // Filter Delegate
     
-    func filterControllerFinished(selectedRange: String, selectedLocation: CLLocation?, selectedGooglePlaceID: String?, selectedTime: String, selectedGroup: String, selectedSort: String){
-        
-        self.filterRange = selectedRange
+    func filterControllerFinished(selectedRange: String?, selectedLocation: CLLocation?, selectedGooglePlaceID: String?, selectedMinRating: Double, selectedType: String?, selectedMaxPrice: String?, selectedSort: String) {
+
+        self.filterRange = selectedRange!
         self.filterLocation = selectedLocation
-        self.filterGroup = selectedGroup
         self.filterSort = selectedSort
-        self.filterTime = selectedTime
         self.refreshPagination()
         self.scrolltoFirst = true
         

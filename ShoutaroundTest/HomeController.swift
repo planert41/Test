@@ -19,55 +19,10 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     let cellId = "cellId"
     var scrolltoFirst: Bool = false
     
-//    1. Fetch All Post Ids to fetchedPostIds
-//    2. Fetch All Posts to fetchedPosts
-//    3. Filter Posts based on Conditions/Sorting to displayedPosts
-//    4. Control Pagination by increasing count of posts to max
-    
-    
-    var fetchedPostIds: [PostId] = [] {
-        didSet{
-        }
-    }
-    
-    var fetchedPosts: [Post] = [] {
-        didSet{
-            
-        }
-    }
-    
+    var fetchedPostIds: [PostId] = []
+    var fetchedPosts: [Post] = []
     var displayedPostsCount: Int = 0
-    
-    var displayedPosts = [Post](){
-        didSet{
-            if displayedPosts.count == 0 {
-                // Won't need to scroll if 0 results as it will default to the top
-//                self.scrolltoFirst = false
-//                self.collectionView?.setContentOffset(CGPoint.zero, animated: true)
-                
-                if self.isFinishedPaging {
-                    self.noResultsLabel.text = "No Results"
-                } else {
-                    self.noResultsLabel.text = "Loading"
-                }
-                self.noResultsLabel.isHidden = false
-            } else {
-                self.noResultsLabel.isHidden = true
-                self.noResultsLabel.text = "Loading"
-            }
-            
-        }
-    }
 
-// Header Sort Variables
-    var currentHeaderSort = HeaderSortDefault
-    
-    
-// Geo Filter Variables
-    
-    let geoFilterRange = geoFilterRangeDefault
-    let geoFilterImage:[UIImage] = geoFilterImageDefault
-    
 // Pagination Variables
     
     var userPostIdFetched = false
@@ -76,25 +31,38 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     var isFinishedPaging = false {
         didSet{
             if isFinishedPaging == true {
-                print("Finished Paging :", self.fetchedPostCount)
+                print("Finished Paging :", self.displayedPostsCount)
             }
         }
     }
-    var fetchedPostCount = 0
     
+    static let refreshPostsNotificationName = NSNotification.Name(rawValue: "RefreshPosts")
     static let finishFetchingUserPostIdsNotificationName = NSNotification.Name(rawValue: "FinishFetchingUserPostIds")
     static let finishFetchingFollowingPostIdsNotificationName = NSNotification.Name(rawValue: "FinishFetchingFollowingPostIds")
     static let finishSortingFetchedPostsNotificationName = NSNotification.Name(rawValue: "FinishSortingFetchedPosts")
     static let finishPaginationNotificationName = NSNotification.Name(rawValue: "FinishPagination")
     
     
+    // Geo Filter Variables
+    
+    let geoFilterRange = geoFilterRangeDefault
+    let geoFilterImage:[UIImage] = geoFilterImageDefault
+    
+    
 // Filter Variables
     
     var filterCaption: String? = nil{
         didSet{
-
         }
     }
+    
+    
+    var filterRange: String? = nil {
+        didSet{
+            setupNavigationItems()
+        }
+    }
+    
     var filterLocation: CLLocation? = nil{
         didSet{
             if let filterLocation = filterLocation {
@@ -110,25 +78,34 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         }
     }
     
+    var filterGoogleLocationID: String? = nil {
+        didSet{
+            
+        }
+    }
+
     
-    
-    var filterGroup: String = defaultGroup {
+    var filterMinRating: Double = 0 {
+        didSet{
+            
+        }
+    }
+        
+    var filterType: String? = nil{
         didSet{
             setupNavigationItems()
         }
     }
-    var filterRange: String = defaultRange {
+    
+    var filterMaxPrice: String? = nil{
         didSet{
             setupNavigationItems()
         }
     }
     
-    var filterSort: String = defaultSort
-    var filterTime: String = defaultTime{
-        didSet{
-            setupNavigationItems()
-        }
-    }
+    // Header Sort Variables
+    var selectedHeaderSort = HeaderSortDefault
+    
     
     
     var filterButton: UIImageView = {
@@ -164,27 +141,31 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     
     override func viewDidLoad() {
         super.viewDidLoad()
-
-//        self.updateFirebaseData()
-//          self.reverseEmoji()
         
         self.navigationController?.navigationBar.backgroundColor = UIColor.clear
         
 //        self.automaticallyAdjustsScrollViewInsets = false
 
+        
+        //    1. Fetch All Post Ids to fetchedPostIds
+        //    2. Fetch All Posts to fetchedPosts
+        //    3. Filter displayedPosts based on Conditions/Sorting (All Fetched Posts are saved to cache anyways)
+        //    4. Control Pagination by increasing displayedPostsCount to fetchedpostCount
+        
+        
+// 1.  Checks if Both User and Following Post Ids are colelctved before proceeding
         NotificationCenter.default.addObserver(self, selector: #selector(finishFetchingPostIds), name: HomeController.finishFetchingUserPostIdsNotificationName, object: nil)
-        
         NotificationCenter.default.addObserver(self, selector: #selector(finishFetchingPostIds), name: HomeController.finishFetchingFollowingPostIdsNotificationName, object: nil)
-        
+
+// 2.  Fetches all Posts and Filters/Sorts
+
+// 3. Paginates Post by increasing displayedPostCount after Filtering and Sorting
         NotificationCenter.default.addObserver(self, selector: #selector(paginatePosts), name: HomeController.finishSortingFetchedPostsNotificationName, object: nil)
         
+// 4. Checks after pagination Ends
+        
         NotificationCenter.default.addObserver(self, selector: #selector(finishPaginationCheck), name: HomeController.finishPaginationNotificationName, object: nil)
-        
-        
         NotificationCenter.default.addObserver(self, selector: #selector(handleUpdateFeed), name: SharePhotoListController.updateFeedNotificationName, object: nil)
-        
-        NotificationCenter.default.addObserver(self, selector: #selector(handleUpdateFeedWithFilter), name: FilterController.updateFeedWithFilterNotificationName, object: nil)
-        
 
         view.addSubview(noResultsLabel)
         noResultsLabel.anchor(top: topLayoutGuide.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 50)
@@ -199,6 +180,10 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         collectionView?.alwaysBounceVertical = true
         collectionView?.keyboardDismissMode = .onDrag
         
+        NotificationCenter.default.addObserver(self, selector: #selector(handleRefresh), name: HomeController.refreshPostsNotificationName, object: nil)
+
+        
+        
         
 // Ask for Authorisation from the User.
         self.locationManager.requestAlwaysAuthorization()
@@ -212,15 +197,11 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         }
 
 
-// 1. Clear out all Filters and Pagination Variables
+// 1. Clear out all Filters, Fetched Post Ids and Pagination Variables
         self.refreshAll()
         
 // 2. Fetch All Relevant Post Ids, then pull in all Post information to fetchedPosts
         fetchAllPostIds()
-        
-// Post Ids are fetched, then fetches all posts, then sorts/filters, then paginates and displays
-        
-//        fetchGroupUserIds()
         self.scrolltoFirst = false
         
         // Search Controller
@@ -262,13 +243,6 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         return CGRect(x: x, y: y, width: width, height: height)
     }
     
-    func clearPostIds(){
-        self.fetchedPostIds.removeAll()
-    }
-    
-
-    
-    
 // Setup for Geo Range Button, Dummy TextView and UIPicker
     
     var noResultsLabel: UILabel = {
@@ -308,7 +282,6 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     
     
     func openSearch(){
-        
         self.present(resultSearchController!, animated: true, completion: nil)
     }
     
@@ -318,125 +291,53 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     func activateFilter(){
         let filterController = FilterController()
         filterController.delegate = self
+        
         filterController.selectedRange = self.filterRange
-        filterController.selectedGroup = self.filterGroup
-        filterController.selectedSort = self.filterSort
-        filterController.selectedTime = self.filterTime
+        filterController.selectedMinRating = self.filterMinRating
+        filterController.selectedMaxPrice = self.filterMaxPrice
+        filterController.selectedType = self.filterType
+
+        filterController.selectedSort = self.selectedHeaderSort
+        
         self.navigationController?.pushViewController(filterController, animated: true)
     }
 
 // Sort Delegate
     
     func headerSortSelected(sort: String) {
-        self.currentHeaderSort = sort
+        self.selectedHeaderSort = sort
         self.refreshPagination()
         self.collectionView?.reloadData()
         self.filterSortFetchedPosts()
-        print("Filter Sort is ", self.currentHeaderSort)
+        print("Filter Sort is ", self.selectedHeaderSort)
     }
     
     
 // Search Delegates
     
-    func filterControllerFinished(selectedRange: String, selectedLocation: CLLocation?, selectedGooglePlaceID: String?, selectedTime: String, selectedGroup: String, selectedSort: String){
+    
+    func filterControllerFinished(selectedRange: String?, selectedLocation: CLLocation?, selectedGooglePlaceID: String?, selectedMinRating: Double, selectedType: String?, selectedMaxPrice: String?, selectedSort: String){
+        
+        self.clearFilter()
         
         self.filterRange = selectedRange
         self.filterLocation = selectedLocation
-        self.filterGroup = selectedGroup
-        self.filterSort = selectedSort
-        self.filterTime = selectedTime
+        self.filterGoogleLocationID = selectedGooglePlaceID
+        self.filterMinRating = selectedMinRating
+        self.filterType = selectedType
+        self.filterMaxPrice = selectedMaxPrice
+        
+        self.selectedHeaderSort = selectedSort
+        
+        // Refresh Everything
         self.refreshPagination()
         self.collectionView?.reloadData()
         self.filterSortFetchedPosts()
         self.scrolltoFirst = true
-//        self.collectionView?.refreshControl?.endRefreshing()
-//        self.collectionView?.setContentOffset(CGPoint.zero, animated: true)
         
-        
-        self.displayedPosts.removeAll()
-        self.collectionView?.reloadData()
-    
-        // No Distance Filter is Selected
-        
-        guard let filterDistance = Double(self.filterRange) else {
-                    print("Invalid Distance Number or Non Distance")
-                    self.clearPostIds()
-                    self.fetchAllPostIds()
-                    return
-        }
-        
-        // Distance Filter is Selected
-        
-        Database.fetchAllPostIDWithinLocation(selectedLocation: self.filterLocation!, distance: filterDistance) { (firebasePostIds) in
-            
-            let currentUserUid = Auth.auth().currentUser?.uid
-            var tempPostIds = firebasePostIds
-            
-            // Check for User UID
-            
-            for (i,str) in firebasePostIds.enumerated().reversed() {
-                if CurrentUser.followingUids.contains(str.creatorUID!) || str.creatorUID! == currentUserUid! {
-                } else {
-                    tempPostIds.remove(at: i)
-                }
-            }
-            self.fetchedPostIds = tempPostIds
-            
-            self.sortFetchPostIds()
-            print("Geofire Filtered Posts: ", self.fetchedPostIds.count)
-            self.paginatePosts()
-        }
         
     }
-    
-    func sortFetchPostIds(){
-        if self.filterSort == FilterSortDefault[1] {
-            // Oldest
-            self.fetchedPostIds.sort(by: { (p1, p2) -> Bool in
-                return p1.creationDate!.compare(p2.creationDate!) == .orderedAscending
-            })
-        } else if self.filterSort == FilterSortDefault[0] {
-            // Nearest
-            self.fetchedPostIds.sort(by: { (p1, p2) -> Bool in
-                return (p1.distance! < p2.distance!)
-            })
-        } else {
-            //Latest
-            self.fetchedPostIds.sort(by: { (p1, p2) -> Bool in
-                return p1.creationDate!.compare(p2.creationDate!) == .orderedDescending
-        })
-        }
-    }
-    
 
-    
-    func sortDisplayedPosts(){
-        if self.displayedPosts.count > 1 {
-//            print(self.displayedPosts)
-            
-        if self.filterSort == FilterSortDefault[0] {
-            // Oldest
-            self.displayedPosts.sort(by: { (p1, p2) -> Bool in
-                return p1.creationDate.compare(p2.creationDate) == .orderedAscending
-            })
-        } else if self.filterSort == FilterSortDefault[1] {
-            // Nearest
-            self.displayedPosts.sort(by: { (p1, p2) -> Bool in
-                return (p1.distance! < p2.distance!)
-            })
-        } else if self.filterSort == FilterSortDefault[2] {
-            //Latest
-            self.displayedPosts.sort(by: { (p1, p2) -> Bool in
-                return p1.creationDate.compare(p2.creationDate) == .orderedDescending
-            })
-        } else {
-            print("Header Sort: ERROR, Not Valid Filter Sort")
-        }
-        } else {
-            print("0 Display Post when filtering")
-        }
-    }
-    
     // Home Post Search Delegates
     
     func filterCaptionSelected(searchedText: String?){
@@ -450,14 +351,10 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
             self.filterCaption = searchedText
             self.resultSearchController?.searchBar.text = searchedText
             self.refreshPagination()
-            self.displayedPosts.removeAll()
-            self.scrolltoFirst = true
-//            self.collectionView?.refreshControl?.endRefreshing()
-//            self.collectionView?.setContentOffset(CGPoint.zero, animated: true)
             self.collectionView?.reloadData()
+            self.scrolltoFirst = true
             self.fetchAllPosts()
         }
-        
     }
     
     func userSelected(uid: String?){
@@ -467,46 +364,60 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     }
     
     func locationSelected(googlePlaceId: String?){
-        
         let locationController = LocationController()
         locationController.googlePlaceId = googlePlaceId
         navigationController?.pushViewController(locationController, animated: true)
-        
     }
     
     
     
-// Handle Update
+// Handle Refresh/Update
     
+    func clearPostIds(){
+        self.fetchedPostIds.removeAll()
+    }
     
-    func refreshAll(){
-        self.clearFilter()
-        self.refreshPagination()
+    func clearSort(){
+        self.selectedHeaderSort = defaultSort
+    }
+    
+    func clearSearch(){
+        self.defaultSearchBar.text?.removeAll()
+        self.resultSearchController?.searchBar.text = nil
+        self.filterCaption = nil
     }
     
     func clearFilter(){
-        self.resultSearchController?.searchBar.text = nil
-        self.filterCaption = nil
         self.filterLocation = nil
-        self.filterGroup = defaultGroup
-        self.filterRange = defaultRange
-        self.filterSort = defaultSort
-        self.filterTime = defaultTime
+        self.filterRange = nil
+        self.filterGoogleLocationID = nil
+        self.filterMinRating = 0
+        self.filterType = nil
+        self.filterMaxPrice = nil
+        self.selectedHeaderSort = defaultSort
     }
     
     func refreshPagination(){
         self.isFinishedPaging = false
-        self.fetchedPostCount = 0
         self.displayedPostsCount = 0
         self.userPostIdFetched = false
         self.followingPostIdFetched = false
     }
     
+    func refreshAll(){
+        self.clearSearch()
+        self.clearFilter()
+        self.clearPostIds()
+        self.refreshPagination()
+        self.collectionView?.reloadData()
+    }
+    
+
     func handleUpdateFeed() {
         
         // Check for new post that was edited or uploaded
         if newPost != nil && newPostId != nil {
-            self.displayedPosts.insert(newPost!, at: 0)
+            self.fetchedPosts.insert(newPost!, at: 0)
             self.fetchedPostIds.insert(newPostId!, at: 0)
             
             newPost = nil
@@ -518,39 +429,20 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
                 self.collectionView?.scrollToItem(at: indexPath, at: .bottom, animated: true)
             }
             print("Pull in new post")
-            
+
         } else {
         self.handleRefresh()
         }
-
-    }
-    
-    func handleUpdateFeedWithFilter() {
-        displayedPosts.removeAll()
-        self.collectionView?.reloadData()
-        self.paginatePosts()
-        print("Refresh Home Feed With Filter")
-        
     }
     
     func handleRefresh() {
-        
-        // RemoveAll so that when user follow/unfollows it updates
-//        navigationItem.title = "Shoutaround"
-        defaultSearchBar.text?.removeAll()
-        refreshPagination()
-        clearFilter()
-        fetchedPostIds.removeAll()
-        displayedPosts.removeAll()
-        self.collectionView?.reloadData()
+        self.refreshAll()
         fetchAllPostIds()
         self.collectionView?.refreshControl?.endRefreshing()
-        print("Refresh Home Feed. FetchPostIds: ", self.fetchedPostIds.count, " DisplayedPost: ", self.displayedPosts.count)
+        print("Refresh Home Feed. FetchPostIds: ", self.fetchedPostIds.count, "FetchedPostCounr: ", self.fetchedPosts.count, " DisplayedPost: ", self.displayedPostsCount)
     }
 
 // Post ID Fetching
-    
-    
     fileprivate func fetchAllPostIds(){
         fetchUserPostIds()
         fetchFollowingUserPostIds()
@@ -569,9 +461,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
             CurrentUser.user = user
         }
         
-        
         Database.fetchAllPostIDWithCreatorUID(creatoruid: uid) { (postIds) in
-            
             self.checkDisplayPostIdForDups(postIds: postIds)
             self.fetchedPostIds = self.fetchedPostIds + postIds
             self.fetchedPostIds.sort(by: { (p1, p2) -> Bool in
@@ -639,30 +529,28 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         
         print("Finish Paging Check")
         
-        if self.fetchedPostCount == (self.fetchedPostIds.count) {
+        if self.displayedPostsCount == (self.fetchedPosts.count) {
             self.isFinishedPaging = true
         }
         
-        if self.displayedPosts.count == 0 && self.isFinishedPaging == true {
+        if self.fetchedPosts.count == 0 && self.isFinishedPaging == true {
             print("No Results Pagination Finished")
             self.noResultsLabel.text = "No Results"
             self.noResultsLabel.isHidden = false
         }
-        else if self.displayedPosts.count == 0 && self.isFinishedPaging != true {
+        else if self.fetchedPosts.count == 0 && self.isFinishedPaging != true {
             print("No Display Pagination Check Paginate")
             self.noResultsLabel.text = "Loading"
             self.noResultsLabel.isHidden = false
             self.paginatePosts()
         } else {
             
-            // Sort Displayed Post - Firebase does not return post in order
-            self.sortDisplayedPosts()
             print("Refreshing CollectionView")
             
             DispatchQueue.main.async(execute: { self.collectionView?.reloadData()
             
                 // Scrolling for refreshed results
-                if self.scrolltoFirst && self.displayedPosts.count > 1{
+                if self.scrolltoFirst && self.fetchedPosts.count > 1{
                     print("Refresh Control Status: ", self.collectionView?.refreshControl?.state)
                     self.collectionView?.refreshControl?.endRefreshing()
                     let indexPath = IndexPath(item: 0, section: 0)
@@ -675,22 +563,6 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
                 }
             
             })
-
-//            print("Visible Cells: ",self.collectionView?.indexPathsForVisibleItems, " ScrollToFirst: ",self.scrolltoFirst, "No of items: ", self.collectionView?.numberOfItems(inSection: 0))
-//            
-//            if self.collectionView?.numberOfItems(inSection: 0) != 0 && self.scrolltoFirst {
-//                if (self.collectionView?.indexPathsForVisibleItems)! != [] {
-//                let indexPath = IndexPath(item: 0, section: 0)
-//                self.collectionView?.scrollToItem(at: indexPath, at: .top, animated: true)
-//                self.scrolltoFirst = false
-//                self.noResultsLabel.isHidden = true
-//                    print("Scolled to First")}
-//                else {
-//                self.scrolltoFirst = false
-//                }
-//            }        
-//            print("Displayed Posts: ",displayedPosts)
-        
         }
     }
     
@@ -715,24 +587,6 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         }
     }
     
-    func filterFetchedPosts(completion: @escaping () ->()){
-        
-        // Filter Caption
-        
-        if self.filterCaption != nil && self.filterCaption != "" {
-            guard let searchedText = self.filterCaption else {return}
-            print("Sort Post By Caption: \(searchedText)")
-            self.fetchedPosts = self.fetchedPosts.filter { (post) -> Bool in
-                
-                let searchedEmoji = ReverseEmojiDictionary[searchedText.lowercased()] ?? ""
-                
-                return post.caption.lowercased().contains(searchedText.lowercased()) || post.emoji.contains(searchedText.lowercased()) || post.nonRatingEmojiTags.joined(separator: " ").lowercased().contains(searchedText.lowercased()) || post.nonRatingEmojiTags.joined(separator: " ").lowercased().contains(searchedEmoji) || post.locationName.lowercased().contains(searchedText.lowercased()) || post.locationAdress.lowercased().contains(searchedText.lowercased())
-            }
-        }
-        
-        completion()
-    }
-    
     func filterSortFetchedPosts(){
         self.filterFetchedPosts {
             self.sortFetchedPosts {
@@ -742,22 +596,90 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         }
     }
     
-    func sortFetchedPosts(completion: @escaping () ->()){
-        print("Sort Posts: \(self.currentHeaderSort)")
+    func filterFetchedPosts(completion: @escaping () ->()){
+        // Filter Caption
+        if self.filterCaption != nil && self.filterCaption != "" {
+            guard let searchedText = self.filterCaption else {return}
+            self.fetchedPosts = self.fetchedPosts.filter { (post) -> Bool in
+                
+                let searchedEmoji = ReverseEmojiDictionary[searchedText.lowercased()] ?? ""
+                
+                return post.caption.lowercased().contains(searchedText.lowercased()) || post.emoji.contains(searchedText.lowercased()) || post.nonRatingEmojiTags.joined(separator: " ").lowercased().contains(searchedText.lowercased()) || post.nonRatingEmojiTags.joined(separator: " ").lowercased().contains(searchedEmoji) || post.locationName.lowercased().contains(searchedText.lowercased()) || post.locationAdress.lowercased().contains(searchedText.lowercased())
+            }
+            print("Filtered Post By Caption: \(searchedText): \(self.fetchedPosts.count)")
 
-        if self.currentHeaderSort == HeaderSortOptions[0] {
-            // Recent
+        }
+        
+        // Filter Range
+        if self.filterLocation != nil && self.filterRange != nil {
+            self.fetchedPosts = self.fetchedPosts.filter { (post) -> Bool in
+                var filterDistance:Double = 99999
+                if post.distance != nil {
+                    filterDistance = post.distance!
+                }
+                return filterDistance <= Double(self.filterRange!)!
+            }
+            print("Filtered Post By Range: \(self.filterRange) AT \(self.filterLocation): \(self.fetchedPosts.count)")
+        }
+        
+        // Filter Rating
+        if self.filterMinRating != 0 {
+            self.fetchedPosts = self.fetchedPosts.filter { (post) -> Bool in
+                var filterRating:Double = 0
+                if post.rating != nil {
+                    filterRating = post.rating!
+                }
+                return filterRating >= self.filterMinRating
+            }
+            print("Filtered Post By Min Rating: \(self.filterMinRating): \(self.fetchedPosts.count)")
+        }
+        
+        // Filter Type
+        if self.filterType != nil {
+            self.fetchedPosts = self.fetchedPosts.filter { (post) -> Bool in
+                return post.type == self.filterType
+            }
+            print("Filtered Post By Post Type: \(self.filterType): \(self.fetchedPosts.count)")
+        }
+        
+        // Filter Max Price
+        if self.filterMaxPrice != nil {
+            let maxPriceIndex = UploadPostPriceDefault.index(of: self.filterMaxPrice!)
+            let filterMaxPrice = UploadPostPriceDefault[0..<maxPriceIndex!]
+            
+            self.fetchedPosts = self.fetchedPosts.filter { (post) -> Bool in
+                var filterPrice:String = "0"
+                if post.price != nil {
+                    filterPrice = post.price!
+                }
+                return filterMaxPrice.contains(filterPrice)
+            }
+            print("Filtered Post By Max Price: \(self.filterMaxPrice): \(self.fetchedPosts.count)")
+        }
+        
+        completion()
+    }
+    
+
+    
+    func sortFetchedPosts(completion: @escaping () ->()){
+        print("Sort Posts: \(self.selectedHeaderSort)")
+
+        // Recent
+        if self.selectedHeaderSort == HeaderSortOptions[0] {
             self.fetchedPosts.sort(by: { (p1, p2) -> Bool in
                 return p1.creationDate.compare(p2.creationDate) == .orderedDescending
             })
             completion()
-        } else if self.currentHeaderSort == HeaderSortOptions[1] {
-            // Nearest
-            
+        }
+        
+        // Nearest
+        else if self.selectedHeaderSort == HeaderSortOptions[1] {
             // Check for current filter location
             if self.filterLocation == nil {
                 print("Header Sort: Nearest, No Location, Finding Current Location")
                 self.determineCurrentLocation()
+                
                 // Posts are refreshed with distances when filter location is updated
                 let when = DispatchTime.now() + 1 // change 2 to desired number of seconds
                 DispatchQueue.main.asyncAfter(deadline: when) {
@@ -772,18 +694,21 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
                 })
                 completion()
             }
-        } else if self.currentHeaderSort == HeaderSortOptions[2] {
-            //Trending/Oldest For Now
+        }
+            
+        //Trending
+        else if self.selectedHeaderSort == HeaderSortOptions[2] {
             self.fetchedPosts.sort(by: { (p1, p2) -> Bool in
-                return p1.creationDate.compare(p2.creationDate) == .orderedAscending
+                return (p1.voteCount > p2.voteCount)
             })
-            completion()
-        } else {
-            print("Fetched Post Sort: ERROR, Invalid Sort")
             completion()
         }
         
-        print("Finish Sorting")
+        // ERROR - Invalid Sort
+        else {
+            print("Fetched Post Sort: ERROR, Invalid Sort")
+            completion()
+        }
     }
     
     
@@ -792,85 +717,11 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         let paginateFetchPostSize = 4
 
         self.displayedPostsCount = min(self.displayedPostsCount + paginateFetchPostSize, self.fetchedPosts.count)
-        
-        if self.displayedPostsCount == self.fetchedPosts.count {
-            self.isFinishedPaging = true
-        }
-        
-        collectionView?.reloadData()
-
         print("Home Paginate \(self.displayedPostsCount) : \(self.fetchedPosts.count)")
 
-        //                print("Finish Paging")
-//        NotificationCenter.default.post(name: HomeController.finishPaginationNotificationName, object: nil)
-
+        NotificationCenter.default.post(name: HomeController.finishPaginationNotificationName, object: nil)
     }
     
-//    func paginatePosts(){
-//
-//        let paginateFetchPostSize = 4
-//
-//        var paginateFetchPostsLimit = min(self.displayedPostsCount + paginateFetchPostSize, self.fetchedPostIds.count)
-//
-//        print("Home Paginate \(self.displayedPostsCount) to \(paginateFetchPostsLimit) : \(self.fetchedPostIds.count)")
-//
-//        for i in self.displayedPostsCount ..< paginateFetchPostsLimit  {
-//
-//            let fetchPostId = fetchedPostIds[i]
-//
-////            print("Current number: ", i, "from", self.fetchedPostCount, " to ",paginateFetchPostsLimit)
-////            print(" Paginate \(i): \(fetchPostId.id)")
-//
-//
-//            Database.fetchPostWithPostID(postId: fetchPostId.id, completion: { (post, error) in
-//                self.fetchedPostCount += 1
-//
-//                guard var fetchedPost = post else {return}
-//
-//                // Update Post with Location Distance from selected Location
-//                if self.filterLocation != nil {
-//                    fetchedPost.distance = Double((fetchedPost.locationGPS?.distance(from: self.filterLocation!))!)
-//                }
-//
-//                var tempPost = [fetchedPost]
-//
-//                if let error = error {
-////                    print("Failed to fetch post for: ", fetchPostId.id)
-//                    return
-//                }
-//
-//                // Filter Caption
-//
-//                if self.filterCaption != nil && self.filterCaption != "" {
-//                    guard let searchedText = self.filterCaption else {return}
-//                    tempPost = tempPost.filter { (post) -> Bool in
-//
-//                        let searchedEmoji = ReverseEmojiDictionary[searchedText.lowercased()] ?? ""
-//
-//                        return post.caption.lowercased().contains(searchedText.lowercased()) || post.emoji.contains(searchedText.lowercased()) || post.nonRatingEmojiTags.joined(separator: " ").lowercased().contains(searchedText.lowercased()) || post.nonRatingEmojiTags.joined(separator: " ").lowercased().contains(searchedEmoji) || post.locationName.lowercased().contains(searchedText.lowercased()) || post.locationAdress.lowercased().contains(searchedText.lowercased())
-//                    }
-//                }
-//
-//                if tempPost.count > 0 {print("Adding Temp Post id: ", tempPost[0].id)}
-//
-//                // Update Location if nil
-//
-//                self.displayedPosts += tempPost
-//
-////                print("Current: ", i, "fetchedPostCount: ", self.fetchedPostCount, "Total: ", self.fetchPostIds.count, "Display: ", self.displayedPosts.count, "finished: ", self.isFinishedPaging, "paginate:", paginateFetchPostsLimit)
-//
-//                if self.fetchedPostCount == paginateFetchPostsLimit {
-//
-////                print("Finish Paging")
-//                NotificationCenter.default.post(name: HomeController.finishPaginationNotificationName, object: nil)
-//
-//                    }
-//                })
-//            }
-//        }
-    
-    
-
     
     fileprivate func fetchGroupUserIds() {
         
@@ -900,7 +751,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         
         navigationItem.leftBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "mailbox").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(openInbox))
         
-        if self.filterGroup == defaultGroup && self.filterRange == defaultRange && self.filterTime == defaultTime && self.filterGroup == "All" {
+        if self.filterRange == defaultRange && self.filterType == defaultTime {
             filterButton.image = #imageLiteral(resourceName: "filter").withRenderingMode(.alwaysOriginal)
             filterButton.backgroundColor = UIColor.clear
             filterButton.addGestureRecognizer(singleTap)
@@ -1026,12 +877,12 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     }
     
     func refreshPost(post: Post) {
-        let index = displayedPosts.index { (filteredpost) -> Bool in
+        let index = fetchedPosts.index { (filteredpost) -> Bool in
             filteredpost.id  == post.id
         }
         print(index)
         let filteredindexpath = IndexPath(row:index!, section: 0)
-        self.displayedPosts[index!] = post
+        self.fetchedPosts[index!] = post
 //        self.collectionView?.reloadItems(at: [filteredindexpath])
         
         // Update Cache
@@ -1092,12 +943,12 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         deleteAlert.addAction(UIAlertAction(title: "Ok", style: .default, handler: { (action: UIAlertAction!) in
             
             // Remove from Current View
-            let index = self.displayedPosts.index { (filteredpost) -> Bool in
+            let index = self.fetchedPosts.index { (filteredpost) -> Bool in
                 filteredpost.id  == post.id
             }
             
             let filteredindexpath = IndexPath(row:index!, section: 0)
-            self.displayedPosts.remove(at: index!)
+            self.fetchedPosts.remove(at: index!)
             self.collectionView?.deleteItems(at: [filteredindexpath])
             Database.deletePost(post: post)
         }))

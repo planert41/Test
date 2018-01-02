@@ -19,6 +19,24 @@ class MainTabBarController: UITabBarController, UITabBarControllerDelegate, UIIm
     var selectedImage: UIImage? = nil
     var selectedTime: Date? = nil
     var assets = [PHAsset]()
+    var selectedTabBarIndex: Int? = nil
+    
+
+    func tabBarController(_ tabBarController: UITabBarController, didSelect viewController: UIViewController) {
+        guard let index = viewControllers?.index(of: viewController) else {
+            print("Invalid Tab Bar Index")
+            return
+        }
+        
+        if index == 0 && index == self.selectedTabBarIndex {
+            print("Double Click Home Tab Bar, Refreshing")
+            NotificationCenter.default.post(name: HomeController.refreshPostsNotificationName, object: nil)
+            // Reselected Home Controller refresh
+        }
+
+        selectedTabBarIndex = index
+    }
+    
     
     
     func tabBarController(_ tabBarController: UITabBarController, shouldSelect viewController: UIViewController) -> Bool {

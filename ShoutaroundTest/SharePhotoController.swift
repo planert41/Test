@@ -52,11 +52,11 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
     var selectedImageLocation:CLLocation?{
         didSet{
             selectPostLocation = selectedImageLocation
-            // Updates Adress and Finds Restaurants near location
-//            if selectPostLocation != nil && (selectPostLocation?.coordinate.latitude != 0) && (selectPostLocation?.coordinate.longitude != 0){
-//                googleReverseGPS(GPSLocation: selectPostLocation!)
-//                googleLocationSearch(GPSLocation: selectPostLocation!)
-//            }
+//             Updates Adress and Finds Restaurants near location
+            if selectPostLocation != nil && (selectPostLocation?.coordinate.latitude != 0) && (selectPostLocation?.coordinate.longitude != 0){
+                googleReverseGPS(GPSLocation: selectPostLocation!)
+                googleLocationSearch(GPSLocation: selectPostLocation!)
+            }
         }
     }
     
@@ -872,20 +872,8 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         LocationContainerView.anchor(top: captionTextView.bottomAnchor, left: view.leftAnchor, bottom: view.bottomAnchor, right: view.rightAnchor, paddingTop: 1, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
         
         
-        
-        // Add Rating
-        
-        view.addSubview(starRatingCancelButton)
-        starRatingCancelButton.anchor(top: LocationContainerView.topAnchor, left: nil, bottom: nil, right: LocationContainerView.rightAnchor, paddingTop: 10, paddingLeft: 10, paddingBottom: 10, paddingRight: 10, width: 20, height: 20)
-        starRatingCancelButton.isHidden = true
-        
-        view.addSubview(starRating)
-        starRating.anchor(top: LocationContainerView.topAnchor, left: LocationContainerView.leftAnchor, bottom: nil, right: starRatingCancelButton.leftAnchor, paddingTop: 5, paddingLeft: 10, paddingBottom: 0, paddingRight: 0, width: 0, height: 30)
-        starRating.didFinishTouchingCosmos = starRatingSelectFunction
-        //        starRating.backgroundColor = UIColor.blue
-        
         view.addSubview(locationNameLabel)
-        locationNameLabel.anchor(top: starRating.bottomAnchor, left: LocationContainerView.leftAnchor, bottom: nil, right: LocationContainerView.rightAnchor, paddingTop: 10, paddingLeft: 0, paddingBottom: 5, paddingRight: 0, width: 0, height: 40)
+        locationNameLabel.anchor(top: LocationContainerView.topAnchor, left: LocationContainerView.leftAnchor, bottom: nil, right: LocationContainerView.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 5, paddingRight: 0, width: 0, height: 40)
         locationNameLabel.isUserInteractionEnabled = true
         let TapGesture = UITapGestureRecognizer(target: self, action: #selector(tapSearchBar))
         locationNameLabel.addGestureRecognizer(TapGesture)
@@ -915,10 +903,21 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         placesCollectionView.delegate = self
         placesCollectionView.dataSource = self
         
+        // Add Rating
+        
+        view.addSubview(starRatingCancelButton)
+        starRatingCancelButton.anchor(top: placesCollectionView.bottomAnchor, left: nil, bottom: nil, right: LocationContainerView.rightAnchor, paddingTop: 10, paddingLeft: 10, paddingBottom: 10, paddingRight: 10, width: 20, height: 20)
+        starRatingCancelButton.isHidden = true
+        
+        view.addSubview(starRating)
+        starRating.anchor(top: placesCollectionView.bottomAnchor, left: LocationContainerView.leftAnchor, bottom: nil, right: starRatingCancelButton.leftAnchor, paddingTop: 5, paddingLeft: 10, paddingBottom: 0, paddingRight: 0, width: 0, height: 30)
+        starRating.didFinishTouchingCosmos = starRatingSelectFunction
+        //        starRating.backgroundColor = UIColor.blue
+        
         
         // Add Post Type Segment
         view.addSubview(postTypeSegment)
-        postTypeSegment.anchor(top: placesCollectionView.bottomAnchor, left: LocationContainerView.leftAnchor, bottom: nil, right: LocationContainerView.rightAnchor, paddingTop: 5, paddingLeft: 10, paddingBottom: 0, paddingRight: 10, width: 0, height: 30)
+        postTypeSegment.anchor(top: starRating.bottomAnchor, left: LocationContainerView.leftAnchor, bottom: nil, right: LocationContainerView.rightAnchor, paddingTop: 10, paddingLeft: 10, paddingBottom: 0, paddingRight: 10, width: 0, height: 30)
         
         // Add Post Price Segment
         view.addSubview(postPriceSegment)

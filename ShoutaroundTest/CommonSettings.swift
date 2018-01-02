@@ -11,7 +11,7 @@ import UIKit
 
 
 var geoFilterImageDefault:[UIImage] = [#imageLiteral(resourceName: "GeoFence"),#imageLiteral(resourceName: "GeoFence"), #imageLiteral(resourceName: "City"), #imageLiteral(resourceName: "City"), #imageLiteral(resourceName: "Globe")]
-var geoFilterRangeDefault:[String] = ["5", "25", "100","250", "All"]
+var geoFilterRangeDefault:[String] = ["1", "5", "25", "50", "100","250"]
 
 var defaultPhotoResize = CGSize(width: 500, height: 500)
 var defaultEmptyGPSName: String = "No Location"
@@ -32,6 +32,7 @@ let HeaderSortDefault:String = HeaderSortOptions[0]
 
 // Filter Defaults
 
+var FilterRatingDefault:[Int] = [1,2,3,4,5,6,7]
 var FilterSortTimeDefault:[String] = ["Breakfast", "Lunch", "Dinner", "All"]
 var FilterSortTimeStart:[Double] = [6,12,18,0]
 var FilterSortTimeEnd:[Double] = [12,18,23,23]

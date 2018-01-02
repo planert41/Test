@@ -574,7 +574,7 @@ extension Database{
 //                print("Using post cache for \(postId)")
                 var tempCachePost = cachedPost
                 
-                // Need to update cache post if current user location is not nil
+// Need to update cache post distance if current user location is not nil
                 if CurrentUser.currentLocation != nil {
                     tempCachePost.distance = Double((tempCachePost.locationGPS?.distance(from: CurrentUser.currentLocation!))!)
                 }
