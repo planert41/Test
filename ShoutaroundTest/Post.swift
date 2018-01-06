@@ -46,6 +46,8 @@ struct Post {
     let creationDate: Date
     var id: String?
     var locationGPS: CLLocation?
+    var imageGPS: CLLocation?
+
     var locationName: String
     var locationAdress: String
     var locationGooglePlaceID: String?
@@ -114,7 +116,7 @@ struct Post {
         
         
         
-        let locationGPSText = dictionary["postLocationGPS"] as? String ?? "0,0"
+        let locationGPSText = dictionary["postLocationGPS"] as? String ?? ""
         let locationGPSTextArray = locationGPSText.components(separatedBy: ",")
         
         if locationGPSTextArray.count == 1 {
@@ -126,8 +128,49 @@ struct Post {
             if CurrentUser.currentLocation != nil {
                 self.distance = Double((self.locationGPS?.distance(from: CurrentUser.currentLocation!))!)
             }
-        
         }
+    
+        let imageGPSText = dictionary["imageLocationGPS"] as? String ?? ""
+        let imageGPSTextArray = imageGPSText.components(separatedBy: ",")
+        
+        if imageGPSTextArray.count == 1 {
+            self.imageGPS = nil
+        } else {
+            self.imageGPS = CLLocation(latitude: Double(imageGPSTextArray[0])!, longitude: Double(imageGPSTextArray[1])!)
+        }
+    
+    }
+    
+    func dictionary() -> [String:Any]{
+        var createdTime = self.creationDate.timeIntervalSince1970
+        
+        var uploadedLocationGPSLatitude: String?
+        var uploadedlocationGPSLongitude: String?
+        var uploadedLocationGPS: String?
+        
+        if self.locationGPS == nil {
+            uploadedLocationGPS = nil
+        } else {
+            uploadedLocationGPSLatitude = String(format: "%f", (self.locationGPS!.coordinate.latitude))
+            uploadedlocationGPSLongitude = String(format: "%f", (self.locationGPS!.coordinate.longitude))
+            uploadedLocationGPSLatitude = uploadedLocationGPSLatitude! + "," + uploadedlocationGPSLongitude!
+        }
+        
+        var uploadedImageLocationGPSLatitude: String?
+        var uploadedImageLocationGPSLongitude: String?
+        var uploadedImageLocationGPS: String?
+
+        if self.imageGPS == nil {
+            uploadedImageLocationGPS = nil
+        } else {
+            uploadedImageLocationGPSLatitude = String(format: "%f", (self.imageGPS!.coordinate.latitude))
+            uploadedImageLocationGPSLongitude = String(format: "%f", (self.imageGPS!.coordinate.longitude))
+            uploadedImageLocationGPS = uploadedImageLocationGPSLatitude! + "," + uploadedImageLocationGPSLongitude!
+        }
+        
+        let values = ["caption": self.caption,"rating": self.rating, "nonratingEmoji": self.nonRatingEmoji, "nonratingEmojiTags": self.nonRatingEmojiTags, "creationDate": createdTime, "googlePlaceID": self.locationGooglePlaceID, "locationName": self.locationName, "locationAdress": self.locationAdress, "postLocationGPS": uploadedLocationGPSLatitude, "imageLocationGPS": uploadedImageLocationGPS, "creatorUID": self.creatorUID, "price": self.price, "type": self.type, "lists": self.creatorListId] as [String:Any]
+        
+        return values
     }
     
     

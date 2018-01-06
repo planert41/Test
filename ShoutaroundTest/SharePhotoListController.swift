@@ -41,6 +41,7 @@ class SharePhotoListController: UIViewController, UICollectionViewDelegate, UICo
             
             collectionView.reloadData()
             
+            print(uploadPost?.dictionary())
             
         }
     }
@@ -159,11 +160,11 @@ class SharePhotoListController: UIViewController, UICollectionViewDelegate, UICo
         // Setup Navigation
         navigationItem.title = "Add To List"
         if self.isEditingPost{
-        navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Edit", style: .plain, target: self, action: #selector(handleEdit))
+        navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Edit", style: .plain, target: self, action: #selector(handleEditPost))
         } else if self.isBookmarkingPost {
-            navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Add", style: .plain, target: self, action: #selector(handleAddList))
+            navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Add", style: .plain, target: self, action: #selector(handleAddPostToList))
         } else {
-            navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Share", style: .plain, target: self, action: #selector(handleShare))
+            navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Share", style: .plain, target: self, action: #selector(handleShareNewPost))
         }
         
         
@@ -189,7 +190,18 @@ class SharePhotoListController: UIViewController, UICollectionViewDelegate, UICo
         view.addSubview(tableView)
         tableView.anchor(top: addListView.bottomAnchor, left: view.leftAnchor, bottom: view.bottomAnchor, right: view.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
         
+        let refreshControl = UIRefreshControl()
+        refreshControl.addTarget(self, action: #selector(refreshList), for: .valueChanged)
+        tableView.refreshControl = refreshControl
+        tableView.alwaysBounceVertical = true
+        tableView.keyboardDismissMode = .onDrag
+        
         setupLists()
+    }
+    
+    func refreshList(){
+        self.tableView.reloadData()
+        self.tableView.refreshControl?.endRefreshing()
     }
     
     func setupLists(){
@@ -254,7 +266,7 @@ class SharePhotoListController: UIViewController, UICollectionViewDelegate, UICo
         
     }
     
-    func handleShare(){
+    func handleShareNewPost(){
         print("Selected List: \(self.selectedList)")
         if self.selectedList != nil {
             // Add list id to post dictionary for display
@@ -275,7 +287,7 @@ class SharePhotoListController: UIViewController, UICollectionViewDelegate, UICo
         }
     }
     
-    func handleEdit(){
+    func handleEditPost(){
         print("Selected List: \(self.selectedList)")
         if self.selectedList != nil {
             // Add list id to post dictionary for display
@@ -306,7 +318,7 @@ class SharePhotoListController: UIViewController, UICollectionViewDelegate, UICo
         }
     }
     
-    func handleAddList(){
+    func handleAddPostToList(){
         
         var tempNewList: [String:String] = [:]
         for list in self.selectedList! {
@@ -387,7 +399,7 @@ class SharePhotoListController: UIViewController, UICollectionViewDelegate, UICo
 
 
     func tableView(_ tableView: UITableView, editActionsForRowAt indexPath: IndexPath) -> [UITableViewRowAction]? {
-        
+
         let delete = UITableViewRowAction(style: .destructive, title: "Delete") { (action, indexPath) in
             // Check For Default List
             if (defaultListNames.contains(where: { (listNames) -> Bool in
@@ -396,15 +408,15 @@ class SharePhotoListController: UIViewController, UICollectionViewDelegate, UICo
                 return
             }
             var list = self.displayList[indexPath.row]
-            
+
             self.displayList.remove(at: indexPath.row)
             tableView.deleteRows(at: [indexPath], with: .fade)
-            
+
             // Delete List in Database
             Database.deleteList(uploadList: list)
-            
+
         }
-        
+
         let edit = UITableViewRowAction(style: .default, title: "Edit") { (action, indexPath) in
             // Check For Default List
             if (defaultListNames.contains(where: { (listNames) -> Bool in
@@ -412,33 +424,33 @@ class SharePhotoListController: UIViewController, UICollectionViewDelegate, UICo
                 self.alert(title: "Edit List Error", message: "Cannot Edit Default List: \(self.displayList[indexPath.row].name)")
                 return
             }
-            
+
             print("I want to change: \(self.displayList[indexPath.row])")
 
-         
+
             //1. Create the alert controller.
             let alert = UIAlertController(title: "Change List Name", message: "Enter a New Name", preferredStyle: .alert)
-            
+
             //2. Add the text field. You can configure it however you need.
             alert.addTextField { (textField) in
                 textField.text = self.displayList[indexPath.row].name
             }
-            
+
             // 3. Grab the value from the text field, and print it when the user clicks OK.
             alert.addAction(UIAlertAction(title: "OK", style: .default, handler: { [weak alert] (_) in
                 let textField = alert?.textFields![0] // Force unwrapping because we know it exists.
                 print("Text field: \(textField?.text)")
-                
+
                 // Change List Name
                 self.checkListName(listName: textField?.text, completion: { (listName) in
                     self.displayList[indexPath.row].name = listName
                     self.tableView.reloadData()
-                    
+
                     var list = self.displayList[indexPath.row]
-                    
+
                     // Replace Database List
                     Database.createList(uploadList: list)
-                    
+
                     // Update Current User
                     if let listIndex = CurrentUser.lists.index(where: { (currentList) -> Bool in
                         currentList.id == list.id
@@ -447,17 +459,30 @@ class SharePhotoListController: UIViewController, UICollectionViewDelegate, UICo
                     }
                 })
             }))
-            
+
             // 4. Present the alert.
             self.present(alert, animated: true, completion: nil)
-            
-            
+
+
+        }
+
+        edit.backgroundColor = UIColor.lightGray
+        return [delete, edit]
+
+    }
+    
+    func tableView(_ tableView: UITableView, didEndEditingRowAt indexPath: IndexPath?) {
+        self.tableView.reloadData()
+    }
+    
+    func tableView(_ tableView: UITableView, editingStyleForRowAt indexPath: IndexPath) -> UITableViewCellEditingStyle {
+       
+        // Prevents Full Swipe Delete
+        if tableView.isEditing{
+            return .delete
         }
         
-        edit.backgroundColor = UIColor.lightGray
-        
-        return [delete, edit]
-        
+        return .none
     }
     
     

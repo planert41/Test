@@ -90,7 +90,10 @@ class UploadListCell: UITableViewCell {
             accessoryView = imageView
         }
         else {
-            accessoryType = selected ? .checkmark : .none
+            var imageView : UIImageView
+            imageView  = UIImageView(frame:CGRect(x: 0, y: 0, width: 20, height: 20))
+            imageView.image = selected ? #imageLiteral(resourceName: "checkmark") : nil
+            accessoryView = imageView
         }
         backgroundColor = selected ? UIColor.mainBlue() : UIColor.white
     }

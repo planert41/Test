@@ -450,7 +450,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
             print("Pull in new post")
 
         } else {
-        self.handleRefresh()
+            self.handleRefresh()
         }
     }
     
@@ -895,10 +895,11 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         let index = fetchedPosts.index { (filteredpost) -> Bool in
             filteredpost.id  == post.id
         }
-        print(index)
+        print("Refreshing Post @ \(index) for post \(post.id)")
         let filteredindexpath = IndexPath(row:index!, section: 0)
+        
         self.fetchedPosts[index!] = post
-//        self.collectionView?.reloadItems(at: [filteredindexpath])
+        self.collectionView?.reloadItems(at: [filteredindexpath])
         
         // Update Cache
         postCache.removeValue(forKey: post.id!)

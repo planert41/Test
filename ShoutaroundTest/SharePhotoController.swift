@@ -1620,6 +1620,8 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         // Upload Post to List Controller
         
         var uploadPost = Post.init(user: CurrentUser.user!, dictionary: values)
+        print("Reverse Post Dictionary: \(uploadPost.dictionary())")
+        
         uploadPost.image = postImage
         if self.editPostInd {
             // Use Current Image URL and post id
