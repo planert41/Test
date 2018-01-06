@@ -30,19 +30,12 @@ class SharePhotoListController: UIViewController, UICollectionViewDelegate, UICo
     var uploadPostLocation: CLLocation? = nil
     var uploadPost: Post? = nil {
         didSet{
-//            if uploadPost?.creatorListId?.count != 0 {
-//                self.editPrevList = uploadPost?.creatorListId
-//            }
-            
+            self.uploadPostDictionary = (self.uploadPost?.dictionary())!
             self.editPrevList = uploadPost?.selectedListId
             
             // Refreshes Current User Lists
             userList = CurrentUser.lists
-            
             collectionView.reloadData()
-            
-            print(uploadPost?.dictionary())
-            
         }
     }
     
@@ -295,7 +288,6 @@ class SharePhotoListController: UIViewController, UICollectionViewDelegate, UICo
             
             for list in self.selectedList! {
                 listIds![list.id!] = list.name
-                //                listIds?.append(list.id!)
             }
             uploadPostDictionary["lists"] = listIds
         }
@@ -312,7 +304,7 @@ class SharePhotoListController: UIViewController, UICollectionViewDelegate, UICo
         
         Database.editPostToDatabase(imageUrl: imageUrl, postId: postId, uploadDictionary: uploadPostDictionary, uploadLocation: uploadPostLocation, prevList: editPrevList) {
             
-            self.dismiss(animated: true, completion: nil)
+            self.navigationController?.popViewController(animated: true)
             NotificationCenter.default.post(name: SharePhotoListController.updateFeedNotificationName, object: nil)
             
         }
@@ -320,22 +312,27 @@ class SharePhotoListController: UIViewController, UICollectionViewDelegate, UICo
     
     func handleAddPostToList(){
         
-        var tempNewList: [String:String] = [:]
-        for list in self.selectedList! {
-            tempNewList[list.id!] = list.name
-        }
+        if uploadPost?.creatorUID == Auth.auth().currentUser?.uid {
+            // Same Creator So Edit Post instead of Adding Post to List
+            self.handleEditPost()
+        } else {
+            var tempNewList: [String:String] = [:]
+            for list in self.selectedList! {
+                tempNewList[list.id!] = list.name
+            }
 
-        Database.updateListforPost(post: uploadPost, newList: tempNewList, prevList: editPrevList) {
-
-            // Update Post Cache
-            var tempPost = self.uploadPost
-            tempPost?.selectedListId = tempNewList
-            postCache[(self.uploadPost?.id)!] = tempPost
-
-            
-            self.navigationController?.popViewController(animated: true)
-            self.delegate?.refreshPost(post: tempPost!)
-            NotificationCenter.default.post(name: SharePhotoListController.updateFeedNotificationName, object: nil)
+            Database.updateListforPost(post: uploadPost, newList: tempNewList, prevList: editPrevList) {
+                
+                
+                // Update Post Cache
+                var tempPost = self.uploadPost
+                tempPost?.selectedListId = tempNewList
+                postCache[(self.uploadPost?.id)!] = tempPost
+                
+                self.navigationController?.popViewController(animated: true)
+                self.delegate?.refreshPost(post: tempPost!)
+                NotificationCenter.default.post(name: SharePhotoListController.updateFeedNotificationName, object: nil)
+            }
         }
     }
     

@@ -104,7 +104,12 @@ struct Post {
         self.locationAdress = dictionary["locationAdress"] as? String ?? ""
         self.locationGooglePlaceID = dictionary["googlePlaceID"] as? String ?? ""
         self.creatorUID = dictionary["creatorUID"] as? String ?? ""
+        
         self.creatorListId = dictionary["lists"] as? [String:String] ?? [:]
+        
+        if self.creatorUID == Auth.auth().currentUser?.uid {
+            self.selectedListId = self.creatorListId
+        }
         
         self.likeCount = dictionary["likeCount"] as? Int ?? 0
         self.bookmarkCount = dictionary["bookmarkCount"] as? Int ?? 0

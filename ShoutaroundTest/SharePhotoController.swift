@@ -98,8 +98,11 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
             self.captionTextView.text = editPost?.caption
             }
             
-            // rating
+            // Rating
             self.selectPostStarRating = editPost?.rating ?? 0
+            
+            // Lists
+            self.postList = editPost?.creatorListId
             
             // Emojis
             self.nonRatingEmoji = (editPost?.nonRatingEmoji)!
@@ -315,6 +318,9 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         }
         print("Selected Time is ",self.selectPostPrice)
     }
+    
+    // List Variable
+    var postList:[String:String]? = nil
     
     
     // Emoji Variables
@@ -1635,7 +1641,7 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         sharePhotoListController.uploadPost = uploadPost
         sharePhotoListController.isEditingPost = self.editPostInd
         
-        sharePhotoListController.uploadPostDictionary = values
+//        sharePhotoListController.uploadPostDictionary = values
         sharePhotoListController.uploadPostLocation = self.selectPostLocation
         navigationController?.pushViewController(sharePhotoListController, animated: true)
     }
@@ -1828,7 +1834,7 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         let uploadTime = Date().timeIntervalSince1970
         let tagTime = self.selectTime.timeIntervalSince1970
         
-        let values = ["imageUrl": imageUrl, "caption": caption, "imageWidth": postImage.size.width, "imageHeight": postImage.size.height, "creationDate": uploadTime, "googlePlaceID": googlePlaceID, "locationName": postLocationName, "locationAdress": postLocationAdress, "postLocationGPS": uploadedLocationGPS, "creatorUID": uid, "tagTime": tagTime, "nonratingEmoji": nonratingEmojiUpload, "nonratingEmojiTags": nonratingEmojiTagsUpload, "editDate": uploadTime] as [String:Any]
+        let values = ["imageUrl": imageUrl, "caption": caption, "imageWidth": postImage.size.width, "imageHeight": postImage.size.height, "creationDate": uploadTime, "googlePlaceID": googlePlaceID, "locationName": postLocationName, "locationAdress": postLocationAdress, "postLocationGPS": uploadedLocationGPS, "creatorUID": uid, "tagTime": tagTime, "nonratingEmoji": nonratingEmojiUpload, "nonratingEmojiTags": nonratingEmojiTagsUpload, "editDate": uploadTime, "lists": self.postList] as [String:Any]
         userPostRef.updateChildValues(values) { (err, ref) in
             if let err = err {
                 self.navigationItem.rightBarButtonItem?.isEnabled = true

@@ -105,9 +105,16 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
     
     func checkPostForLegit(){
         
-        for (key,value) in (post?.creatorListId)! {
+        guard let creatorListId = post?.creatorListId else {
+            self.legitIcon.isHidden = true
+            return
+        }
+        
+        for (key,value) in creatorListId {
             if value == "Legit"{
                 self.legitIcon.isHidden = false
+            } else {
+                self.legitIcon.isHidden = true
             }
         }
     }
@@ -120,6 +127,8 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
     }
     
     func locationTap() {
+        print("Post Information: ", post)
+        
         print("Tap location label", post?.locationName ?? "")
         guard let post = post else {return}
         delegate?.didTapLocation(post: post)
@@ -549,6 +558,7 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         legitIcon.anchor(top: nil, left: nil, bottom: nil, right: starRatingLabel.leftAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 2, width: 25, height: 25)
         legitIcon.centerYAnchor.constraint(equalTo: usernameLabel.centerYAnchor).isActive = true
         legitIcon.isHidden = true
+        checkPostForLegit()
         
 //        ratingEmojiLabel.anchor(top: topAnchor, left: nil, bottom: photoImageView.topAnchor, right: usernameLabel.leftAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 2, width: 0, height: 0)
         
@@ -1185,3 +1195,4 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
     
     
 }
+
