@@ -28,6 +28,9 @@ pod 'SMSegmentView'
 pod ‘SearchTextField’
 pod 'Cosmos', '~> 13.0'
 pod 'IQKeyboardManagerSwift'
+pod 'UIFontComplete'
+pod 'SwiftIcons', '~> 2.0'
+
 
 
 

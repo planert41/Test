@@ -352,6 +352,13 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
     
 // HomePost Cell Delegate Functions
     
+    func didTapBookmark(post: Post) {
+        
+        let sharePhotoListController = SharePhotoListController()
+        sharePhotoListController.uploadPost = post
+        navigationController?.pushViewController(sharePhotoListController, animated: true)
+    }
+    
     func didTapComment(post: Post) {
         
         let commentsController = CommentsController(collectionViewLayout: UICollectionViewFlowLayout())
@@ -497,7 +504,7 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
     
 // Filter Delegate
     
-    func filterControllerFinished(selectedRange: String?, selectedLocation: CLLocation?, selectedGooglePlaceID: String?, selectedMinRating: Double, selectedType: String?, selectedMaxPrice: String?, selectedSort: String) {
+    func filterControllerFinished(selectedRange: String?, selectedLocation: CLLocation?, selectedLocationName: String?, selectedMinRating: Double, selectedType: String?, selectedMaxPrice: String?, selectedSort: String) {
 
         self.filterRange = selectedRange!
         self.filterLocation = selectedLocation

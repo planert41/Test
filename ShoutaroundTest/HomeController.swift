@@ -14,7 +14,7 @@ import CoreGraphics
 import CoreLocation
 
 
-class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLayout, HomePostCellDelegate, CLLocationManagerDelegate, UISearchControllerDelegate, HomePostSearchDelegate, UIGestureRecognizerDelegate, FilterControllerDelegate, UISearchBarDelegate, SortFilterHeaderDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate  {
+class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLayout, HomePostCellDelegate, CLLocationManagerDelegate, UISearchControllerDelegate, HomePostSearchDelegate, UIGestureRecognizerDelegate, FilterControllerDelegate, UISearchBarDelegate, SortFilterHeaderDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate, SharePhotoListControllerDelegate  {
     
     let cellId = "cellId"
     var scrolltoFirst: Bool = false
@@ -311,7 +311,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
 // Search Delegates
     
     
-    func filterControllerFinished(selectedRange: String?, selectedLocation: CLLocation?, selectedGooglePlaceID: String?, selectedMinRating: Double, selectedType: String?, selectedMaxPrice: String?, selectedSort: String){
+    func filterControllerFinished(selectedRange: String?, selectedLocation: CLLocation?, selectedLocationName: String?, selectedMinRating: Double, selectedType: String?, selectedMaxPrice: String?, selectedSort: String){
         
         // Clears all Filters, Puts in new Filters, Refreshes all Post IDS and Posts
         
@@ -320,7 +320,8 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         
         self.filterRange = selectedRange
         self.filterLocation = selectedLocation
-        self.filterGoogleLocationID = selectedGooglePlaceID
+        self.defaultSearchBar.text = selectedLocationName
+
         self.filterMinRating = selectedMinRating
         self.filterType = selectedType
         self.filterMaxPrice = selectedMaxPrice
@@ -631,6 +632,8 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
 
         }
         
+        // Distances are updated in fetchallposts as they are filtered by distance
+
         // Filter Range
         if self.filterLocation != nil && self.filterRange != nil {
             self.fetchedPosts = self.fetchedPosts.filter { (post) -> Bool in
@@ -710,12 +713,11 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
                     completion()
                 }
             } else {
-                self.updatePostDistances(refLocation: filterLocation){
+                    // Distances are updated in fetchallposts as they are filtered by distance
                     self.fetchedPosts.sort(by: { (p1, p2) -> Bool in
                         return (p1.distance! < p2.distance!)
                     })
                     completion()
-                }
             }
         }
             
@@ -857,6 +859,15 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     
     
 // HOME POST CELL DELEGATE METHODS
+    
+    func didTapBookmark(post: Post) {
+        
+        let sharePhotoListController = SharePhotoListController()
+        sharePhotoListController.uploadPost = post
+        sharePhotoListController.isBookmarkingPost = true
+        sharePhotoListController.delegate = self
+        navigationController?.pushViewController(sharePhotoListController, animated: true)
+    }
     
     func didTapComment(post: Post) {
     

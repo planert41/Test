@@ -9,8 +9,9 @@
 import UIKit
 import Firebase
 import FBSDKLoginKit
+import IQKeyboardManagerSwift
 
-class LoginController: UIViewController, FBSDKLoginButtonDelegate   {
+class LoginController: UIViewController, UITextFieldDelegate, FBSDKLoginButtonDelegate {
     
     
     
@@ -180,9 +181,17 @@ class LoginController: UIViewController, FBSDKLoginButtonDelegate   {
         
         navigationController?.isNavigationBarHidden = true
         view.backgroundColor = .white
+        IQKeyboardManager.sharedManager().enable = true
         
         view.addSubview(logoContainerView)
         logoContainerView.anchor(top: view.topAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 150)
+        
+        
+        view.isUserInteractionEnabled = true
+        view.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard)))
+        
+        logoContainerView.isUserInteractionEnabled = true
+        logoContainerView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard)))
         
         setupInputFields()
         
@@ -190,7 +199,29 @@ class LoginController: UIViewController, FBSDKLoginButtonDelegate   {
         dontHaveAccountButton.anchor(top: nil, left: view.leftAnchor, bottom: view.bottomAnchor, right: view.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 50)
         
 
+    }
+
+    override func viewDidDisappear(_ animated: Bool) {
+        IQKeyboardManager.sharedManager().enable = false
+
+    }
     
+    func dismissKeyboard() {
+        //Causes the view (or one of its embedded text fields) to resign the first responder status.
+        view.endEditing(true)
+    }
+    
+    
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        if textField == emailTextField{
+            passwordTextField.becomeFirstResponder()
+        } else if textField == passwordTextField {
+            self.resignFirstResponder()
+            self.handleLogIn()
+        } else {
+            self.resignFirstResponder()
+        }
+        return false
     }
     
 
@@ -340,6 +371,9 @@ class LoginController: UIViewController, FBSDKLoginButtonDelegate   {
 //        let stackView = UIStackView(arrangedSubviews: [emailTextField, passwordTextField, loginButton, fbLoginButton])
         
         let stackView = UIStackView(arrangedSubviews: [emailTextField, passwordTextField, loginButton])
+        
+        emailTextField.delegate = self
+        passwordTextField.delegate = self
         
         stackView.axis = .vertical
         stackView.spacing = 10

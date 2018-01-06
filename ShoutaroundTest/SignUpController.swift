@@ -9,8 +9,9 @@
 import UIKit
 import Firebase
 import FBSDKLoginKit
+import IQKeyboardManagerSwift
 
-class SignUpController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
+class SignUpController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate, UITextFieldDelegate {
 
     
     let plusPhotoButton: UIButton = {
@@ -92,6 +93,7 @@ class SignUpController: UIViewController, UIImagePickerControllerDelegate, UINav
         tf.backgroundColor = UIColor(white: 0, alpha: 0.03)
         tf.borderStyle = .roundedRect
         tf.font = UIFont.systemFont(ofSize: 14)
+
         
         tf.addTarget(self, action: #selector(handleTextInputChange), for: .editingChanged)
         
@@ -244,11 +246,16 @@ class SignUpController: UIViewController, UIImagePickerControllerDelegate, UINav
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        IQKeyboardManager.sharedManager().enable = true
      
         navigationController?.isNavigationBarHidden = true
         
         view.backgroundColor = .white
         view.addSubview(plusPhotoButton)
+        
+        view.isUserInteractionEnabled = true
+        view.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard)))
         
         plusPhotoButton.anchor(top: view.topAnchor, left: nil, bottom: nil, right: nil, paddingTop: 40, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 140, height: 140)
         
@@ -264,9 +271,21 @@ class SignUpController: UIViewController, UIImagePickerControllerDelegate, UINav
     }
 
     
+    override func viewDidDisappear(_ animated: Bool) {
+        IQKeyboardManager.sharedManager().enable = false
+    }
+    
+    func dismissKeyboard() {
+        //Causes the view (or one of its embedded text fields) to resign the first responder status.
+        view.endEditing(true)
+    }
+    
     fileprivate func setupInputFields()
     {
 
+        emailTextField.delegate = self
+        usernameTextField.delegate = self
+        passwordTextField.delegate = self   
         
         let stackView = UIStackView(arrangedSubviews: [emailTextField, usernameTextField, passwordTextField, signUpButton])
         
@@ -283,11 +302,22 @@ class SignUpController: UIViewController, UIImagePickerControllerDelegate, UINav
             stackView.heightAnchor.constraint(equalToConstant: 200)
             ])
 
-
-
         stackView.anchor(top: plusPhotoButton.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 20, paddingLeft: 40, paddingBottom: 0, paddingRight: 40, width: 0, height: 200 )
         
-        
+    }
+    
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        if textField == emailTextField{
+            usernameTextField.becomeFirstResponder()
+        } else if textField == usernameTextField {
+            passwordTextField.becomeFirstResponder()
+        } else if textField == passwordTextField {
+            self.resignFirstResponder()
+            self.handleSignUp()
+        } else {
+            self.resignFirstResponder()
+        }
+        return false
     }
 
 

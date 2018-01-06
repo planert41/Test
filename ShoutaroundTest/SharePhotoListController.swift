@@ -11,19 +11,37 @@ import UIKit
 import Firebase
 import CoreLocation
 
+protocol SharePhotoListControllerDelegate {
+    func refreshPost(post:Post)
+}
+
+
 class SharePhotoListController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, UITextFieldDelegate, UITableViewDelegate, UITableViewDataSource {
     
-    var editPostInd: Bool = false
-    var editPrevList: [String]? = []
+    // 3 Modes: Add Post, Edit Post, Bookmarking Post (Not creator UID)
+    
+    var delegate: SharePhotoListControllerDelegate?
+
+    var isEditingPost: Bool = false
+    var editPrevList: [String:String]? = [:]
+    var isBookmarkingPost: Bool = false
     
     var uploadPostDictionary: [String: Any] = [:]
     var uploadPostLocation: CLLocation? = nil
     var uploadPost: Post? = nil {
         didSet{
-            if uploadPost?.creatorListId?.count != 0 {
-                self.editPrevList = uploadPost?.creatorListId
-            }
+//            if uploadPost?.creatorListId?.count != 0 {
+//                self.editPrevList = uploadPost?.creatorListId
+//            }
+            
+            self.editPrevList = uploadPost?.selectedListId
+            
+            // Refreshes Current User Lists
+            userList = CurrentUser.lists
+            
             collectionView.reloadData()
+            
+            
         }
     }
     
@@ -140,10 +158,12 @@ class SharePhotoListController: UIViewController, UICollectionViewDelegate, UICo
         
         // Setup Navigation
         navigationItem.title = "Add To List"
-        if self.editPostInd{
+        if self.isEditingPost{
         navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Edit", style: .plain, target: self, action: #selector(handleEdit))
+        } else if self.isBookmarkingPost {
+            navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Add", style: .plain, target: self, action: #selector(handleAddList))
         } else {
-        navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Share", style: .plain, target: self, action: #selector(handleShare))
+            navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Share", style: .plain, target: self, action: #selector(handleShare))
         }
         
         
@@ -173,33 +193,35 @@ class SharePhotoListController: UIViewController, UICollectionViewDelegate, UICo
     }
     
     func setupLists(){
-        // Check for Bookmark List first
         guard let uid = Auth.auth().currentUser?.uid else {return}
         
-        if let tempBookmarkList = userList?.first(where:{$0.name == "Bookmarks"}) {
-            bookmarkList = tempBookmarkList
+        if uploadPost?.creatorUID != uid {
+         
+            // Check for Bookmark List first. add Bookmark List if not post creator UID
+            if let tempBookmarkList = userList?.first(where:{$0.name == "Bookmarks"}) {
+                bookmarkList = tempBookmarkList
+            } else {
+                // Create Bookmark List
+                let listId = NSUUID().uuidString
+                print("No Bookmark List, Creating Bookmark List: \(listId), User: \(uid)")
+                bookmarkList.id = listId
+                Database.createList(uploadList: bookmarkList)
+            }
+            displayList.append(bookmarkList)
         } else {
-            // Create Bookmark List
-            let listId = NSUUID().uuidString
-            print("No Bookmark List, Creating Bookmark List: \(listId), User: \(uid)")
-            bookmarkList.id = listId
-            Database.createList(uploadList: bookmarkList)
+           
+            // Check for Legit List. add Legit List if is post creator UID
+            if let tempLegitList = userList?.first(where:{$0.name == "Legit"}) {
+                legitList = tempLegitList
+            } else {
+                // Create Legit List
+                let listId = NSUUID().uuidString
+                print("No Legit List, Creating Legit List: \(listId), User: \(uid)")
+                legitList.id = listId
+                Database.createList(uploadList: legitList)
+            }
+            displayList.append(legitList)
         }
-        displayList.append(bookmarkList)
-        
-        
-        if let tempLegitList = userList?.first(where:{$0.name == "Legit"}) {
-            legitList = tempLegitList
-        } else {
-            // Create Legit List
-            let listId = NSUUID().uuidString
-            print("No Legit List, Creating Legit List: \(listId), User: \(uid)")
-            legitList.id = listId
-            Database.createList(uploadList: legitList)
-        }
-        
-        displayList.append(legitList)
-        
         // Add remaining list to Display List. List is sorted by creation date when pulling
         
         if userList?.count != 0 {
@@ -216,9 +238,9 @@ class SharePhotoListController: UIViewController, UICollectionViewDelegate, UICo
 
         
         // Highlight Selected List if In Editing Post
-        if self.editPostInd {
-            if uploadPost?.creatorListId?.count != 0 {
-                for listId in (uploadPost?.creatorListId)!{
+        if self.isEditingPost || self.isBookmarkingPost {
+            if self.editPrevList?.count != 0 && self.editPrevList != nil {
+                for (listId, listName) in (self.editPrevList)!{
                     if let index = displayList.index(where: { (list) -> Bool in
                         return list.id == listId
                     }) {
@@ -236,10 +258,11 @@ class SharePhotoListController: UIViewController, UICollectionViewDelegate, UICo
         print("Selected List: \(self.selectedList)")
         if self.selectedList != nil {
             // Add list id to post dictionary for display
-            var listIds: [String]? = []
+            var listIds: [String:String]? = [:]
             
             for list in self.selectedList! {
-                listIds?.append(list.id!)
+                listIds![list.id!] = list.name
+//                listIds?.append(list.id!)
             }
             uploadPostDictionary["lists"] = listIds
         }
@@ -256,10 +279,11 @@ class SharePhotoListController: UIViewController, UICollectionViewDelegate, UICo
         print("Selected List: \(self.selectedList)")
         if self.selectedList != nil {
             // Add list id to post dictionary for display
-            var listIds: [String]? = []
+            var listIds: [String:String]? = [:]
             
             for list in self.selectedList! {
-                listIds?.append(list.id!)
+                listIds![list.id!] = list.name
+                //                listIds?.append(list.id!)
             }
             uploadPostDictionary["lists"] = listIds
         }
@@ -279,6 +303,27 @@ class SharePhotoListController: UIViewController, UICollectionViewDelegate, UICo
             self.dismiss(animated: true, completion: nil)
             NotificationCenter.default.post(name: SharePhotoListController.updateFeedNotificationName, object: nil)
             
+        }
+    }
+    
+    func handleAddList(){
+        
+        var tempNewList: [String:String] = [:]
+        for list in self.selectedList! {
+            tempNewList[list.id!] = list.name
+        }
+
+        Database.updateListforPost(post: uploadPost, newList: tempNewList, prevList: editPrevList) {
+
+            // Update Post Cache
+            var tempPost = self.uploadPost
+            tempPost?.selectedListId = tempNewList
+            postCache[(self.uploadPost?.id)!] = tempPost
+
+            
+            self.navigationController?.popViewController(animated: true)
+            self.delegate?.refreshPost(post: tempPost!)
+            NotificationCenter.default.post(name: SharePhotoListController.updateFeedNotificationName, object: nil)
         }
     }
     
@@ -312,6 +357,7 @@ class SharePhotoListController: UIViewController, UICollectionViewDelegate, UICo
         let cell = tableView.dequeueReusableCell(withIdentifier: listCellId, for: indexPath) as! UploadListCell
         
         cell.list = displayList[indexPath.row]
+        
         
         // select/deselect the cell
         if displayList[indexPath.row].isSelected {

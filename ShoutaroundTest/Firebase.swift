@@ -358,7 +358,7 @@ extension Database{
     }
 
 // Edit Posts Function
-    static func editPostToDatabase(imageUrl: String?, postId: String?, uploadDictionary:[String:Any]?,uploadLocation: CLLocation?, prevList:[String]?, completion:@escaping () ->()){
+    static func editPostToDatabase(imageUrl: String?, postId: String?, uploadDictionary:[String:Any]?,uploadLocation: CLLocation?, prevList:[String:String]?, completion:@escaping () ->()){
     
         //    1. Update Post Dictionary
         //    2. Update Post Geofire Location
@@ -401,25 +401,25 @@ extension Database{
         // UPDATE LISTS
         
         // Find Deleted List
-        let currentList = uploadValues["lists"] as! [String] ?? []
-        let previousList = prevList as! [String] ?? []
+        let currentList = uploadValues["lists"] as! [String:String]? ?? [:]
+        let previousList = prevList as! [String:String]? ?? [:]
         var deletedList: [String] = []
         var addedList: [String] = []
         
-        for list in previousList {
-            if currentList.contains(list) {
+        for (listId,listName) in previousList {
+            if currentList[listId] != nil {
                 // Is in current list ignore
             } else {
-                deletedList.append(list)
+                deletedList.append(listId)
             }
         }
         
         
-        for list in currentList {
-            if previousList.contains(list){
+        for (listId,listName) in currentList {
+            if previousList[listId] != nil {
                 // Is in previous list ignore
             } else {
-                addedList.append(list)
+                addedList.append(listId)
             }
         }
         
@@ -436,6 +436,8 @@ extension Database{
         completion()
     
     }
+    
+
     
 // Fetch Posts Functions
 
@@ -574,10 +576,6 @@ extension Database{
 //                print("Using post cache for \(postId)")
                 var tempCachePost = cachedPost
                 
-// Need to update cache post distance if current user location is not nil
-//                if CurrentUser.currentLocation != nil {
-//                    tempCachePost.distance = Double((tempCachePost.locationGPS?.distance(from: CurrentUser.currentLocation!))!)
-//                }
                 completion(tempCachePost, nil)
                 return
             }
@@ -809,6 +807,25 @@ extension Database{
         })
     }
     
+    static func checkPostForLists(post: Post, completion: @escaping (Post) -> ()){
+        var tempSelectedListIds: [String:String]? = [:]
+        var tempPost = post
+        guard let postId = post.id else {
+            print("Check Post for Lists: ERROR, No Post Ids")
+            return
+        }
+        
+        if CurrentUser.lists.count > 0 {
+            for list in CurrentUser.lists {
+                if list.postIds![postId] != nil {
+                    tempSelectedListIds![list.id!] = list.name
+                }
+            }
+            tempPost.selectedListId = tempSelectedListIds
+        }
+        completion(tempPost)
+    }
+    
     static func checkPostForBookmarks(post: Post, completion: @escaping (Post) -> ()){
         
         guard let uid = Auth.auth().currentUser?.uid else {return}
@@ -876,7 +893,7 @@ extension Database{
     static func checkPostForSocial(post: Post, completion: @escaping (Post) -> ()){
         
         Database.checkPostForVotes(post: post) { (post) in
-            Database.checkPostForBookmarks(post: post, completion: { (post) in
+            Database.checkPostForLists(post: post, completion: { (post) in
                 Database.checkPostForMessages(post: post, completion: { (post) in
                     completion(post)
                 })
@@ -1189,6 +1206,7 @@ extension Database{
                 print("Create List ID with User: SUCCESS: \(listId):\(listName), User: \(uid)")
             }
         }
+        
     }
     
     static func deleteList(uploadList: List){
@@ -1225,7 +1243,6 @@ extension Database{
         let createdDate = Date().timeIntervalSince1970
         let listRef = Database.database().reference().child("lists").child(listId).child("posts")
         
-        let userListRef = Database.database().reference().child("users").child(uid).child("lists").child(listId).child("posts")
         let values = [postId: createdDate] as [String:Any]
         
         // Add Post to List
@@ -1237,15 +1254,13 @@ extension Database{
             print("Successfully save post \(postId) to List \(listId)")
         }
         
-//        // Add Post Id to List
-//        userListRef.updateChildValues(values) { (err, ref) in
-//            if let err = err {
-//                print("Failed to save post \(postId) to List \(listId) for user", err)
-//                return
-//            }
-//            print("Successfully save post \(postId) to List \(listId) for user")
-//        }
         
+        // Update Current User List
+        if let listIndex = CurrentUser.lists.index(where: { (currentList) -> Bool in
+            currentList.id == listId
+        }) {
+            CurrentUser.lists[listIndex].postIds![postId] = createdDate
+        }
     }
     
     static func DeletePostForList(postId: String, listId: String?){
@@ -1255,6 +1270,15 @@ extension Database{
             return}
         Database.database().reference().child("lists").child(listId).child("posts").child(postId).removeValue()
         print("Delete PostId: Success : \(postId) from ListId: \(listId)")
+        
+        // Update Current User List
+        if let listIndex = CurrentUser.lists.index(where: { (currentList) -> Bool in
+            currentList.id == listId
+        }) {
+            if let postIndex = CurrentUser.lists[listIndex].postIds?.index(forKey: postId){
+            CurrentUser.lists[listIndex].postIds?.remove(at: postIndex)
+            }
+        }
     }
     
     static func fetchListForMultListIds(listUid: [String]?, completion: @escaping ([List]) -> ()){
@@ -1300,7 +1324,51 @@ extension Database{
         }
     }
     
-    
+    static func updateListforPost(post: Post?, newList: [String:String]?, prevList:[String:String]?, completion:@escaping () ->()){
+        
+        // Find Deleted List
+        let currentList = newList as! [String:String]? ?? [:]
+        let previousList = prevList as! [String:String]? ?? [:]
+        var deletedList: [String] = []
+        var addedList: [String] = []
+        
+        guard let postId = post?.id else {
+            print("Update List for Post: ERROR, No PostID")
+            return
+        }
+        
+        for (listId,listName) in previousList {
+            if currentList[listId] != nil {
+                // Is in current list ignore
+            } else {
+                deletedList.append(listId)
+            }
+        }
+        
+        
+        for (listId,listName) in currentList {
+            if previousList[listId] != nil {
+                // Is in previous list ignore
+            } else {
+                addedList.append(listId)
+            }
+        }
+        
+        for list in deletedList {
+            Database.DeletePostForList(postId: postId, listId: list)
+        }
+        
+        for list in addedList {
+            Database.addPostForList(postId: postId, listId: list)
+        }
+        
+        // Replace Post Cache
+        var tempPost = post
+        tempPost?.selectedListId = newList
+        postCache[postId] = tempPost
+        completion()
+        
+    }
     
     // Messages
     static func updateMessageThread(threadKey: String, creatorUid: String, creatorUsername: String, receiveUid: [String: String]?, message: String) {

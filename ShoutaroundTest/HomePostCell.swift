@@ -12,6 +12,7 @@ import Firebase
 
 
 protocol HomePostCellDelegate {
+    func didTapBookmark(post: Post)
     func didTapComment(post:Post)
     func didTapUser(post:Post)
     func didTapLocation(post:Post)
@@ -51,6 +52,13 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
             usernameLabel.isUserInteractionEnabled = true
             let usernameTap = UITapGestureRecognizer(target: self, action: #selector(HomePostCell.usernameTap))
             usernameLabel.addGestureRecognizer(usernameTap)
+            
+            self.starRatingLabel.rating = (post?.rating)!
+            if (post?.rating)! == 0 {
+                self.starRatingLabel.isHidden = true
+            } else {
+                self.starRatingLabel.isHidden = false
+            }
             
             setupEmojiLabels()
             locationLabel.text = post?.locationName.truncate(length: 30)
@@ -201,6 +209,8 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         
     }()
     
+    var starRatingLabel = RatingLabel()
+
     lazy var ratingEmojiLabel: UILabel = {
         let label = UILabel()
         label.text = "Emojis"
@@ -470,6 +480,7 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         addSubview(emojiDetailLabel)
         addSubview(ratingEmojiLabel)
         addSubview(bookmarkButton)
+        addSubview(starRatingLabel)
         
         headerView.anchor(top: topAnchor, left: leftAnchor, bottom: nil, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 50)
 
@@ -508,7 +519,10 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         locationDistanceLabel.anchor(top: nil, left: nil, bottom: photoImageView.topAnchor, right: userProfileImageView.leftAnchor, paddingTop: 2, paddingLeft: 0, paddingBottom: 3, paddingRight: 10, width: 0, height: 0)
         
         
-        ratingEmojiLabel.anchor(top: topAnchor, left: nil, bottom: photoImageView.topAnchor, right: usernameLabel.leftAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 2, width: 0, height: 0)
+        starRatingLabel.anchor(top: nil, left: nil, bottom: nil, right: usernameLabel.leftAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 2, width: 25, height: 25)
+        starRatingLabel.centerYAnchor.constraint(equalTo: usernameLabel.centerYAnchor).isActive = true
+        
+//        ratingEmojiLabel.anchor(top: topAnchor, left: nil, bottom: photoImageView.topAnchor, right: usernameLabel.leftAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 2, width: 0, height: 0)
         
 // Photo Image View and Complex User Interactions
         
@@ -638,43 +652,48 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         
     }()
     
-    
     func handleBookmark() {
-        
-        //    delegate?.didBookmark(for: self)
-        
-        guard let postId = self.post?.id else {return}
-        guard let creatorId = self.post?.creatorUID else {return}
-        guard let uid = Auth.auth().currentUser?.uid else {return}
-        
-        Database.handleBookmark(postId: postId, creatorUid: creatorId){
-        }
-        
-        // Animates before database function is complete
-        
-        if (self.post?.hasBookmarked)! {
-            self.post?.bookmarkCount -= 1
-        } else {
-            self.post?.bookmarkCount += 1
-        }
-        self.post?.hasBookmarked = !(self.post?.hasBookmarked)!
-        self.setupAttributedSocialCount()
-        self.delegate?.refreshPost(post: self.post!)
-        
-        bookmarkButton.transform = CGAffineTransform(scaleX: 0.1, y: 0.1)
-        
-        UIView.animate(withDuration: 1.0,
-                       delay: 0,
-                       usingSpringWithDamping: 0.2,
-                       initialSpringVelocity: 6.0,
-                       options: .allowUserInteraction,
-                       animations: { [weak self] in
-                        self?.bookmarkButton.transform = .identity
-            },
-                       completion: nil)
-        
+        guard let post = post else {return}
+        delegate?.didTapBookmark(post: post)
+
     }
     
+//    func handleBookmark() {
+//
+//        //    delegate?.didBookmark(for: self)
+//
+//        guard let postId = self.post?.id else {return}
+//        guard let creatorId = self.post?.creatorUID else {return}
+//        guard let uid = Auth.auth().currentUser?.uid else {return}
+//
+//        Database.handleBookmark(postId: postId, creatorUid: creatorId){
+//        }
+//
+//        // Animates before database function is complete
+//
+//        if (self.post?.hasBookmarked)! {
+//            self.post?.bookmarkCount -= 1
+//        } else {
+//            self.post?.bookmarkCount += 1
+//        }
+//        self.post?.hasBookmarked = !(self.post?.hasBookmarked)!
+//        self.setupAttributedSocialCount()
+//        self.delegate?.refreshPost(post: self.post!)
+//
+//        bookmarkButton.transform = CGAffineTransform(scaleX: 0.1, y: 0.1)
+//
+//        UIView.animate(withDuration: 1.0,
+//                       delay: 0,
+//                       usingSpringWithDamping: 0.2,
+//                       initialSpringVelocity: 6.0,
+//                       options: .allowUserInteraction,
+//                       animations: { [weak self] in
+//                        self?.bookmarkButton.transform = .identity
+//            },
+//                       completion: nil)
+//
+//    }
+//
     
     // Comments
     

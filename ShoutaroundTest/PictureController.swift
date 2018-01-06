@@ -93,6 +93,13 @@ class PictureController: UICollectionViewController, HomePostCellDelegate, UICol
     
     // HOME POST CELL DELEGATE METHODS
     
+    func didTapBookmark(post: Post) {
+        
+        let sharePhotoListController = SharePhotoListController()
+        sharePhotoListController.uploadPost = post
+        navigationController?.pushViewController(sharePhotoListController, animated: true)
+    }
+    
     func didTapComment(post: Post) {
         
         let commentsController = CommentsController(collectionViewLayout: UICollectionViewFlowLayout())

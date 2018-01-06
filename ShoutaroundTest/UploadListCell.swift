@@ -7,12 +7,29 @@
 //
 
 import UIKit
+import SwiftIcons
 
 class UploadListCell: UITableViewCell {
 
+    var isLegit: Bool = false
+    var isBookmark: Bool = false
+    
     var list: List? {
         didSet{
             self.listNameLabel.text = list?.name
+            
+            if self.list?.name == "Legit"{
+                self.isLegit = true
+            } else {
+                self.isLegit = false
+            }
+            
+            if self.list?.name == "Bookmarks"{
+                self.isBookmark = true
+            } else {
+                self.isBookmark = false
+            }
+            
         }
     }
     
@@ -59,7 +76,22 @@ class UploadListCell: UITableViewCell {
         // Configure the view for the selected state
         
         // update UI
-        accessoryType = selected ? .checkmark : .none
+        if isLegit {
+            var imageView : UIImageView
+            imageView  = UIImageView(frame:CGRect(x: 0, y: 0, width: 20, height: 20))
+            imageView.image = selected ? #imageLiteral(resourceName: "bookmark_selected") : #imageLiteral(resourceName: "bookmark_unselected")
+            accessoryView = imageView
+        }
+        
+        else if isBookmark {
+            var imageView : UIImageView
+            imageView  = UIImageView(frame:CGRect(x: 0, y: 0, width: 20, height: 20))
+            imageView.image = selected ? #imageLiteral(resourceName: "bookmark_ribbon_filled") : #imageLiteral(resourceName: "bookmark_ribbon_unfilled")
+            accessoryView = imageView
+        }
+        else {
+            accessoryType = selected ? .checkmark : .none
+        }
         backgroundColor = selected ? UIColor.mainBlue() : UIColor.white
     }
 

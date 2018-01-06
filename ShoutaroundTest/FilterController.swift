@@ -13,7 +13,7 @@ import Cosmos
 
 
 protocol FilterControllerDelegate: class {
-    func filterControllerFinished(selectedRange: String?, selectedLocation: CLLocation?, selectedGooglePlaceID: String?, selectedMinRating: Double, selectedType: String?, selectedMaxPrice: String?, selectedSort: String)
+    func filterControllerFinished(selectedRange: String?, selectedLocation: CLLocation?, selectedLocationName: String?, selectedMinRating: Double, selectedType: String?, selectedMaxPrice: String?, selectedSort: String)
 }
 
 class FilterController: UIViewController, CLLocationManagerDelegate, GMSAutocompleteViewControllerDelegate {
@@ -86,7 +86,6 @@ class FilterController: UIViewController, CLLocationManagerDelegate, GMSAutocomp
             }
         }
     }
-    
 
     lazy var filterDistanceLabel: UILabel = {
         let ul = UILabel()
@@ -402,9 +401,9 @@ class FilterController: UIViewController, CLLocationManagerDelegate, GMSAutocomp
     
     func filterSelected(){
         
-        delegate?.filterControllerFinished(selectedRange: self.selectedRange, selectedLocation: self.selectedLocation, selectedGooglePlaceID: self.selectedGooglePlaceID, selectedMinRating: self.selectedMinRating, selectedType: self.selectedType, selectedMaxPrice: self.selectedMaxPrice, selectedSort: self.selectedSort)
+        delegate?.filterControllerFinished(selectedRange: self.selectedRange, selectedLocation: self.selectedLocation, selectedLocationName: self.locationNameLabel.text, selectedMinRating: self.selectedMinRating, selectedType: self.selectedType, selectedMaxPrice: self.selectedMaxPrice, selectedSort: self.selectedSort)
 
-        print("Filter By ",self.selectedRange,self.selectedLocation, self.selectedGooglePlaceID, self.selectedMinRating, self.selectedType, self.selectedMaxPrice,  self.selectedSort)
+        print("Filter By ",self.selectedRange,self.selectedLocation, self.locationNameLabel.text, self.selectedMinRating, self.selectedType, self.selectedMaxPrice,  self.selectedSort)
 
         self.navigationController?.popViewController(animated: true)
 
@@ -449,6 +448,9 @@ class FilterController: UIViewController, CLLocationManagerDelegate, GMSAutocomp
         // Auto Select Closest Distance (5 KM)
         self.distanceSegment.selectedSegmentIndex = 1
         self.selectedRange = geoFilterRangeDefault[1]
+        
+        self.sortSegment.selectedSegmentIndex = 0
+        self.selectedSort = defaultSort
         
         print("Selected Google Location: \(place.name), \(place.placeID), \(selectedLocation)")
         dismiss(animated: true, completion: nil)

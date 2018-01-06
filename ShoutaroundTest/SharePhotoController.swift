@@ -1609,7 +1609,7 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         let type = self.selectPostType ?? nil
         
         // Previous List for Editing
-        var listId = nil as [String]?
+        var listId = nil as [String:String]?
         if self.editPostInd {
             listId = editPost?.creatorListId
         }
@@ -1631,10 +1631,10 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         
         let sharePhotoListController = SharePhotoListController()
         sharePhotoListController.uploadPost = uploadPost
+        sharePhotoListController.isEditingPost = self.editPostInd
+        
         sharePhotoListController.uploadPostDictionary = values
-        sharePhotoListController.userList = CurrentUser.lists
         sharePhotoListController.uploadPostLocation = self.selectPostLocation
-        sharePhotoListController.editPostInd = self.editPostInd
         navigationController?.pushViewController(sharePhotoListController, animated: true)
     }
     

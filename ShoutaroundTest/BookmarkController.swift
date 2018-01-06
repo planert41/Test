@@ -482,7 +482,7 @@ class BookMarkController: UIViewController, UICollectionViewDelegate, UICollecti
     }
     
     
-    func filterControllerFinished(selectedRange: String?, selectedLocation: CLLocation?, selectedGooglePlaceID: String?, selectedMinRating: Double, selectedType: String?, selectedMaxPrice: String?, selectedSort: String) {
+    func filterControllerFinished(selectedRange: String?, selectedLocation: CLLocation?, selectedLocationName: String?, selectedMinRating: Double, selectedType: String?, selectedMaxPrice: String?, selectedSort: String) {
 //        self.filterRange = selectedRange
 //        self.filterLocation = selectedLocation
 //        self.filterSort = selectedSort
@@ -614,11 +614,18 @@ class BookMarkController: UIViewController, UICollectionViewDelegate, UICollecti
     
     // HOME POST CELL DELEGATE METHODS
     
+    func didTapBookmark(post: Post) {
+        
+        let sharePhotoListController = SharePhotoListController()
+        sharePhotoListController.uploadPost = post
+        navigationController?.pushViewController(sharePhotoListController, animated: true)
+    }
+    
+    
     func didTapPicture(post: Post) {
         
         let pictureController = PictureController(collectionViewLayout: UICollectionViewFlowLayout())
         pictureController.selectedPost = post
-        
         
         navigationController?.pushViewController(pictureController, animated: true)
     }

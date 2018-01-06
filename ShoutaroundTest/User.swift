@@ -59,7 +59,6 @@ struct CurrentUser {
     static var username: String?
     static var profileImageUrl: String?
     static var uid : String?
-    static var listIds: [String] = []
     static var status: String?
 
     // From Other Database Sources
@@ -68,6 +67,7 @@ struct CurrentUser {
     static var followerUids: [String] = []
     static var groupUids: [String] = []
     
+    static var listIds: [String] = []
     static var lists: [List] = []
     //static var currentLocation: CLLocation? = CLLocation(latitude: 41.9735039, longitude: -87.66775139999999)
     
@@ -89,6 +89,36 @@ struct CurrentUser {
         self.lists.append(list)
     }
     
+    static func addPostToList(postId: String?, listId: String?){
+        guard let postId = postId else {
+            print("Add Post To List: ERROR, No Post ID")
+            return
+        }
+        
+        guard let listId = listId else {
+            print("Add Post To List: ERROR, No List ID")
+            return
+        }
+        
+        guard let listIndex = self.lists.index(where: { (list) -> Bool in
+            list.id == listId
+        }) else {
+            print("Add Post To List: ERROR, Can't Find List \(listId) in Current User ListIDs")
+            return
+        }
+        
+        var tempList = self.lists[listIndex]
+        let createdDate = Date().timeIntervalSince1970
+
+        
+        tempList.postIds![postId] = createdDate
+        
+        // Replace Current User List with updated Post Ids
+        self.lists[listIndex] = tempList
+        print("Add Post To List: SUCCESS, Added Post: \(postId) to List: \(listId)")
+
+    }
+    
     static func removeList(list: List){
         guard let listId = list.id else {
             print("CurrentUser Remove List: ERROR: No List ID")
@@ -97,6 +127,33 @@ struct CurrentUser {
         self.lists.remove(at: (self.lists.index(where:{$0.id == listId}))!)
         self.listIds.remove(at: (self.listIds.index(where:{$0 == listId}))!)
     }
+    
+    static func removePostToList(postId: String?, listId: String?){
+        guard let postId = postId else {
+            print("Remove Post To List: ERROR, No Post ID")
+            return
+        }
+        
+        guard let listId = listId else {
+            print("Remove Post To List: ERROR, No List ID")
+            return
+        }
+        
+        guard let listIndex = self.lists.index(where: { (list) -> Bool in
+            list.id == listId
+        }) else {
+            print("Remove Post To List: ERROR, Can't Find List \(listId) in Current User ListIDs")
+            return
+        }
+        
+        self.lists.remove(at: listIndex)
+        print("Remove Post To List: SUCCESS, Removed Post: \(postId) to List: \(listId)")
+        
+    }
+    
+    
+    
+    
     
     static func printProperties(){
         let currentUserProperties = Mirror(reflecting: self)
