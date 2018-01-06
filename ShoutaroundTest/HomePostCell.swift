@@ -95,8 +95,20 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
                 optionsButton.isHidden = true
             }
             
+            // Check for Creator Legit List
+            
+            checkPostForLegit()
             
            // setupAttributedLocationName()
+        }
+    }
+    
+    func checkPostForLegit(){
+        
+        for (key,value) in (post?.creatorListId)! {
+            if value == "Legit"{
+                self.legitIcon.isHidden = false
+            }
         }
     }
 
@@ -210,6 +222,17 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
     }()
     
     var starRatingLabel = RatingLabel()
+    
+    lazy var legitIcon: UIButton = {
+        let button = UIButton(type: .system)
+        button.setImage(#imageLiteral(resourceName: "starfilled").withRenderingMode(.alwaysOriginal), for: .normal)
+        button.addTarget(self, action: #selector(openLegitList), for: .touchUpInside)
+        return button
+    }()
+    
+    func openLegitList(){
+        print("Open Legit List")
+    }
 
     lazy var ratingEmojiLabel: UILabel = {
         let label = UILabel()
@@ -481,6 +504,7 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         addSubview(ratingEmojiLabel)
         addSubview(bookmarkButton)
         addSubview(starRatingLabel)
+        addSubview(legitIcon)
         
         headerView.anchor(top: topAnchor, left: leftAnchor, bottom: nil, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 50)
 
@@ -521,6 +545,10 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         
         starRatingLabel.anchor(top: nil, left: nil, bottom: nil, right: usernameLabel.leftAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 2, width: 25, height: 25)
         starRatingLabel.centerYAnchor.constraint(equalTo: usernameLabel.centerYAnchor).isActive = true
+        
+        legitIcon.anchor(top: nil, left: nil, bottom: nil, right: starRatingLabel.leftAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 2, width: 25, height: 25)
+        legitIcon.centerYAnchor.constraint(equalTo: usernameLabel.centerYAnchor).isActive = true
+        legitIcon.isHidden = true
         
 //        ratingEmojiLabel.anchor(top: topAnchor, left: nil, bottom: photoImageView.topAnchor, right: usernameLabel.leftAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 2, width: 0, height: 0)
         
