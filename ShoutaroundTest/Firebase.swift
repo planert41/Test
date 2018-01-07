@@ -432,7 +432,9 @@ extension Database{
         }
         
         // Replace Post Cache
-        postCache[postId] = Post.init(user: CurrentUser.user!, dictionary: uploadValues)
+        var tempPost = Post.init(user: CurrentUser.user!, dictionary: uploadValues)
+        tempPost.id = postId
+        postCache[postId] = tempPost
         completion()
     
     }

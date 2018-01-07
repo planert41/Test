@@ -105,7 +105,7 @@ struct Post {
         self.locationGooglePlaceID = dictionary["googlePlaceID"] as? String ?? ""
         self.creatorUID = dictionary["creatorUID"] as? String ?? ""
         
-        self.creatorListId = dictionary["lists"] as? [String:String] ?? [:]
+        self.creatorListId = dictionary["lists"] as? [String:String]? ?? nil
         
         if self.creatorUID == Auth.auth().currentUser?.uid {
             self.selectedListId = self.creatorListId

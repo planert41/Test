@@ -67,6 +67,8 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
             guard let profileImageUrl = post?.user.profileImageUrl else {return}
             
             userProfileImageView.loadImage(urlString: profileImageUrl)
+            
+            setupExtraTags()
             captionLabel.text = post?.caption
             setupAttributedCaption()
             setupAttributedSocialCount()
@@ -110,11 +112,12 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
             return
         }
         
+        self.legitIcon.isHidden = true
+
         for (key,value) in creatorListId {
+            // Only show if there is a legit list
             if value == "Legit"{
                 self.legitIcon.isHidden = false
-            } else {
-                self.legitIcon.isHidden = true
             }
         }
     }
@@ -497,8 +500,154 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         guard let post = post else {return}
         print("Options Button Pressed")
         delegate?.userOptionPost(post: post)
-
     }
+
+    
+    lazy var extraTagLabel1: UILabel = {
+        let label = UILabel()
+        let tap = UITapGestureRecognizer(target: self, action: #selector(extraTagSelected(_:)))
+        label.addGestureRecognizer(tap)
+        label.isUserInteractionEnabled = true
+        label.backgroundColor = UIColor.white
+        label.font = UIFont.boldSystemFont(ofSize: 15)
+        label.layer.cornerRadius = 5
+        label.layer.masksToBounds = true
+        label.layer.borderWidth = 1
+        label.tag = 0
+        label.textAlignment = NSTextAlignment.center
+
+        return label
+    }()
+    
+    lazy var extraTagLabel2: UILabel = {
+        let label = UILabel()
+        let tap = UITapGestureRecognizer(target: self, action: #selector(extraTagSelected(_:)))
+        label.addGestureRecognizer(tap)
+        label.isUserInteractionEnabled = true
+        label.backgroundColor = UIColor.white
+        label.font = UIFont.boldSystemFont(ofSize: 15)
+        label.tag = 1
+        label.layer.cornerRadius = 5
+        label.layer.masksToBounds = true
+        label.layer.borderWidth = 1
+        label.textAlignment = NSTextAlignment.center
+
+        return label
+    }()
+    
+    lazy var extraTagLabel3: UILabel = {
+        let label = UILabel()
+        let tap = UITapGestureRecognizer(target: self, action: #selector(extraTagSelected(_:)))
+        label.addGestureRecognizer(tap)
+        label.isUserInteractionEnabled = true
+        label.backgroundColor = UIColor.white
+        label.font = UIFont.boldSystemFont(ofSize: 15)
+        label.tag = 2
+        label.layer.cornerRadius = 5
+        label.layer.masksToBounds = true
+        label.layer.borderWidth = 1
+        label.textAlignment = NSTextAlignment.center
+
+        return label
+    }()
+    
+    lazy var extraTagLabel4: UILabel = {
+        let label = UILabel()
+        let tap = UITapGestureRecognizer(target: self, action: #selector(extraTagSelected(_:)))
+        label.addGestureRecognizer(tap)
+        label.isUserInteractionEnabled = true
+        label.backgroundColor = UIColor.white
+        label.font = UIFont.boldSystemFont(ofSize: 15)
+        label.tag = 3
+        label.layer.cornerRadius = 5
+        label.layer.masksToBounds = true
+        label.layer.borderWidth = 1
+        label.textAlignment = NSTextAlignment.center
+        
+        return label
+    }()
+    
+    func extraTagSelected(_ sender: UIGestureRecognizer){
+        print("List Selected")
+        
+        guard let post = post else {return}
+        guard let listTag = sender.view?.tag else {return}
+        
+        var selectedListName = self.extraTagsNameArray[listTag]
+        var selectedListId = self.extraTagsIdArray[listTag]
+        
+        print("Selected List: \(selectedListName), \(selectedListId)")
+    }
+    
+    let extraTagView: UIView = {
+        let uv = UIView()
+        uv.backgroundColor = UIColor.clear
+        return uv
+    }()
+    
+    var extraTagsArray:[UILabel] = []
+    
+    var extraTagsNameArray: [String] = []
+    var extraTagsIdArray: [String] = []
+
+    func setupExtraTags() {
+
+        // Refresh Tags
+        extraTagsNameArray.removeAll()
+        extraTagsIdArray.removeAll()
+        
+        for label in self.extraTagsArray {
+            label.text = ""
+        }
+        
+    // Setup ListNameArray and ListIdArray
+        if post?.creatorListId != nil {
+             // Check for Legit
+            var listCount = post?.creatorListId?.count
+            
+            for list in (post?.creatorListId)! {
+                if list.value == "Legit" {
+                    extraTagsNameArray.append(list.value)
+                    extraTagsIdArray.append(list.key)
+                }
+            }
+            
+            // Add Other List
+            for list in (post?.creatorListId)! {
+                if list.value != "Legit" && list.value != "Bookmarks" {
+                    if extraTagsNameArray.count < 2 {
+                        extraTagsNameArray.append(list.value.truncate(length: 15))
+                        extraTagsIdArray.append(list.key)
+                    } else if extraTagsNameArray.count == 2 && listCount! > 2 {
+                        extraTagsNameArray.append("+ \(listCount! - 2) Lists")
+                        extraTagsIdArray.append("lists")
+                    }
+                }
+            }
+        }
+        
+        // Populate Price Label
+        if post?.price != nil {
+            extraTagsNameArray.append((post?.price)!)
+            extraTagsIdArray.append("price")
+        }
+        
+    // Populate List Labels
+        if extraTagsNameArray.count > 0 {
+            for (index, listName) in (self.extraTagsNameArray.enumerated()) {
+                extraTagsArray[index].text = extraTagsNameArray[index]
+                extraTagsArray[index].sizeToFit()
+            }
+        }
+    
+        self.extraTagView.layoutIfNeeded()
+        
+    }
+    
+    
+
+    
+
     
     
     
@@ -583,11 +732,28 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         pan.delegate = self
         self.photoImageView.addGestureRecognizer(pan)
         
+// Setup List and Price Tags
+        
+        extraTagsArray = [extraTagLabel1, extraTagLabel2, extraTagLabel3, extraTagLabel4]
+
+        addSubview(extraTagView)
+        extraTagView.anchor(top: photoImageView.bottomAnchor, left: leftAnchor, bottom: nil, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
+        extraTagView.backgroundColor = UIColor.yellow
+
+        for (index,label) in extraTagsArray.enumerated(){
+            addSubview(label)
+            
+            if index == 0{
+                label.anchor(top: extraTagView.topAnchor, left: extraTagView.leftAnchor, bottom: extraTagView.bottomAnchor, right: nil, paddingTop: 0, paddingLeft: 15, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
+            } else {
+                label.anchor(top: extraTagView.topAnchor, left: extraTagsArray[index - 1].rightAnchor, bottom: extraTagView.bottomAnchor, right: nil, paddingTop: 0, paddingLeft: 10, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
+            }
+        }
         
 // Location View
         
         addSubview(locationView)
-        locationView.anchor(top: photoImageView.bottomAnchor, left: leftAnchor, bottom: nil, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 40)
+        locationView.anchor(top: extraTagView.bottomAnchor, left: leftAnchor, bottom: nil, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 40)
         
 //        addSubview(optionsButton)
 //        optionsButton.anchor(top: locationView.topAnchor, left: nil, bottom: photoImageView.topAnchor, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 44, height: 0)
