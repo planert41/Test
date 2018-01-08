@@ -380,6 +380,10 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
         
         navigationController?.pushViewController(locationController, animated: true)
     }
+    
+    func didTapExtraTag(tagName: String, tagId: String, post: Post) {
+        
+    }
 
     
     func refreshPost(post: Post) {

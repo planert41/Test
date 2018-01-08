@@ -14,6 +14,8 @@ import CoreGraphics
 import CoreLocation
 
 class PictureController: UICollectionViewController, HomePostCellDelegate, UICollectionViewDelegateFlowLayout{
+
+    
     
     var selectedPost: Post?
     var cellId = "cellId"
@@ -122,6 +124,9 @@ class PictureController: UICollectionViewController, HomePostCellDelegate, UICol
         navigationController?.pushViewController(locationController, animated: true)
     }
     
+    func didTapExtraTag(tagName: String, tagId: String, post: Post) {
+        }
+    
     func refreshPost(post: Post) {
         
         self.selectedPost = post
@@ -138,6 +143,8 @@ class PictureController: UICollectionViewController, HomePostCellDelegate, UICol
         
         navigationController?.pushViewController(messageController, animated: true)
     }
+    
+    
     
     internal func didTapNavMessage() {
         

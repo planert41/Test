@@ -332,8 +332,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         self.refreshPagination()
         self.collectionView?.reloadData()
         
-        self.clearAllPosts()
-        self.fetchAllPostIds()
+        self.refreshPostsForFilter()
         self.scrolltoFirst = true
         
         // Check for filtering
@@ -429,6 +428,11 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     
     func refreshPosts(){
         self.clearAllPosts()
+    }
+    
+    func refreshPostsForFilter(){
+        self.clearAllPosts()
+        self.fetchAllPostIds()
     }
     
 
@@ -889,6 +893,48 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         locationController.selectedPost = post
         
         navigationController?.pushViewController(locationController, animated: true)
+    }
+    
+    func didTapExtraTag(tagName: String, tagId: String, post: Post) {
+        // Check to see if its a list, price or something else
+        if tagId == "price"{
+            // Price Tag Selected
+            print("Price Selected")
+            self.filterMaxPrice = tagName
+            self.refreshPostsForFilter()
+        } else if tagId == "lists"{
+            // Additional Tags
+            let listController  = ListController()
+            listController.displayedPost = post
+            self.navigationController?.pushViewController(listController, animated: true)
+        }
+        else {
+            // List Tag Selected
+            
+            // Check if List Exist
+            Database.fetchListforSingleListId(listId: tagId, completion: { (fetchedList) in
+                if fetchedList == nil {
+                    // List Does not Exist
+                    self.alert(title: "List Error", message: "List Does Not Exist Anymore")
+                    
+                    // Update list from Post
+                    var tempPost = post
+                    if let deleteIndex = tempPost.creatorListId?.index(forKey: tagId) {
+                        var updatePostListIds = tempPost.creatorListId?.remove(at: deleteIndex)
+                        var tempPostDictionary = tempPost.dictionary()
+                        tempPostDictionary["lists"] = updatePostListIds
+                        print("Deleting \(tagId) list from \(tempPost.id) Post")
+                        Database.updatePostwithPostID(postId: tempPost.id!, values: tempPostDictionary)
+                    }
+                } else {
+                    let listViewController = ListViewController()
+                    listViewController.displayListId = tagId
+                    listViewController.displayList = fetchedList
+                    self.navigationController?.pushViewController(listViewController, animated: true)
+                }
+                
+            })
+        }
     }
     
     func refreshPost(post: Post) {

@@ -13,6 +13,8 @@ import CoreGraphics
 import GeoFire
 
 class BookMarkController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, UISearchControllerDelegate, HomePostSearchDelegate, BookmarkPhotoCellDelegate, HomePostCellDelegate, CLLocationManagerDelegate, UIGestureRecognizerDelegate, FilterControllerDelegate, UISearchBarDelegate {
+
+    
     let bookmarkCellId = "bookmarkCellId"
     let homePostCellId = "homePostCellId"
     
@@ -651,6 +653,10 @@ class BookMarkController: UIViewController, UICollectionViewDelegate, UICollecti
         locationController.selectedPost = post
         
         navigationController?.pushViewController(locationController, animated: true)
+    }
+    
+    func didTapExtraTag(tagName: String, tagId: String, post: Post) {
+        
     }
     
     func refreshPost(post: Post) {

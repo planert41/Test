@@ -59,6 +59,7 @@ struct Post {
     var creatorListId: [String:String]?
     
     var selectedListId: [String:String]?
+    var listedDate: Date? = nil
 
     var ratingEmoji: String?
     var emoji: String

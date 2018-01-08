@@ -1301,7 +1301,9 @@ extension Database{
         listUid.forEach { (key) in
             myGroup.enter()
             self.fetchListforSingleListId(listId: key, completion: { (fetchedList) in
-                fetchedLists.append(fetchedList)
+                if let fetchedList = fetchedList {
+                    fetchedLists.append(fetchedList)
+                }
                 myGroup.leave()
             })
         }
@@ -1314,7 +1316,7 @@ extension Database{
         }
     }
     
-    static func fetchListforSingleListId(listId: String, completion: @escaping(List) -> ()){
+    static func fetchListforSingleListId(listId: String, completion: @escaping(List?) -> ()){
         let ref = Database.database().reference().child("lists").child(listId)
         ref.observeSingleEvent(of: .value, with: {(snapshot) in
             guard let listDictionary = snapshot.value as? [String: Any] else {return}
@@ -1323,6 +1325,7 @@ extension Database{
             completion(fetchedList)
         }){ (error) in
             print("Fetch List ID: ERROR, \(listId)", error)
+            completion(nil)
         }
     }
     

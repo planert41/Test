@@ -17,6 +17,7 @@ protocol HomePostCellDelegate {
     func didTapUser(post:Post)
     func didTapLocation(post:Post)
     func didTapMessage(post:Post)
+    func didTapExtraTag(tagName: String, tagId: String, post: Post)
     func refreshPost(post:Post)
     func userOptionPost(post:Post)
     func displaySelectedEmoji(emoji: String, emojitag: String)
@@ -509,12 +510,13 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         label.addGestureRecognizer(tap)
         label.isUserInteractionEnabled = true
         label.backgroundColor = UIColor.white
-        label.font = UIFont.boldSystemFont(ofSize: 15)
+        label.font = UIFont.boldSystemFont(ofSize: 12)
         label.layer.cornerRadius = 5
         label.layer.masksToBounds = true
-        label.layer.borderWidth = 1
+        label.layer.borderWidth = 0
         label.tag = 0
         label.textAlignment = NSTextAlignment.center
+        label.translatesAutoresizingMaskIntoConstraints = false
 
         return label
     }()
@@ -525,12 +527,13 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         label.addGestureRecognizer(tap)
         label.isUserInteractionEnabled = true
         label.backgroundColor = UIColor.white
-        label.font = UIFont.boldSystemFont(ofSize: 15)
+        label.font = UIFont.boldSystemFont(ofSize: 12)
         label.tag = 1
         label.layer.cornerRadius = 5
         label.layer.masksToBounds = true
-        label.layer.borderWidth = 1
+        label.layer.borderWidth = 0
         label.textAlignment = NSTextAlignment.center
+        label.translatesAutoresizingMaskIntoConstraints = false
 
         return label
     }()
@@ -541,12 +544,13 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         label.addGestureRecognizer(tap)
         label.isUserInteractionEnabled = true
         label.backgroundColor = UIColor.white
-        label.font = UIFont.boldSystemFont(ofSize: 15)
+        label.font = UIFont.boldSystemFont(ofSize: 12)
         label.tag = 2
         label.layer.cornerRadius = 5
         label.layer.masksToBounds = true
-        label.layer.borderWidth = 1
+        label.layer.borderWidth = 0
         label.textAlignment = NSTextAlignment.center
+        label.translatesAutoresizingMaskIntoConstraints = false
 
         return label
     }()
@@ -557,13 +561,14 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         label.addGestureRecognizer(tap)
         label.isUserInteractionEnabled = true
         label.backgroundColor = UIColor.white
-        label.font = UIFont.boldSystemFont(ofSize: 15)
+        label.font = UIFont.boldSystemFont(ofSize: 12)
         label.tag = 3
         label.layer.cornerRadius = 5
         label.layer.masksToBounds = true
-        label.layer.borderWidth = 1
+        label.layer.borderWidth = 0
         label.textAlignment = NSTextAlignment.center
-        
+        label.translatesAutoresizingMaskIntoConstraints = false
+
         return label
     }()
     
@@ -577,6 +582,7 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         var selectedListId = self.extraTagsIdArray[listTag]
         
         print("Selected List: \(selectedListName), \(selectedListId)")
+        delegate?.didTapExtraTag(tagName: selectedListName, tagId: selectedListId, post: post)
     }
     
     let extraTagView: UIView = {
@@ -616,10 +622,10 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
             for list in (post?.creatorListId)! {
                 if list.value != "Legit" && list.value != "Bookmarks" {
                     if extraTagsNameArray.count < 2 {
-                        extraTagsNameArray.append(list.value.truncate(length: 15))
+                        extraTagsNameArray.append("!\(list.value.truncate(length: 15))")
                         extraTagsIdArray.append(list.key)
                     } else if extraTagsNameArray.count == 2 && listCount! > 2 {
-                        extraTagsNameArray.append("+ \(listCount! - 2) Lists")
+                        extraTagsNameArray.append("+\(listCount! - 2) Lists")
                         extraTagsIdArray.append("lists")
                     }
                 }
@@ -636,7 +642,13 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         if extraTagsNameArray.count > 0 {
             for (index, listName) in (self.extraTagsNameArray.enumerated()) {
                 extraTagsArray[index].text = extraTagsNameArray[index]
-                extraTagsArray[index].sizeToFit()
+                if extraTagsIdArray[index] == "price" {
+                    extraTagsArray[index].textColor = UIColor.orange
+                } else {
+                    extraTagsArray[index].textColor = UIColor.mainBlue()
+                }
+                
+//                extraTagsArray[index].frame = CGRect(x: 0, y: 0, width: extraTagsArray[index].intrinsicContentSize.width + 20, height: extraTagsArray[index].intrinsicContentSize.height)
             }
         }
     
@@ -737,8 +749,7 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         extraTagsArray = [extraTagLabel1, extraTagLabel2, extraTagLabel3, extraTagLabel4]
 
         addSubview(extraTagView)
-        extraTagView.anchor(top: photoImageView.bottomAnchor, left: leftAnchor, bottom: nil, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
-        extraTagView.backgroundColor = UIColor.yellow
+        extraTagView.anchor(top: photoImageView.bottomAnchor, left: leftAnchor, bottom: nil, right: rightAnchor, paddingTop: 2, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
 
         for (index,label) in extraTagsArray.enumerated(){
             addSubview(label)

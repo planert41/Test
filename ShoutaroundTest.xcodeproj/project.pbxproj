@@ -53,6 +53,9 @@
 		A5A17BB01FA6497F001F227D /* UIPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5A17BAF1FA6497E001F227D /* UIPicker.swift */; };
 		A5A2E5CC200032BF00D7E8F5 /* List.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5A2E5CB200032BF00D7E8F5 /* List.swift */; };
 		A5A2E5CE20019A7400D7E8F5 /* HomePostTagCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5A2E5CD20019A7400D7E8F5 /* HomePostTagCell.swift */; };
+		A5A2E5D120028F0C00D7E8F5 /* ListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5A2E5D020028F0C00D7E8F5 /* ListViewController.swift */; };
+		A5A2E5D32002B00000D7E8F5 /* ListViewHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5A2E5D22002B00000D7E8F5 /* ListViewHeader.swift */; };
+		A5A2E5D52002E6F800D7E8F5 /* ListController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5A2E5D42002E6F800D7E8F5 /* ListController.swift */; };
 		A5AEB9721F96A82B00E88CAC /* HomePostSearch.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5AEB9711F96A82B00E88CAC /* HomePostSearch.swift */; };
 		A5AEB9741F96B00500E88CAC /* EmojiCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5AEB9731F96B00500E88CAC /* EmojiCell.swift */; };
 		A5AEB9761F986F8200E88CAC /* PictureController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5AEB9751F986F8200E88CAC /* PictureController.swift */; };
@@ -146,6 +149,9 @@
 		A5A17BAF1FA6497E001F227D /* UIPicker.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIPicker.swift; sourceTree = "<group>"; };
 		A5A2E5CB200032BF00D7E8F5 /* List.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = List.swift; sourceTree = "<group>"; };
 		A5A2E5CD20019A7400D7E8F5 /* HomePostTagCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomePostTagCell.swift; sourceTree = "<group>"; };
+		A5A2E5D020028F0C00D7E8F5 /* ListViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListViewController.swift; sourceTree = "<group>"; };
+		A5A2E5D22002B00000D7E8F5 /* ListViewHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListViewHeader.swift; sourceTree = "<group>"; };
+		A5A2E5D42002E6F800D7E8F5 /* ListController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListController.swift; sourceTree = "<group>"; };
 		A5AEB9711F96A82B00E88CAC /* HomePostSearch.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HomePostSearch.swift; sourceTree = "<group>"; };
 		A5AEB9731F96B00500E88CAC /* EmojiCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EmojiCell.swift; sourceTree = "<group>"; };
 		A5AEB9751F986F8200E88CAC /* PictureController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PictureController.swift; sourceTree = "<group>"; };
@@ -298,6 +304,7 @@
 				A5A17BAE1FA6496B001F227D /* OLD */,
 				A5516BC01F8ED0B9003C3E22 /* ItemCells */,
 				A56868BB1F78A0E50050C406 /* Message */,
+				A5A2E5CF20028E5B00D7E8F5 /* List */,
 				A57C060A1F7602F100A0568F /* Bookmark */,
 				A53E7E191F5E4A390011C1CA /* GooglePlaces */,
 				A5C645121F565E7E00C78244 /* Home */,
@@ -398,6 +405,16 @@
 				A5A17BAF1FA6497E001F227D /* UIPicker.swift */,
 			);
 			name = OLD;
+			sourceTree = "<group>";
+		};
+		A5A2E5CF20028E5B00D7E8F5 /* List */ = {
+			isa = PBXGroup;
+			children = (
+				A5A2E5D020028F0C00D7E8F5 /* ListViewController.swift */,
+				A5A2E5D22002B00000D7E8F5 /* ListViewHeader.swift */,
+				A5A2E5D42002E6F800D7E8F5 /* ListController.swift */,
+			);
+			path = List;
 			sourceTree = "<group>";
 		};
 		A5C6450B1F564A4000C78244 /* Models */ = {
@@ -668,8 +685,10 @@
 				A57A674D1F5FA8190063D400 /* UploadLocationFlowLayout.swift in Sources */,
 				A57C060E1F7611A000A0568F /* BookmarkController.swift in Sources */,
 				A5F46C411FC6057100D69945 /* SMSegmentAppearance.swift in Sources */,
+				A5A2E5D120028F0C00D7E8F5 /* ListViewController.swift in Sources */,
 				A552EA5F1F997973005A0977 /* Message.swift in Sources */,
 				A5AEB9721F96A82B00E88CAC /* HomePostSearch.swift in Sources */,
+				A5A2E5D52002E6F800D7E8F5 /* ListController.swift in Sources */,
 				A5516BC21F8ED0D5003C3E22 /* LocationController.swift in Sources */,
 				A57941C41F6A2092004EC40D /* UploadEmojiFlowLayout.swift in Sources */,
 				A51C13C91F51B6FD00CEB740 /* UserProfileController.swift in Sources */,
@@ -704,6 +723,7 @@
 				A5C645141F565E8800C78244 /* HomeController.swift in Sources */,
 				A54413521FF55BE00015F615 /* SortFilterHeader.swift in Sources */,
 				A5C645181F57A4BF00C78244 /* User.swift in Sources */,
+				A5A2E5D32002B00000D7E8F5 /* ListViewHeader.swift in Sources */,
 				A57A674B1F5E62F30063D400 /* Credentials.swift in Sources */,
 				A5A2E5CE20019A7400D7E8F5 /* HomePostTagCell.swift in Sources */,
 				A5F990821FCF66EF0086E661 /* ThreadMessageController.swift in Sources */,
