@@ -17,7 +17,7 @@ import SwiftyJSON
 
 var placeCache = [String: JSON]()
 
-class LocationController: UIViewController, UIScrollViewDelegate, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, GMSMapViewDelegate, UserProfilePhotoCellDelegate, CLLocationManagerDelegate  {
+class LocationController: UIViewController, UIScrollViewDelegate, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, GMSMapViewDelegate, UserProfilePhotoCellDelegate  {
     
     let locationManager = CLLocationManager()
     let locationCellId = "locationCellID"
@@ -443,8 +443,8 @@ class LocationController: UIViewController, UIScrollViewDelegate, UICollectionVi
 // Created scrollview and pinned temp uiview on top of scroll view
 // Added ScrollView onto view
         
-        determineCurrentLocation()
-        
+        LocationSingleton.sharedInstance.determineCurrentLocation()
+
         scrollView.frame = view.bounds
         scrollView.backgroundColor = UIColor.white
         scrollView.isScrollEnabled = true
@@ -863,31 +863,31 @@ class LocationController: UIViewController, UIScrollViewDelegate, UICollectionVi
         
     }
 
-    // LOCATION MANAGER DELEGATE METHODS
-    
-    func determineCurrentLocation(){
-        
-        CurrentUser.currentLocation = nil
-        locationManager.delegate = self
-        if CLLocationManager.locationServicesEnabled() {
-            locationManager.startUpdatingLocation()
-        }
-    }
-    
-    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        let userLocation:CLLocation = locations[0] as CLLocation
-        
-        if userLocation != nil {
-            print("Current User Location", userLocation)
-            CurrentUser.currentLocation = userLocation
-            manager.stopUpdatingLocation()
-            updateAdressLabel()
-        }
-    }
-
-    func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
-        print("GPS Location Not Found")
-    }
+//    // LOCATION MANAGER DELEGATE METHODS
+//
+//    func determineCurrentLocation(){
+//
+//        CurrentUser.currentLocation = nil
+//        locationManager.delegate = self
+//        if CLLocationManager.locationServicesEnabled() {
+//            locationManager.startUpdatingLocation()
+//        }
+//    }
+//
+//    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+//        let userLocation:CLLocation = locations[0] as CLLocation
+//
+//        if userLocation != nil {
+//            print("Current User Location", userLocation)
+//            CurrentUser.currentLocation = userLocation
+//            manager.stopUpdatingLocation()
+//            updateAdressLabel()
+//        }
+//    }
+//
+//    func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
+//        print("GPS Location Not Found")
+//    }
     
     func googleLocationSearch(GPSLocation: CLLocation){
         

@@ -14,7 +14,7 @@ import CoreGraphics
 import CoreLocation
 
 
-class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLayout, HomePostCellDelegate, CLLocationManagerDelegate, UISearchControllerDelegate, HomePostSearchDelegate, UIGestureRecognizerDelegate, FilterControllerDelegate, UISearchBarDelegate, SortFilterHeaderDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate, SharePhotoListControllerDelegate  {
+class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLayout, HomePostCellDelegate, UISearchControllerDelegate, HomePostSearchDelegate, UIGestureRecognizerDelegate, FilterControllerDelegate, UISearchBarDelegate, SortFilterHeaderDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate, SharePhotoListControllerDelegate  {
     
     let cellId = "cellId"
     var scrolltoFirst: Bool = false
@@ -68,8 +68,14 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     var filterLocation: CLLocation? = nil{
         didSet{
             self.updatePostDistances(refLocation: filterLocation){}
+            if filterLocation == nil {
+                self.filterLocationName = nil
+            } else if filterLocation == CurrentUser.currentLocation{
+                self.filterLocationName = "Current Location"
+            }
         }
     }
+    var filterLocationName: String? = nil
     
 
     
@@ -125,8 +131,6 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     var homePostSearchResults = HomePostSearch()
     var defaultSearchBar = UISearchBar()
 
-    let locationManager = CLLocationManager()
-
     override func viewDidLayoutSubviews() {
                 
 //        let filterBarHeight = (self.filterBar.isHidden == false) ? self.filterBar.frame.height : 0
@@ -177,20 +181,6 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         collectionView?.keyboardDismissMode = .onDrag
         
         NotificationCenter.default.addObserver(self, selector: #selector(handleRefresh), name: HomeController.refreshPostsNotificationName, object: nil)
-
-        
-        
-        
-// Ask for Authorisation from the User.
-        self.locationManager.requestAlwaysAuthorization()
-        
-// For use in foreground
-        self.locationManager.requestWhenInUseAuthorization()
-        
-        if CLLocationManager.locationServicesEnabled() {
-            locationManager.delegate = self
-            locationManager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters
-        }
 
 
 // 1. Clear out all Filters, Fetched Post Ids and Pagination Variables
@@ -316,6 +306,8 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         filterController.selectedMinRating = self.filterMinRating
         filterController.selectedMaxPrice = self.filterMaxPrice
         filterController.selectedType = self.filterType
+        filterController.selectedLocation = self.filterLocation
+        filterController.selectedLocationName = self.filterLocationName
 
         filterController.selectedSort = self.selectedHeaderSort
         
@@ -329,10 +321,11 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         
         if (self.selectedHeaderSort == HeaderSortOptions[1] && self.filterLocation == nil){
                 print("Sort by Nearest, No Location, Look up Current Location")
-                self.determineCurrentLocation()
+                LocationSingleton.sharedInstance.determineCurrentLocation()
                 let when = DispatchTime.now() + 1 // change 2 to desired number of seconds
                 DispatchQueue.main.asyncAfter(deadline: when) {
                     //Delay for 1 second to find current location
+                    self.filterLocation = CurrentUser.currentLocation
                     self.refreshPostsForFilter()
                 }
         } else {
@@ -355,6 +348,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         
         self.filterRange = selectedRange
         self.filterLocation = selectedLocation
+        self.filterLocationName = selectedLocationName
         self.defaultSearchBar.text = selectedLocationName
 
         self.filterMinRating = selectedMinRating
@@ -760,7 +754,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
             // Check for current filter location
             if self.filterLocation == nil {
                 print("Header Sort: Nearest, No Location, Finding Current Location")
-                self.determineCurrentLocation()
+                LocationSingleton.sharedInstance.determineCurrentLocation()
                 
                 // Posts are refreshed with distances when filter location is updated
                 let when = DispatchTime.now() + 1 // change 2 to desired number of seconds
@@ -1072,31 +1066,31 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     }
     
     
-// LOCATION MANAGER DELEGATE METHODS
-    
-    func determineCurrentLocation(){
-
-        CurrentUser.currentLocation = nil
-        
-        if CLLocationManager.locationServicesEnabled() {
-            locationManager.startUpdatingLocation()
-        }
-    }
-    
-    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        let userLocation:CLLocation = locations[0] as CLLocation
-        
-        if userLocation != nil {
-            print("Current User Location", userLocation)
-            CurrentUser.currentLocation = userLocation
-            self.filterLocation = CurrentUser.currentLocation
-            manager.stopUpdatingLocation()
-        }
-    }
-    
-    func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
-        print("GPS Location Not Found")
-    }
+//// LOCATION MANAGER DELEGATE METHODS
+//
+//    func determineCurrentLocation(){
+//
+//        CurrentUser.currentLocation = nil
+//
+//        if CLLocationManager.locationServicesEnabled() {
+//            locationManager.startUpdatingLocation()
+//        }
+//    }
+//
+//    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+//        let userLocation:CLLocation = locations[0] as CLLocation
+//
+//        if userLocation != nil {
+//            print("Current User Location", userLocation)
+//            CurrentUser.currentLocation = userLocation
+//            self.filterLocation = CurrentUser.currentLocation
+//            manager.stopUpdatingLocation()
+//        }
+//    }
+//
+//    func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
+//        print("GPS Location Not Found")
+//    }
     
     func updatePostDistances(refLocation: CLLocation?, completion:() -> ()){
         if let refLocation = refLocation {
@@ -1123,7 +1117,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
             self.present(imagePicker, animated: true, completion: nil)
 
             // Detect Current Location for Photo
-            self.determineCurrentLocation()
+            LocationSingleton.sharedInstance.determineCurrentLocation()
 
         }
     }

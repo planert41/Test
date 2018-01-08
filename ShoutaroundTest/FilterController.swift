@@ -16,7 +16,7 @@ protocol FilterControllerDelegate: class {
     func filterControllerFinished(selectedRange: String?, selectedLocation: CLLocation?, selectedLocationName: String?, selectedMinRating: Double, selectedType: String?, selectedMaxPrice: String?, selectedSort: String)
 }
 
-class FilterController: UIViewController, CLLocationManagerDelegate, GMSAutocompleteViewControllerDelegate {
+class FilterController: UIViewController, GMSAutocompleteViewControllerDelegate {
     
 
     let locationManager = CLLocationManager()
@@ -78,11 +78,18 @@ class FilterController: UIViewController, CLLocationManagerDelegate, GMSAutocomp
         didSet{
             if selectedLocation == CurrentUser.currentLocation {
                 let attributedText = NSMutableAttributedString(string: "Current Location", attributes: [NSFontAttributeName: UIFont.boldSystemFont(ofSize: 14),NSForegroundColorAttributeName: UIColor.mainBlue()])
-    
-                self.currentLocationButton.isHidden = true
                 locationNameLabel.attributedText = attributedText
+
+                self.currentLocationButton.isHidden = true
             } else {
                 self.currentLocationButton.isHidden = false
+            }
+        }
+    }
+    var selectedLocationName: String? = nil {
+        didSet{
+            if selectedLocationName != nil {
+                locationNameLabel.text = selectedLocationName
             }
         }
     }
@@ -271,7 +278,7 @@ class FilterController: UIViewController, CLLocationManagerDelegate, GMSAutocomp
         self.selectedGooglePlaceID = nil
         self.selectedLocation = nil
         
-        self.determineCurrentLocation()
+        LocationSingleton.sharedInstance.determineCurrentLocation()
         let when = DispatchTime.now() + 1 // change 2 to desired number of seconds
         DispatchQueue.main.asyncAfter(deadline: when) {
             self.selectedLocation = CurrentUser.currentLocation
@@ -283,8 +290,14 @@ class FilterController: UIViewController, CLLocationManagerDelegate, GMSAutocomp
     override func viewDidLoad() {
         
         super.viewDidLoad()
-        self.determineCurrentLocation()
         
+        if self.selectedLocation == nil {
+            let attributedText = NSMutableAttributedString(string: "Current Location", attributes: [NSFontAttributeName: UIFont.boldSystemFont(ofSize: 14),NSForegroundColorAttributeName: UIColor.mainBlue()])
+            locationNameLabel.attributedText = attributedText
+            
+            self.findCurrentLocation()
+        }
+
         let scrollview = UIScrollView()
         
         scrollview.frame = view.bounds
@@ -465,37 +478,5 @@ class FilterController: UIViewController, CLLocationManagerDelegate, GMSAutocomp
     func wasCancelled(_ viewController: GMSAutocompleteViewController) {
         dismiss(animated: true, completion: nil)
     }
-    
-    // LOCATION MANAGER DELEGATE METHODS
-    
-    func determineCurrentLocation(){
-        
-        if CLLocationManager.locationServicesEnabled() {
-            locationManager.delegate = self
-            locationManager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters
-        }
-        
-        if CLLocationManager.locationServicesEnabled() {
-            locationManager.startUpdatingLocation()
-        }
-    }
-    
-    
-    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        let userLocation:CLLocation = locations[0] as CLLocation
-        
-        if userLocation != nil {
-            print("Current User Location", userLocation)
-            CurrentUser.currentLocation = userLocation
-            selectedLocation = userLocation
-            manager.stopUpdatingLocation()
-        }
-        
-    }
-    
-    func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
-        print("GPS Location Not Found")
-    }
-    
     
 }

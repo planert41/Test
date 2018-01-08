@@ -20,7 +20,7 @@ import Cosmos
 var newPost: Post? = nil
 var newPostId: PostId? = nil
 
-class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout, UICollectionViewDelegate,UICollectionViewDataSource, UITextViewDelegate, CLLocationManagerDelegate, LocationSearchControllerDelegate, UIGestureRecognizerDelegate, GMSAutocompleteViewControllerDelegate, UITableViewDelegate, UITableViewDataSource {
+class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout, UICollectionViewDelegate,UICollectionViewDataSource, UITextViewDelegate, LocationSearchControllerDelegate, UIGestureRecognizerDelegate, GMSAutocompleteViewControllerDelegate, UITableViewDelegate, UITableViewDataSource {
     
     
     
@@ -643,7 +643,6 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         return button
     } ()
     
-    
     func cancelLocation(){
         selectPostLocation = nil
         // Refresh places collectionview to unselect selected place
@@ -670,7 +669,7 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         var sentLocation: CLLocation?
         
         if self.selectPostLocation == nil {
-            self.determineCurrentLocation()
+            LocationSingleton.sharedInstance.determineCurrentLocation()
             let when = DispatchTime.now() + 1 // change 2 to desired number of seconds
             DispatchQueue.main.asyncAfter(deadline: when) {
                 sentLocation = CurrentUser.currentLocation
@@ -1886,45 +1885,25 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
     }
     
     
-    // LOCATION MANAGER DELEGATE METHODS
-    
+//    // LOCATION MANAGER DELEGATE METHODS
+
     func determineCurrentLocation(){
-        
-        CurrentUser.currentLocation = nil
+
+        LocationSingleton.sharedInstance.determineCurrentLocation()
         refreshGoogleResults()
         
-        if CLLocationManager.locationServicesEnabled() {
-            locationManager.delegate = self
-            locationManager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters
+        let when = DispatchTime.now() + 1 // change 2 to desired number of seconds
+        DispatchQueue.main.asyncAfter(deadline: when) {
+            //Delay for 1 second to find current location
+            if CurrentUser.currentLocation == nil {
+                print("Determine Current Location: FAIL, No Current User Location")
+            } else {
+                self.selectPostLocation = CurrentUser.currentLocation
+                self.googleReverseGPS(GPSLocation: self.selectPostLocation)
+                self.googleLocationSearch(GPSLocation: self.selectPostLocation)
+            }
         }
-        
-        if CLLocationManager.locationServicesEnabled() {
-            locationManager.startUpdatingLocation()
-        }
-        
     }
-    
-    
-    
-    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        let userLocation:CLLocation = locations[0] as CLLocation
-        
-        if userLocation != nil {
-            print("Current User Location", userLocation)
-            CurrentUser.currentLocation = userLocation
-            self.selectPostLocation = userLocation
-            googleReverseGPS(GPSLocation: userLocation)
-            googleLocationSearch(GPSLocation: userLocation)
-            manager.stopUpdatingLocation()
-        }
-        
-    }
-    
-    func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
-        print("GPS Location Not Found")
-    }
-    
-    
     
     
     // APPLE PLACES QUERY
@@ -1933,9 +1912,6 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         
         // Reverse GPS to get place adress
         
-        locationManager.delegate = self
-        locationManager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters
-        locationManager.requestWhenInUseAuthorization()
         
         // var location:CLLocation = CLLocation(latitude: postlatitude, longitude: postlongitude)
         

@@ -12,7 +12,7 @@ import Firebase
 import CoreGraphics
 import GeoFire
 
-class BookMarkController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, UISearchControllerDelegate, HomePostSearchDelegate, BookmarkPhotoCellDelegate, HomePostCellDelegate, CLLocationManagerDelegate, UIGestureRecognizerDelegate, FilterControllerDelegate, UISearchBarDelegate {
+class BookMarkController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, UISearchControllerDelegate, HomePostSearchDelegate, BookmarkPhotoCellDelegate, HomePostCellDelegate, UIGestureRecognizerDelegate, FilterControllerDelegate, UISearchBarDelegate {
 
     
     let bookmarkCellId = "bookmarkCellId"
@@ -209,17 +209,7 @@ class BookMarkController: UIViewController, UICollectionViewDelegate, UICollecti
         
         view.addSubview(collectionView)
         collectionView.anchor(top: actionBar.bottomAnchor , left: view.leftAnchor, bottom: bottomLayoutGuide.topAnchor, right: view.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
-        
-        // Ask for Authorisation from the User.
-        self.locationManager.requestAlwaysAuthorization()
-        
-        // For use in foreground
-        self.locationManager.requestWhenInUseAuthorization()
-        
-        if CLLocationManager.locationServicesEnabled() {
-            locationManager.delegate = self
-            locationManager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters
-        }
+
         
         // Fetch Photos and Refresh
 
@@ -492,33 +482,6 @@ class BookMarkController: UIViewController, UICollectionViewDelegate, UICollecti
         self.finalFilterAndSort()
     }
     
-    
-    
-    
-    // LOCATION MANAGER DELEGATE METHODS
-    
-    func determineCurrentLocation(){
-        
-        CurrentUser.currentLocation = nil
-        
-        if CLLocationManager.locationServicesEnabled() {
-            locationManager.startUpdatingLocation()
-        }
-    }
-    
-    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        let userLocation:CLLocation = locations[0] as CLLocation
-        
-        if userLocation != nil {
-            print("Current User Location", userLocation)
-            CurrentUser.currentLocation = userLocation
-            manager.stopUpdatingLocation()
-        }
-    }
-    
-    func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
-        print("GPS Location Not Found")
-    }
     
     
     // Search Delegate And Methods

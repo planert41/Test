@@ -237,32 +237,6 @@ extension UIViewController {
         self.dismiss(animated: true, completion: nil)
     }
     
-//    public func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-//        let userLocation:CLLocation = locations[0] as CLLocation
-//
-//        if userLocation != nil {
-//            print("Current User Location", userLocation)
-//            CurrentUser.currentLocation = userLocation
-//            manager.stopUpdatingLocation()
-//        }
-//    }
-//
-//    public func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
-//        print("GPS Location Not Found")
-//    }
-//    
-//    public func determineCurrentLocation(){
-//
-//        CurrentUser.currentLocation = nil
-//        let locationManager = CLLocationManager()
-//        locationManager.delegate = self
-//
-//        if CLLocationManager.locationServicesEnabled() {
-//            locationManager.startUpdatingLocation()
-//        }
-//    }
-//
-    
 }
 
 

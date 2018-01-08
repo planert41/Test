@@ -56,6 +56,7 @@
 		A5A2E5D120028F0C00D7E8F5 /* ListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5A2E5D020028F0C00D7E8F5 /* ListViewController.swift */; };
 		A5A2E5D32002B00000D7E8F5 /* ListViewHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5A2E5D22002B00000D7E8F5 /* ListViewHeader.swift */; };
 		A5A2E5D52002E6F800D7E8F5 /* ListController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5A2E5D42002E6F800D7E8F5 /* ListController.swift */; };
+		A5A2E5D7200415C100D7E8F5 /* LocationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5A2E5D6200415C100D7E8F5 /* LocationManager.swift */; };
 		A5AEB9721F96A82B00E88CAC /* HomePostSearch.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5AEB9711F96A82B00E88CAC /* HomePostSearch.swift */; };
 		A5AEB9741F96B00500E88CAC /* EmojiCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5AEB9731F96B00500E88CAC /* EmojiCell.swift */; };
 		A5AEB9761F986F8200E88CAC /* PictureController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5AEB9751F986F8200E88CAC /* PictureController.swift */; };
@@ -152,6 +153,7 @@
 		A5A2E5D020028F0C00D7E8F5 /* ListViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListViewController.swift; sourceTree = "<group>"; };
 		A5A2E5D22002B00000D7E8F5 /* ListViewHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListViewHeader.swift; sourceTree = "<group>"; };
 		A5A2E5D42002E6F800D7E8F5 /* ListController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListController.swift; sourceTree = "<group>"; };
+		A5A2E5D6200415C100D7E8F5 /* LocationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationManager.swift; sourceTree = "<group>"; };
 		A5AEB9711F96A82B00E88CAC /* HomePostSearch.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HomePostSearch.swift; sourceTree = "<group>"; };
 		A5AEB9731F96B00500E88CAC /* EmojiCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EmojiCell.swift; sourceTree = "<group>"; };
 		A5AEB9751F986F8200E88CAC /* PictureController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PictureController.swift; sourceTree = "<group>"; };
@@ -251,6 +253,7 @@
 				A5F46C3F1FC6057100D69945 /* SMSegmentAppearance.swift */,
 				A5F46C401FC6057100D69945 /* SMSegmentViewConstants.swift */,
 				A5F9FE211FED6A7700AF9542 /* ReselectableSegmentControl.swift */,
+				A5A2E5D6200415C100D7E8F5 /* LocationManager.swift */,
 			);
 			name = Utils;
 			sourceTree = "<group>";
@@ -725,6 +728,7 @@
 				A5C645181F57A4BF00C78244 /* User.swift in Sources */,
 				A5A2E5D32002B00000D7E8F5 /* ListViewHeader.swift in Sources */,
 				A57A674B1F5E62F30063D400 /* Credentials.swift in Sources */,
+				A5A2E5D7200415C100D7E8F5 /* LocationManager.swift in Sources */,
 				A5A2E5CE20019A7400D7E8F5 /* HomePostTagCell.swift in Sources */,
 				A5F990821FCF66EF0086E661 /* ThreadMessageController.swift in Sources */,
 				A56868BD1F78A0FA0050C406 /* MessageController.swift in Sources */,

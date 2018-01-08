@@ -20,7 +20,7 @@ protocol LocationSearchControllerDelegate {
 }
 
 
-class LocationSearchController: UIViewController, UITextFieldDelegate, CLLocationManagerDelegate, GMSMapViewDelegate, GMSAutocompleteViewControllerDelegate{
+class LocationSearchController: UIViewController, UITextFieldDelegate, GMSMapViewDelegate, GMSAutocompleteViewControllerDelegate{
 
     let locationManager = CLLocationManager()
     
@@ -129,8 +129,8 @@ class LocationSearchController: UIViewController, UITextFieldDelegate, CLLocatio
     }()
     
     func findCurrentLocation() {
-        self.determineCurrentLocation()
-        
+        LocationSingleton.sharedInstance.determineCurrentLocation()
+
         let when = DispatchTime.now() + 1 // change 2 to desired number of seconds
         DispatchQueue.main.asyncAfter(deadline: when) {
         self.selectedLocation = CurrentUser.currentLocation
@@ -229,8 +229,6 @@ class LocationSearchController: UIViewController, UITextFieldDelegate, CLLocatio
     }
     
     func selectLocation(){
-        
-        
         
         self.delegate?.didUpdate(lat: Double(latInput.text!), long: Double(longInput.text!), locationAdress: locationAdress.text, locationName: locationName.text, locationGooglePlaceID: selectedGooglePlaceID)
 
@@ -378,40 +376,7 @@ class LocationSearchController: UIViewController, UITextFieldDelegate, CLLocatio
     func wasCancelled(_ viewController: GMSAutocompleteViewController) {
         dismiss(animated: true, completion: nil)
     }
-    
-    // LOCATION MANAGER DELEGATE METHODS
-    
-    func determineCurrentLocation(){
-        
-        if CLLocationManager.locationServicesEnabled() {
-            locationManager.delegate = self
-            locationManager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters
-        }
-        
-        if CLLocationManager.locationServicesEnabled() {
-            locationManager.startUpdatingLocation()
-        }
-        
-    }
-    
-    
-    
-    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        let userLocation:CLLocation = locations[0] as CLLocation
-        
-        if userLocation != nil {
-            print("Current User Location", userLocation)
-            CurrentUser.currentLocation = userLocation
-            manager.stopUpdatingLocation()
-        }
-        
-    }
-    
-    func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
-        print("GPS Location Not Found")
-    }
-    
-    
+
     
     
 
