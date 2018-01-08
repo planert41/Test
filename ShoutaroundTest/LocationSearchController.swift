@@ -131,7 +131,7 @@ class LocationSearchController: UIViewController, UITextFieldDelegate, GMSMapVie
     func findCurrentLocation() {
         LocationSingleton.sharedInstance.determineCurrentLocation()
 
-        let when = DispatchTime.now() + 1 // change 2 to desired number of seconds
+        let when = DispatchTime.now() + defaultGeoWaitTime // change 2 to desired number of seconds
         DispatchQueue.main.asyncAfter(deadline: when) {
         self.selectedLocation = CurrentUser.currentLocation
         self.refreshMap(long: self.selectedLong!, lat: self.selectedLat!, name: nil, adress: nil)

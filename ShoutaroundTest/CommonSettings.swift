@@ -12,6 +12,7 @@ import UIKit
 
 var geoFilterImageDefault:[UIImage] = [#imageLiteral(resourceName: "GeoFence"),#imageLiteral(resourceName: "GeoFence"), #imageLiteral(resourceName: "City"), #imageLiteral(resourceName: "City"), #imageLiteral(resourceName: "Globe")]
 var geoFilterRangeDefault:[String] = ["1", "5", "25", "50", "100","250"]
+var defaultGeoWaitTime: Double = 0.5
 
 var defaultPhotoResize = CGSize(width: 500, height: 500)
 var defaultEmptyGPSName: String = "No Location"

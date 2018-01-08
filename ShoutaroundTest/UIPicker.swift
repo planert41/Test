@@ -6,6 +6,133 @@
 //  Created by Wei Zou Ang on 10/29/17.
 //  Copyright © 2017 Wei Zou Ang. All rights reserved.
 //
+// OLD FILTERING
+//        self.filterFetchedPosts {
+//            self.sortFetchedPosts {
+//                print("Finish Filter and Sorting Post")
+//                NotificationCenter.default.post(name: HomeController.finishSortingFetchedPostsNotificationName, object: nil)
+//            }
+//        }
+//func filterFetchedPosts(completion: @escaping () ->()){
+//    // Filter Caption
+//    if self.filterCaption != nil && self.filterCaption != "" {
+//        guard let searchedText = self.filterCaption else {return}
+//        self.fetchedPosts = self.fetchedPosts.filter { (post) -> Bool in
+//            
+//            let searchedEmoji = ReverseEmojiDictionary[searchedText.lowercased()] ?? ""
+//            
+//            return post.caption.lowercased().contains(searchedText.lowercased()) || post.emoji.contains(searchedText.lowercased()) || post.nonRatingEmojiTags.joined(separator: " ").lowercased().contains(searchedText.lowercased()) || post.nonRatingEmojiTags.joined(separator: " ").lowercased().contains(searchedEmoji) || post.locationName.lowercased().contains(searchedText.lowercased()) || post.locationAdress.lowercased().contains(searchedText.lowercased())
+//        }
+//        print("Filtered Post By Caption: \(searchedText): \(self.fetchedPosts.count)")
+//        
+//    }
+//    
+//    // Distances are updated in fetchallposts as they are filtered by distance
+//    
+//    // Filter Range
+//    if self.filterLocation != nil && self.filterRange != nil {
+//        self.fetchedPosts = self.fetchedPosts.filter { (post) -> Bool in
+//            var filterDistance:Double = 99999999
+//            if post.distance != nil {
+//                filterDistance = post.distance!
+//            }
+//            return filterDistance <= (Double(self.filterRange!)! * 1000)
+//        }
+//        print("Filtered Post By Range: \(self.filterRange) AT \(self.filterLocation): \(self.fetchedPosts.count)")
+//    }
+//    
+//    // Filter Rating
+//    if self.filterMinRating != 0 {
+//        self.fetchedPosts = self.fetchedPosts.filter { (post) -> Bool in
+//            var filterRating:Double = 0
+//            if post.rating != nil {
+//                filterRating = post.rating!
+//            }
+//            return filterRating >= self.filterMinRating
+//        }
+//        print("Filtered Post By Min Rating: \(self.filterMinRating): \(self.fetchedPosts.count)")
+//    }
+//    
+//    // Filter Type
+//    if self.filterType != nil {
+//        self.fetchedPosts = self.fetchedPosts.filter { (post) -> Bool in
+//            return post.type == self.filterType
+//        }
+//        print("Filtered Post By Post Type: \(self.filterType): \(self.fetchedPosts.count)")
+//    }
+//    
+//    // Filter Max Price
+//    if self.filterMaxPrice != nil {
+//        let maxPriceIndex = UploadPostPriceDefault.index(of: self.filterMaxPrice!)
+//        let filterMaxPrice = UploadPostPriceDefault[0...maxPriceIndex!]
+//        
+//        self.fetchedPosts = self.fetchedPosts.filter { (post) -> Bool in
+//            var filterPrice:String = "0"
+//            if post.price != nil {
+//                filterPrice = post.price!
+//            }
+//            return filterMaxPrice.contains(filterPrice)
+//        }
+//        print("Filtered Post By Max Price: \(self.filterMaxPrice): \(self.fetchedPosts.count)")
+//    }
+//    
+//    completion()
+//}
+//
+//
+//
+//func sortFetchedPosts(completion: @escaping () ->()){
+//    print("Sort Posts: \(self.selectedHeaderSort)")
+//    
+//    // Recent
+//    if self.selectedHeaderSort == HeaderSortOptions[0] {
+//        self.fetchedPosts.sort(by: { (p1, p2) -> Bool in
+//            return p1.creationDate.compare(p2.creationDate) == .orderedDescending
+//        })
+//        completion()
+//    }
+//        
+//        // Nearest
+//    else if self.selectedHeaderSort == HeaderSortOptions[1] {
+//        // Check for current filter location
+//        if self.filterLocation == nil {
+//            print("Header Sort: Nearest, No Location, Finding Current Location")
+//            LocationSingleton.sharedInstance.determineCurrentLocation()
+//            
+//            // Posts are refreshed with distances when filter location is updated
+//            let when = DispatchTime.now() + 1 // change 2 to desired number of seconds
+//            DispatchQueue.main.asyncAfter(deadline: when) {
+//                self.fetchedPosts.sort(by: { (p1, p2) -> Bool in
+//                    return (p1.distance! < p2.distance!)
+//                })
+//                completion()
+//            }
+//        } else {
+//            // Distances are updated in fetchallposts as they are filtered by distance
+//            self.fetchedPosts.sort(by: { (p1, p2) -> Bool in
+//                return (p1.distance! < p2.distance!)
+//            })
+//            completion()
+//        }
+//    }
+//        
+//        //Trending
+//    else if self.selectedHeaderSort == HeaderSortOptions[2] {
+//        self.fetchedPosts.sort(by: { (p1, p2) -> Bool in
+//            return (p1.voteCount > p2.voteCount)
+//        })
+//        completion()
+//    }
+//        
+//        // ERROR - Invalid Sort
+//    else {
+//        print("Fetched Post Sort: ERROR, Invalid Sort")
+//        completion()
+//    }
+//}
+
+
+
 //
 //import Foundation
 // Add Tag Time

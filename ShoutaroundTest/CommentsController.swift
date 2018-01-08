@@ -154,11 +154,15 @@ class CommentsController: UICollectionViewController, UICollectionViewDelegateFl
     
     func handleSubmit() {
         print("submit comment:", commentTextField.text ?? "")
+
         
         guard let uid = Auth.auth().currentUser?.uid else {return}
         
         let postId = self.post?.id ?? ""
         let values = ["text": commentTextField.text ?? "", "creationDate": Date().timeIntervalSince1970, "uid": uid] as [String:Any]
+        
+        commentTextField.text?.removeAll()
+
         
         Database.database().reference().child("comments").child(postId).childByAutoId().updateChildValues(values) { (err, ref) in
             if let err = err {

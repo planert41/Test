@@ -1986,7 +1986,7 @@ extension Database{
             // ERROR - Invalid Sort
         else {
             print("Fetched Post Sort: ERROR, Invalid Sort")
-            completion(nil)
+            completion(tempPosts)
         }
         
         

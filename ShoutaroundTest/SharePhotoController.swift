@@ -670,7 +670,7 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         
         if self.selectPostLocation == nil {
             LocationSingleton.sharedInstance.determineCurrentLocation()
-            let when = DispatchTime.now() + 1 // change 2 to desired number of seconds
+            let when = DispatchTime.now() + defaultGeoWaitTime // change 2 to desired number of seconds
             DispatchQueue.main.asyncAfter(deadline: when) {
                 sentLocation = CurrentUser.currentLocation
                 print(sentLocation)
@@ -1892,7 +1892,7 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         LocationSingleton.sharedInstance.determineCurrentLocation()
         refreshGoogleResults()
         
-        let when = DispatchTime.now() + 1 // change 2 to desired number of seconds
+        let when = DispatchTime.now() + defaultGeoWaitTime // change 2 to desired number of seconds
         DispatchQueue.main.asyncAfter(deadline: when) {
             //Delay for 1 second to find current location
             if CurrentUser.currentLocation == nil {

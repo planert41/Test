@@ -64,6 +64,7 @@ class ListViewController: UIViewController, UICollectionViewDelegate, UICollecti
     var filterCaption: String? = nil
     var filterRange: String? = nil
     var filterLocation: CLLocation? = nil
+    var filterLocationName: String? = nil
     var filterGoogleLocationID: String? = nil
     var filterMinRating: Double = 0
     var filterType: String? = nil
@@ -71,7 +72,7 @@ class ListViewController: UIViewController, UICollectionViewDelegate, UICollecti
     
     // Header Sort Variables
     // Default Sort is Most Recent Listed Date
-    var selectedHeaderSort:String? = nil
+    var selectedHeaderSort:String? = defaultSort
     
     
     
@@ -123,27 +124,78 @@ class ListViewController: UIViewController, UICollectionViewDelegate, UICollecti
                     } else {
                         self.fetchedPosts = []
                     }
-                    self.collectionView.reloadData()
+                    self.filterSortFetchedPosts()
                 })
             })
         } else {
             self.fetchPostFromList(list: self.displayList, completion: { (fetchedPosts) in
+                print("Fetch Post for List: Success, Post Count: \(fetchedPosts?.count)")
+
                 if let fetchedPosts = fetchedPosts {
                     self.fetchedPosts = fetchedPosts
                 } else {
                     self.fetchedPosts = []
                 }
-                self.collectionView.reloadData()
+                self.filterSortFetchedPosts()
             })
         }
         
     }
     
+    func filterSortFetchedPosts(){
+        
+        // Filter Posts
+        Database.filterPosts(inputPosts: self.fetchedPosts, filterCaption: self.filterCaption, filterRange: self.filterRange, filterLocation: self.filterLocation, filterMinRating: self.filterMinRating, filterType: self.filterType, filterMaxPrice: self.filterMaxPrice) { (filteredPosts) in
+            
+            // Sort Posts
+            Database.sortPosts(inputPosts: filteredPosts, selectedSort: self.selectedHeaderSort, selectedLocation: self.filterLocation, completion: { (filteredPosts) in
+                
+                self.fetchedPosts = []
+                if filteredPosts != nil {
+                    self.fetchedPosts = filteredPosts!
+                }
+                print("Finish Filter and Sorting Post")
+                self.collectionView.reloadData()
+            })
+        }
+    }
+    
+    // Refresh Functions
+    
+    
     func handleRefresh(){
         print("Refresh List")
         self.clearAllPost()
+        self.clearFilter()
         self.collectionView.reloadData()
         self.fetchListPosts()
+        self.collectionView.refreshControl?.endRefreshing()
+    }
+    
+    func refreshPostsForFilter(){
+        self.clearAllPost()
+        self.collectionView.reloadData()
+        self.fetchListPosts()
+        self.collectionView.refreshControl?.endRefreshing()
+    }
+    
+    
+    func clearAllPost(){
+        self.displayList = nil
+        self.fetchedPosts = []
+    }
+    
+    
+    func clearFilter(){
+        self.filterLocation = nil
+        self.filterLocationName = nil
+        self.filterRange = nil
+        self.filterGoogleLocationID = nil
+        self.filterMinRating = 0
+        self.filterType = nil
+        self.filterMaxPrice = nil
+        self.selectedHeaderSort = defaultSort
+        self.isFiltering = false
     }
     
     func fetchPostFromList(list: List?, completion: @escaping ([Post]?) -> ()){
@@ -194,11 +246,61 @@ class ListViewController: UIViewController, UICollectionViewDelegate, UICollecti
         }
         
     }
+
+    // Search Delegates
     
-    func clearAllPost(){
-        self.displayList = nil
-        self.fetchedPosts = []
+    
+    func filterControllerFinished(selectedRange: String?, selectedLocation: CLLocation?, selectedLocationName: String?, selectedMinRating: Double, selectedType: String?, selectedMaxPrice: String?, selectedSort: String){
+        
+        // Clears all Filters, Puts in new Filters, Refreshes all Post IDS and Posts
+        
+        self.clearFilter()
+        
+        self.filterRange = selectedRange
+        self.filterLocation = selectedLocation
+        self.filterLocationName = selectedLocationName
+        
+        self.filterMinRating = selectedMinRating
+        self.filterType = selectedType
+        self.filterMaxPrice = selectedMaxPrice
+        
+        self.selectedHeaderSort = selectedSort
+        
+        // Refresh Everything
+        self.refreshPostsForFilter()
+        
+        // Check for filtering
+        if (self.filterRange != nil) || (self.filterMinRating != 0) || (self.filterType != nil) || (self.filterMaxPrice != nil) {
+            self.isFiltering = true
+        } else {
+            self.isFiltering = false
+        }
+        
     }
+    
+    func headerSortSelected(sort: String) {
+        self.selectedHeaderSort = sort
+        self.collectionView.reloadData()
+        
+        if (self.selectedHeaderSort == HeaderSortOptions[1] && self.filterLocation == nil){
+            print("Sort by Nearest, No Location, Look up Current Location")
+            LocationSingleton.sharedInstance.determineCurrentLocation()
+            let when = DispatchTime.now() + defaultGeoWaitTime // change 2 to desired number of seconds
+            DispatchQueue.main.asyncAfter(deadline: when) {
+                //Delay for 1 second to find current location
+                self.filterLocation = CurrentUser.currentLocation
+                self.refreshPostsForFilter()
+            }
+        } else {
+            self.refreshPostsForFilter()
+        }
+        
+        print("Filter Sort is ", self.selectedHeaderSort)
+    }
+    
+    
+    
+    
 
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat {
@@ -295,53 +397,7 @@ class ListViewController: UIViewController, UICollectionViewDelegate, UICollecti
         self.navigationController?.pushViewController(filterController, animated: true)
     }
     
-    // Search Delegates
-    
-    
-    func filterControllerFinished(selectedRange: String?, selectedLocation: CLLocation?, selectedLocationName: String?, selectedMinRating: Double, selectedType: String?, selectedMaxPrice: String?, selectedSort: String){
-        
-        // Clears all Filters, Puts in new Filters, Refreshes all Post IDS and Posts
-        
-        
-//        self.clearFilter()
-//
-//        self.filterRange = selectedRange
-//        self.filterLocation = selectedLocation
-//        self.defaultSearchBar.text = selectedLocationName
-//
-//        self.filterMinRating = selectedMinRating
-//        self.filterType = selectedType
-//        self.filterMaxPrice = selectedMaxPrice
-//
-//        self.selectedHeaderSort = selectedSort
-//
-//        // Refresh Everything
-//        self.refreshPagination()
-//        self.collectionView?.reloadData()
-//
-//        self.clearAllPosts()
-//        self.fetchAllPostIds()
-//        self.scrolltoFirst = true
-//
-//        // Check for filtering
-//        if (self.filterRange != nil) || (self.filterMinRating != 0) || (self.filterType != nil) || (self.filterMaxPrice != nil) {
-//            self.isFiltering = true
-//        } else {
-//            self.isFiltering = false
-//        }
-        
-        
-    }
 
-    func headerSortSelected(sort: String) {
-        self.selectedHeaderSort = sort
-        self.collectionView.reloadData()
-//        self.filterSortFetchedPosts()
-        print("Filter Sort is ", self.selectedHeaderSort)
-    }
-    
-    
-    
     // HOME POST CELL DELEGATE METHODS
     
     func didTapBookmark(post: Post) {
