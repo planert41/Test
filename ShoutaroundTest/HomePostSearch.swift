@@ -88,6 +88,33 @@ class HomePostSearch : UITableViewController, UISearchResultsUpdating, UISearchC
 //            // Fallback on earlier versions
 //        }
     }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        print("view Appear")
+
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        if #available(iOS 11.0, *) {
+            self.navigationController?.navigationItem.searchController?.isActive = false
+            self.navigationController?.navigationItem.searchController = nil
+            self.navigationController?.navigationItem.searchController?.searchBar.isHidden = true
+
+            
+        } else {
+            // Fallback on earlier versions
+        }
+        print("view Dissapear")
+    }
+    
+    func searchBarTextDidEndEditing(_ searchBar: UISearchBar) {
+        if #available(iOS 11.0, *) {
+            self.navigationController?.navigationItem.searchController?.isActive = false
+            self.navigationController?.navigationItem.searchController = nil
+            self.navigationController?.navigationItem.searchController?.searchBar.isHidden = true
+            
+        }
+    }
 
     override func numberOfSections(in tableView: UITableView) -> Int {
         return 1

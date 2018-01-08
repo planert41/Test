@@ -122,6 +122,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
 
     
     var resultSearchController:UISearchController? = nil
+    var homePostSearchResults = HomePostSearch()
     var defaultSearchBar = UISearchBar()
 
     let locationManager = CLLocationManager()
@@ -257,7 +258,6 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     
     
     func setupSearchController() {
-        let homePostSearchResults = HomePostSearch()
         homePostSearchResults.delegate = self
         resultSearchController = UISearchController(searchResultsController: homePostSearchResults)
         resultSearchController?.searchResultsUpdater = homePostSearchResults
@@ -273,13 +273,38 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         resultSearchController?.hidesNavigationBarDuringPresentation = true
         resultSearchController?.dimsBackgroundDuringPresentation = true
         definesPresentationContext = true
+        
+
     }
     
     
     func openSearch(){
+        
+        if #available(iOS 11.0, *) {
+            // For iOS 11 and later, we place the search bar in the navigation bar.
+            navigationItem.searchController = resultSearchController
+
+            // We want the search bar visible all the time.
+            navigationItem.hidesSearchBarWhenScrolling = false
+        } else {
+            // For iOS 10 and earlier, we place the search bar in the table view's header.
+            navigationItem.titleView = resultSearchController?.searchBar
+            
+        }
+        
+        resultSearchController?.searchBar.becomeFirstResponder()
         self.present(resultSearchController!, animated: true, completion: nil)
     }
     
+    
+    override func viewWillAppear(_ animated: Bool) {
+       print("view appear")
+        if #available(iOS 11.0, *) {
+            // For iOS 11 and later, we place the search bar in the navigation bar.
+            navigationItem.searchController?.searchBar.removeFromSuperview()
+        }
+        
+    }
     
 // Search Delegate And Methods
 
@@ -387,6 +412,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     func clearAllPosts(){
         self.fetchedPostIds.removeAll()
         self.fetchedPosts.removeAll()
+        self.refreshPagination()
     }
     
     func clearSort(){
@@ -432,6 +458,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     
     func refreshPostsForFilter(){
         self.clearAllPosts()
+        self.collectionView?.reloadData()
         self.fetchAllPostIds()
     }
     
@@ -673,7 +700,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         // Filter Max Price
         if self.filterMaxPrice != nil {
             let maxPriceIndex = UploadPostPriceDefault.index(of: self.filterMaxPrice!)
-            let filterMaxPrice = UploadPostPriceDefault[0..<maxPriceIndex!]
+            let filterMaxPrice = UploadPostPriceDefault[0...maxPriceIndex!]
             
             self.fetchedPosts = self.fetchedPosts.filter { (post) -> Bool in
                 var filterPrice:String = "0"
@@ -911,28 +938,16 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         else {
             // List Tag Selected
             
-            // Check if List Exist
-            Database.fetchListforSingleListId(listId: tagId, completion: { (fetchedList) in
+            Database.checkUpdateListDetailsWithPost(listName: tagName, listId: tagId, post: post, completion: { (fetchedList) in
                 if fetchedList == nil {
                     // List Does not Exist
                     self.alert(title: "List Error", message: "List Does Not Exist Anymore")
-                    
-                    // Update list from Post
-                    var tempPost = post
-                    if let deleteIndex = tempPost.creatorListId?.index(forKey: tagId) {
-                        var updatePostListIds = tempPost.creatorListId?.remove(at: deleteIndex)
-                        var tempPostDictionary = tempPost.dictionary()
-                        tempPostDictionary["lists"] = updatePostListIds
-                        print("Deleting \(tagId) list from \(tempPost.id) Post")
-                        Database.updatePostwithPostID(postId: tempPost.id!, values: tempPostDictionary)
-                    }
                 } else {
                     let listViewController = ListViewController()
                     listViewController.displayListId = tagId
                     listViewController.displayList = fetchedList
                     self.navigationController?.pushViewController(listViewController, animated: true)
                 }
-                
             })
         }
     }

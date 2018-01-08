@@ -84,6 +84,7 @@ class ListViewController: UIViewController, UICollectionViewDelegate, UICollecti
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        view.backgroundColor = UIColor.white
         
         self.navigationController?.navigationBar.tintColor = UIColor.blue
         self.navigationItem.title = displayList?.name

@@ -1026,7 +1026,12 @@ extension Database{
                 return
             }
             print("Succesfully Updated Post: ", postId, " with: ", values)
-
+            
+            // Update Post Cache
+            var tempPost = Post.init(user: CurrentUser.user, dictionary: values)
+            tempPost.id = postId
+            postCache[postId] = tempPost
+            
         }
         
     }
@@ -1372,6 +1377,47 @@ extension Database{
         tempPost?.selectedListId = newList
         postCache[postId] = tempPost
         completion()
+        
+    }
+    
+    static func checkUpdateListDetailsWithPost(listName: String, listId: String, post: Post, completion: @escaping (List?) ->()){
+        
+        var tempPost = post
+        var tempPostDictionary = tempPost.dictionary()
+        
+        // Check if list exists
+        Database.fetchListforSingleListId(listId: listId) { (list) in
+            if list == nil {
+                print("List \(listId): \(listName) does not exist anymore")
+                
+                // Update Post Details and Remove List
+                if let deleteIndex = tempPost.creatorListId?.index(forKey: listId) {
+                    var updatePostListIds = tempPost.creatorListId?.remove(at: deleteIndex)
+                    tempPostDictionary["lists"] = updatePostListIds
+                    print("Deleting \(listId) list from \(tempPost.id) Post")
+                    Database.updatePostwithPostID(postId: tempPost.id!, values: tempPostDictionary)
+                }
+                completion(nil)
+            } else {
+                // List Exists
+                
+                    if list?.name != listName {
+                    // Update Post Details if List Name has Changes
+                        var tempList = tempPostDictionary["lists"] as! [String:String]
+                        tempList[listId] = list?.name
+                        tempPostDictionary["lists"] = tempList
+                        print("Updating \(listId) list Name from \(listName) to \(list?.name) for Post \(post.id)")
+                        Database.updatePostwithPostID(postId: tempPost.id!, values: tempPostDictionary)
+                    }
+                
+                completion(list)
+            }
+        }
+        
+        
+        
+        
+        
         
     }
     

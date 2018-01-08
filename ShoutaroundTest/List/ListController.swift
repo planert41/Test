@@ -40,6 +40,7 @@ class ListController: UITableViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        view.backgroundColor = UIColor.white
         
         self.navigationController?.navigationBar.tintColor = UIColor.blue
         self.navigationItem.title = "Tagged List"
