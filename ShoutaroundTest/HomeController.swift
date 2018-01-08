@@ -326,9 +326,19 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     
     func headerSortSelected(sort: String) {
         self.selectedHeaderSort = sort
-        self.refreshPagination()
-        self.collectionView?.reloadData()
-        self.filterSortFetchedPosts()
+        
+        if (self.selectedHeaderSort == HeaderSortOptions[1] && self.filterLocation == nil){
+                print("Sort by Nearest, No Location, Look up Current Location")
+                self.determineCurrentLocation()
+                let when = DispatchTime.now() + 1 // change 2 to desired number of seconds
+                DispatchQueue.main.asyncAfter(deadline: when) {
+                    //Delay for 1 second to find current location
+                    self.refreshPostsForFilter()
+                }
+        } else {
+            self.refreshPostsForFilter()
+        }
+        
         print("Filter Sort is ", self.selectedHeaderSort)
     }
     
@@ -584,21 +594,21 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         }
         
         if self.fetchedPosts.count == 0 && self.isFinishedPaging == true {
-            print("No Results Pagination Finished")
+            print("Finish Pagination Check: No Results")
             self.noResultsLabel.text = "No Results"
             self.noResultsLabel.isHidden = false
         }
         else if self.fetchedPosts.count == 0 && self.isFinishedPaging != true {
-            print("No Display Pagination Check Paginate")
+            print("Finish Pagination Check: No Results, Still Paging")
             self.noResultsLabel.text = "Loading"
             self.noResultsLabel.isHidden = false
             self.paginatePosts()
         } else {
-            
-            print("Refreshing CollectionView")
-            
+            print("Finish Pagination Check: Success, Post: \(self.fetchedPosts.count)")
             DispatchQueue.main.async(execute: { self.collectionView?.reloadData()
             
+                self.noResultsLabel.isHidden = true
+                
                 // Scrolling for refreshed results
                 if self.scrolltoFirst && self.fetchedPosts.count > 1{
                     print("Refresh Control Status: ", self.collectionView?.refreshControl?.state)
@@ -608,7 +618,6 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
 //                    self.collectionView?.setContentOffset(CGPoint(x: 0, y: 0 - self.topLayoutGuide.length), animated: true)
                     print("Scrolled to Top")
                     self.scrolltoFirst = false
-                    self.noResultsLabel.isHidden = true
                     
                 }
             
@@ -641,13 +650,31 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     }
     
     func filterSortFetchedPosts(){
-        self.filterFetchedPosts {
-            self.sortFetchedPosts {
-                print("Finish Filter and Sorting Post")
-                NotificationCenter.default.post(name: HomeController.finishSortingFetchedPostsNotificationName, object: nil)
-            }
+        
+    // Filter Posts
+        Database.filterPosts(inputPosts: self.fetchedPosts, filterCaption: self.filterCaption, filterRange: self.filterRange, filterLocation: self.filterLocation, filterMinRating: self.filterMinRating, filterType: self.filterType, filterMaxPrice: self.filterMaxPrice) { (filteredPosts) in
+            
+    // Sort Posts
+            Database.sortPosts(inputPosts: filteredPosts, selectedSort: self.selectedHeaderSort, selectedLocation: self.filterLocation, completion: { (filteredPosts) in
+                
+                self.fetchedPosts = []
+                if filteredPosts != nil {
+                    self.fetchedPosts = filteredPosts!
+                }
+                    print("Finish Filter and Sorting Post")
+                    NotificationCenter.default.post(name: HomeController.finishSortingFetchedPostsNotificationName, object: nil)
+            })
         }
+        
+        
+//        self.filterFetchedPosts {
+//            self.sortFetchedPosts {
+//                print("Finish Filter and Sorting Post")
+//                NotificationCenter.default.post(name: HomeController.finishSortingFetchedPostsNotificationName, object: nil)
+//            }
+//        }
     }
+    
     
     func filterFetchedPosts(completion: @escaping () ->()){
         // Filter Caption

@@ -1018,19 +1018,19 @@ extension Database{
     
 // Upload/Update Post
     
-    static func updatePostwithPostID( postId: String, values: [String:Any]){
+    static func updatePostwithPostID( post: Post, newDictionaryValues: [String:Any]){
         
-        Database.database().reference().child("posts").child(postId).updateChildValues(values) { (err, ref) in
+        Database.database().reference().child("posts").child(post.id!).updateChildValues(newDictionaryValues) { (err, ref) in
             if let err = err {
-                print("Fail to Update Post: ", postId, err)
+                print("Fail to Update Post: ", post.id, err)
                 return
             }
-            print("Succesfully Updated Post: ", postId, " with: ", values)
+            print("Succesfully Updated Post: ", post.id, " with: ", newDictionaryValues)
             
             // Update Post Cache
-            var tempPost = Post.init(user: CurrentUser.user, dictionary: values)
-            tempPost.id = postId
-            postCache[postId] = tempPost
+            var tempPost = Post.init(user: post.user, dictionary: newDictionaryValues)
+            tempPost.id = post.id
+            postCache[post.id!] = tempPost
             
         }
         
@@ -1395,7 +1395,7 @@ extension Database{
                     var updatePostListIds = tempPost.creatorListId?.remove(at: deleteIndex)
                     tempPostDictionary["lists"] = updatePostListIds
                     print("Deleting \(listId) list from \(tempPost.id) Post")
-                    Database.updatePostwithPostID(postId: tempPost.id!, values: tempPostDictionary)
+                    Database.updatePostwithPostID(post: post, newDictionaryValues: tempPostDictionary)
                 }
                 completion(nil)
             } else {
@@ -1407,7 +1407,7 @@ extension Database{
                         tempList[listId] = list?.name
                         tempPostDictionary["lists"] = tempList
                         print("Updating \(listId) list Name from \(listName) to \(list?.name) for Post \(post.id)")
-                        Database.updatePostwithPostID(postId: tempPost.id!, values: tempPostDictionary)
+                        Database.updatePostwithPostID(post: post, newDictionaryValues: tempPostDictionary)
                     }
                 
                 completion(list)
@@ -1853,6 +1853,147 @@ extension Database{
             }
         }
     }
+    
+    static func filterPosts(inputPosts: [Post]?, filterCaption: String?, filterRange: String?, filterLocation: CLLocation?, filterMinRating: Double?, filterType: String?, filterMaxPrice: String?, completion: @escaping ([Post]?) -> ()){
+        
+        guard let inputPosts = inputPosts else {
+            print("Filter Posts: ERROR, No Post")
+            completion(nil)
+            return
+        }
+        
+        var tempPosts = inputPosts
+        
+        // Filter Caption
+        if filterCaption != nil && filterCaption != "" {
+            guard let searchedText = filterCaption else {return}
+            tempPosts = tempPosts.filter { (post) -> Bool in
+                
+                let searchedEmoji = ReverseEmojiDictionary[searchedText.lowercased()] ?? ""
+                
+                return post.caption.lowercased().contains(searchedText.lowercased()) || post.emoji.contains(searchedText.lowercased()) || post.nonRatingEmojiTags.joined(separator: " ").lowercased().contains(searchedText.lowercased()) || post.nonRatingEmojiTags.joined(separator: " ").lowercased().contains(searchedEmoji) || post.locationName.lowercased().contains(searchedText.lowercased()) || post.locationAdress.lowercased().contains(searchedText.lowercased())
+            }
+            print("Filtered Post By Caption: \(searchedText): \(tempPosts.count)")
+            
+        }
+        
+        // Distances are updated in fetchallposts as they are filtered by distance
+        
+        // Filter Range
+        if filterLocation != nil && filterRange != nil {
+            tempPosts = tempPosts.filter { (post) -> Bool in
+                var filterDistance:Double = 99999999
+                if post.distance != nil {
+                    filterDistance = post.distance!
+                }
+                return filterDistance <= (Double(filterRange!)! * 1000)
+            }
+            print("Filtered Post By Range: \(filterRange) AT \(filterLocation): \(tempPosts.count)")
+        }
+        
+        // Filter Rating
+        if filterMinRating != 0 && filterMinRating != nil {
+            tempPosts = tempPosts.filter { (post) -> Bool in
+                var filterRating:Double = 0
+                if post.rating != nil {
+                    filterRating = post.rating!
+                }
+                return filterRating >= filterMinRating!
+            }
+            print("Filtered Post By Min Rating: \(filterMinRating): \(tempPosts.count)")
+        }
+        
+        // Filter Type
+        if filterType != nil {
+            tempPosts = tempPosts.filter { (post) -> Bool in
+                return post.type == filterType
+            }
+            print("Filtered Post By Post Type: \(filterType): \(tempPosts.count)")
+        }
+        
+        // Filter Max Price
+        if filterMaxPrice != nil {
+            let maxPriceIndex = UploadPostPriceDefault.index(of: filterMaxPrice!)
+            let filterMaxPrice = UploadPostPriceDefault[0...maxPriceIndex!]
+            
+            tempPosts = tempPosts.filter { (post) -> Bool in
+                var filterPrice:String = "0"
+                if post.price != nil {
+                    filterPrice = post.price!
+                }
+                return filterMaxPrice.contains(filterPrice)
+            }
+            print("Filtered Post By Max Price: \(filterMaxPrice): \(tempPosts.count)")
+        }
+        
+        completion(tempPosts)
+    }
+    
+    static func sortPosts(inputPosts: [Post]?, selectedSort: String?, selectedLocation: CLLocation?, completion: @escaping ([Post]?) -> ()){
+        guard let inputPosts = inputPosts else {
+            print("Sort Posts: ERROR, No Post")
+            completion(nil)
+            return
+        }
+        
+        var tempPosts = inputPosts
+        
+        print("Sort Posts: \(selectedSort)")
+        
+        // Recent
+        if selectedSort == HeaderSortOptions[0] {
+            tempPosts.sort(by: { (p1, p2) -> Bool in
+                return p1.creationDate.compare(p2.creationDate) == .orderedDescending
+            })
+            completion(tempPosts)
+        }
+            
+            // Nearest
+        else if selectedSort == HeaderSortOptions[1] {
+                // Distances are updated in fetchallposts as they are filtered by distance
+            
+            guard let selectedLocation = selectedLocation else {
+                print("Sort Nearest: ERROR, No Location")
+                completion(nil)
+                return
+            }
+                //Update Posts for distances
+                for (index,post) in tempPosts.enumerated() {
+                    var tempPost = post
+                    if tempPost.locationGPS == nil || tempPost.locationGPS == CLLocation(latitude: 0, longitude: 0) {
+                        print("Sort Nearest: No GPS Location for \(tempPost.id), default Distance")
+                        tempPost.distance = 999999999
+                    } else {
+                        tempPost.distance = Double((tempPost.locationGPS?.distance(from: selectedLocation))!)
+                    }
+                    tempPosts[index] = tempPost
+                }
+
+                tempPosts.sort(by: { (p1, p2) -> Bool in
+                    return (p1.distance! < p2.distance!)
+                })
+                completion(tempPosts)
+        }
+            
+            //Trending
+        else if selectedSort == HeaderSortOptions[2] {
+            tempPosts.sort(by: { (p1, p2) -> Bool in
+                return (p1.voteCount > p2.voteCount)
+            })
+            completion(tempPosts)
+        }
+            
+            // ERROR - Invalid Sort
+        else {
+            print("Fetched Post Sort: ERROR, Invalid Sort")
+            completion(nil)
+        }
+        
+        
+        
+        
+    }
+    
     
     
 }

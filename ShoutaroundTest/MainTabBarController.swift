@@ -359,7 +359,7 @@ class MainTabBarController: UITabBarController, UITabBarControllerDelegate, UIIm
                     
                     
                     print("Updating PostId: ",key," Values: ", values)
-                    Database.updatePostwithPostID(postId: key, values: values)
+//                    Database.updatePostwithPostID(post: key, newDictionaryValues: values)
                     
                     var saveNewRatingEmoji = newRatingEmoji ?? ""
                     var saveNewNonratingEmoji = newNonratingEmoji?.joined() ?? ""

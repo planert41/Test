@@ -92,7 +92,7 @@ class ListController: UITableViewController {
                     var tempPostDictionary = tempPost.dictionary()
                     tempPostDictionary["lists"] = updatePostListIds
                     print("Deleting \(tagId) list from \(tempPost.id) Post")
-                    Database.updatePostwithPostID(postId: tempPost.id!, values: tempPostDictionary)
+                    Database.updatePostwithPostID(post: tempPost, newDictionaryValues: tempPostDictionary)
                 }
             } else {
                 let listViewController = ListViewController()

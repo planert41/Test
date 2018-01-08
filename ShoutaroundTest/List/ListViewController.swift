@@ -79,7 +79,6 @@ class ListViewController: UIViewController, UICollectionViewDelegate, UICollecti
     
     var displayListId: String? = nil
     var displayList: List? = nil
-    var fetchedPostIds: [String] = []
     var fetchedPosts: [Post] = []
     
     override func viewDidLoad() {
@@ -114,51 +113,91 @@ class ListViewController: UIViewController, UICollectionViewDelegate, UICollecti
             return
         }
         
-        guard let displayList = displayList else {
-            print("Fetch Post for List: ERROR, No List")
+        if displayList == nil {
+            print("Fetch Post for List: No List, Pulling List for \(displayListId)")
+            Database.fetchListforSingleListId(listId: displayListId, completion: { (fetchedList) in
+                self.displayList = fetchedList
+                self.fetchPostFromList(list: self.displayList, completion: { (fetchedPosts) in
+                    if let fetchedPosts = fetchedPosts {
+                        self.fetchedPosts = fetchedPosts
+                    } else {
+                        self.fetchedPosts = []
+                    }
+                    self.collectionView.reloadData()
+                })
+            })
+        } else {
+            self.fetchPostFromList(list: self.displayList, completion: { (fetchedPosts) in
+                if let fetchedPosts = fetchedPosts {
+                    self.fetchedPosts = fetchedPosts
+                } else {
+                    self.fetchedPosts = []
+                }
+                self.collectionView.reloadData()
+            })
+        }
+        
+    }
+    
+    func handleRefresh(){
+        print("Refresh List")
+        self.clearAllPost()
+        self.collectionView.reloadData()
+        self.fetchListPosts()
+    }
+    
+    func fetchPostFromList(list: List?, completion: @escaping ([Post]?) -> ()){
+        
+        guard let list = list else {
+            print("Fetch Post from List: ERROR, No List")
+            completion(nil)
             return
         }
         
         let thisGroup = DispatchGroup()
-
-        for (postId,postListDate) in displayList.postIds! {
+        var tempPosts: [Post] = []
+        
+        for (postId,postListDate) in list.postIds! {
             thisGroup.enter()
-            self.fetchedPostIds.append(postId)
-
+            
             Database.fetchPostWithPostID(postId: postId, completion: { (fetchedPost, error) in
                 if let error = error {
                     print("Fetch Post: ERROR, \(postId)", error)
                     return
                 }
                 
-                guard let fetchedPost = fetchedPost else {
-                    print("Fetch Post: ERROR, \(postId), No Post")
-                    return
+                // Work around to handle if listed post was deleted
+                if let fetchedPost = fetchedPost {
+                    var tempDate = postListDate as! Double
+                    var tempPost = fetchedPost
+                    let listDate = Date(timeIntervalSince1970: tempDate)
+                    tempPost.listedDate = listDate
+                    tempPosts.append(tempPost)
+                    thisGroup.leave()
+                } else {
+                    print("Fetch Post: ERROR, \(postId), No Post, Will Delete from List")
+                    Database.DeletePostForList(postId: postId, listId: list.id)
+                    thisGroup.leave()
                 }
-                
-                var tempDate = postListDate as! Double
-                var tempPost = fetchedPost
-                let listDate = Date(timeIntervalSince1970: tempDate)
-                tempPost.listedDate = listDate
-                self.fetchedPosts.append(tempPost)
-                thisGroup.leave()
+            
             })
         }
         
         thisGroup.notify(queue: .main) {
-            print("Fetched \(self.fetchedPosts.count) Post for List: \(displayListId)")
-        
+            print("Fetched \(tempPosts.count) Post for List: \(list.id)")
+            
             // Initial Sort by Listed Dates
-            self.fetchedPosts.sort(by: { (p1, p2) -> Bool in
+            tempPosts.sort(by: { (p1, p2) -> Bool in
                 return p1.listedDate?.compare((p2.listedDate)!) == .orderedDescending
             })
-            
-            self.collectionView.reloadData()
+            completion(tempPosts)
         }
+        
     }
     
-    func handleRefresh(){
-        print("Refresh List")
+    func clearAllPost(){
+        self.displayList = nil
+        self.fetchedPosts = []
     }
 
     
