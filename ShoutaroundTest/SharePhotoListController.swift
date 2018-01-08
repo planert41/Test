@@ -282,9 +282,10 @@ class SharePhotoListController: UIViewController, UICollectionViewDelegate, UICo
     
     func handleEditPost(){
         print("Selected List: \(self.selectedList)")
+        var listIds: [String:String]? = [:]
+
         if self.selectedList != nil {
             // Add list id to post dictionary for display
-            var listIds: [String:String]? = [:]
             
             for list in self.selectedList! {
                 listIds![list.id!] = list.name
@@ -304,8 +305,17 @@ class SharePhotoListController: UIViewController, UICollectionViewDelegate, UICo
         
         Database.editPostToDatabase(imageUrl: imageUrl, postId: postId, uploadDictionary: uploadPostDictionary, uploadLocation: uploadPostLocation, prevList: editPrevList) {
             
+            // Update Post Cache
+            var tempPost = self.uploadPost
+            tempPost?.selectedListId = listIds
+            tempPost?.creatorListId = listIds
+
+            postCache[(self.uploadPost?.id)!] = tempPost
+            
             self.navigationController?.popViewController(animated: true)
-            NotificationCenter.default.post(name: SharePhotoListController.updateFeedNotificationName, object: nil)
+            self.delegate?.refreshPost(post: tempPost!)
+
+//            NotificationCenter.default.post(name: SharePhotoListController.updateFeedNotificationName, object: nil)
             
         }
     }
@@ -331,7 +341,7 @@ class SharePhotoListController: UIViewController, UICollectionViewDelegate, UICo
                 
                 self.navigationController?.popViewController(animated: true)
                 self.delegate?.refreshPost(post: tempPost!)
-                NotificationCenter.default.post(name: SharePhotoListController.updateFeedNotificationName, object: nil)
+//                NotificationCenter.default.post(name: SharePhotoListController.updateFeedNotificationName, object: nil)
             }
         }
     }
