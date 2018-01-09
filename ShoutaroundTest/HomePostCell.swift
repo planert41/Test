@@ -504,9 +504,9 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
     }
 
     
-    lazy var extraTagLabel1: UILabel = {
+    lazy var creatorTagLabel1: UILabel = {
         let label = UILabel()
-        let tap = UITapGestureRecognizer(target: self, action: #selector(extraTagSelected(_:)))
+        let tap = UITapGestureRecognizer(target: self, action: #selector(creatorTagSelected(_:)))
         label.addGestureRecognizer(tap)
         label.isUserInteractionEnabled = true
         label.backgroundColor = UIColor.white
@@ -521,9 +521,9 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         return label
     }()
     
-    lazy var extraTagLabel2: UILabel = {
+    lazy var creatorTagLabel2: UILabel = {
         let label = UILabel()
-        let tap = UITapGestureRecognizer(target: self, action: #selector(extraTagSelected(_:)))
+        let tap = UITapGestureRecognizer(target: self, action: #selector(creatorTagSelected(_:)))
         label.addGestureRecognizer(tap)
         label.isUserInteractionEnabled = true
         label.backgroundColor = UIColor.white
@@ -538,9 +538,9 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         return label
     }()
     
-    lazy var extraTagLabel3: UILabel = {
+    lazy var creatorTagLabel3: UILabel = {
         let label = UILabel()
-        let tap = UITapGestureRecognizer(target: self, action: #selector(extraTagSelected(_:)))
+        let tap = UITapGestureRecognizer(target: self, action: #selector(creatorTagSelected(_:)))
         label.addGestureRecognizer(tap)
         label.isUserInteractionEnabled = true
         label.backgroundColor = UIColor.white
@@ -555,9 +555,9 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         return label
     }()
     
-    lazy var extraTagLabel4: UILabel = {
+    lazy var creatorTagLabel4: UILabel = {
         let label = UILabel()
-        let tap = UITapGestureRecognizer(target: self, action: #selector(extraTagSelected(_:)))
+        let tap = UITapGestureRecognizer(target: self, action: #selector(creatorTagSelected(_:)))
         label.addGestureRecognizer(tap)
         label.isUserInteractionEnabled = true
         label.backgroundColor = UIColor.white
@@ -572,16 +572,43 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         return label
     }()
     
-    func extraTagSelected(_ sender: UIGestureRecognizer){
-        print("List Selected")
+    lazy var userTagLabel1: UILabel = {
+        let label = UILabel()
+        let tap = UITapGestureRecognizer(target: self, action: #selector(userTagSelected(_:)))
+        label.addGestureRecognizer(tap)
+        label.isUserInteractionEnabled = true
+        label.backgroundColor = UIColor.white
+        label.font = UIFont.boldSystemFont(ofSize: 12)
+        label.textColor = UIColor.mainBlue()
+        label.tag = 3
+        label.layer.cornerRadius = 5
+        label.layer.masksToBounds = true
+        label.layer.borderWidth = 0
+        label.textAlignment = NSTextAlignment.center
+        label.translatesAutoresizingMaskIntoConstraints = false
         
+        return label
+    }()
+    
+    
+    func creatorTagSelected(_ sender: UIGestureRecognizer){
         guard let post = post else {return}
         guard let listTag = sender.view?.tag else {return}
         
-        var selectedListName = self.extraTagsNameArray[listTag]
-        var selectedListId = self.extraTagsIdArray[listTag]
+        var selectedListName = self.creatorTagsNameArray[listTag]
+        var selectedListId = self.creatorTagsIdArray[listTag]
         
-        print("Selected List: \(selectedListName), \(selectedListId)")
+        print("Selected Creator Tag: \(selectedListName), \(selectedListId)")
+        delegate?.didTapExtraTag(tagName: selectedListName, tagId: selectedListId, post: post)
+    }
+    
+    func userTagSelected(_ sender: UIGestureRecognizer){
+        
+        guard let post = post else {return}
+        guard let selectedListName = self.userTagName else {return}
+        guard let selectedListId = self.userTagId else {return}
+        
+        print("Selected User Tag: \(selectedListName), \(selectedListId)")
         delegate?.didTapExtraTag(tagName: selectedListName, tagId: selectedListId, post: post)
     }
     
@@ -591,18 +618,27 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         return uv
     }()
     
-    var extraTagsArray:[UILabel] = []
+    let creatorTagView: UIView = {
+        let uv = UIView()
+        uv.backgroundColor = UIColor.clear
+        return uv
+    }()
     
-    var extraTagsNameArray: [String] = []
-    var extraTagsIdArray: [String] = []
-
-    func setupExtraTags() {
+    var creatorTagsArray:[UILabel] = []
+    
+    var creatorTagsNameArray: [String] = []
+    var creatorTagsIdArray: [String] = []
+    
+    var userTagName: String? = nil
+    var userTagId: String? = nil
+    
+    func setupCreatorTags() {
 
         // Refresh Tags
-        extraTagsNameArray.removeAll()
-        extraTagsIdArray.removeAll()
+        creatorTagsNameArray.removeAll()
+        creatorTagsIdArray.removeAll()
         
-        for label in self.extraTagsArray {
+        for label in self.creatorTagsArray {
             label.text = ""
         }
         
@@ -613,20 +649,20 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
             
             for list in (post?.creatorListId)! {
                 if list.value == "Legit" {
-                    extraTagsNameArray.append(list.value)
-                    extraTagsIdArray.append(list.key)
+                    creatorTagsNameArray.append("!Legit")
+                    creatorTagsIdArray.append(list.key)
                 }
             }
             
             // Add Other List
             for list in (post?.creatorListId)! {
                 if list.value != "Legit" && list.value != "Bookmarks" {
-                    if extraTagsNameArray.count < 2 {
-                        extraTagsNameArray.append("!\(list.value.truncate(length: 15))")
-                        extraTagsIdArray.append(list.key)
-                    } else if extraTagsNameArray.count == 2 && listCount! > 2 {
-                        extraTagsNameArray.append("+\(listCount! - 2) Lists")
-                        extraTagsIdArray.append("lists")
+                    if creatorTagsNameArray.count < 2 {
+                        creatorTagsNameArray.append("!\(list.value.truncate(length: 10))")
+                        creatorTagsIdArray.append(list.key)
+                    } else if creatorTagsNameArray.count == 2 && listCount! > 2 {
+                        creatorTagsNameArray.append("+!\(listCount! - 2)")
+                        creatorTagsIdArray.append("creatorLists")
                     }
                 }
             }
@@ -634,29 +670,72 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         
         // Populate Price Label
         if post?.price != nil {
-            extraTagsNameArray.append((post?.price)!)
-            extraTagsIdArray.append("price")
+            creatorTagsNameArray.append((post?.price)!)
+            creatorTagsIdArray.append("price")
         }
         
     // Populate List Labels
-        if extraTagsNameArray.count > 0 {
-            for (index, listName) in (self.extraTagsNameArray.enumerated()) {
-                extraTagsArray[index].text = extraTagsNameArray[index]
-                if extraTagsIdArray[index] == "price" {
-                    extraTagsArray[index].textColor = UIColor.orange
+        if creatorTagsNameArray.count > 0 {
+            for (index, listName) in (self.creatorTagsNameArray.enumerated()) {
+                creatorTagsArray[index].text = creatorTagsNameArray[index]
+                if creatorTagsIdArray[index] == "price" {
+                    creatorTagsArray[index].textColor = UIColor.orange
+                } else  if creatorTagsIdArray[index] == "creatorLists"{
+                    creatorTagsArray[index].textColor = UIColor.mainBlue()
+                    creatorTagsArray[index].layer.borderWidth = 1
                 } else {
-                    extraTagsArray[index].textColor = UIColor.mainBlue()
+                    creatorTagsArray[index].textColor = UIColor.mainBlue()
                 }
-                
-//                extraTagsArray[index].frame = CGRect(x: 0, y: 0, width: extraTagsArray[index].intrinsicContentSize.width + 20, height: extraTagsArray[index].intrinsicContentSize.height)
             }
         }
     
-        self.extraTagView.layoutIfNeeded()
-        
     }
     
+    func setupUserTags() {
+        
+        userTagName = nil
+        userTagId = nil
+        
+        guard let uid = Auth.auth().currentUser?.uid else {
+            print("SetupUserTag: Invalid Current User UID")
+            return
+        }
+        
+        if post?.creatorUID == uid {
+            print("No User Tags: User is Creator")
+            return
+        }
+        
+        guard let userSelectedList = post?.selectedListId else {
+            print("No User Tags: Nil")
+            return
+        }
+        
+        if (userSelectedList.contains(where: { (listId, listName) -> Bool in
+            return listName == "Bookmarks"})) {
+                userTagName = "!Bookmarks"
+                userTagId = userSelectedList.key(forValue: userTagName!)
+        } else if userSelectedList.count > 0 {
+                userTagName = Array(userSelectedList.values)[0].truncate(length: 10)
+                userTagId = Array(userSelectedList.keys)[0]
+        }
+        
+        if userSelectedList.count > 1 {
+            let listCount = userSelectedList.count - 1
+            userTagName = userTagName! + " +!\(listCount)"
+            userTagId = "userLists"
+        }
+        
+        userTagLabel1.text = userTagName
+    }
     
+    func setupExtraTags(){
+        setupUserTags()
+        setupCreatorTags()
+        self.userTagLabel1.layoutIfNeeded()
+        self.creatorTagView.layoutIfNeeded()
+        self.extraTagView.layoutIfNeeded()
+    }
 
     
 
@@ -746,20 +825,29 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         
 // Setup List and Price Tags
         
-        extraTagsArray = [extraTagLabel1, extraTagLabel2, extraTagLabel3, extraTagLabel4]
-
+        creatorTagsArray = [creatorTagLabel1, creatorTagLabel2, creatorTagLabel3, creatorTagLabel4]
+        
         addSubview(extraTagView)
         extraTagView.anchor(top: photoImageView.bottomAnchor, left: leftAnchor, bottom: nil, right: rightAnchor, paddingTop: 2, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
 
-        for (index,label) in extraTagsArray.enumerated(){
-            addSubview(label)
+        addSubview(userTagLabel1)
+        userTagLabel1.anchor(top: extraTagView.topAnchor, left: nil, bottom: extraTagView.bottomAnchor, right: extraTagView.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 10, width: 0, height: 0)
+        
+        addSubview(creatorTagView)
+        creatorTagView.anchor(top: extraTagView.topAnchor, left: extraTagView.leftAnchor, bottom: extraTagView.bottomAnchor, right: userTagLabel1.leftAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
+
+        
+        for (index,label) in creatorTagsArray.enumerated(){
+            creatorTagView.addSubview(label)
             
             if index == 0{
-                label.anchor(top: extraTagView.topAnchor, left: extraTagView.leftAnchor, bottom: extraTagView.bottomAnchor, right: nil, paddingTop: 0, paddingLeft: 15, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
+                label.anchor(top: creatorTagView.topAnchor, left: creatorTagView.leftAnchor, bottom: creatorTagView.bottomAnchor, right: nil, paddingTop: 0, paddingLeft: 15, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
             } else {
-                label.anchor(top: extraTagView.topAnchor, left: extraTagsArray[index - 1].rightAnchor, bottom: extraTagView.bottomAnchor, right: nil, paddingTop: 0, paddingLeft: 10, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
+                label.anchor(top: creatorTagView.topAnchor, left: creatorTagsArray[index - 1].rightAnchor, bottom: creatorTagView.bottomAnchor, right: nil, paddingTop: 0, paddingLeft: 10, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
             }
         }
+        
+        
         
 // Location View
         
