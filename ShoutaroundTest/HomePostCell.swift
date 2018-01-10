@@ -502,98 +502,107 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         print("Options Button Pressed")
         delegate?.userOptionPost(post: post)
     }
-
     
-    lazy var creatorTagLabel1: UILabel = {
-        let label = UILabel()
-        let tap = UITapGestureRecognizer(target: self, action: #selector(creatorTagSelected(_:)))
-        label.addGestureRecognizer(tap)
-        label.isUserInteractionEnabled = true
-        label.backgroundColor = UIColor.white
-        label.font = UIFont.boldSystemFont(ofSize: 12)
-        label.layer.cornerRadius = 5
-        label.layer.masksToBounds = true
-        label.layer.borderWidth = 0
+    lazy var creatorTagLabel1: UIButton = {
+        let label = UIButton()
         label.tag = 0
-        label.textAlignment = NSTextAlignment.center
-        label.translatesAutoresizingMaskIntoConstraints = false
+        label.addTarget(self, action: #selector(creatorTagSelected(_:)), for: .touchUpInside)
+        
+        label.backgroundColor = UIColor.white
+        label.layer.cornerRadius = 5
+        label.layer.masksToBounds = true
+        label.layer.borderWidth = 0
+
+        label.titleLabel?.font = UIFont.boldSystemFont(ofSize: 12)
+        label.titleLabel?.textAlignment = NSTextAlignment.center
 
         return label
     }()
     
-    lazy var creatorTagLabel2: UILabel = {
-        let label = UILabel()
-        let tap = UITapGestureRecognizer(target: self, action: #selector(creatorTagSelected(_:)))
-        label.addGestureRecognizer(tap)
-        label.isUserInteractionEnabled = true
-        label.backgroundColor = UIColor.white
-        label.font = UIFont.boldSystemFont(ofSize: 12)
+    lazy var creatorTagLabel2: UIButton = {
+        let label = UIButton()
         label.tag = 1
+        label.addTarget(self, action: #selector(creatorTagSelected(_:)), for: .touchUpInside)
+        
+        label.backgroundColor = UIColor.white
         label.layer.cornerRadius = 5
         label.layer.masksToBounds = true
         label.layer.borderWidth = 0
-        label.textAlignment = NSTextAlignment.center
-        label.translatesAutoresizingMaskIntoConstraints = false
+        
+        label.titleLabel?.font = UIFont.boldSystemFont(ofSize: 12)
+        label.titleLabel?.textAlignment = NSTextAlignment.center
 
         return label
     }()
     
-    lazy var creatorTagLabel3: UILabel = {
-        let label = UILabel()
-        let tap = UITapGestureRecognizer(target: self, action: #selector(creatorTagSelected(_:)))
-        label.addGestureRecognizer(tap)
-        label.isUserInteractionEnabled = true
-        label.backgroundColor = UIColor.white
-        label.font = UIFont.boldSystemFont(ofSize: 12)
+    lazy var creatorTagLabel3: UIButton = {
+        let label = UIButton()
         label.tag = 2
+        label.addTarget(self, action: #selector(creatorTagSelected(_:)), for: .touchUpInside)
+        
+        label.backgroundColor = UIColor.white
         label.layer.cornerRadius = 5
         label.layer.masksToBounds = true
         label.layer.borderWidth = 0
-        label.textAlignment = NSTextAlignment.center
-        label.translatesAutoresizingMaskIntoConstraints = false
+        
+        label.titleLabel?.font = UIFont.boldSystemFont(ofSize: 12)
+        label.titleLabel?.textAlignment = NSTextAlignment.center
 
         return label
     }()
     
-    lazy var creatorTagLabel4: UILabel = {
-        let label = UILabel()
-        let tap = UITapGestureRecognizer(target: self, action: #selector(creatorTagSelected(_:)))
-        label.addGestureRecognizer(tap)
-        label.isUserInteractionEnabled = true
-        label.backgroundColor = UIColor.white
-        label.font = UIFont.boldSystemFont(ofSize: 12)
+    lazy var creatorTagLabel4: UIButton = {
+        let label = UIButton()
         label.tag = 3
+        label.addTarget(self, action: #selector(creatorTagSelected(_:)), for: .touchUpInside)
+        
+        label.backgroundColor = UIColor.white
         label.layer.cornerRadius = 5
         label.layer.masksToBounds = true
         label.layer.borderWidth = 0
-        label.textAlignment = NSTextAlignment.center
-        label.translatesAutoresizingMaskIntoConstraints = false
+        
+        label.titleLabel?.font = UIFont.boldSystemFont(ofSize: 12)
+        label.titleLabel?.textAlignment = NSTextAlignment.center
 
         return label
     }()
     
-    lazy var userTagLabel1: UILabel = {
-        let label = UILabel()
-        let tap = UITapGestureRecognizer(target: self, action: #selector(userTagSelected(_:)))
-        label.addGestureRecognizer(tap)
-        label.isUserInteractionEnabled = true
+    lazy var userTagLabel1: UIButton = {
+        let label = UIButton()
+        label.tag = 0
+        label.addTarget(self, action: #selector(userTagSelected(_:)), for: .touchUpInside)
+        
         label.backgroundColor = UIColor.white
-        label.font = UIFont.boldSystemFont(ofSize: 12)
-        label.textColor = UIColor.mainBlue()
-        label.tag = 3
         label.layer.cornerRadius = 5
         label.layer.masksToBounds = true
         label.layer.borderWidth = 0
-        label.textAlignment = NSTextAlignment.center
-        label.translatesAutoresizingMaskIntoConstraints = false
+        
+        label.titleLabel?.font = UIFont.boldSystemFont(ofSize: 12)
+        label.titleLabel?.textAlignment = NSTextAlignment.center
+        
+        return label
+    }()
+    
+    lazy var userTagLabel2: UIButton = {
+        let label = UIButton()
+        label.tag = 1
+        label.addTarget(self, action: #selector(userTagSelected(_:)), for: .touchUpInside)
+        
+        label.backgroundColor = UIColor.white
+        label.layer.cornerRadius = 5
+        label.layer.masksToBounds = true
+        label.layer.borderWidth = 0
+        
+        label.titleLabel?.font = UIFont.boldSystemFont(ofSize: 12)
+        label.titleLabel?.textAlignment = NSTextAlignment.right
         
         return label
     }()
     
     
-    func creatorTagSelected(_ sender: UIGestureRecognizer){
+    func creatorTagSelected(_ sender: UIButton){
         guard let post = post else {return}
-        guard let listTag = sender.view?.tag else {return}
+        let listTag = sender.tag
         
         var selectedListName = self.creatorTagsNameArray[listTag]
         var selectedListId = self.creatorTagsIdArray[listTag]
@@ -602,14 +611,19 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         delegate?.didTapExtraTag(tagName: selectedListName, tagId: selectedListId, post: post)
     }
     
-    func userTagSelected(_ sender: UIGestureRecognizer){
+    func userTagSelected(_ sender: UIButton){
         
         guard let post = post else {return}
         guard let selectedListName = self.userTagName else {return}
         guard let selectedListId = self.userTagId else {return}
         
-        print("Selected User Tag: \(selectedListName), \(selectedListId)")
-        delegate?.didTapExtraTag(tagName: selectedListName, tagId: selectedListId, post: post)
+        if sender == userTagLabel1 {
+            print("Selected User Tag: \(selectedListName), \(selectedListId)")
+            delegate?.didTapExtraTag(tagName: selectedListName, tagId: selectedListId, post: post)
+        } else if sender == userTagLabel2 {
+            print("Selected User Tag: Other User List")
+            delegate?.didTapExtraTag(tagName: "userLists", tagId: "userLists", post: post)
+        }
     }
     
     let extraTagView: UIView = {
@@ -624,7 +638,7 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         return uv
     }()
     
-    var creatorTagsArray:[UILabel] = []
+    var creatorTagsArray:[UIButton] = []
     
     var creatorTagsNameArray: [String] = []
     var creatorTagsIdArray: [String] = []
@@ -639,7 +653,9 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         creatorTagsIdArray.removeAll()
         
         for label in self.creatorTagsArray {
-            label.text = ""
+            label.setTitle(nil, for: .normal)
+            label.layer.borderWidth = 0
+            label.removeFromSuperview()
         }
         
     // Setup ListNameArray and ListIdArray
@@ -649,7 +665,7 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
             
             for list in (post?.creatorListId)! {
                 if list.value == "Legit" {
-                    creatorTagsNameArray.append("!Legit")
+                    creatorTagsNameArray.append(list.value)
                     creatorTagsIdArray.append(list.key)
                 }
             }
@@ -658,10 +674,10 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
             for list in (post?.creatorListId)! {
                 if list.value != "Legit" && list.value != "Bookmarks" {
                     if creatorTagsNameArray.count < 2 {
-                        creatorTagsNameArray.append("!\(list.value.truncate(length: 10))")
+                        creatorTagsNameArray.append(list.value)
                         creatorTagsIdArray.append(list.key)
                     } else if creatorTagsNameArray.count == 2 && listCount! > 2 {
-                        creatorTagsNameArray.append("+!\(listCount! - 2)")
+                        creatorTagsNameArray.append("+\(listCount! - 2)!")
                         creatorTagsIdArray.append("creatorLists")
                     }
                 }
@@ -674,17 +690,40 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
             creatorTagsIdArray.append("price")
         }
         
-    // Populate List Labels
+        // Creator Tag Button Label
         if creatorTagsNameArray.count > 0 {
             for (index, listName) in (self.creatorTagsNameArray.enumerated()) {
-                creatorTagsArray[index].text = creatorTagsNameArray[index]
-                if creatorTagsIdArray[index] == "price" {
-                    creatorTagsArray[index].textColor = UIColor.orange
-                } else  if creatorTagsIdArray[index] == "creatorLists"{
-                    creatorTagsArray[index].textColor = UIColor.mainBlue()
-                    creatorTagsArray[index].layer.borderWidth = 1
+                
+                creatorTagsArray[index].setTitle(creatorTagsNameArray[index], for: .normal)
+                creatorTagsArray[index].titleLabel?.font = UIFont.boldSystemFont(ofSize: 12)
+
+                
+                if creatorTagsNameArray[index] == "Legit" {
+                    creatorTagsArray[index].setTitleColor(UIColor.rgb(red: 255, green: 128, blue: 0), for: .normal)
+                }
+                else if creatorTagsIdArray[index] == "price" {
+                    creatorTagsArray[index].setTitleColor(UIColor.rgb(red: 0, green: 153, blue: 0), for: .normal)
+                }
+                else  if creatorTagsIdArray[index] == "creatorLists"{
+//                    creatorTagsArray[index].layer.borderWidth = 1
+                    creatorTagsArray[index].setTitleColor(UIColor.mainBlue(), for: .normal)
+                    creatorTagsArray[index].titleLabel?.font = UIFont.boldSystemFont(ofSize: 12)
+
+                }
+                else {
+                    creatorTagsArray[index].setTitle("!" + creatorTagsNameArray[index].truncate(length: 15), for: .normal)
+                    creatorTagsArray[index].setTitleColor(UIColor.mainBlue(), for: .normal)
+                    creatorTagsArray[index].titleLabel?.font = UIFont.boldSystemFont(ofSize: 12)
+                }
+
+        // Add Creator Tag Button to View
+                let displayButton = creatorTagsArray[index]
+                self.addSubview(displayButton)
+                
+                if index == 0{
+                    displayButton.anchor(top: extraTagView.topAnchor, left: extraTagView.leftAnchor, bottom: extraTagView.bottomAnchor, right: nil, paddingTop: 0, paddingLeft: 15, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
                 } else {
-                    creatorTagsArray[index].textColor = UIColor.mainBlue()
+                    displayButton.anchor(top: extraTagView.topAnchor, left: creatorTagsArray[index - 1].rightAnchor, bottom: extraTagView.bottomAnchor, right: nil, paddingTop: 0, paddingLeft: 6, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
                 }
             }
         }
@@ -693,47 +732,68 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
     
     func setupUserTags() {
         
+        // Refresh User Tag Buttons
         userTagName = nil
         userTagId = nil
-        
+        userTagLabel1.removeFromSuperview()
+        userTagLabel2.removeFromSuperview()
+
         guard let uid = Auth.auth().currentUser?.uid else {
             print("SetupUserTag: Invalid Current User UID")
             return
         }
         
         if post?.creatorUID == uid {
-            print("No User Tags: User is Creator")
+//            print("No User Tags: User is Creator")
             return
         }
         
         guard let userSelectedList = post?.selectedListId else {
-            print("No User Tags: Nil")
+//            print("No User Tags: Nil")
             return
         }
+        if userSelectedList.count > 0 {
         
-        if (userSelectedList.contains(where: { (listId, listName) -> Bool in
-            return listName == "Bookmarks"})) {
-                userTagName = "!Bookmarks"
+            if (userSelectedList.contains(where: { (listId, listName) -> Bool in
+                return listName == "Bookmarks"})) {
+                userTagName = "Bookmarks"
                 userTagId = userSelectedList.key(forValue: userTagName!)
-        } else if userSelectedList.count > 0 {
-                userTagName = Array(userSelectedList.values)[0].truncate(length: 10)
+                userTagLabel1.setImage(#imageLiteral(resourceName: "bookmark_filled"), for: .normal)
+            } else {
+                userTagName = Array(userSelectedList.values)[0]
                 userTagId = Array(userSelectedList.keys)[0]
-        }
+                userTagLabel1.setImage(nil, for: .normal)
+                userTagLabel1.setTitle("!" + (userTagName?.truncate(length: 10))!, for: .normal)
+                userTagLabel1.titleLabel?.font = UIFont.boldSystemFont(ofSize: 12)
+                userTagLabel1.setTitleColor(UIColor.orange, for: .normal)
+
+            }
         
-        if userSelectedList.count > 1 {
-            let listCount = userSelectedList.count - 1
-            userTagName = userTagName! + " +!\(listCount)"
-            userTagId = "userLists"
-        }
+            addSubview(userTagLabel1)
+            userTagLabel1.anchor(top: extraTagView.topAnchor, left: nil, bottom: extraTagView.bottomAnchor, right: extraTagView.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 10, width: 0, height: 0)
         
-        userTagLabel1.text = userTagName
+            if userSelectedList.count > 1 {
+                let listCount = userSelectedList.count - 1
+                userTagLabel2.setTitle("+\(listCount)!", for: .normal)
+                userTagLabel2.setTitleColor(UIColor.orange, for: .normal)
+                userTagLabel2.layer.borderWidth = 0
+                
+                addSubview(userTagLabel2)
+                userTagLabel2.anchor(top: extraTagView.topAnchor, left: nil, bottom: extraTagView.bottomAnchor, right: userTagLabel1.leftAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
+
+                
+            }
+        
+        }
     }
     
     func setupExtraTags(){
         setupUserTags()
         setupCreatorTags()
-        self.userTagLabel1.layoutIfNeeded()
-        self.creatorTagView.layoutIfNeeded()
+//        self.userTagLabel1.layoutIfNeeded()
+//        self.userTagLabel2.layoutIfNeeded()
+//        self.userTagLabel2.sizeToFit()
+//        self.creatorTagView.layoutIfNeeded()
         self.extraTagView.layoutIfNeeded()
     }
 
@@ -829,12 +889,6 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         
         addSubview(extraTagView)
         extraTagView.anchor(top: photoImageView.bottomAnchor, left: leftAnchor, bottom: nil, right: rightAnchor, paddingTop: 2, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
-
-        addSubview(userTagLabel1)
-        userTagLabel1.anchor(top: extraTagView.topAnchor, left: nil, bottom: extraTagView.bottomAnchor, right: extraTagView.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 10, width: 0, height: 0)
-        
-        addSubview(creatorTagView)
-        creatorTagView.anchor(top: extraTagView.topAnchor, left: extraTagView.leftAnchor, bottom: extraTagView.bottomAnchor, right: userTagLabel1.leftAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
 
         
         for (index,label) in creatorTagsArray.enumerated(){

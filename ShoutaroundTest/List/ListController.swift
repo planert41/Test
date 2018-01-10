@@ -13,14 +13,7 @@ import Firebase
 
 class ListController: UITableViewController {
     
-    var displayedPost: Post? = nil {
-        didSet{
-            if displayedPost != nil {
-                self.displayedList = self.displayedPost?.creatorListId
-            }
-        }
-    }
-    
+    var displayedPost: Post? = nil
     var displayedList: [String: String]? = [:] {
         didSet{
             displayedNames = []

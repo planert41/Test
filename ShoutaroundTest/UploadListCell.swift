@@ -86,7 +86,7 @@ class UploadListCell: UITableViewCell {
         else if isBookmark {
             var imageView : UIImageView
             imageView  = UIImageView(frame:CGRect(x: 0, y: 0, width: 20, height: 20))
-            imageView.image = selected ? #imageLiteral(resourceName: "bookmark_ribbon_filled") : #imageLiteral(resourceName: "bookmark_ribbon_unfilled")
+            imageView.image = selected ? #imageLiteral(resourceName: "bookmark_filled") : #imageLiteral(resourceName: "bookmark_unfilled")
             accessoryView = imageView
         }
         else {

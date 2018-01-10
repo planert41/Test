@@ -824,10 +824,17 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
             print("Price Selected")
             self.filterMaxPrice = tagName
             self.refreshPostsForFilter()
-        } else if tagId == "lists"{
+        } else if tagId == "creatorLists"{
             // Additional Tags
             let listController  = ListController()
             listController.displayedPost = post
+            listController.displayedList = post.creatorListId
+            self.navigationController?.pushViewController(listController, animated: true)
+        } else if tagId == "userLists"{
+            // Additional Tags
+            let listController  = ListController()
+            listController.displayedPost = post
+            listController.displayedList = post.selectedListId
             self.navigationController?.pushViewController(listController, animated: true)
         }
         else {
