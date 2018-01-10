@@ -13,6 +13,32 @@ var postCache = [String: Post]()
 
 extension Database{
     
+    
+    static func fetchCurrentUser(completion:@escaping () ->()){
+        
+        guard let uid = Auth.auth().currentUser?.uid else {return}
+
+        Database.fetchUserWithUID(uid: uid) { (user) in
+            CurrentUser.user = user
+            print("Current User: \(CurrentUser.user)")
+            
+            // Fetch Lists
+            Database.fetchListForMultListIds(listUid: CurrentUser.listIds, completion: { (fetchedLists) in
+                CurrentUser.lists = fetchedLists
+                print("Current User List: \(CurrentUser.lists)")
+                completion()
+            
+            })
+        }
+        
+    }
+    
+
+    
+    
+    
+    
+    
 // Alerts
     static func alert(title: String, message: String) {
         

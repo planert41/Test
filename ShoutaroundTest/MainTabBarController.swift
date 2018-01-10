@@ -198,8 +198,8 @@ class MainTabBarController: UITabBarController, UITabBarControllerDelegate, UIIm
             return
         }
         
-        setupViewControllers()
         fetchCurrentUser()
+        setupViewControllers()
     
     }
     
@@ -251,6 +251,7 @@ class MainTabBarController: UITabBarController, UITabBarControllerDelegate, UIIm
 //        let bookmarkNavController = UINavigationController(rootViewController: bookmarkController)
         
         let tabListController = TabListViewController()
+        tabListController.displayUser = CurrentUser.user
         let bookmarkNavController = UINavigationController(rootViewController: tabListController)
 
         
