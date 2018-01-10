@@ -56,10 +56,11 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
             
             self.starRatingLabel.rating = (post?.rating)!
             if (post?.rating)! == 0 {
-                self.starRatingLabel.widthAnchor.constraint(equalTo: self.starRatingLabel.heightAnchor, multiplier: 0).isActive = true
+                starRatingLabelWidth?.constant = 0
             } else {
-                self.starRatingLabel.widthAnchor.constraint(equalTo: self.starRatingLabel.heightAnchor, multiplier: 1).isActive = true
+                starRatingLabelWidth?.constant = 25
             }
+            self.starRatingLabel.layoutIfNeeded()
             
             setupEmojiLabels()
             locationLabel.text = post?.locationName.truncate(length: 30)
@@ -235,6 +236,7 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
     }()
     
     var starRatingLabel = RatingLabel()
+    var starRatingLabelWidth: NSLayoutConstraint?
     
     lazy var legitIcon: UIButton = {
         let button = UIButton(type: .system)
@@ -854,6 +856,9 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         
         starRatingLabel.anchor(top: nil, left: nil, bottom: nil, right: usernameLabel.leftAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 2, width: 0, height: 25)
         starRatingLabel.centerYAnchor.constraint(equalTo: usernameLabel.centerYAnchor).isActive = true
+        starRatingLabelWidth = NSLayoutConstraint(item: starRatingLabel, attribute: NSLayoutAttribute.width, relatedBy: NSLayoutRelation.equal, toItem: nil, attribute: NSLayoutAttribute.width, multiplier: 1, constant: 25)
+        starRatingLabelWidth?.isActive = true
+        
         
         legitIcon.anchor(top: nil, left: nil, bottom: nil, right: starRatingLabel.leftAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 2, width: 25, height: 25)
         legitIcon.centerYAnchor.constraint(equalTo: usernameLabel.centerYAnchor).isActive = true
