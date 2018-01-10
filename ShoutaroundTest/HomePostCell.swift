@@ -56,9 +56,9 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
             
             self.starRatingLabel.rating = (post?.rating)!
             if (post?.rating)! == 0 {
-                self.starRatingLabel.isHidden = true
+                self.starRatingLabel.widthAnchor.constraint(equalTo: self.starRatingLabel.heightAnchor, multiplier: 0).isActive = true
             } else {
-                self.starRatingLabel.isHidden = false
+                self.starRatingLabel.widthAnchor.constraint(equalTo: self.starRatingLabel.heightAnchor, multiplier: 1).isActive = true
             }
             
             setupEmojiLabels()
@@ -68,7 +68,7 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
             guard let profileImageUrl = post?.user.profileImageUrl else {return}
             
             userProfileImageView.loadImage(urlString: profileImageUrl)
-            
+            starRatingLabel.layoutIfNeeded()
             setupExtraTags()
             captionLabel.text = post?.caption
             setupAttributedCaption()
@@ -852,7 +852,7 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         locationDistanceLabel.anchor(top: nil, left: nil, bottom: photoImageView.topAnchor, right: userProfileImageView.leftAnchor, paddingTop: 2, paddingLeft: 0, paddingBottom: 3, paddingRight: 10, width: 0, height: 0)
         
         
-        starRatingLabel.anchor(top: nil, left: nil, bottom: nil, right: usernameLabel.leftAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 2, width: 25, height: 25)
+        starRatingLabel.anchor(top: nil, left: nil, bottom: nil, right: usernameLabel.leftAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 2, width: 0, height: 25)
         starRatingLabel.centerYAnchor.constraint(equalTo: usernameLabel.centerYAnchor).isActive = true
         
         legitIcon.anchor(top: nil, left: nil, bottom: nil, right: starRatingLabel.leftAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 2, width: 25, height: 25)
