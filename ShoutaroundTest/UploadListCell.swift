@@ -18,13 +18,13 @@ class UploadListCell: UITableViewCell {
         didSet{
             self.listNameLabel.text = list?.name
             
-            if self.list?.name == "Legit"{
+            if self.list?.name == legitListName{
                 self.isLegit = true
             } else {
                 self.isLegit = false
             }
             
-            if self.list?.name == "Bookmarks"{
+            if self.list?.name == bookmarkListName{
                 self.isBookmark = true
             } else {
                 self.isBookmark = false

@@ -818,28 +818,30 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     }
     
     func didTapExtraTag(tagName: String, tagId: String, post: Post) {
+        
         // Check to see if its a list, price or something else
         if tagId == "price"{
             // Price Tag Selected
             print("Price Selected")
             self.filterMaxPrice = tagName
             self.refreshPostsForFilter()
-        } else if tagId == "creatorLists"{
+        }
+        else if tagId == "creatorLists"{
             // Additional Tags
             let listController  = ListController()
             listController.displayedPost = post
-            listController.displayedList = post.creatorListId
+            listController.displayedListNameDictionary = post.creatorListId
             self.navigationController?.pushViewController(listController, animated: true)
-        } else if tagId == "userLists"{
+        }
+        else if tagId == "userLists"{
             // Additional Tags
             let listController  = ListController()
             listController.displayedPost = post
-            listController.displayedList = post.selectedListId
+            listController.displayedListNameDictionary = post.selectedListId
             self.navigationController?.pushViewController(listController, animated: true)
         }
         else {
             // List Tag Selected
-            
             Database.checkUpdateListDetailsWithPost(listName: tagName, listId: tagId, post: post, completion: { (fetchedList) in
                 if fetchedList == nil {
                     // List Does not Exist

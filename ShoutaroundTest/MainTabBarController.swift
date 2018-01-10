@@ -250,13 +250,14 @@ class MainTabBarController: UITabBarController, UITabBarControllerDelegate, UIIm
 //        let bookmarkController = BookMarkController()
 //        let bookmarkNavController = UINavigationController(rootViewController: bookmarkController)
         
+        //Lists
         let tabListController = TabListViewController()
         tabListController.displayUser = CurrentUser.user
-        let bookmarkNavController = UINavigationController(rootViewController: tabListController)
+        let tabListNavController = UINavigationController(rootViewController: tabListController)
 
         
-        bookmarkNavController.tabBarItem.image = #imageLiteral(resourceName: "bookmark_ribbon_unfilled").withRenderingMode(.alwaysOriginal)
-        bookmarkNavController.tabBarItem.selectedImage = #imageLiteral(resourceName: "bookmark_ribbon_filled").withRenderingMode(.alwaysOriginal)
+        tabListNavController.tabBarItem.image = #imageLiteral(resourceName: "list_unfilled").withRenderingMode(.alwaysOriginal)
+        tabListNavController.tabBarItem.selectedImage = #imageLiteral(resourceName: "list_filled").withRenderingMode(.alwaysOriginal)
         
 
         
@@ -271,7 +272,7 @@ class MainTabBarController: UITabBarController, UITabBarControllerDelegate, UIIm
         
         tabBar.tintColor = .black
 
-        viewControllers = [homeNavController, searchNavController, plusNavController, bookmarkNavController, userProfileNavController]
+        viewControllers = [homeNavController, searchNavController, plusNavController, tabListNavController, userProfileNavController]
         
         //modify tab bar item insets
         

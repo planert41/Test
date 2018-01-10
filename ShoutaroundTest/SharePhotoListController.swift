@@ -203,7 +203,7 @@ class SharePhotoListController: UIViewController, UICollectionViewDelegate, UICo
         if uploadPost?.creatorUID != uid {
          
             // Check for Bookmark List first. add Bookmark List if not post creator UID
-            if let tempBookmarkList = userList?.first(where:{$0.name == "Bookmarks"}) {
+            if let tempBookmarkList = userList?.first(where:{$0.name == bookmarkListName}) {
                 bookmarkList = tempBookmarkList
             } else {
                 // Create Bookmark List
@@ -216,7 +216,7 @@ class SharePhotoListController: UIViewController, UICollectionViewDelegate, UICo
         } else {
            
             // Check for Legit List. add Legit List if is post creator UID
-            if let tempLegitList = userList?.first(where:{$0.name == "Legit"}) {
+            if let tempLegitList = userList?.first(where:{$0.name == legitListName}) {
                 legitList = tempLegitList
             } else {
                 // Create Legit List
@@ -230,11 +230,11 @@ class SharePhotoListController: UIViewController, UICollectionViewDelegate, UICo
         // Add remaining list to Display List. List is sorted by creation date when pulling
         
         if userList?.count != 0 {
-            if let bookmarkIndex = (userList?.index(where:{$0.name == "Bookmarks"})) {
+            if let bookmarkIndex = (userList?.index(where:{$0.name == bookmarkListName})) {
                 userList?.remove(at: bookmarkIndex)
             }
             
-            if let legitIndex = (userList?.index(where:{$0.name == "Legit"})) {
+            if let legitIndex = (userList?.index(where:{$0.name == legitListName})) {
                 userList?.remove(at: legitIndex)
             }
             

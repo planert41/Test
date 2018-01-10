@@ -58,6 +58,8 @@
 		A5A2E5D52002E6F800D7E8F5 /* ListController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5A2E5D42002E6F800D7E8F5 /* ListController.swift */; };
 		A5A2E5D7200415C100D7E8F5 /* LocationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5A2E5D6200415C100D7E8F5 /* LocationManager.swift */; };
 		A5A2E5D92005CB9000D7E8F5 /* TabListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5A2E5D82005CB9000D7E8F5 /* TabListViewController.swift */; };
+		A5A2E5DB20067B1900D7E8F5 /* ListNameFlowLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5A2E5DA20067B1900D7E8F5 /* ListNameFlowLayout.swift */; };
+		A5A2E5DD2006885100D7E8F5 /* ListNameCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5A2E5DC2006885100D7E8F5 /* ListNameCell.swift */; };
 		A5AEB9721F96A82B00E88CAC /* HomePostSearch.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5AEB9711F96A82B00E88CAC /* HomePostSearch.swift */; };
 		A5AEB9741F96B00500E88CAC /* EmojiCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5AEB9731F96B00500E88CAC /* EmojiCell.swift */; };
 		A5AEB9761F986F8200E88CAC /* PictureController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5AEB9751F986F8200E88CAC /* PictureController.swift */; };
@@ -156,6 +158,8 @@
 		A5A2E5D42002E6F800D7E8F5 /* ListController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListController.swift; sourceTree = "<group>"; };
 		A5A2E5D6200415C100D7E8F5 /* LocationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationManager.swift; sourceTree = "<group>"; };
 		A5A2E5D82005CB9000D7E8F5 /* TabListViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabListViewController.swift; sourceTree = "<group>"; };
+		A5A2E5DA20067B1900D7E8F5 /* ListNameFlowLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListNameFlowLayout.swift; sourceTree = "<group>"; };
+		A5A2E5DC2006885100D7E8F5 /* ListNameCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListNameCell.swift; sourceTree = "<group>"; };
 		A5AEB9711F96A82B00E88CAC /* HomePostSearch.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HomePostSearch.swift; sourceTree = "<group>"; };
 		A5AEB9731F96B00500E88CAC /* EmojiCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EmojiCell.swift; sourceTree = "<group>"; };
 		A5AEB9751F986F8200E88CAC /* PictureController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PictureController.swift; sourceTree = "<group>"; };
@@ -419,6 +423,8 @@
 				A5A2E5D22002B00000D7E8F5 /* ListViewHeader.swift */,
 				A5A2E5D42002E6F800D7E8F5 /* ListController.swift */,
 				A5A2E5D82005CB9000D7E8F5 /* TabListViewController.swift */,
+				A5A2E5DA20067B1900D7E8F5 /* ListNameFlowLayout.swift */,
+				A5A2E5DC2006885100D7E8F5 /* ListNameCell.swift */,
 			);
 			path = List;
 			sourceTree = "<group>";
@@ -667,6 +673,7 @@
 			files = (
 				A56F4C361FD06621000BB676 /* ThreadMessageHeader.swift in Sources */,
 				A54E1D731F4E736B00C2AA77 /* InstagramFirebase.xcdatamodeld in Sources */,
+				A5A2E5DD2006885100D7E8F5 /* ListNameCell.swift in Sources */,
 				A5C645161F56604200C78244 /* HomePostCell.swift in Sources */,
 				A5F9FE241FEE044C00AF9542 /* UploadPhotoListController.swift in Sources */,
 				A552EA611F99BE76005A0977 /* PhotoSelectorControllerDummy.swift in Sources */,
@@ -743,6 +750,7 @@
 				A51C13C31F4FBF2F00CEB740 /* Extensions.swift in Sources */,
 				A5C6451F1F57B1BD00C78244 /* UserSearchCell.swift in Sources */,
 				A5F46C3E1FC5EBE400D69945 /* SMSegmentView.swift in Sources */,
+				A5A2E5DB20067B1900D7E8F5 /* ListNameFlowLayout.swift in Sources */,
 				A5A2E5CC200032BF00D7E8F5 /* List.swift in Sources */,
 				A5C645261F5BADB000C78244 /* CustomAnimationPresentor.swift in Sources */,
 				A55E6AF21FD2388100DEC490 /* TEST.swift in Sources */,

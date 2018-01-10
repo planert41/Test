@@ -118,7 +118,7 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
 
         for (key,value) in creatorListId {
             // Only show if there is a legit list
-            if value == "Legit"{
+            if value == legitListName{
                 self.legitIcon.isHidden = false
             }
         }
@@ -666,7 +666,7 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
             var listCount = post?.creatorListId?.count
             
             for list in (post?.creatorListId)! {
-                if list.value == "Legit" {
+                if list.value == legitListName {
                     creatorTagsNameArray.append(list.value)
                     creatorTagsIdArray.append(list.key)
                 }
@@ -674,7 +674,7 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
             
             // Add Other List
             for list in (post?.creatorListId)! {
-                if list.value != "Legit" && list.value != "Bookmarks" {
+                if list.value != legitListName && list.value != bookmarkListName {
                     if creatorTagsNameArray.count < 2 {
                         creatorTagsNameArray.append(list.value)
                         creatorTagsIdArray.append(list.key)
@@ -700,7 +700,7 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
                 creatorTagsArray[index].titleLabel?.font = UIFont.boldSystemFont(ofSize: 12)
 
                 
-                if creatorTagsNameArray[index] == "Legit" {
+                if creatorTagsNameArray[index] == legitListName {
                     creatorTagsArray[index].setTitleColor(UIColor.rgb(red: 255, green: 128, blue: 0), for: .normal)
                 }
                 else if creatorTagsIdArray[index] == "price" {
@@ -757,8 +757,8 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         if userSelectedList.count > 0 {
         
             if (userSelectedList.contains(where: { (listId, listName) -> Bool in
-                return listName == "Bookmarks"})) {
-                userTagName = "Bookmarks"
+                return listName == bookmarkListName})) {
+                userTagName = bookmarkListName
                 userTagId = userSelectedList.key(forValue: userTagName!)
                 userTagLabel1.setImage(#imageLiteral(resourceName: "bookmark_filled"), for: .normal)
             } else {

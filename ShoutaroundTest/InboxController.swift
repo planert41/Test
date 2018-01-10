@@ -42,7 +42,7 @@ class InboxController: UICollectionViewController,UICollectionViewDelegateFlowLa
         super.viewDidLoad()
     
         navigationItem.title = "Inbox (" + String(messageThreads.count) + ")"
-        navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Bookmarks", style: .plain, target: self, action: #selector(toBookmarks))
+        navigationItem.rightBarButtonItem = UIBarButtonItem(title: bookmarkListName, style: .plain, target: self, action: #selector(toBookmarks))
         
         collectionView?.register(ThreadCell.self, forCellWithReuseIdentifier: threadCellId)
 
