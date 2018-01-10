@@ -17,6 +17,15 @@ class ListViewController: UIViewController, UICollectionViewDelegate, UICollecti
     let homePostCellId = "homePostCellId"
     let listHeaderId = "listHeaderId"
     
+    // Posts
+    
+    //INPUT
+    var displayListId: String? = nil
+    
+    //DISPLAY VARIABLES
+    var displayList: List? = nil
+    var fetchedPosts: [Post] = []
+    
 // CollectionView Setup
     
     var isListView: Bool = true
@@ -74,13 +83,6 @@ class ListViewController: UIViewController, UICollectionViewDelegate, UICollecti
     // Default Sort is Most Recent Listed Date
     var selectedHeaderSort:String? = defaultSort
     
-    
-    
-// Posts
-    
-    var displayListId: String? = nil
-    var displayList: List? = nil
-    var fetchedPosts: [Post] = []
     
     override func viewDidLoad() {
         super.viewDidLoad()

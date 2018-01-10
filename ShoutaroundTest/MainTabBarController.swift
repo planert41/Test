@@ -246,12 +246,18 @@ class MainTabBarController: UITabBarController, UITabBarControllerDelegate, UIIm
         
         //Bookmark
         
-        let bookmarkLayout = UICollectionViewFlowLayout()
-        let bookmarkController = BookMarkController()
-        let bookmarkNavController = UINavigationController(rootViewController: bookmarkController)
+//        let bookmarkLayout = UICollectionViewFlowLayout()
+//        let bookmarkController = BookMarkController()
+//        let bookmarkNavController = UINavigationController(rootViewController: bookmarkController)
+        
+        let tabListController = TabListViewController()
+        let bookmarkNavController = UINavigationController(rootViewController: tabListController)
+
+        
         bookmarkNavController.tabBarItem.image = #imageLiteral(resourceName: "bookmark_ribbon_unfilled").withRenderingMode(.alwaysOriginal)
         bookmarkNavController.tabBarItem.selectedImage = #imageLiteral(resourceName: "bookmark_ribbon_filled").withRenderingMode(.alwaysOriginal)
         
+
         
         //user profile
         
