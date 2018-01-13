@@ -9,6 +9,7 @@
 import UIKit
 import mailgun
 import Firebase
+import Spring
 
 
 protocol HomePostCellDelegate {
@@ -492,8 +493,8 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
     }()
     
     
-    let captionView: UIView = {
-        let view = UIView()
+    let captionView: SpringView = {
+        let view = SpringView()
         view.layer.backgroundColor = UIColor.lightGray.cgColor.copy(alpha: 0.5)
         view.layer.cornerRadius = 5
         view.layer.masksToBounds = true
@@ -928,7 +929,19 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
 //        attributedString.append(test)
 //        captionBubble.attributedText = attributedString
         
-        self.fadeViewInThenOut(view: captionView, delay: 3)
+        
+        captionView.force = 0.5
+        captionView.duration = 0.5
+        captionView.animation = "zoomIn"
+        captionView.curve = "spring"
+        captionView.animateNext {
+            self.captionView.animation = "fadeOut"
+            self.captionView.delay = 3
+            self.captionView.animate()
+        }
+        
+        
+//        self.fadeViewInThenOut(inputView: captionView, delay: 3)
     }
     
     func hideCaptionBubble(){
@@ -937,21 +950,42 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
 
     }
 
-    func fadeViewInThenOut(view : UIView, delay: TimeInterval) {
+    func fadeViewInThenOut(inputView : UIView, delay: TimeInterval) {
         
+        inputView.alpha = 1
+        inputView.transform = CGAffineTransform(scaleX: 0.1, y: 0.1)
+
         let animationDuration = 0.0
         
+//        UIView.animate(withDuration: 1.0,
+//                       delay: 0,
+//                       usingSpringWithDamping: 0.2,
+//                       initialSpringVelocity: 6.0,
+//                       options: .allowUserInteraction,
+//                       animations: { [weak self] in
+//                        self?.likeButton.transform = .identity
+//                        self?.likeButton.layoutIfNeeded()
+//
+//            },
+//                       completion: nil)
+        
         // Fade in the view
-        UIView.animate(withDuration: animationDuration, animations: { () -> Void in
-            view.alpha = 1
+        UIView.animate(withDuration: animationDuration,delay: 0,
+                       usingSpringWithDamping: 0.2,
+                       initialSpringVelocity: 6.0,
+                       options: .allowUserInteraction,
+                       animations: { [weak inputView] in
+                    
+                       inputView?.transform = .identity
+
         }) { (Bool) -> Void in
             
             // After the animation completes, fade out the view after a delay
             
             UIView.animate(withDuration: animationDuration, delay: delay, options: .curveEaseInOut, animations: { () -> Void in
-                view.alpha = 0
+                inputView.alpha = 0
             },
-                           completion: nil)
+                    completion: nil)
         }
     }
 

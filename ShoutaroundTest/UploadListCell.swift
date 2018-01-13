@@ -7,7 +7,7 @@
 //
 
 import UIKit
-import SwiftIcons
+//import SwiftIcons
 
 class UploadListCell: UITableViewCell {
 
