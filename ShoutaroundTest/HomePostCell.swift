@@ -38,8 +38,8 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         didSet {
                 
             guard let imageUrl = post?.imageUrl else {return}
-
-            bookmarkButton.setImage(post?.hasBookmarked == true ? #imageLiteral(resourceName: "bookmark_selected").withRenderingMode(.alwaysOriginal) : #imageLiteral(resourceName: "bookmark_unselected").withRenderingMode(.alwaysOriginal), for: .normal)
+            
+            bookmarkButton.setImage(post?.hasBookmarked == true ? #imageLiteral(resourceName: "bookmark_filled").withRenderingMode(.alwaysOriginal) : #imageLiteral(resourceName: "bookmark_unfilled").withRenderingMode(.alwaysOriginal), for: .normal)
             
             upVoteButton.setImage(post?.hasVoted == 1 ? #imageLiteral(resourceName: "upvote_selected").withRenderingMode(.alwaysOriginal) : #imageLiteral(resourceName: "upvote").withRenderingMode(.alwaysOriginal), for: .normal)
             
@@ -54,17 +54,18 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
             let usernameTap = UITapGestureRecognizer(target: self, action: #selector(HomePostCell.usernameTap))
             usernameLabel.addGestureRecognizer(usernameTap)
             
-            self.starRatingLabel.rating = (post?.rating)!
-            if (post?.rating)! == 0 {
-                starRatingLabelWidth?.constant = 0
-            } else {
-                starRatingLabelWidth?.constant = 25
-            }
-            self.starRatingLabel.layoutIfNeeded()
+//            self.starRatingLabel.rating = (post?.rating)!
+//            if (post?.rating)! == 0 {
+//                starRatingLabelWidth?.constant = 0
+//            } else {
+////                starRatingLabelWidth?.constant = 25
+//
+//                starRatingLabelWidth?.constant = 0
+//            }
+//            self.starRatingLabel.layoutIfNeeded()
             
             setupEmojiLabels()
-            locationLabel.text = post?.locationName.truncate(length: 30)
-            adressLabel.text = post?.locationAdress.truncate(length: 60)
+
             
             guard let profileImageUrl = post?.user.profileImageUrl else {return}
             
@@ -72,8 +73,15 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
             starRatingLabel.layoutIfNeeded()
             setupExtraTags()
             captionLabel.text = post?.caption
+            setupAttributedLocationName()
             setupAttributedCaption()
             setupAttributedSocialCount()
+            
+//            locationLabel.text = post?.locationName.truncate(length: 30)
+//            adressLabel.text = post?.locationAdress.truncate(length: 60)
+            
+            captionBubble.text = post?.caption
+            captionBubble.sizeToFit()
             
             
             if post?.distance != nil && post?.locationGPS?.coordinate.longitude != 0 && post?.locationGPS?.coordinate.latitude != 0 {
@@ -171,15 +179,17 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         
     }
     
+    
+    
     fileprivate func setupAttributedCaption(){
         
         guard let post = self.post else {return}
         
-        let attributedText = NSMutableAttributedString(string: post.user.username, attributes: [NSFontAttributeName: UIFont.boldSystemFont(ofSize: 14)])
-        
-        attributedText.append(NSAttributedString(string: " \(post.caption)", attributes: [NSFontAttributeName: UIFont.systemFont(ofSize: 14)]))
-        
-        attributedText.append(NSAttributedString(string: "\n\n", attributes: [NSFontAttributeName: UIFont.systemFont(ofSize: 4)]))
+//        let attributedText = NSMutableAttributedString(string: post.user.username, attributes: [NSFontAttributeName: UIFont.boldSystemFont(ofSize: 14)])
+//
+//        attributedText.append(NSAttributedString(string: " \(post.caption)", attributes: [NSFontAttributeName: UIFont.systemFont(ofSize: 14)]))
+//
+//        attributedText.append(NSAttributedString(string: "\n\n", attributes: [NSFontAttributeName: UIFont.systemFont(ofSize: 4)]))
         
         
 //        let timeAgoDisplay = post.creationDate.timeAgoDisplay()
@@ -187,9 +197,12 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         formatter.dateFormat = "MMM d YYYY, h:mm a"
         let timeAgoDisplay = formatter.string(from: post.creationDate)
         
-        attributedText.append(NSAttributedString(string: timeAgoDisplay, attributes: [NSFontAttributeName: UIFont.systemFont(ofSize: 12),NSForegroundColorAttributeName: UIColor.gray]))
+//        attributedText.append(NSAttributedString(string: timeAgoDisplay, attributes: [NSFontAttributeName: UIFont.systemFont(ofSize: 12),NSForegroundColorAttributeName: UIColor.gray]))
         
-        self.captionLabel.attributedText = attributedText
+        let attributedText = NSAttributedString(string: timeAgoDisplay, attributes: [NSFontAttributeName: UIFont.systemFont(ofSize: 12),NSForegroundColorAttributeName: UIColor.gray])
+
+//        self.captionLabel.attributedText = attributedText
+        self.postDateLabel.attributedText = attributedText
         
         
     }
@@ -197,20 +210,33 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
     fileprivate func setupAttributedLocationName(){
         
         guard let post = self.post else {return}
+        var displayLocationName: String = ""
         
-        let attributedText = NSMutableAttributedString(string: post.locationName.truncate(length: 20), attributes: [NSFontAttributeName: UIFont.boldSystemFont(ofSize: 12)])
-        
-        if post.distance != nil && post.locationGPS?.coordinate.longitude != 0 && post.locationGPS?.coordinate.latitude != 0 {
+        if post.locationGooglePlaceID! == "" {
+            // Detect Not Google Tagged Location
 
-            let distanceformat = ".2"
-            
-            // Convert to M to KM
-            let locationDistance = post.distance!/1000
-            
-            attributedText.append(NSAttributedString(string: " \(locationDistance.format(f: distanceformat)) KM", attributes: [NSFontAttributeName: UIFont.systemFont(ofSize: 10),NSForegroundColorAttributeName: UIColor.gray]))
+            let locationNameTextArray = post.locationAdress.components(separatedBy: ",")
+            // Last 3 items are City, State, Country
+            displayLocationName = locationNameTextArray.suffix(3).joined(separator: ",")
+        } else {
+            displayLocationName = post.locationName
         }
         
-        self.locationLabel.attributedText = attributedText
+        self.locationLabel.text = displayLocationName
+//
+//
+//        let attributedText = NSMutableAttributedString(string: post.locationName.truncate(length: 20), attributes: [NSFontAttributeName: UIFont.boldSystemFont(ofSize: 12)])
+//
+//        if post.distance != nil && post.locationGPS?.coordinate.longitude != 0 && post.locationGPS?.coordinate.latitude != 0 {
+//
+//            let distanceformat = ".2"
+//
+//            // Convert to M to KM
+//            let locationDistance = post.distance!/1000
+//
+//            attributedText.append(NSAttributedString(string: " \(locationDistance.format(f: distanceformat)) KM", attributes: [NSFontAttributeName: UIFont.systemFont(ofSize: 10),NSForegroundColorAttributeName: UIColor.gray]))
+//        }
+//        self.locationLabel.attributedText = attributedText
         
     }
     
@@ -446,7 +472,7 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
     let locationLabel: UILabel = {
         let label = UILabel()
         label.text = "Location"
-        label.font = UIFont.boldSystemFont(ofSize: 12)
+        label.font = UIFont.boldSystemFont(ofSize: 13)
         label.textColor = UIColor.black
         let locationTapGesture = UITapGestureRecognizer(target: self, action: #selector(locationTap))
         label.isUserInteractionEnabled = true
@@ -485,6 +511,23 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         label.numberOfLines = 0
         return label
     }()
+    
+    let captionBubble: UILabel = {
+        let label = UILabel()
+        label.font = UIFont.boldSystemFont(ofSize: 30)
+        label.textAlignment = NSTextAlignment.center
+        label.layer.backgroundColor = UIColor.lightGray.cgColor.copy(alpha: 0.5)
+        label.layer.cornerRadius = 5
+        label.layer.masksToBounds = true
+        label.numberOfLines = 0
+        return label
+    }()
+    
+    let postDateLabel: UILabel = {
+        let label = UILabel()
+        label.numberOfLines = 0
+        return label
+    }()
 
 
     lazy var optionsButton: UIButton = {
@@ -505,15 +548,18 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         delegate?.userOptionPost(post: post)
     }
     
-    lazy var creatorTagLabel1: UIButton = {
+    lazy var extraTagLabel1: UIButton = {
         let label = UIButton()
         label.tag = 0
-        label.addTarget(self, action: #selector(creatorTagSelected(_:)), for: .touchUpInside)
+        label.addTarget(self, action: #selector(extraTagselected(_:)), for: .touchUpInside)
         
         label.backgroundColor = UIColor.white
         label.layer.cornerRadius = 5
         label.layer.masksToBounds = true
         label.layer.borderWidth = 0
+        label.layer.borderColor = UIColor.gray.cgColor
+
+        label.contentEdgeInsets = UIEdgeInsets(top: 0, left: 5, bottom: 0, right: 5)
 
         label.titleLabel?.font = UIFont.boldSystemFont(ofSize: 12)
         label.titleLabel?.textAlignment = NSTextAlignment.center
@@ -521,15 +567,19 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         return label
     }()
     
-    lazy var creatorTagLabel2: UIButton = {
+    lazy var extraTagLabel2: UIButton = {
         let label = UIButton()
         label.tag = 1
-        label.addTarget(self, action: #selector(creatorTagSelected(_:)), for: .touchUpInside)
+        label.addTarget(self, action: #selector(extraTagselected(_:)), for: .touchUpInside)
         
         label.backgroundColor = UIColor.white
         label.layer.cornerRadius = 5
         label.layer.masksToBounds = true
         label.layer.borderWidth = 0
+        label.layer.borderColor = UIColor.gray.cgColor
+
+        label.contentEdgeInsets = UIEdgeInsets(top: 0, left: 5, bottom: 0, right: 5)
+
         
         label.titleLabel?.font = UIFont.boldSystemFont(ofSize: 12)
         label.titleLabel?.textAlignment = NSTextAlignment.center
@@ -537,15 +587,18 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         return label
     }()
     
-    lazy var creatorTagLabel3: UIButton = {
+    lazy var extraTagLabel3: UIButton = {
         let label = UIButton()
         label.tag = 2
-        label.addTarget(self, action: #selector(creatorTagSelected(_:)), for: .touchUpInside)
+        label.addTarget(self, action: #selector(extraTagselected(_:)), for: .touchUpInside)
         
         label.backgroundColor = UIColor.white
         label.layer.cornerRadius = 5
         label.layer.masksToBounds = true
         label.layer.borderWidth = 0
+        label.layer.borderColor = UIColor.gray.cgColor
+        label.contentEdgeInsets = UIEdgeInsets(top: 0, left: 5, bottom: 0, right: 5)
+
         
         label.titleLabel?.font = UIFont.boldSystemFont(ofSize: 12)
         label.titleLabel?.textAlignment = NSTextAlignment.center
@@ -553,15 +606,18 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         return label
     }()
     
-    lazy var creatorTagLabel4: UIButton = {
+    lazy var extraTagLabel4: UIButton = {
         let label = UIButton()
         label.tag = 3
-        label.addTarget(self, action: #selector(creatorTagSelected(_:)), for: .touchUpInside)
+        label.addTarget(self, action: #selector(extraTagselected(_:)), for: .touchUpInside)
         
         label.backgroundColor = UIColor.white
         label.layer.cornerRadius = 5
         label.layer.masksToBounds = true
-        label.layer.borderWidth = 0
+        label.layer.borderWidth = 1
+        label.layer.borderColor = UIColor.gray.cgColor
+        label.contentEdgeInsets = UIEdgeInsets(top: 0, left: 5, bottom: 0, right: 5)
+
         
         label.titleLabel?.font = UIFont.boldSystemFont(ofSize: 12)
         label.titleLabel?.textAlignment = NSTextAlignment.center
@@ -569,15 +625,18 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         return label
     }()
     
-    lazy var userTagLabel1: UIButton = {
+    lazy var extraTagLabel5: UIButton = {
         let label = UIButton()
-        label.tag = 0
-        label.addTarget(self, action: #selector(userTagSelected(_:)), for: .touchUpInside)
+        label.tag = 4
+        label.addTarget(self, action: #selector(extraTagselected(_:)), for: .touchUpInside)
         
         label.backgroundColor = UIColor.white
         label.layer.cornerRadius = 5
         label.layer.masksToBounds = true
-        label.layer.borderWidth = 0
+        label.layer.borderWidth = 1
+        label.layer.borderColor = UIColor.gray.cgColor
+        label.contentEdgeInsets = UIEdgeInsets(top: 0, left: 5, bottom: 0, right: 5)
+        
         
         label.titleLabel?.font = UIFont.boldSystemFont(ofSize: 12)
         label.titleLabel?.textAlignment = NSTextAlignment.center
@@ -585,48 +644,37 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         return label
     }()
     
-    lazy var userTagLabel2: UIButton = {
+    lazy var extraTagLabel6: UIButton = {
         let label = UIButton()
-        label.tag = 1
-        label.addTarget(self, action: #selector(userTagSelected(_:)), for: .touchUpInside)
+        label.tag = 5
+        label.addTarget(self, action: #selector(extraTagselected(_:)), for: .touchUpInside)
         
         label.backgroundColor = UIColor.white
         label.layer.cornerRadius = 5
         label.layer.masksToBounds = true
-        label.layer.borderWidth = 0
+        label.layer.borderWidth = 1
+        label.layer.borderColor = UIColor.gray.cgColor
+        label.contentEdgeInsets = UIEdgeInsets(top: 0, left: 5, bottom: 0, right: 5)
+        
         
         label.titleLabel?.font = UIFont.boldSystemFont(ofSize: 12)
-        label.titleLabel?.textAlignment = NSTextAlignment.right
+        label.titleLabel?.textAlignment = NSTextAlignment.center
         
         return label
     }()
+
     
-    
-    func creatorTagSelected(_ sender: UIButton){
+    func extraTagselected(_ sender: UIButton){
         guard let post = post else {return}
         let listTag = sender.tag
         
-        var selectedListName = self.creatorTagsNameArray[listTag]
-        var selectedListId = self.creatorTagsIdArray[listTag]
+        var selectedListName = self.extraTagsNameArray[listTag]
+        var selectedListId = self.extraTagsIdArray[listTag]
         
         print("Selected Creator Tag: \(selectedListName), \(selectedListId)")
         delegate?.didTapExtraTag(tagName: selectedListName, tagId: selectedListId, post: post)
     }
     
-    func userTagSelected(_ sender: UIButton){
-        
-        guard let post = post else {return}
-        guard let selectedListName = self.userTagName else {return}
-        guard let selectedListId = self.userTagId else {return}
-        
-        if sender == userTagLabel1 {
-            print("Selected User Tag: \(selectedListName), \(selectedListId)")
-            delegate?.didTapExtraTag(tagName: selectedListName, tagId: selectedListId, post: post)
-        } else if sender == userTagLabel2 {
-            print("Selected User Tag: Other User List")
-            delegate?.didTapExtraTag(tagName: "userLists", tagId: "userLists", post: post)
-        }
-    }
     
     let extraTagView: UIView = {
         let uv = UIView()
@@ -634,172 +682,239 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         return uv
     }()
     
+    var extraTagViewHeight:NSLayoutConstraint?
+    
     let creatorTagView: UIView = {
         let uv = UIView()
         uv.backgroundColor = UIColor.clear
         return uv
     }()
+
+    // Extra Tags
     
-    var creatorTagsArray:[UIButton] = []
+    let extraTagFontSize: CGFloat = 13
+    let extraTagViewHeightSize: CGFloat = 25
+    var extraTagsArray:[UIButton] = []
     
-    var creatorTagsNameArray: [String] = []
-    var creatorTagsIdArray: [String] = []
+    var extraTagsNameArray: [String] = []
+    var extraTagsIdArray: [String] = []
+    var userTagsNameArray: [String] = []
+    var userTagsIdArray: [String] = []
     
-    var userTagName: String? = nil
-    var userTagId: String? = nil
+
+
     
-    func setupCreatorTags() {
+    
+    func setupExtraTagButtons() {
 
         // Refresh Tags
-        creatorTagsNameArray.removeAll()
-        creatorTagsIdArray.removeAll()
+        extraTagsNameArray.removeAll()
+        extraTagsIdArray.removeAll()
+        userTagsNameArray.removeAll()
+        userTagsIdArray.removeAll()
         
-        for label in self.creatorTagsArray {
+    // Reset Extra Tags
+        extraTagsArray = [extraTagLabel1, extraTagLabel2, extraTagLabel3, extraTagLabel4,extraTagLabel5,extraTagLabel6]
+
+        for label in self.extraTagsArray {
             label.setTitle(nil, for: .normal)
+            label.setImage(nil, for: .normal)
             label.layer.borderWidth = 0
             label.removeFromSuperview()
         }
         
-    // Setup ListNameArray and ListIdArray
+
+        
+        
+    // Creator Extra Tags
         if post?.creatorListId != nil {
-             // Check for Legit
             var listCount = post?.creatorListId?.count
             
+            // Add Legit List
             for list in (post?.creatorListId)! {
                 if list.value == legitListName {
-                    creatorTagsNameArray.append(list.value)
-                    creatorTagsIdArray.append(list.key)
+                    extraTagsNameArray.append(list.value)
+                    extraTagsIdArray.append(list.key)
                 }
             }
             
             // Add Other List
             for list in (post?.creatorListId)! {
                 if list.value != legitListName && list.value != bookmarkListName {
-                    if creatorTagsNameArray.count < 2 {
-                        creatorTagsNameArray.append(list.value)
-                        creatorTagsIdArray.append(list.key)
-                    } else if creatorTagsNameArray.count == 2 && listCount! > 2 {
-                        creatorTagsNameArray.append("+\(listCount! - 2)!")
-                        creatorTagsIdArray.append("creatorLists")
+                    if extraTagsNameArray.count < 2 {
+                        extraTagsNameArray.append(list.value)
+                        extraTagsIdArray.append(list.key)
+                    } else if extraTagsNameArray.count == 2 && listCount! > 2 {
+                        extraTagsNameArray.append("+\(listCount! - 2)")
+                        extraTagsIdArray.append("creatorLists")
                     }
                 }
             }
         }
         
-        // Populate Price Label
+    // Creator Price Tag
         if post?.price != nil {
-            creatorTagsNameArray.append((post?.price)!)
-            creatorTagsIdArray.append("price")
+            extraTagsNameArray.append((post?.price)!)
+            extraTagsIdArray.append("price")
         }
         
-        // Creator Tag Button Label
-        if creatorTagsNameArray.count > 0 {
-            for (index, listName) in (self.creatorTagsNameArray.enumerated()) {
-                
-                creatorTagsArray[index].setTitle(creatorTagsNameArray[index], for: .normal)
-                creatorTagsArray[index].titleLabel?.font = UIFont.boldSystemFont(ofSize: 12)
-
-                
-                if creatorTagsNameArray[index] == legitListName {
-                    creatorTagsArray[index].setTitleColor(UIColor.rgb(red: 255, green: 128, blue: 0), for: .normal)
-                }
-                else if creatorTagsIdArray[index] == "price" {
-                    creatorTagsArray[index].setTitleColor(UIColor.rgb(red: 0, green: 153, blue: 0), for: .normal)
-                }
-                else  if creatorTagsIdArray[index] == "creatorLists"{
-//                    creatorTagsArray[index].layer.borderWidth = 1
-                    creatorTagsArray[index].setTitleColor(UIColor.mainBlue(), for: .normal)
-                    creatorTagsArray[index].titleLabel?.font = UIFont.boldSystemFont(ofSize: 12)
-
-                }
-                else {
-                    creatorTagsArray[index].setTitle("!" + creatorTagsNameArray[index].truncate(length: 15), for: .normal)
-                    creatorTagsArray[index].setTitleColor(UIColor.mainBlue(), for: .normal)
-                    creatorTagsArray[index].titleLabel?.font = UIFont.boldSystemFont(ofSize: 12)
-                }
-
-        // Add Creator Tag Button to View
-                let displayButton = creatorTagsArray[index]
-                self.addSubview(displayButton)
-                
-                if index == 0{
-                    displayButton.anchor(top: extraTagView.topAnchor, left: extraTagView.leftAnchor, bottom: extraTagView.bottomAnchor, right: nil, paddingTop: 0, paddingLeft: 15, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
-                } else {
-                    displayButton.anchor(top: extraTagView.topAnchor, left: creatorTagsArray[index - 1].rightAnchor, bottom: extraTagView.bottomAnchor, right: nil, paddingTop: 0, paddingLeft: 6, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
-                }
-            }
-        }
     
-    }
-    
-    func setupUserTags() {
+    // User Extra Tags
         
-        // Refresh User Tag Buttons
-        userTagName = nil
-        userTagId = nil
-        userTagLabel1.removeFromSuperview()
-        userTagLabel2.removeFromSuperview()
-
         guard let uid = Auth.auth().currentUser?.uid else {
             print("SetupUserTag: Invalid Current User UID")
             return
         }
         
-        if post?.creatorUID == uid {
-//            print("No User Tags: User is Creator")
-            return
-        }
-        
-        guard let userSelectedList = post?.selectedListId else {
-//            print("No User Tags: Nil")
-            return
-        }
-        if userSelectedList.count > 0 {
-        
-            if (userSelectedList.contains(where: { (listId, listName) -> Bool in
-                return listName == bookmarkListName})) {
-                userTagName = bookmarkListName
-                userTagId = userSelectedList.key(forValue: userTagName!)
-                userTagLabel1.setImage(#imageLiteral(resourceName: "bookmark_filled"), for: .normal)
-            } else {
-                userTagName = Array(userSelectedList.values)[0]
-                userTagId = Array(userSelectedList.keys)[0]
-                userTagLabel1.setImage(nil, for: .normal)
-                userTagLabel1.setTitle("!" + (userTagName?.truncate(length: 10))!, for: .normal)
-                userTagLabel1.titleLabel?.font = UIFont.boldSystemFont(ofSize: 12)
-                userTagLabel1.setTitleColor(UIColor.orange, for: .normal)
+        if post?.creatorUID != uid && post?.selectedListId != nil {
+            
+            var userListCount = post?.selectedListId?.count
 
+            
+            // User Bookmarks
+            for list in (post?.selectedListId)! {
+                if list.value == bookmarkListName {
+                    userTagsNameArray.append(list.value)
+                    userTagsIdArray.append(list.key)
+                }
             }
-        
-            addSubview(userTagLabel1)
-            userTagLabel1.anchor(top: extraTagView.topAnchor, left: nil, bottom: extraTagView.bottomAnchor, right: extraTagView.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 10, width: 0, height: 0)
-        
-            if userSelectedList.count > 1 {
-                let listCount = userSelectedList.count - 1
-                userTagLabel2.setTitle("+\(listCount)!", for: .normal)
-                userTagLabel2.setTitleColor(UIColor.orange, for: .normal)
-                userTagLabel2.layer.borderWidth = 0
-                
-                addSubview(userTagLabel2)
-                userTagLabel2.anchor(top: extraTagView.topAnchor, left: nil, bottom: extraTagView.bottomAnchor, right: userTagLabel1.leftAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
 
-                
+            // Add Other User List
+            for list in (post?.selectedListId)! {
+                if list.value != legitListName && list.value != bookmarkListName {
+                    if userTagsNameArray.count == 0 {
+                        userTagsNameArray.append(list.value)
+                        userTagsIdArray.append(list.key)
+                    } else if userTagsNameArray.count == 1 && userListCount! > 1{
+                        userTagsNameArray.append("+\(userListCount! - 1)")
+                        userTagsIdArray.append("userLists")
+                    }
+                }
             }
+            
+            // Add User Tags to Extra Tags
+            extraTagsNameArray = extraTagsNameArray + userTagsNameArray
+            extraTagsIdArray = extraTagsIdArray + userTagsIdArray
         
         }
-    }
+        
+
+        // Creator Tag Button Label
+        if extraTagsNameArray.count > 0 {
+            for (index, listName) in (self.extraTagsNameArray.enumerated()) {
+                
+                extraTagsArray[index].setTitle(extraTagsNameArray[index], for: .normal)
+                extraTagsArray[index].titleLabel?.font = UIFont.boldSystemFont(ofSize: extraTagFontSize)
+                extraTagsArray[index].layer.borderWidth = 1
+
+
+                if extraTagsNameArray[index] == legitListName {
+//                    extraTagsArray[index].setTitleColor(UIColor.rgb(red: 255, green: 128, blue: 0), for: .normal)
+                    extraTagsArray[index].setTitleColor(UIColor.mainBlue(), for: .normal)
+                    extraTagsArray[index].setImage(#imageLiteral(resourceName: "starfilled"), for: .normal)
+                }
+                else if extraTagsNameArray[index] == bookmarkListName {
+//                    extraTagsArray[index].setTitleColor(UIColor.rgb(red: 255, green: 0, blue: 0), for: .normal)
+                    extraTagsArray[index].setTitleColor(UIColor.rgb(red: 255, green: 128, blue: 0), for: .normal)
+                    extraTagsArray[index].setImage(#imageLiteral(resourceName: "bookmark_filled"), for: .normal)
+                }
+                else if extraTagsIdArray[index] == "price" {
+                    extraTagsArray[index].setTitleColor(UIColor.rgb(red: 0, green: 153, blue: 0), for: .normal)
+                }
+                else {
+                    if index < extraTagsNameArray.count - userTagsNameArray.count {
+                        // Creator Tags
+                        extraTagsArray[index].setTitle(extraTagsNameArray[index].truncate(length: 10) + "!", for: .normal)
+                        extraTagsArray[index].backgroundColor = UIColor.white
+                        extraTagsArray[index].setTitleColor(UIColor.mainBlue(), for: .normal)
+                    } else {
+                        // User Tags
+                        extraTagsArray[index].setTitle(extraTagsNameArray[index].truncate(length: 10) + "!", for: .normal)
+                        extraTagsArray[index].backgroundColor = UIColor(white: 0, alpha: 0.2)
+                        extraTagsArray[index].setTitleColor(UIColor.rgb(red: 255, green: 128, blue: 0), for: .normal)
+                    }
+                }
+                
+                extraTagsArray[index].layer.borderWidth = 1
+
+                // Extra Tag Background Color (Different Fill Color for Creator Vs User
+                if index < extraTagsNameArray.count - userTagsNameArray.count {
+                    // Creator Tags
+                    extraTagsArray[index].backgroundColor = UIColor.white
+                    extraTagsArray[index].layer.borderColor = UIColor.mainBlue().cgColor
+                } else {
+                    // User Tags
+                    extraTagsArray[index].backgroundColor = UIColor.rgb(red: 255, green: 204, blue: 153).withAlphaComponent(0.1)
+                    extraTagsArray[index].layer.borderColor = UIColor.rgb(red: 255, green: 153, blue: 51).cgColor
+                }
+                
+                // Green Border For Price
+                if extraTagsIdArray[index] == "price" {
+                    extraTagsArray[index].layer.borderColor = UIColor.rgb(red: 0, green: 153, blue: 0).cgColor
+                }
+                
+        // Add Creator Tag Button to View
+                let displayButton = extraTagsArray[index]
+                self.addSubview(displayButton)
+                
+                if index == 0{
+                    displayButton.anchor(top: extraTagView.topAnchor, left: extraTagView.leftAnchor, bottom: extraTagView.bottomAnchor, right: nil, paddingTop: 1, paddingLeft: 10, paddingBottom: 1, paddingRight: 0, width: 0, height: 0)
+                } else {
+                    displayButton.anchor(top: extraTagView.topAnchor, left: extraTagsArray[index - 1].rightAnchor, bottom: extraTagView.bottomAnchor, right: nil, paddingTop: 1, paddingLeft: 6, paddingBottom: 1, paddingRight: 0, width: 0, height: 0)
+                }
+            }
+        }
     
+    }
+ 
     func setupExtraTags(){
-        setupUserTags()
-        setupCreatorTags()
-//        self.userTagLabel1.layoutIfNeeded()
-//        self.userTagLabel2.layoutIfNeeded()
-//        self.userTagLabel2.sizeToFit()
-//        self.creatorTagView.layoutIfNeeded()
-        self.extraTagView.layoutIfNeeded()
+        setupExtraTagButtons()
+        
+        if extraTagsNameArray.count == 0 {
+            extraTagViewHeight?.constant = 0
+        } else {
+            extraTagViewHeight?.constant = extraTagViewHeightSize
+        }        
+        
+    }
+    
+    func displayCaptionBubble(){
+        
+        print("Bubble Caption Displayed")
+        guard let post = self.post else {return}
+        
+        captionBubble.text = post.caption
+        captionBubble.sizeToFit()
+        
+        self.addSubview(captionBubble)
+        captionBubble.anchor(top: photoImageView.topAnchor, left: photoImageView.leftAnchor, bottom: nil, right: photoImageView.rightAnchor, paddingTop: 30, paddingLeft: 30, paddingBottom: 0, paddingRight: 30, width: 0, height: 0)
+        
+        self.fadeViewInThenOut(view: captionBubble, delay: 3)
+    }
+    
+    func hideCaptionBubble(){
+        
+        self.captionBubble.removeFromSuperview()
+
     }
 
-    
+    func fadeViewInThenOut(view : UIView, delay: TimeInterval) {
+        
+        let animationDuration = 0.0
+        
+        // Fade in the view
+        UIView.animate(withDuration: animationDuration, animations: { () -> Void in
+            view.alpha = 1
+        }) { (Bool) -> Void in
+            
+            // After the animation completes, fade out the view after a delay
+            
+            UIView.animate(withDuration: animationDuration, delay: delay, options: .curveEaseInOut, animations: { () -> Void in
+                view.alpha = 0
+            },
+                           completion: nil)
+        }
+    }
 
     
     
@@ -814,7 +929,7 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         addSubview(emojiDetailLabel)
         addSubview(ratingEmojiLabel)
         addSubview(bookmarkButton)
-        addSubview(starRatingLabel)
+//        addSubview(starRatingLabel)
         addSubview(legitIcon)
         
         headerView.anchor(top: topAnchor, left: leftAnchor, bottom: nil, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 50)
@@ -845,22 +960,19 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         userProfileImageView.layer.borderWidth = 0.25
         userProfileImageView.layer.borderColor = UIColor.lightGray.cgColor
         
-        usernameLabel.anchor(top: topAnchor, left: nil, bottom: photoImageView.topAnchor, right: userProfileImageView.leftAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 8, width: 0, height: userProfileImageView.frame.height)
+        usernameLabel.anchor(top: userProfileImageView.topAnchor, left: nil, bottom: userProfileImageView.bottomAnchor, right: userProfileImageView.leftAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 8, width: 0, height: 0)
         
         usernameLabel.textAlignment = .right
+//        usernameLabel.backgroundColor = UIColor.yellow
+
+//        starRatingLabel.anchor(top: nil, left: nil, bottom: nil, right: usernameLabel.leftAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 2, width: 0, height: 25)
+//        starRatingLabel.centerYAnchor.constraint(equalTo: usernameLabel.centerYAnchor).isActive = true
+//        starRatingLabelWidth = NSLayoutConstraint(item: starRatingLabel, attribute: NSLayoutAttribute.width, relatedBy: NSLayoutRelation.equal, toItem: nil, attribute: NSLayoutAttribute.width, multiplier: 1, constant: 25)
+//
+//        starRatingLabelWidth?.isActive = true
+//
         
-        addSubview(locationDistanceLabel)
- 
-        locationDistanceLabel.anchor(top: nil, left: nil, bottom: photoImageView.topAnchor, right: userProfileImageView.leftAnchor, paddingTop: 2, paddingLeft: 0, paddingBottom: 3, paddingRight: 10, width: 0, height: 0)
-        
-        
-        starRatingLabel.anchor(top: nil, left: nil, bottom: nil, right: usernameLabel.leftAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 2, width: 0, height: 25)
-        starRatingLabel.centerYAnchor.constraint(equalTo: usernameLabel.centerYAnchor).isActive = true
-        starRatingLabelWidth = NSLayoutConstraint(item: starRatingLabel, attribute: NSLayoutAttribute.width, relatedBy: NSLayoutRelation.equal, toItem: nil, attribute: NSLayoutAttribute.width, multiplier: 1, constant: 25)
-        starRatingLabelWidth?.isActive = true
-        
-        
-        legitIcon.anchor(top: nil, left: nil, bottom: nil, right: starRatingLabel.leftAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 2, width: 25, height: 25)
+        legitIcon.anchor(top: nil, left: nil, bottom: nil, right: usernameLabel.leftAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 2, width: 25, height: 25)
         legitIcon.centerYAnchor.constraint(equalTo: usernameLabel.centerYAnchor).isActive = true
         legitIcon.isHidden = true
         checkPostForLegit()
@@ -877,9 +989,14 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         photoImageView.addGestureRecognizer(doubleTap)
         photoImageView.isUserInteractionEnabled = true
         
-        let locationTapGesture = UITapGestureRecognizer(target: self, action: #selector(locationTap))
-        photoImageView.addGestureRecognizer(locationTapGesture)
-        locationTapGesture.require(toFail: doubleTap)
+//        let locationTapGesture = UITapGestureRecognizer(target: self, action: #selector(locationTap))
+//        photoImageView.addGestureRecognizer(locationTapGesture)
+//        locationTapGesture.require(toFail: doubleTap)
+        
+        let captionTapGesture = UITapGestureRecognizer(target: self, action: #selector(displayCaptionBubble))
+        photoImageView.addGestureRecognizer(captionTapGesture)
+        captionTapGesture.require(toFail: doubleTap)
+        
         
         let pinch = UIPinchGestureRecognizer(target: self, action: #selector(self.pinch(sender:)))
         pinch.delegate = self
@@ -887,66 +1004,61 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         let pan = UIPanGestureRecognizer(target: self, action: #selector(self.pan(sender:)))
         pan.delegate = self
         self.photoImageView.addGestureRecognizer(pan)
-        
-// Setup List and Price Tags
-        
-        creatorTagsArray = [creatorTagLabel1, creatorTagLabel2, creatorTagLabel3, creatorTagLabel4]
-        
-        addSubview(extraTagView)
-        extraTagView.anchor(top: photoImageView.bottomAnchor, left: leftAnchor, bottom: nil, right: rightAnchor, paddingTop: 2, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
 
-        
-        for (index,label) in creatorTagsArray.enumerated(){
-            creatorTagView.addSubview(label)
-            
-            if index == 0{
-                label.anchor(top: creatorTagView.topAnchor, left: creatorTagView.leftAnchor, bottom: creatorTagView.bottomAnchor, right: nil, paddingTop: 0, paddingLeft: 15, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
-            } else {
-                label.anchor(top: creatorTagView.topAnchor, left: creatorTagsArray[index - 1].rightAnchor, bottom: creatorTagView.bottomAnchor, right: nil, paddingTop: 0, paddingLeft: 10, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
-            }
-        }
-        
-        
         
 // Location View
         
         addSubview(locationView)
-        locationView.anchor(top: extraTagView.bottomAnchor, left: leftAnchor, bottom: nil, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 40)
+        locationView.anchor(top: photoImageView.bottomAnchor, left: leftAnchor, bottom: nil, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 25)
+        //        locationView.backgroundColor = UIColor.yellow
         
-//        addSubview(optionsButton)
-//        optionsButton.anchor(top: locationView.topAnchor, left: nil, bottom: photoImageView.topAnchor, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 44, height: 0)
-
         addSubview(locationLabel)
-        addSubview(adressLabel)
         addSubview(locationDistanceLabel)
         
-        addSubview(optionsButton)
-        optionsButton.anchor(top: locationView.topAnchor, left: nil, bottom: locationView.bottomAnchor, right: locationView.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 40, height: 40)
-        optionsButton.centerYAnchor.constraint(equalTo: locationView.centerYAnchor).isActive = true
-        optionsButton.isHidden = true
+        locationDistanceLabel.anchor(top: locationView.topAnchor, left: nil, bottom: locationView.bottomAnchor, right: locationView.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 5, width: 0, height: 0)
         
-        locationLabel.anchor(top: locationView.topAnchor, left: leftAnchor, bottom: nil, right: optionsButton.leftAnchor, paddingTop: 5, paddingLeft: 15, paddingBottom: 0, paddingRight: 0, width: 0, height: 15)
+        locationLabel.anchor(top: locationView.topAnchor, left: leftAnchor, bottom: locationView.bottomAnchor, right: locationDistanceLabel.leftAnchor, paddingTop: 3, paddingLeft: 10, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
         
-        adressLabel.anchor(top: locationLabel.bottomAnchor, left: leftAnchor, bottom: locationView.bottomAnchor, right: optionsButton.leftAnchor, paddingTop: 2, paddingLeft: 15, paddingBottom: 5, paddingRight: 0, width: 0, height: 0)
         
-//        addSubview(locationButton)
-//        locationButton.anchor(top: locationView.topAnchor, left: locationView.leftAnchor, bottom: locationView.bottomAnchor, right: locationView.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
+
+//        extraTagView.layer.borderWidth = 0.5
+//        extraTagView.layer.borderColor = UIColor.lightGray.cgColor
+        //        extraTagView.backgroundColor = UIColor.blue
         
 
         
+        addSubview(actionBar)
+        actionBar.anchor(top: locationView.bottomAnchor, left: leftAnchor, bottom: nil, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 40)
+
         
-        let bottomDividerView = UIView()
-        bottomDividerView.backgroundColor = UIColor.lightGray
-        addSubview(bottomDividerView)
-        
-        bottomDividerView.anchor(top: locationView.bottomAnchor, left: leftAnchor, bottom: nil, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0.5)
-        
+//        actionBar.layer.borderColor = UIColor.lightGray.cgColor
+//        actionBar.layer.borderWidth = 0.5
         setupActionButtons()
 
-        addSubview(captionLabel)
-        captionLabel.anchor(top: actionBar.bottomAnchor, left: leftAnchor, bottom: nil, right: rightAnchor, paddingTop: 2, paddingLeft: 8, paddingBottom: 0, paddingRight: 8, width: 0, height: 0)
-        captionLabel.bottomAnchor.constraint(lessThanOrEqualTo: bottomAnchor)
-    
+//        let bottomDividerView = UIView()
+//        bottomDividerView.backgroundColor = UIColor.lightGray
+//        addSubview(bottomDividerView)
+//
+//        bottomDividerView.anchor(top: nil, left: leftAnchor, bottom: actionBar.bottomAnchor, right: rightAnchor, paddingTop: 1, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0.5)
+//
+        // Setup List and Price Tags
+        
+        addSubview(extraTagView)
+        extraTagView.anchor(top: actionBar.bottomAnchor, left: leftAnchor, bottom: nil, right: rightAnchor, paddingTop: 1, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
+        extraTagViewHeight = NSLayoutConstraint(item: extraTagView, attribute: NSLayoutAttribute.height, relatedBy: NSLayoutRelation.equal, toItem: nil, attribute: NSLayoutAttribute.width, multiplier: 1, constant: extraTagViewHeightSize)
+        extraTagViewHeight?.isActive = true
+
+        
+        addSubview(postDateLabel)
+        postDateLabel.anchor(top: extraTagView.bottomAnchor, left: leftAnchor, bottom: nil, right: rightAnchor, paddingTop: 0, paddingLeft: 10, paddingBottom: 0, paddingRight: 0, width: 0, height: 30)
+        
+        addSubview(optionsButton)
+        optionsButton.anchor(top: postDateLabel.topAnchor, left: nil, bottom: postDateLabel.bottomAnchor, right: postDateLabel.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 10, width: 0, height: 0)
+        optionsButton.widthAnchor.constraint(equalTo: optionsButton.heightAnchor).isActive = true
+        optionsButton.centerYAnchor.constraint(equalTo: postDateLabel.centerYAnchor).isActive = true
+        optionsButton.isHidden = true
+        
+
     }
     
     // Action Buttons
@@ -1236,32 +1348,29 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
     
     fileprivate func setupActionButtons() {
 
-        addSubview(actionBar)
-        actionBar.anchor(top: locationView.bottomAnchor, left: leftAnchor, bottom: nil, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 40)
         
         let voteView = UIView()
-//        voteView.backgroundColor = UIColor.blue
+        //        voteView.backgroundColor = UIColor.blue
         
         let commentView = UIView()
-//        commentView.backgroundColor = UIColor.yellow
+        //        commentView.backgroundColor = UIColor.yellow
         
         let bookmarkView = UIView()
-//        bookmarkView.backgroundColor = UIColor.blue
+        //        bookmarkView.backgroundColor = UIColor.blue
         
         let messageView = UIView()
-//        messageView.backgroundColor = UIColor.yellow
+        //        messageView.backgroundColor = UIColor.yellow
         
         let voteContainer = UIView()
         let commentContainer = UIView()
         let bookmarkContainer = UIView()
         let messageContainer = UIView()
-        
-        
         let actionStackView = UIStackView(arrangedSubviews: [voteView, commentView, bookmarkView, messageView])
         actionStackView.distribution = .fillEqually
+
         addSubview(actionStackView)
         
-        actionStackView.anchor(top: locationView.bottomAnchor, left: leftAnchor, bottom: actionBar.bottomAnchor, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 40)
+        actionStackView.anchor(top: actionBar.topAnchor, left: leftAnchor, bottom: actionBar.bottomAnchor, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 40)
         
         addSubview(upVoteButton)
         addSubview(downVoteButton)
@@ -1330,21 +1439,23 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         
     // Dividers
         
+        let dividerColor = UIColor.lightGray
+        
         let div1 = UIView()
-        div1.backgroundColor = .black
+        div1.backgroundColor = dividerColor
         addSubview(div1)
         div1.anchor(top: actionStackView.topAnchor, left: commentView.leftAnchor, bottom: actionStackView.bottomAnchor, right: nil, paddingTop: 10, paddingLeft: 0, paddingBottom: 10, paddingRight: 0, width: 1, height: 0)
         div1.heightAnchor.constraint(equalTo: actionStackView.heightAnchor, multiplier: 0.4).isActive = true
 
         let div2 = UIView()
-        div2.backgroundColor = .black
+        div2.backgroundColor = dividerColor
         addSubview(div2)
         div2.anchor(top: actionStackView.topAnchor, left: bookmarkView.leftAnchor, bottom: actionStackView.bottomAnchor, right: nil, paddingTop: 10, paddingLeft: 0, paddingBottom: 10, paddingRight: 0, width: 1, height: 0)
         div2.heightAnchor.constraint(equalTo: actionStackView.heightAnchor, multiplier: 0.4).isActive = true
         
 
         let div3 = UIView()
-        div3.backgroundColor = .black
+        div3.backgroundColor = dividerColor
         addSubview(div3)
         div3.anchor(top: actionStackView.topAnchor, left: messageView.leftAnchor, bottom: actionStackView.bottomAnchor, right: nil, paddingTop: 10, paddingLeft: 0, paddingBottom: 10, paddingRight: 0, width: 1, height: 0)
         div3.heightAnchor.constraint(equalTo: actionStackView.heightAnchor, multiplier: 0.4).isActive = true
@@ -1364,65 +1475,65 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         
         
     }
-    
-    fileprivate func setupActionButtonsTest() {
-        
-//        let stackView = UIStackView(arrangedSubviews: [likeButton, commentButton, sendMessageButton])
-//        stackView.distribution = .fillEqually
-//        addSubview(stackView)
-//        stackView.anchor(top: locationView.bottomAnchor, left: leftAnchor, bottom: nil, right: nil, paddingTop: 0, paddingLeft: 8, paddingBottom: 0, paddingRight: 0, width: 120, height: 40)
-        
-        
-        addSubview(actionBar)
-        actionBar.anchor(top: locationView.bottomAnchor, left: leftAnchor, bottom: nil, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 40)
-        
-//        addSubview(likeButton)
-//        likeButton.anchor(top: actionBar.topAnchor, left: actionBar.leftAnchor, bottom: actionBar.bottomAnchor, right: nil, paddingTop: 5, paddingLeft: 8, paddingBottom: 5, paddingRight: 0, width: 30, height: 30)
-        
-        addSubview(commentButton)
-        commentButton.anchor(top: actionBar.topAnchor, left: actionBar.leftAnchor, bottom: actionBar.bottomAnchor, right: nil, paddingTop: 5, paddingLeft: 2, paddingBottom: 5, paddingRight: 0, width: 30, height: 30)
-        
-        addSubview(sendMessageButton)
-        sendMessageButton.anchor(top: actionBar.topAnchor, left: commentButton.rightAnchor, bottom: actionBar.bottomAnchor, right: nil, paddingTop: 5, paddingLeft: 2, paddingBottom: 5, paddingRight: 0, width: 30, height: 30)
-        
-        addSubview(messageCount)
-        messageCount.anchor(top: actionBar.topAnchor, left: sendMessageButton.rightAnchor, bottom: actionBar.bottomAnchor, right: nil, paddingTop: 5, paddingLeft: 2, paddingBottom: 5, paddingRight: 0, width: 30, height: 30)
-        
-        
-        
-        addSubview(upVoteButton)
-        addSubview(downVoteButton)
-        addSubview(voteCount)
-        
-        downVoteButton.anchor(top: actionBar.topAnchor, left: nil, bottom: actionBar.bottomAnchor, right: actionBar.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 15, width: 30, height: 0)
-        downVoteButton.widthAnchor.constraint(equalTo: downVoteButton.heightAnchor, multiplier: 1)
-        
-        voteCount.anchor(top: actionBar.topAnchor, left: nil, bottom: actionBar.bottomAnchor, right: downVoteButton.leftAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
-        voteCount.sizeToFit()
-        
-        upVoteButton.anchor(top: actionBar.topAnchor, left: nil, bottom: actionBar.bottomAnchor, right: voteCount.leftAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
-        upVoteButton.widthAnchor.constraint(equalTo: upVoteButton.heightAnchor, multiplier: 1)
-        
-        
-//        addSubview(bookmarkCount)
-//        bookmarkCount.anchor(top: actionBar.topAnchor, left: nil, bottom: actionBar.bottomAnchor, right: upVoteButton.leftAnchor, paddingTop: 5, paddingLeft: 0, paddingBottom: 5, paddingRight: 8, width: 0, height: 30)
-//        bookmarkCount.sizeToFit()
-//        bookmarkLabelConstraint = NSLayoutConstraint(item: self.bookmarkCount, attribute: NSLayoutAttribute.width, relatedBy: NSLayoutRelation.equal, toItem: nil, attribute: NSLayoutAttribute.notAnAttribute, multiplier: 1, constant: self.bookmarkCount.frame.size.width)
-//        self.bookmarkCount.addConstraint(bookmarkLabelConstraint!)
-//        bookmarkLabel.widthAnchor.constraint(equalToConstant: self.bookmarkLabel.frame.size.width).isActive = true
-        
-        // Width anchor is set after bookmark counts are displayed to figure out label width
-        addSubview(bookmarkButton)
-        bookmarkButton.anchor(top: actionBar.topAnchor, left: nil, bottom: actionBar.bottomAnchor, right: upVoteButton.leftAnchor, paddingTop: 5, paddingLeft: 0, paddingBottom: 5, paddingRight: 2, width: 30, height: 30)
-
-//        addSubview(testlabel)
-//        testlabel.anchor(top: bookmarkButton.topAnchor, left: bookmarkButton.leftAnchor, bottom: bookmarkButton.bottomAnchor, right: bookmarkButton.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
-
-        
-        
-        
-    }
-    
+//
+//    fileprivate func setupActionButtonsTest() {
+//
+////        let stackView = UIStackView(arrangedSubviews: [likeButton, commentButton, sendMessageButton])
+////        stackView.distribution = .fillEqually
+////        addSubview(stackView)
+////        stackView.anchor(top: locationView.bottomAnchor, left: leftAnchor, bottom: nil, right: nil, paddingTop: 0, paddingLeft: 8, paddingBottom: 0, paddingRight: 0, width: 120, height: 40)
+//
+//
+//        addSubview(actionBar)
+//        actionBar.anchor(top: locationView.bottomAnchor, left: leftAnchor, bottom: nil, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 40)
+//
+////        addSubview(likeButton)
+////        likeButton.anchor(top: actionBar.topAnchor, left: actionBar.leftAnchor, bottom: actionBar.bottomAnchor, right: nil, paddingTop: 5, paddingLeft: 8, paddingBottom: 5, paddingRight: 0, width: 30, height: 30)
+//
+//        addSubview(commentButton)
+//        commentButton.anchor(top: actionBar.topAnchor, left: actionBar.leftAnchor, bottom: actionBar.bottomAnchor, right: nil, paddingTop: 5, paddingLeft: 2, paddingBottom: 5, paddingRight: 0, width: 30, height: 30)
+//
+//        addSubview(sendMessageButton)
+//        sendMessageButton.anchor(top: actionBar.topAnchor, left: commentButton.rightAnchor, bottom: actionBar.bottomAnchor, right: nil, paddingTop: 5, paddingLeft: 2, paddingBottom: 5, paddingRight: 0, width: 30, height: 30)
+//
+//        addSubview(messageCount)
+//        messageCount.anchor(top: actionBar.topAnchor, left: sendMessageButton.rightAnchor, bottom: actionBar.bottomAnchor, right: nil, paddingTop: 5, paddingLeft: 2, paddingBottom: 5, paddingRight: 0, width: 30, height: 30)
+//
+//
+//
+//        addSubview(upVoteButton)
+//        addSubview(downVoteButton)
+//        addSubview(voteCount)
+//
+//        downVoteButton.anchor(top: actionBar.topAnchor, left: nil, bottom: actionBar.bottomAnchor, right: actionBar.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 15, width: 30, height: 0)
+//        downVoteButton.widthAnchor.constraint(equalTo: downVoteButton.heightAnchor, multiplier: 1)
+//
+//        voteCount.anchor(top: actionBar.topAnchor, left: nil, bottom: actionBar.bottomAnchor, right: downVoteButton.leftAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
+//        voteCount.sizeToFit()
+//
+//        upVoteButton.anchor(top: actionBar.topAnchor, left: nil, bottom: actionBar.bottomAnchor, right: voteCount.leftAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
+//        upVoteButton.widthAnchor.constraint(equalTo: upVoteButton.heightAnchor, multiplier: 1)
+//
+//
+////        addSubview(bookmarkCount)
+////        bookmarkCount.anchor(top: actionBar.topAnchor, left: nil, bottom: actionBar.bottomAnchor, right: upVoteButton.leftAnchor, paddingTop: 5, paddingLeft: 0, paddingBottom: 5, paddingRight: 8, width: 0, height: 30)
+////        bookmarkCount.sizeToFit()
+////        bookmarkLabelConstraint = NSLayoutConstraint(item: self.bookmarkCount, attribute: NSLayoutAttribute.width, relatedBy: NSLayoutRelation.equal, toItem: nil, attribute: NSLayoutAttribute.notAnAttribute, multiplier: 1, constant: self.bookmarkCount.frame.size.width)
+////        self.bookmarkCount.addConstraint(bookmarkLabelConstraint!)
+////        bookmarkLabel.widthAnchor.constraint(equalToConstant: self.bookmarkLabel.frame.size.width).isActive = true
+//
+//        // Width anchor is set after bookmark counts are displayed to figure out label width
+//        addSubview(bookmarkButton)
+//        bookmarkButton.anchor(top: actionBar.topAnchor, left: nil, bottom: actionBar.bottomAnchor, right: upVoteButton.leftAnchor, paddingTop: 5, paddingLeft: 0, paddingBottom: 5, paddingRight: 2, width: 30, height: 30)
+//
+////        addSubview(testlabel)
+////        testlabel.anchor(top: bookmarkButton.topAnchor, left: bookmarkButton.leftAnchor, bottom: bookmarkButton.bottomAnchor, right: bookmarkButton.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
+//
+//
+//
+//
+//    }
+//
     func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
         return true
     }

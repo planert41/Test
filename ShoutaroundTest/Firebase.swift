@@ -836,7 +836,7 @@ extension Database{
     }
     
     static func checkPostForLists(post: Post, completion: @escaping (Post) -> ()){
-        var tempSelectedListIds: [String:String]? = [:]
+        var tempSelectedListIds: [String:String] = [:]
         var tempPost = post
         guard let postId = post.id else {
             print("Check Post for Lists: ERROR, No Post Ids")
@@ -846,11 +846,18 @@ extension Database{
         if CurrentUser.lists.count > 0 {
             for list in CurrentUser.lists {
                 if list.postIds![postId] != nil {
-                    tempSelectedListIds![list.id!] = list.name
+                    tempSelectedListIds[list.id!] = list.name
                 }
             }
             tempPost.selectedListId = tempSelectedListIds
         }
+        
+        if tempSelectedListIds.count > 0 {
+            tempPost.hasBookmarked = true
+        } else {
+            tempPost.hasBookmarked = false
+        }
+
         completion(tempPost)
     }
     

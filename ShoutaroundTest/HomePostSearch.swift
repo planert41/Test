@@ -258,6 +258,24 @@ class HomePostSearch : UITableViewController, UISearchResultsUpdating, UISearchC
         }
     }
     
+    func searchBarShouldBeginEditing(_ searchBar: UISearchBar) -> Bool {        
+        searchBar.showsScopeBar = true
+        searchBar.sizeToFit()
+        return true
+    }
+    
+    func searchBarShouldEndEditing(_ searchBar: UISearchBar) -> Bool {
+        if #available(iOS 11.0, *) {
+            navigationItem.searchController?.searchBar.showsScopeBar = false
+            navigationItem.searchController?.searchBar.isHidden = true
+            let search = UISearchController(searchResultsController: nil)
+            self.navigationItem.searchController = search
+
+        }
+        searchBar.sizeToFit()
+        return true
+    }
+    
     
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
         if (searchBar.text?.isEmpty)! {
@@ -276,6 +294,7 @@ class HomePostSearch : UITableViewController, UISearchResultsUpdating, UISearchC
             self.delegate?.filterCaptionSelected(searchedText: nil)
         }
         self.dismiss(animated: true) {
+            searchBar.showsScopeBar = false
         }
     }
     
@@ -286,6 +305,7 @@ class HomePostSearch : UITableViewController, UISearchResultsUpdating, UISearchC
             self.delegate?.filterCaptionSelected(searchedText: nil)
         }
         self.dismiss(animated: true) {
+            searchBar.showsScopeBar = false
         }
     }
     

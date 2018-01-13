@@ -223,6 +223,14 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     
     override func scrollViewDidScroll(_ scrollView: UIScrollView) {
         emojiDetailLabel.isHidden = true
+        
+
+        for cell in (collectionView?.visibleCells)! {
+            let tempCell = cell as! HomePostCell
+            tempCell.hideCaptionBubble()
+        }
+        
+        
     }
     
     func CGRectMake(_ x: CGFloat, _ y: CGFloat, _ width: CGFloat, _ height: CGFloat) -> CGRect {
@@ -258,13 +266,32 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         searchBar?.scopeButtonTitles = searchScopeButtons
         searchBar?.placeholder =  searchBarPlaceholderText
         searchBar?.delegate = homePostSearchResults
-        searchBar?.showsScopeBar = true
+        searchBar?.showsScopeBar = false
         
-        resultSearchController?.hidesNavigationBarDuringPresentation = true
+        resultSearchController?.hidesNavigationBarDuringPresentation = false
         resultSearchController?.dimsBackgroundDuringPresentation = true
         definesPresentationContext = true
         
+//        if #available(iOS 11.0, *) {
+//            // For iOS 11 and later, we place the search bar in the navigation bar.
+//            navigationItem.searchController = resultSearchController
+////            navigationItem.titleView = resultSearchController?.searchBar
+//
+//            // We want the search bar visible all the time.
+//            navigationItem.hidesSearchBarWhenScrolling = false
+//        } else {
+//            // For iOS 10 and earlier, we place the search bar in the table view's header.
+//            navigationItem.titleView = resultSearchController?.searchBar
+//        }
+        
 
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        if #available(iOS 11.0, *) {
+            // For iOS 11 and later, we place the search bar in the navigation bar.
+            navigationItem.searchController?.searchBar.isHidden = true
+        }
     }
     
     
