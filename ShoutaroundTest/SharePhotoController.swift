@@ -211,7 +211,7 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         return iv
     }()
     
-    var starRatingLabel = RatingLabel()
+    var starRatingLabel = RatingLabel(ratingScore: 0)
     
     let starRatingCancelButton: UIButton = {
         let button = UIButton(type: .system)

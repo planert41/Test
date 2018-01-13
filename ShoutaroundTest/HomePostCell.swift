@@ -70,8 +70,11 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
             guard let profileImageUrl = post?.user.profileImageUrl else {return}
             
             userProfileImageView.loadImage(urlString: profileImageUrl)
-            starRatingLabel.layoutIfNeeded()
             setupExtraTags()
+            setupLegitIcon()
+            
+            
+            
             captionLabel.text = post?.caption
             setupAttributedLocationName()
             setupAttributedCaption()
@@ -107,31 +110,10 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
                 optionsButton.isHidden = true
             }
             
-            // Check for Creator Legit List
-            
-            checkPostForLegit()
-            
            // setupAttributedLocationName()
         }
     }
     
-    func checkPostForLegit(){
-        
-        guard let creatorListId = post?.creatorListId else {
-            self.legitIcon.isHidden = true
-            return
-        }
-        
-        self.legitIcon.isHidden = true
-
-        for (key,value) in creatorListId {
-            // Only show if there is a legit list
-            if value == legitListName{
-                self.legitIcon.isHidden = false
-            }
-        }
-    }
-
     
     func usernameTap() {
         print("Tap username label", post?.user.username ?? "")
@@ -260,9 +242,6 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         return iv
         
     }()
-    
-    var starRatingLabel = RatingLabel()
-    var starRatingLabelWidth: NSLayoutConstraint?
     
     lazy var legitIcon: UIButton = {
         let button = UIButton(type: .system)
@@ -512,16 +491,25 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         return label
     }()
     
+    
+    let captionView: UIView = {
+        let view = UIView()
+        view.layer.backgroundColor = UIColor.lightGray.cgColor.copy(alpha: 0.5)
+        view.layer.cornerRadius = 5
+        view.layer.masksToBounds = true
+        return view
+    }()
+    
     let captionBubble: UILabel = {
         let label = UILabel()
         label.font = UIFont.boldSystemFont(ofSize: 30)
         label.textAlignment = NSTextAlignment.center
-        label.layer.backgroundColor = UIColor.lightGray.cgColor.copy(alpha: 0.5)
-        label.layer.cornerRadius = 5
-        label.layer.masksToBounds = true
         label.numberOfLines = 0
         return label
     }()
+
+    var starRatingLabel = RatingLabel(ratingScore: 0)
+    var starRatingLabelHeight: NSLayoutConstraint?
     
     let postDateLabel: UILabel = {
         let label = UILabel()
@@ -723,9 +711,6 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
             label.removeFromSuperview()
         }
         
-
-        
-        
     // Creator Extra Tags
         if post?.creatorListId != nil {
             var listCount = post?.creatorListId?.count
@@ -811,12 +796,12 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
                 if extraTagsNameArray[index] == legitListName {
 //                    extraTagsArray[index].setTitleColor(UIColor.rgb(red: 255, green: 128, blue: 0), for: .normal)
                     extraTagsArray[index].setTitleColor(UIColor.mainBlue(), for: .normal)
-                    extraTagsArray[index].setImage(#imageLiteral(resourceName: "starfilled"), for: .normal)
+                    extraTagsArray[index].setImage(#imageLiteral(resourceName: "starfilled").withRenderingMode(.alwaysOriginal), for: .normal)
                 }
                 else if extraTagsNameArray[index] == bookmarkListName {
 //                    extraTagsArray[index].setTitleColor(UIColor.rgb(red: 255, green: 0, blue: 0), for: .normal)
                     extraTagsArray[index].setTitleColor(UIColor.rgb(red: 255, green: 128, blue: 0), for: .normal)
-                    extraTagsArray[index].setImage(#imageLiteral(resourceName: "bookmark_filled"), for: .normal)
+                    extraTagsArray[index].setImage(#imageLiteral(resourceName: "bookmark_filled").withRenderingMode(.alwaysOriginal), for: .normal)
                 }
                 else if extraTagsIdArray[index] == "price" {
                     extraTagsArray[index].setTitleColor(UIColor.rgb(red: 0, green: 153, blue: 0), for: .normal)
@@ -866,9 +851,39 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         }
     
     }
+    
+    func setupLegitIcon(){
+        
+        self.legitIcon.isHidden = false
+
+        if extraTagsNameArray.contains(legitListName){
+            // Check for Legit
+            self.legitIcon.setImage(#imageLiteral(resourceName: "starfilled").withRenderingMode(.alwaysOriginal), for: .normal)
+        }
+        
+        else if extraTagsNameArray.contains(bookmarkListName){
+            // Check for Legit
+            self.legitIcon.setImage(#imageLiteral(resourceName: "bookmark_filled").withRenderingMode(.alwaysOriginal), for: .normal)
+        }
+    
+        else if (post?.rating) != nil && post?.rating != 0 {
+            guard let postRating = self.post?.rating else {return}
+            if postRating >= 6.0 {
+                self.legitIcon.setImage(#imageLiteral(resourceName: "highrating").withRenderingMode(.alwaysOriginal), for: .normal)
+            }
+            else if postRating <= 2.0 {
+                self.legitIcon.setImage(#imageLiteral(resourceName: "lowrating").withRenderingMode(.alwaysOriginal), for: .normal)
+            }
+        } else {
+            self.legitIcon.isHidden = true
+        }
+        
+    }
  
     func setupExtraTags(){
         setupExtraTagButtons()
+        setupLegitIcon()
+        
         
         if extraTagsNameArray.count == 0 {
             extraTagViewHeight?.constant = 0
@@ -885,16 +900,40 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         
         captionBubble.text = post.caption
         captionBubble.sizeToFit()
+        starRatingLabel.rating = post.rating!
         
-        self.addSubview(captionBubble)
-        captionBubble.anchor(top: photoImageView.topAnchor, left: photoImageView.leftAnchor, bottom: nil, right: photoImageView.rightAnchor, paddingTop: 30, paddingLeft: 30, paddingBottom: 0, paddingRight: 30, width: 0, height: 0)
+        self.addSubview(captionView)
+        captionView.anchor(top: photoImageView.topAnchor, left: photoImageView.leftAnchor, bottom: nil, right: photoImageView.rightAnchor, paddingTop: 30, paddingLeft: 30, paddingBottom: 0, paddingRight: 30, width: 0, height: 0)
         
-        self.fadeViewInThenOut(view: captionBubble, delay: 3)
+        captionView.addSubview(captionBubble)
+        captionBubble.anchor(top: captionView.topAnchor, left: captionView.leftAnchor, bottom: nil, right: captionView.rightAnchor, paddingTop: 10, paddingLeft: 10, paddingBottom: 10, paddingRight: 10, width: 0, height: 0)
+        
+        captionView.addSubview(starRatingLabel)
+        starRatingLabel.anchor(top: captionBubble.bottomAnchor, left: nil, bottom: captionView.bottomAnchor, right: nil, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 30, height: 0)
+        starRatingLabel.centerXAnchor.constraint(equalTo: captionView.centerXAnchor).isActive = true
+        starRatingLabelHeight = NSLayoutConstraint(item: starRatingLabel, attribute: NSLayoutAttribute.height, relatedBy: NSLayoutRelation.equal, toItem: nil, attribute: NSLayoutAttribute.height, multiplier: 1, constant: 30)
+        starRatingLabelHeight?.isActive = true
+        
+        if post.rating == 0 {
+            starRatingLabelHeight?.constant = 0
+        } else {
+            starRatingLabelHeight?.constant = 30
+        }
+
+//
+//        let attributedString = NSMutableAttributedString(string: post.caption, attributes: [NSFontAttributeName: UIFont.boldSystemFont(ofSize: 30)])
+//
+//        let test = NSAttributedString(string: String(describing: post.rating!), attributes: [NSFontAttributeName: UIFont.boldSystemFont(ofSize: 30), NSBackgroundColorAttributeName: RatingLabel.init(ratingScore: post.rating!).ratingBackgroundColor()])
+//
+//        attributedString.append(test)
+//        captionBubble.attributedText = attributedString
+        
+        self.fadeViewInThenOut(view: captionView, delay: 3)
     }
     
     func hideCaptionBubble(){
         
-        self.captionBubble.removeFromSuperview()
+        self.captionView.removeFromSuperview()
 
     }
 
@@ -975,7 +1014,6 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         legitIcon.anchor(top: nil, left: nil, bottom: nil, right: usernameLabel.leftAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 2, width: 25, height: 25)
         legitIcon.centerYAnchor.constraint(equalTo: usernameLabel.centerYAnchor).isActive = true
         legitIcon.isHidden = true
-        checkPostForLegit()
         
 //        ratingEmojiLabel.anchor(top: topAnchor, left: nil, bottom: photoImageView.topAnchor, right: usernameLabel.leftAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 2, width: 0, height: 0)
         
