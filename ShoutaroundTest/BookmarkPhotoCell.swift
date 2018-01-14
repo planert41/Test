@@ -90,7 +90,7 @@ class BookmarkPhotoCell: UICollectionViewCell {
             
             
             
-            print("Post Distance is",post?.distance)
+//            print("Post Distance is",post?.distance)
             if post?.distance != nil && post?.locationGPS?.coordinate.longitude != 0 && post?.locationGPS?.coordinate.latitude != 0 {
                 
                 guard let postdistance = post?.distance else {return}

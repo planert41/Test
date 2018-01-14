@@ -15,19 +15,35 @@ class TabListViewController: UIViewController, UICollectionViewDelegate, UIColle
     
     // List Variables
     
+    //INPUT
     var displayUser: User? = nil {
         didSet{
             userListIds = displayUser?.listIds
         }
     }
+    
     var userListIds: [String]? = []
-    var displayedLists: [List]? = []
+    
+    var displayedLists: [List]? = [] {
+        didSet{
+            guard let uid = Auth.auth().currentUser?.uid else {return}
+            if displayUser?.uid != uid {
+                // Filter bookmark list if not current user
+                if let bookmarkIndex = displayedLists?.index(where: { (list) -> Bool in
+                    return list.name == bookmarkListName
+                }) {
+                    displayedLists?.remove(at: bookmarkIndex)
+                }
+            }
+            self.listCollectionView.reloadData()
+        }
+    }
+    
     var currentDisplayListIndex: Int? = nil {
         didSet{
             guard let currentDisplayListIndex = currentDisplayListIndex else {return}
             self.listViewController?.displayListId = displayedLists![currentDisplayListIndex].id
             self.listViewController?.displayList = displayedLists?[currentDisplayListIndex]
-            self.listViewController?.reloadInputViews()
             print("Loading List \(displayedLists![currentDisplayListIndex].id) : \(displayedLists?[currentDisplayListIndex].name)")
             NotificationCenter.default.post(name: ListViewController.refreshListViewNotificationName, object: nil)
         }
@@ -62,7 +78,6 @@ class TabListViewController: UIViewController, UICollectionViewDelegate, UIColle
     }
     
     let listHeaderView = UIView()
-
     let topDivider = UIView()
     let bottomDivider = UIView()
     
@@ -106,13 +121,23 @@ class TabListViewController: UIViewController, UICollectionViewDelegate, UIColle
         addChildViewController(listViewController!)
         view.addSubview((listViewController?.view)!)
         listViewController?.view.anchor(top: bottomDivider.bottomAnchor, left: view.leftAnchor, bottom: view.bottomAnchor, right: view.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
+
         checkUsers {
             self.fetchList()
         }
         
-        
         // Do any additional setup after loading the view.
     }
+    
+//    override func viewDidAppear(_ animated: Bool) {
+//        checkUsers {
+//            print("Check User Finished, Userid: \(displayUser?.uid), Post No: \(displayedLists?.count)")
+//            // Just checks for user at loading. If no users then fetches for Current User.
+//            // Only Fetches List once user has been loaded or is refreshed
+//            // self.fetchList()
+//        }
+//    }
+    
     
     func checkUsers(completion: @escaping() ->()){
         
@@ -149,15 +174,19 @@ class TabListViewController: UIViewController, UICollectionViewDelegate, UIColle
             
 
             self.displayedLists = fetchedLists
-            self.listCollectionView.reloadData()
             if fetchedLists.count > 0 {
                 // Set Display List
                 self.currentDisplayListIndex = 0
             }
+            print("Fetched Lists: Post Numbers: \(self.displayedLists?.count)")
+            self.listCollectionView.reloadData()
+            NotificationCenter.default.post(name: ListViewController.refreshListViewNotificationName, object: nil)
 
         }
     }
 
+
+    
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.

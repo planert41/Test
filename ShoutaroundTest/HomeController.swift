@@ -747,10 +747,14 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         
         var height: CGFloat = 40 + 8 + 8 //username userprofileimageview
         height += view.frame.width  // Picture
-        height += 50    // Location View
-        height += 60    // Action Bar
-        height += 20    // Social Counts
-        height += 20    // Caption
+        height += 25    // Location View
+        height += 40    // Action Bar
+        height += 25    // Extra Tag Bar
+        height += 30    // Date Bar
+
+        
+////        height += 20    // Social Counts
+////        height += 20    // Caption
         
         return CGSize(width: view.frame.width, height: height)
     }

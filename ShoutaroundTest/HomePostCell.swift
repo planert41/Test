@@ -246,7 +246,7 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
     
     lazy var legitIcon: UIButton = {
         let button = UIButton(type: .system)
-        button.setImage(#imageLiteral(resourceName: "starfilled").withRenderingMode(.alwaysOriginal), for: .normal)
+        button.setImage(#imageLiteral(resourceName: "legit").withRenderingMode(.alwaysOriginal), for: .normal)
         button.addTarget(self, action: #selector(openLegitList), for: .touchUpInside)
         return button
     }()
@@ -797,11 +797,13 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
                 if extraTagsNameArray[index] == legitListName {
 //                    extraTagsArray[index].setTitleColor(UIColor.rgb(red: 255, green: 128, blue: 0), for: .normal)
                     extraTagsArray[index].setTitleColor(UIColor.mainBlue(), for: .normal)
-                    extraTagsArray[index].setImage(#imageLiteral(resourceName: "starfilled").withRenderingMode(.alwaysOriginal), for: .normal)
+                    extraTagsArray[index].setImage(#imageLiteral(resourceName: "legit").withRenderingMode(.alwaysOriginal), for: .normal)
+//                    extraTagsArray[index].imageView?.contentMode = UIViewContentMode.scaleAspectFit
+//                    extraTagsArray[index].imageView?.backgroundColor = UIColor.red
                 }
                 else if extraTagsNameArray[index] == bookmarkListName {
 //                    extraTagsArray[index].setTitleColor(UIColor.rgb(red: 255, green: 0, blue: 0), for: .normal)
-                    extraTagsArray[index].setTitleColor(UIColor.rgb(red: 255, green: 128, blue: 0), for: .normal)
+                    extraTagsArray[index].setTitleColor(UIColor.rgb(red: 215, green: 38, blue: 61), for: .normal)
                     extraTagsArray[index].setImage(#imageLiteral(resourceName: "bookmark_filled").withRenderingMode(.alwaysOriginal), for: .normal)
                 }
                 else if extraTagsIdArray[index] == "price" {
@@ -817,7 +819,7 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
                         // User Tags
                         extraTagsArray[index].setTitle(extraTagsNameArray[index].truncate(length: 10) + "!", for: .normal)
                         extraTagsArray[index].backgroundColor = UIColor(white: 0, alpha: 0.2)
-                        extraTagsArray[index].setTitleColor(UIColor.rgb(red: 255, green: 128, blue: 0), for: .normal)
+                        extraTagsArray[index].setTitleColor(UIColor.rgb(red: 215, green: 38, blue: 61), for: .normal)
                     }
                 }
                 
@@ -830,8 +832,8 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
                     extraTagsArray[index].layer.borderColor = UIColor.mainBlue().cgColor
                 } else {
                     // User Tags
-                    extraTagsArray[index].backgroundColor = UIColor.rgb(red: 255, green: 204, blue: 153).withAlphaComponent(0.1)
-                    extraTagsArray[index].layer.borderColor = UIColor.rgb(red: 255, green: 153, blue: 51).cgColor
+                    extraTagsArray[index].backgroundColor = UIColor.rgb(red: 215, green: 38, blue: 61).withAlphaComponent(0.1)
+                    extraTagsArray[index].layer.borderColor = UIColor.rgb(red: 215, green: 38, blue: 61).cgColor
                 }
                 
                 // Green Border For Price
@@ -859,18 +861,19 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
 
         if extraTagsNameArray.contains(legitListName){
             // Check for Legit
-            self.legitIcon.setImage(#imageLiteral(resourceName: "starfilled").withRenderingMode(.alwaysOriginal), for: .normal)
+            self.legitIcon.setImage(#imageLiteral(resourceName: "legit_icon").withRenderingMode(.alwaysOriginal), for: .normal)
+            self.legitIcon.contentMode = .scaleAspectFit
         }
         
         else if extraTagsNameArray.contains(bookmarkListName){
             // Check for Legit
-            self.legitIcon.setImage(#imageLiteral(resourceName: "bookmark_filled").withRenderingMode(.alwaysOriginal), for: .normal)
+//            self.legitIcon.setImage(#imageLiteral(resourceName: "bookmark_filled").withRenderingMode(.alwaysOriginal), for: .normal)
         }
     
         else if (post?.rating) != nil && post?.rating != 0 {
             guard let postRating = self.post?.rating else {return}
             if postRating >= 6.0 {
-                self.legitIcon.setImage(#imageLiteral(resourceName: "highrating").withRenderingMode(.alwaysOriginal), for: .normal)
+                self.legitIcon.setImage(#imageLiteral(resourceName: "starfilled").withRenderingMode(.alwaysOriginal), for: .normal)
             }
             else if postRating <= 2.0 {
                 self.legitIcon.setImage(#imageLiteral(resourceName: "lowrating").withRenderingMode(.alwaysOriginal), for: .normal)
@@ -1547,65 +1550,7 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         
         
     }
-//
-//    fileprivate func setupActionButtonsTest() {
-//
-////        let stackView = UIStackView(arrangedSubviews: [likeButton, commentButton, sendMessageButton])
-////        stackView.distribution = .fillEqually
-////        addSubview(stackView)
-////        stackView.anchor(top: locationView.bottomAnchor, left: leftAnchor, bottom: nil, right: nil, paddingTop: 0, paddingLeft: 8, paddingBottom: 0, paddingRight: 0, width: 120, height: 40)
-//
-//
-//        addSubview(actionBar)
-//        actionBar.anchor(top: locationView.bottomAnchor, left: leftAnchor, bottom: nil, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 40)
-//
-////        addSubview(likeButton)
-////        likeButton.anchor(top: actionBar.topAnchor, left: actionBar.leftAnchor, bottom: actionBar.bottomAnchor, right: nil, paddingTop: 5, paddingLeft: 8, paddingBottom: 5, paddingRight: 0, width: 30, height: 30)
-//
-//        addSubview(commentButton)
-//        commentButton.anchor(top: actionBar.topAnchor, left: actionBar.leftAnchor, bottom: actionBar.bottomAnchor, right: nil, paddingTop: 5, paddingLeft: 2, paddingBottom: 5, paddingRight: 0, width: 30, height: 30)
-//
-//        addSubview(sendMessageButton)
-//        sendMessageButton.anchor(top: actionBar.topAnchor, left: commentButton.rightAnchor, bottom: actionBar.bottomAnchor, right: nil, paddingTop: 5, paddingLeft: 2, paddingBottom: 5, paddingRight: 0, width: 30, height: 30)
-//
-//        addSubview(messageCount)
-//        messageCount.anchor(top: actionBar.topAnchor, left: sendMessageButton.rightAnchor, bottom: actionBar.bottomAnchor, right: nil, paddingTop: 5, paddingLeft: 2, paddingBottom: 5, paddingRight: 0, width: 30, height: 30)
-//
-//
-//
-//        addSubview(upVoteButton)
-//        addSubview(downVoteButton)
-//        addSubview(voteCount)
-//
-//        downVoteButton.anchor(top: actionBar.topAnchor, left: nil, bottom: actionBar.bottomAnchor, right: actionBar.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 15, width: 30, height: 0)
-//        downVoteButton.widthAnchor.constraint(equalTo: downVoteButton.heightAnchor, multiplier: 1)
-//
-//        voteCount.anchor(top: actionBar.topAnchor, left: nil, bottom: actionBar.bottomAnchor, right: downVoteButton.leftAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
-//        voteCount.sizeToFit()
-//
-//        upVoteButton.anchor(top: actionBar.topAnchor, left: nil, bottom: actionBar.bottomAnchor, right: voteCount.leftAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
-//        upVoteButton.widthAnchor.constraint(equalTo: upVoteButton.heightAnchor, multiplier: 1)
-//
-//
-////        addSubview(bookmarkCount)
-////        bookmarkCount.anchor(top: actionBar.topAnchor, left: nil, bottom: actionBar.bottomAnchor, right: upVoteButton.leftAnchor, paddingTop: 5, paddingLeft: 0, paddingBottom: 5, paddingRight: 8, width: 0, height: 30)
-////        bookmarkCount.sizeToFit()
-////        bookmarkLabelConstraint = NSLayoutConstraint(item: self.bookmarkCount, attribute: NSLayoutAttribute.width, relatedBy: NSLayoutRelation.equal, toItem: nil, attribute: NSLayoutAttribute.notAnAttribute, multiplier: 1, constant: self.bookmarkCount.frame.size.width)
-////        self.bookmarkCount.addConstraint(bookmarkLabelConstraint!)
-////        bookmarkLabel.widthAnchor.constraint(equalToConstant: self.bookmarkLabel.frame.size.width).isActive = true
-//
-//        // Width anchor is set after bookmark counts are displayed to figure out label width
-//        addSubview(bookmarkButton)
-//        bookmarkButton.anchor(top: actionBar.topAnchor, left: nil, bottom: actionBar.bottomAnchor, right: upVoteButton.leftAnchor, paddingTop: 5, paddingLeft: 0, paddingBottom: 5, paddingRight: 2, width: 30, height: 30)
-//
-////        addSubview(testlabel)
-////        testlabel.anchor(top: bookmarkButton.topAnchor, left: bookmarkButton.leftAnchor, bottom: bookmarkButton.bottomAnchor, right: bookmarkButton.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
-//
-//
-//
-//
-//    }
-//
+
     func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
         return true
     }

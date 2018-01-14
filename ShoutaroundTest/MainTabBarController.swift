@@ -254,6 +254,7 @@ class MainTabBarController: UITabBarController, UITabBarControllerDelegate, UIIm
         let tabListController = TabListViewController()
         tabListController.displayUser = CurrentUser.user
         let tabListNavController = UINavigationController(rootViewController: tabListController)
+        
 
         
         tabListNavController.tabBarItem.image = #imageLiteral(resourceName: "list_unfilled").withRenderingMode(.alwaysOriginal)

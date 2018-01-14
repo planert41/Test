@@ -52,11 +52,14 @@ class SharePhotoListController: UIViewController, UICollectionViewDelegate, UICo
     
     lazy var collectionView : UICollectionView = {
         let layout = UICollectionViewFlowLayout()
+//        layout.sectionInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
         let cv = UICollectionView(frame: CGRect.zero, collectionViewLayout: layout)
-        cv.translatesAutoresizingMaskIntoConstraints = false
+        cv.translatesAutoresizingMaskIntoConstraints = true
         cv.delegate = self
         cv.dataSource = self
         cv.backgroundColor = .white
+        
+        
         return cv
     }()
     
@@ -150,6 +153,9 @@ class SharePhotoListController: UIViewController, UICollectionViewDelegate, UICo
         super.viewDidLoad()
         view.backgroundColor = UIColor.white
         
+        // Set for the Post up top
+        self.automaticallyAdjustsScrollViewInsets = false
+        
         // Setup Navigation
         navigationItem.title = "Add To List"
         if self.isEditingPost{
@@ -165,6 +171,7 @@ class SharePhotoListController: UIViewController, UICollectionViewDelegate, UICo
         collectionView.register(BookmarkPhotoCell.self, forCellWithReuseIdentifier: postCellId)
         view.addSubview(collectionView)
         collectionView.anchor(top: topLayoutGuide.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 120)
+        collectionView.isScrollEnabled = false
         
         view.addSubview(addListView)
         addListView.anchor(top: collectionView.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 10, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 50)
@@ -181,7 +188,7 @@ class SharePhotoListController: UIViewController, UICollectionViewDelegate, UICo
 
         tableView.register(UploadListCell.self, forCellReuseIdentifier: listCellId)
         view.addSubview(tableView)
-        tableView.anchor(top: addListView.bottomAnchor, left: view.leftAnchor, bottom: view.bottomAnchor, right: view.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
+        tableView.anchor(top: addListView.bottomAnchor, left: view.leftAnchor, bottom: bottomLayoutGuide.topAnchor, right: view.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
         
         let refreshControl = UIRefreshControl()
         refreshControl.addTarget(self, action: #selector(refreshList), for: .valueChanged)
@@ -260,6 +267,8 @@ class SharePhotoListController: UIViewController, UICollectionViewDelegate, UICo
     }
     
     func handleShareNewPost(){
+        navigationItem.rightBarButtonItem?.isEnabled = false
+        
         print("Selected List: \(self.selectedList)")
         if self.selectedList != nil {
             // Add list id to post dictionary for display
@@ -273,7 +282,8 @@ class SharePhotoListController: UIViewController, UICollectionViewDelegate, UICo
         }
         
         Database.savePostToDatabase(uploadImage: uploadPost?.image, uploadDictionary: uploadPostDictionary, uploadLocation: uploadPostLocation, lists: self.selectedList){
-         
+            
+            self.navigationItem.rightBarButtonItem?.isEnabled = true
             self.dismiss(animated: true, completion: nil)
             NotificationCenter.default.post(name: SharePhotoListController.updateFeedNotificationName, object: nil)
             
@@ -284,6 +294,8 @@ class SharePhotoListController: UIViewController, UICollectionViewDelegate, UICo
         print("Selected List: \(self.selectedList)")
         var listIds: [String:String]? = [:]
 
+        navigationItem.rightBarButtonItem?.isEnabled = false
+        
         if self.selectedList != nil {
             // Add list id to post dictionary for display
             
@@ -312,15 +324,19 @@ class SharePhotoListController: UIViewController, UICollectionViewDelegate, UICo
 
             postCache[(self.uploadPost?.id)!] = tempPost
             
+            self.navigationItem.rightBarButtonItem?.isEnabled = true
             self.navigationController?.popViewController(animated: true)
             self.delegate?.refreshPost(post: tempPost!)
 
+            
 //            NotificationCenter.default.post(name: SharePhotoListController.updateFeedNotificationName, object: nil)
             
         }
     }
     
     func handleAddPostToList(){
+        
+        navigationItem.rightBarButtonItem?.isEnabled = false
         
         if uploadPost?.creatorUID == Auth.auth().currentUser?.uid {
             // Same Creator So Edit Post instead of Adding Post to List
@@ -333,12 +349,13 @@ class SharePhotoListController: UIViewController, UICollectionViewDelegate, UICo
 
             Database.updateListforPost(post: uploadPost, newList: tempNewList, prevList: editPrevList) {
                 
-                
                 // Update Post Cache
                 var tempPost = self.uploadPost
                 tempPost?.selectedListId = tempNewList
                 postCache[(self.uploadPost?.id)!] = tempPost
                 
+                self.navigationItem.rightBarButtonItem?.isEnabled = true
+
                 self.navigationController?.popViewController(animated: true)
                 self.delegate?.refreshPost(post: tempPost!)
 //                NotificationCenter.default.post(name: SharePhotoListController.updateFeedNotificationName, object: nil)
