@@ -17,6 +17,7 @@
 		A53E7E171F5E46DB0011C1CA /* GooglePlaces.swift in Sources */ = {isa = PBXBuildFile; fileRef = A53E7E161F5E46DB0011C1CA /* GooglePlaces.swift */; };
 		A53E7E1B1F5E4A4B0011C1CA /* GoogleDataProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = A53E7E1A1F5E4A4B0011C1CA /* GoogleDataProvider.swift */; };
 		A542FF28200BDA20005F925A /* HomeSortFilterHeaderLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = A542FF27200BDA1F005F925A /* HomeSortFilterHeaderLayout.swift */; };
+		A542FF2B200D4E56005F925A /* PostSearchController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A542FF2A200D4E55005F925A /* PostSearchController.swift */; };
 		A54413521FF55BE00015F615 /* SortFilterHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = A54413511FF55BDF0015F615 /* SortFilterHeader.swift */; };
 		A546D6091FC0834900C89736 /* StickyHeaders.swift in Sources */ = {isa = PBXBuildFile; fileRef = A546D6081FC0834900C89736 /* StickyHeaders.swift */; };
 		A54E1D6B1F4E736B00C2AA77 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = A54E1D6A1F4E736B00C2AA77 /* AppDelegate.swift */; };
@@ -116,6 +117,7 @@
 		A53E7E161F5E46DB0011C1CA /* GooglePlaces.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GooglePlaces.swift; sourceTree = "<group>"; };
 		A53E7E1A1F5E4A4B0011C1CA /* GoogleDataProvider.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GoogleDataProvider.swift; sourceTree = "<group>"; };
 		A542FF27200BDA1F005F925A /* HomeSortFilterHeaderLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeSortFilterHeaderLayout.swift; sourceTree = "<group>"; };
+		A542FF2A200D4E55005F925A /* PostSearchController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostSearchController.swift; sourceTree = "<group>"; };
 		A54413511FF55BDF0015F615 /* SortFilterHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SortFilterHeader.swift; sourceTree = "<group>"; };
 		A546D6081FC0834900C89736 /* StickyHeaders.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StickyHeaders.swift; sourceTree = "<group>"; };
 		A54E1D671F4E736B00C2AA77 /* ShoutaroundTest.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ShoutaroundTest.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -474,6 +476,7 @@
 				A5C6451E1F57B1BD00C78244 /* UserSearchCell.swift */,
 				A530FE8E1F8B17BA003C3591 /* LocationSearchController.swift */,
 				A5AEB9711F96A82B00E88CAC /* HomePostSearch.swift */,
+				A542FF2A200D4E55005F925A /* PostSearchController.swift */,
 				A5F3E32D1FBD486D00A3E3A0 /* UserCell.swift */,
 				A5AEB9731F96B00500E88CAC /* EmojiCell.swift */,
 				A5A17BAA1FA582B4001F227D /* FilterController.swift */,
@@ -729,6 +732,7 @@
 				A5AEB9781F9956B500E88CAC /* InboxController.swift in Sources */,
 				A5BBD28C1FB26F4B004367E7 /* Notes2.swift in Sources */,
 				A57941C61F6A225D004EC40D /* UploadEmojiCell.swift in Sources */,
+				A542FF2B200D4E56005F925A /* PostSearchController.swift in Sources */,
 				A58477AA1F6EFFD7007DE06C /* LocationLabels.swift in Sources */,
 				A552EA631F9A49EA005A0977 /* CommonSettings.swift in Sources */,
 				A5C6450A1F54F68800C78244 /* SharePhotoController.swift in Sources */,

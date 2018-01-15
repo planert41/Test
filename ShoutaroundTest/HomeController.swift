@@ -256,22 +256,22 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     
     
     func setupSearchController() {
-        homePostSearchResults.delegate = self
-        resultSearchController = UISearchController(searchResultsController: homePostSearchResults)
-        resultSearchController?.searchResultsUpdater = homePostSearchResults
-        resultSearchController?.delegate = self
-        
-        let searchBar = resultSearchController?.searchBar
-        searchBar?.backgroundColor = UIColor.white
-        searchBar?.scopeButtonTitles = searchScopeButtons
-        searchBar?.placeholder =  searchBarPlaceholderText
-        searchBar?.delegate = homePostSearchResults
-        searchBar?.showsScopeBar = false
-        
-        resultSearchController?.hidesNavigationBarDuringPresentation = false
-        resultSearchController?.dimsBackgroundDuringPresentation = true
-        definesPresentationContext = true
-        
+//        homePostSearchResults.delegate = self
+//        resultSearchController = UISearchController(searchResultsController: homePostSearchResults)
+//        resultSearchController?.searchResultsUpdater = homePostSearchResults
+//        resultSearchController?.delegate = self
+//
+//        let searchBar = resultSearchController?.searchBar
+//        searchBar?.backgroundColor = UIColor.white
+//        searchBar?.scopeButtonTitles = searchScopeButtons
+//        searchBar?.placeholder =  searchBarPlaceholderText
+//        searchBar?.delegate = homePostSearchResults
+//        searchBar?.showsScopeBar = false
+//
+//        resultSearchController?.hidesNavigationBarDuringPresentation = false
+//        resultSearchController?.dimsBackgroundDuringPresentation = true
+//        definesPresentationContext = true
+//
 //        if #available(iOS 11.0, *) {
 //            // For iOS 11 and later, we place the search bar in the navigation bar.
 //            navigationItem.searchController = resultSearchController
@@ -287,41 +287,31 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
 
     }
     
-    override func viewDidAppear(_ animated: Bool) {
-        if #available(iOS 11.0, *) {
-            // For iOS 11 and later, we place the search bar in the navigation bar.
-            navigationItem.searchController?.searchBar.isHidden = true
-        }
-    }
-    
     
     func openSearch(){
         
-        if #available(iOS 11.0, *) {
-            // For iOS 11 and later, we place the search bar in the navigation bar.
-            navigationItem.searchController = resultSearchController
+//        if #available(iOS 11.0, *) {
+//            // For iOS 11 and later, we place the search bar in the navigation bar.
+//            navigationItem.searchController = resultSearchController
+//
+//            // We want the search bar visible all the time.
+//            navigationItem.hidesSearchBarWhenScrolling = false
+//        } else {
+//            // For iOS 10 and earlier, we place the search bar in the table view's header.
+//            navigationItem.titleView = resultSearchController?.searchBar
+//
+//        }
+//
+//        resultSearchController?.searchBar.becomeFirstResponder()
+//        self.present(resultSearchController!, animated: true, completion: nil)
+        
+        let postSearch = PostSearchController()
+        self.navigationController?.pushViewController(postSearch, animated: true)
 
-            // We want the search bar visible all the time.
-            navigationItem.hidesSearchBarWhenScrolling = false
-        } else {
-            // For iOS 10 and earlier, we place the search bar in the table view's header.
-            navigationItem.titleView = resultSearchController?.searchBar
-            
-        }
-        
-        resultSearchController?.searchBar.becomeFirstResponder()
-        self.present(resultSearchController!, animated: true, completion: nil)
+//        self.present(postSearch, animated: true, completion: nil)
+
     }
     
-    
-    override func viewWillAppear(_ animated: Bool) {
-       print("view appear")
-        if #available(iOS 11.0, *) {
-            // For iOS 11 and later, we place the search bar in the navigation bar.
-            navigationItem.searchController?.searchBar.removeFromSuperview()
-        }
-        
-    }
     
 // Search Delegate And Methods
 

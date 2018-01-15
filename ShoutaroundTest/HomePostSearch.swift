@@ -51,6 +51,7 @@ class HomePostSearch : UITableViewController, UISearchResultsUpdating, UISearchC
         view.backgroundColor = UIColor.white
         
         
+        
 //        let searchBar = resultSearchController?.searchBar
 //        searchBar?.backgroundColor = UIColor.white
 //        searchBar?.scopeButtonTitles = searchScopeButtons
@@ -80,6 +81,7 @@ class HomePostSearch : UITableViewController, UISearchResultsUpdating, UISearchC
         
         
     }
+ 
     
     override func viewWillLayoutSubviews() {
 //        if #available(iOS 11.0, *) {
