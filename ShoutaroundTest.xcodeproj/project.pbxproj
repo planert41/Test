@@ -16,6 +16,7 @@
 		A530FE8F1F8B17BA003C3591 /* LocationSearchController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A530FE8E1F8B17BA003C3591 /* LocationSearchController.swift */; };
 		A53E7E171F5E46DB0011C1CA /* GooglePlaces.swift in Sources */ = {isa = PBXBuildFile; fileRef = A53E7E161F5E46DB0011C1CA /* GooglePlaces.swift */; };
 		A53E7E1B1F5E4A4B0011C1CA /* GoogleDataProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = A53E7E1A1F5E4A4B0011C1CA /* GoogleDataProvider.swift */; };
+		A542FF28200BDA20005F925A /* HomeSortFilterHeaderLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = A542FF27200BDA1F005F925A /* HomeSortFilterHeaderLayout.swift */; };
 		A54413521FF55BE00015F615 /* SortFilterHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = A54413511FF55BDF0015F615 /* SortFilterHeader.swift */; };
 		A546D6091FC0834900C89736 /* StickyHeaders.swift in Sources */ = {isa = PBXBuildFile; fileRef = A546D6081FC0834900C89736 /* StickyHeaders.swift */; };
 		A54E1D6B1F4E736B00C2AA77 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = A54E1D6A1F4E736B00C2AA77 /* AppDelegate.swift */; };
@@ -114,6 +115,7 @@
 		A530FE8E1F8B17BA003C3591 /* LocationSearchController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LocationSearchController.swift; sourceTree = "<group>"; };
 		A53E7E161F5E46DB0011C1CA /* GooglePlaces.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GooglePlaces.swift; sourceTree = "<group>"; };
 		A53E7E1A1F5E4A4B0011C1CA /* GoogleDataProvider.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GoogleDataProvider.swift; sourceTree = "<group>"; };
+		A542FF27200BDA1F005F925A /* HomeSortFilterHeaderLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeSortFilterHeaderLayout.swift; sourceTree = "<group>"; };
 		A54413511FF55BDF0015F615 /* SortFilterHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SortFilterHeader.swift; sourceTree = "<group>"; };
 		A546D6081FC0834900C89736 /* StickyHeaders.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StickyHeaders.swift; sourceTree = "<group>"; };
 		A54E1D671F4E736B00C2AA77 /* ShoutaroundTest.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ShoutaroundTest.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -284,6 +286,15 @@
 			name = GooglePlaces;
 			sourceTree = "<group>";
 		};
+		A542FF29200BDA40005F925A /* Comment */ = {
+			isa = PBXGroup;
+			children = (
+				A5C645291F5BB84200C78244 /* CommentsController.swift */,
+				A5C6452B1F5C459500C78244 /* CommentCell.swift */,
+			);
+			name = Comment;
+			sourceTree = "<group>";
+		};
 		A54E1D5E1F4E736B00C2AA77 = {
 			isa = PBXGroup;
 			children = (
@@ -316,6 +327,7 @@
 				A5A2E5CF20028E5B00D7E8F5 /* List */,
 				A57C060A1F7602F100A0568F /* Bookmark */,
 				A53E7E191F5E4A390011C1CA /* GooglePlaces */,
+				A542FF29200BDA40005F925A /* Comment */,
 				A5C645121F565E7E00C78244 /* Home */,
 				A5C6451B1F57AE4800C78244 /* Search */,
 				A57941C71F6A2799004EC40D /* Shared */,
@@ -447,9 +459,8 @@
 			isa = PBXGroup;
 			children = (
 				A5C645131F565E8800C78244 /* HomeController.swift */,
-				A5C645291F5BB84200C78244 /* CommentsController.swift */,
-				A5C6452B1F5C459500C78244 /* CommentCell.swift */,
 				A54413511FF55BDF0015F615 /* SortFilterHeader.swift */,
+				A542FF27200BDA1F005F925A /* HomeSortFilterHeaderLayout.swift */,
 				A5C645151F56604200C78244 /* HomePostCell.swift */,
 				A5A2E5CD20019A7400D7E8F5 /* HomePostTagCell.swift */,
 			);
@@ -740,6 +751,7 @@
 				A5A2E5D32002B00000D7E8F5 /* ListViewHeader.swift in Sources */,
 				A57A674B1F5E62F30063D400 /* Credentials.swift in Sources */,
 				A5A2E5D7200415C100D7E8F5 /* LocationManager.swift in Sources */,
+				A542FF28200BDA20005F925A /* HomeSortFilterHeaderLayout.swift in Sources */,
 				A5A2E5CE20019A7400D7E8F5 /* HomePostTagCell.swift in Sources */,
 				A5F990821FCF66EF0086E661 /* ThreadMessageController.swift in Sources */,
 				A56868BD1F78A0FA0050C406 /* MessageController.swift in Sources */,
