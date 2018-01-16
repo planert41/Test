@@ -452,7 +452,7 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
     let locationLabel: UILabel = {
         let label = UILabel()
         label.text = "Location"
-        label.font = UIFont.boldSystemFont(ofSize: 13)
+        label.font = UIFont.boldSystemFont(ofSize: 14)
         label.textColor = UIColor.black
         let locationTapGesture = UITapGestureRecognizer(target: self, action: #selector(locationTap))
         label.isUserInteractionEnabled = true

@@ -13,13 +13,19 @@ import Cosmos
 
 
 protocol FilterControllerDelegate: class {
-    func filterControllerFinished(selectedRange: String?, selectedLocation: CLLocation?, selectedLocationName: String?, selectedMinRating: Double, selectedType: String?, selectedMaxPrice: String?, selectedSort: String)
+    func filterControllerFinished(selectedCaption: String?, selectedRange: String?, selectedLocation: CLLocation?, selectedLocationName: String?, selectedMinRating: Double, selectedType: String?, selectedMaxPrice: String?, selectedSort: String)
 }
 
-class FilterController: UIViewController, GMSAutocompleteViewControllerDelegate {
+class FilterController: UIViewController, GMSAutocompleteViewControllerDelegate, PostSearchControllerDelegate, UISearchBarDelegate {
     
 
     let locationManager = CLLocationManager()
+    
+    var selectedCaption: String? = nil {
+        didSet{
+            self.filterCaptionSearchBar.text = selectedCaption
+        }
+    }
     
     var selectedRange: String? = nil {
         didSet{
@@ -93,7 +99,16 @@ class FilterController: UIViewController, GMSAutocompleteViewControllerDelegate 
             }
         }
     }
-
+    
+    lazy var filterCaptionLabel: UILabel = {
+        let ul = UILabel()
+        ul.text = "Search Post For"
+        ul.font = UIFont.boldSystemFont(ofSize: 14.0)
+        return ul
+    }()
+    
+    lazy var filterCaptionSearchBar = UISearchBar()
+    
     lazy var filterDistanceLabel: UILabel = {
         let ul = UILabel()
         ul.text = "Filter Within (KM)"
@@ -285,6 +300,8 @@ class FilterController: UIViewController, GMSAutocompleteViewControllerDelegate 
         }
     }
     
+    let selectionMargin: CGFloat = 10
+    
     static let updateFeedWithFilterNotificationName = NSNotification.Name(rawValue: "UpdateFeedWithFilter")
     
     override func viewDidLoad() {
@@ -312,11 +329,28 @@ class FilterController: UIViewController, GMSAutocompleteViewControllerDelegate 
         
         view.backgroundColor = UIColor.white
         
+    // 0. Filter Post By Caption
+        
+        scrollview.addSubview(filterCaptionLabel)
+        filterCaptionLabel.anchor(top: scrollview.topAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: selectionMargin, paddingLeft: 20, paddingBottom: 0, paddingRight: 20, width: 0, height: 30)
+        
+        filterCaptionSearchBar.delegate = self
+        filterCaptionSearchBar.placeholder = searchBarPlaceholderText
+        filterCaptionSearchBar.searchBarStyle = .minimal
+        
+        
+//        filterCaptionSearchBar.backgroundColor = UIColor.red
+//        filterCaptionSearchBar.tintColor = UIColor.red
+        filterCaptionSearchBar.barTintColor = UIColor.white
+        scrollview.addSubview(filterCaptionSearchBar)
+        filterCaptionSearchBar.anchor(top: filterCaptionLabel.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: segmentHeight)
+
+        
     // 1. Filter By Distance
         scrollview.addSubview(filterDistanceLabel)
         scrollview.addSubview(distanceSegment)
         
-        filterDistanceLabel.anchor(top: scrollview.topAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 20, paddingLeft: 20, paddingBottom: 0, paddingRight: 20, width: 0, height: 30)
+        filterDistanceLabel.anchor(top: filterCaptionSearchBar.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: selectionMargin, paddingLeft: 20, paddingBottom: 0, paddingRight: 20, width: 0, height: 30)
         
         distanceSegment.anchor(top: filterDistanceLabel.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 1, paddingLeft: 20, paddingBottom: 0, paddingRight: 20, width: 0, height: segmentHeight)
         
@@ -329,7 +363,7 @@ class FilterController: UIViewController, GMSAutocompleteViewControllerDelegate 
         let TapGesture = UITapGestureRecognizer(target: self, action: #selector(tapSearchBar))
         locationNameLabel.addGestureRecognizer(TapGesture)
         
-        locationLabel.anchor(top: distanceSegment.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 10, paddingLeft: 20, paddingBottom: 0, paddingRight: 20, width: 0, height: 30)
+        locationLabel.anchor(top: distanceSegment.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: selectionMargin, paddingLeft: 20, paddingBottom: 0, paddingRight: 20, width: 0, height: 30)
         locationNameLabel.anchor(top: locationLabel.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 1, paddingLeft: 20, paddingBottom: 0, paddingRight: 20, width: 0, height: segmentHeight)
         
         currentLocationButton.anchor(top: locationNameLabel.topAnchor, left: nil, bottom: locationNameLabel.bottomAnchor, right: locationNameLabel.rightAnchor, paddingTop: 5, paddingLeft: 0, paddingBottom: 5, paddingRight: 5, width: 0, height: 0)
@@ -339,7 +373,7 @@ class FilterController: UIViewController, GMSAutocompleteViewControllerDelegate 
     // 3. Select Min Rating
         scrollview.addSubview(filterRatingLabel)
         scrollview.addSubview(starRating)
-        filterRatingLabel.anchor(top: locationNameLabel.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 10, paddingLeft: 20, paddingBottom: 0, paddingRight: 20, width: 0, height: 30)
+        filterRatingLabel.anchor(top: locationNameLabel.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: selectionMargin, paddingLeft: 20, paddingBottom: 0, paddingRight: 20, width: 0, height: 30)
         starRating.anchor(top: filterRatingLabel.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 1, paddingLeft: 20, paddingBottom: 0, paddingRight: 20, width: 0, height: segmentHeight)
         starRating.didFinishTouchingCosmos = starRatingSelectFunction
 
@@ -347,21 +381,21 @@ class FilterController: UIViewController, GMSAutocompleteViewControllerDelegate 
     // 4. Select Post Type (Breakfast, Lunch, Dinner, Snack)
         scrollview.addSubview(filterTimeLabel)
         scrollview.addSubview(typeSegment)
-        filterTimeLabel.anchor(top: starRating.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 10, paddingLeft: 20, paddingBottom: 0, paddingRight: 20, width: 0, height: 30)
+        filterTimeLabel.anchor(top: starRating.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: selectionMargin, paddingLeft: 20, paddingBottom: 0, paddingRight: 20, width: 0, height: 30)
         typeSegment.anchor(top: filterTimeLabel.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 1, paddingLeft: 20, paddingBottom: 0, paddingRight: 20, width: 0, height: segmentHeight)
         
     // 5. Select Price Filter
         scrollview.addSubview(filterPriceLabel)
         scrollview.addSubview(priceSegment)
         
-        filterPriceLabel.anchor(top: typeSegment.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 10, paddingLeft: 20, paddingBottom: 0, paddingRight: 20, width: 0, height: 30)
+        filterPriceLabel.anchor(top: typeSegment.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: selectionMargin, paddingLeft: 20, paddingBottom: 0, paddingRight: 20, width: 0, height: 30)
         priceSegment.anchor(top: filterPriceLabel.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 1, paddingLeft: 20, paddingBottom: 0, paddingRight: 20, width: 0, height: segmentHeight)
         
     // 6. Sort Filter
         scrollview.addSubview(sortByLabel)
         scrollview.addSubview(sortSegment)
         
-        sortByLabel.anchor(top: priceSegment.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 10, paddingLeft: 20, paddingBottom: 0, paddingRight: 20, width: 0, height: 30)
+        sortByLabel.anchor(top: priceSegment.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: selectionMargin, paddingLeft: 20, paddingBottom: 0, paddingRight: 20, width: 0, height: 30)
         sortSegment.anchor(top: sortByLabel.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 1, paddingLeft: 20, paddingBottom: 0, paddingRight: 20, width: 0, height: segmentHeight)
 
     // 7. Sort button
@@ -414,7 +448,7 @@ class FilterController: UIViewController, GMSAutocompleteViewControllerDelegate 
     
     func filterSelected(){
         
-        delegate?.filterControllerFinished(selectedRange: self.selectedRange, selectedLocation: self.selectedLocation, selectedLocationName: self.locationNameLabel.text, selectedMinRating: self.selectedMinRating, selectedType: self.selectedType, selectedMaxPrice: self.selectedMaxPrice, selectedSort: self.selectedSort)
+        delegate?.filterControllerFinished(selectedCaption: self.selectedCaption, selectedRange: self.selectedRange, selectedLocation: self.selectedLocation, selectedLocationName: self.locationNameLabel.text, selectedMinRating: self.selectedMinRating, selectedType: self.selectedType, selectedMaxPrice: self.selectedMaxPrice, selectedSort: self.selectedSort)
 
         print("Filter By ",self.selectedRange,self.selectedLocation, self.locationNameLabel.text, self.selectedMinRating, self.selectedType, self.selectedMaxPrice,  self.selectedSort)
 
@@ -441,6 +475,61 @@ class FilterController: UIViewController, GMSAutocompleteViewControllerDelegate 
         self.selectedSort = defaultSort
         
     }
+    
+    // Search Bar Delegates
+    func searchBarShouldBeginEditing(_ searchBar: UISearchBar) -> Bool {
+        self.openSearch()
+        return false
+    }
+    
+    
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+//        if (searchText.length == 0) {
+//            self.filterCaption = nil
+//            self.refreshPostsForFilter()
+//            searchBar.endEditing(true)
+//        }
+    }
+    
+    func openSearch(){
+        
+        let postSearch = PostSearchController()
+        postSearch.delegate = self
+        self.navigationController?.pushViewController(postSearch, animated: true)
+    }
+    
+    // Home Post Search Delegates
+    
+    func filterCaptionSelected(searchedText: String?){
+        
+        self.selectedCaption = searchedText
+        
+//        if searchedText == nil {
+//            self.handleRefresh()
+//
+//        } else {
+//            print("Searching for \(searchedText)")
+//            defaultSearchBar.text = searchedText!
+//            self.filterCaption = searchedText
+//            self.refreshPagination()
+//            self.collectionView?.reloadData()
+//            self.scrolltoFirst = true
+//            self.fetchAllPosts()
+//        }
+    }
+    
+    func userSelected(uid: String?){
+//        let userProfileController = UserProfileController(collectionViewLayout: StickyHeadersCollectionViewFlowLayout())
+//        userProfileController.userId = uid
+//        self.navigationController?.pushViewController(userProfileController, animated: true)
+    }
+    
+    func locationSelected(googlePlaceId: String?){
+//        let locationController = LocationController()
+//        locationController.googlePlaceId = googlePlaceId
+//        navigationController?.pushViewController(locationController, animated: true)
+    }
+    
     
     // Google Search Location Delegates
     

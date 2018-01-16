@@ -508,8 +508,9 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
     
 // Filter Delegate
     
-    func filterControllerFinished(selectedRange: String?, selectedLocation: CLLocation?, selectedLocationName: String?, selectedMinRating: Double, selectedType: String?, selectedMaxPrice: String?, selectedSort: String) {
+    func filterControllerFinished(selectedCaption: String?, selectedRange: String?, selectedLocation: CLLocation?, selectedLocationName: String?, selectedMinRating: Double, selectedType: String?, selectedMaxPrice: String?, selectedSort: String) {
 
+        self.filterCaption = selectedCaption
         self.filterRange = selectedRange!
         self.filterLocation = selectedLocation
         self.filterSort = selectedSort

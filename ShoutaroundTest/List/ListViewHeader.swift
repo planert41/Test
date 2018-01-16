@@ -13,7 +13,7 @@ import Firebase
 protocol ListViewHeaderDelegate {
     func didChangeToListView()
     func didChangeToPostView()
-    func activateFilter()
+    func openFilter()
     func headerSortSelected(sort: String)
 }
 
@@ -61,15 +61,15 @@ class ListViewHeader: UICollectionViewCell, UIGestureRecognizerDelegate {
     lazy var filterButton: UIButton = {
         let button = UIButton(type: .system)
         button.setImage(#imageLiteral(resourceName: "filter").withRenderingMode(.alwaysOriginal), for: .normal)
-        button.addTarget(self, action: #selector(activateFilter), for: .touchUpInside)
+        button.addTarget(self, action: #selector(openFilter), for: .touchUpInside)
         button.layer.borderWidth = 0
         button.layer.borderColor = UIColor.darkGray.cgColor
         button.clipsToBounds = true
         return button
     }()
     
-    func activateFilter(){
-        self.delegate?.activateFilter()
+    func openFilter(){
+        self.delegate?.openFilter()
     }
     
     

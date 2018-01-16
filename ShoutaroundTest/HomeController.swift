@@ -12,9 +12,11 @@ import mailgun
 import GeoFire
 import CoreGraphics
 import CoreLocation
+import EmptyDataSet_Swift
 
 
-class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLayout, HomePostCellDelegate, UISearchControllerDelegate, HomePostSearchDelegate, UIGestureRecognizerDelegate, FilterControllerDelegate, UISearchBarDelegate, SortFilterHeaderDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate, SharePhotoListControllerDelegate  {
+
+class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLayout, HomePostCellDelegate, HomePostSearchDelegate, UIGestureRecognizerDelegate, FilterControllerDelegate, UISearchBarDelegate, SortFilterHeaderDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate, SharePhotoListControllerDelegate, PostSearchControllerDelegate, EmptyDataSource, EmptyDataSetDelegate  {
     
     let cellId = "cellId"
     var scrolltoFirst: Bool = false
@@ -111,7 +113,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     
     var filterButton: UIImageView = {
         let view = UIImageView(frame: CGRect(x: 0, y: 0, width: 20, height: 20))
-        view.image = #imageLiteral(resourceName: "blankfilter").withRenderingMode(.alwaysOriginal)
+        view.image = #imageLiteral(resourceName: "search_blank").withRenderingMode(.alwaysOriginal)
         view.contentMode = .scaleAspectFit
         view.sizeToFit()
 //        view.layer.cornerRadius = 25/2
@@ -121,14 +123,12 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     }()
     
     lazy var singleTap: UIGestureRecognizer = {
-        let tap = UITapGestureRecognizer(target: self, action: #selector(activateFilter))
+        let tap = UITapGestureRecognizer(target: self, action: #selector(openFilter))
         tap.delegate = self
         return tap
     }()
 
     
-    var resultSearchController:UISearchController? = nil
-    var homePostSearchResults = HomePostSearch()
     var defaultSearchBar = UISearchBar()
 
     override func viewDidLayoutSubviews() {
@@ -190,8 +190,6 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         fetchAllPostIds()
         self.scrolltoFirst = false
         
-        // Search Controller
-        setupSearchController()
         setupNavigationItems()
         setupEmojiDetailLabel()
     }
@@ -254,71 +252,32 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         return false
     }
     
-    
-    func setupSearchController() {
-//        homePostSearchResults.delegate = self
-//        resultSearchController = UISearchController(searchResultsController: homePostSearchResults)
-//        resultSearchController?.searchResultsUpdater = homePostSearchResults
-//        resultSearchController?.delegate = self
-//
-//        let searchBar = resultSearchController?.searchBar
-//        searchBar?.backgroundColor = UIColor.white
-//        searchBar?.scopeButtonTitles = searchScopeButtons
-//        searchBar?.placeholder =  searchBarPlaceholderText
-//        searchBar?.delegate = homePostSearchResults
-//        searchBar?.showsScopeBar = false
-//
-//        resultSearchController?.hidesNavigationBarDuringPresentation = false
-//        resultSearchController?.dimsBackgroundDuringPresentation = true
-//        definesPresentationContext = true
-//
-//        if #available(iOS 11.0, *) {
-//            // For iOS 11 and later, we place the search bar in the navigation bar.
-//            navigationItem.searchController = resultSearchController
-////            navigationItem.titleView = resultSearchController?.searchBar
-//
-//            // We want the search bar visible all the time.
-//            navigationItem.hidesSearchBarWhenScrolling = false
-//        } else {
-//            // For iOS 10 and earlier, we place the search bar in the table view's header.
-//            navigationItem.titleView = resultSearchController?.searchBar
-//        }
-        
 
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        if (searchText.length == 0) {
+            self.filterCaption = nil
+            self.refreshPostsForFilter()
+            searchBar.endEditing(true)
+        }
     }
     
+
     
     func openSearch(){
-        
-//        if #available(iOS 11.0, *) {
-//            // For iOS 11 and later, we place the search bar in the navigation bar.
-//            navigationItem.searchController = resultSearchController
-//
-//            // We want the search bar visible all the time.
-//            navigationItem.hidesSearchBarWhenScrolling = false
-//        } else {
-//            // For iOS 10 and earlier, we place the search bar in the table view's header.
-//            navigationItem.titleView = resultSearchController?.searchBar
-//
-//        }
-//
-//        resultSearchController?.searchBar.becomeFirstResponder()
-//        self.present(resultSearchController!, animated: true, completion: nil)
-        
+
         let postSearch = PostSearchController()
+        postSearch.delegate = self
         self.navigationController?.pushViewController(postSearch, animated: true)
-
-//        self.present(postSearch, animated: true, completion: nil)
-
     }
     
     
 // Search Delegate And Methods
 
-    func activateFilter(){
+    func openFilter(){
         let filterController = FilterController()
         filterController.delegate = self
         
+        filterController.selectedCaption = self.filterCaption
         filterController.selectedRange = self.filterRange
         filterController.selectedMinRating = self.filterMinRating
         filterController.selectedMaxPrice = self.filterMaxPrice
@@ -356,17 +315,17 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
 // Search Delegates
     
     
-    func filterControllerFinished(selectedRange: String?, selectedLocation: CLLocation?, selectedLocationName: String?, selectedMinRating: Double, selectedType: String?, selectedMaxPrice: String?, selectedSort: String){
+    func filterControllerFinished(selectedCaption: String?, selectedRange: String?, selectedLocation: CLLocation?, selectedLocationName: String?, selectedMinRating: Double, selectedType: String?, selectedMaxPrice: String?, selectedSort: String){
         
         // Clears all Filters, Puts in new Filters, Refreshes all Post IDS and Posts
         
         
         self.clearFilter()
         
+        self.filterCaption = selectedCaption
         self.filterRange = selectedRange
         self.filterLocation = selectedLocation
         self.filterLocationName = selectedLocationName
-        self.defaultSearchBar.text = selectedLocationName
 
         self.filterMinRating = selectedMinRating
         self.filterType = selectedType
@@ -382,13 +341,39 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         self.scrolltoFirst = true
         
         // Check for filtering
-        if (self.filterRange != nil) || (self.filterMinRating != 0) || (self.filterType != nil) || (self.filterMaxPrice != nil) {
+        self.checkFilter()
+        
+        if filterCaption != nil {
+            defaultSearchBar.text = self.filterCaption ?? ""
+        }
+        
+        if self.filterLocationName != nil {
+            defaultSearchBar.text = defaultSearchBar.text! + " @ " + self.filterLocationName!
+        }
+        
+        if self.filterMinRating != nil {
+//            defaultSearchBar.text = defaultSearchBar.text! + " @ " + String(self.filterMinRating)
+        }
+        
+        if self.filterType != nil {
+            defaultSearchBar.text = defaultSearchBar.text! + " @ " + self.filterType!
+        }
+        
+        if self.filterMaxPrice != nil {
+            defaultSearchBar.text = defaultSearchBar.text! + " @ " + self.filterMaxPrice!
+        }
+        
+        
+        
+        
+    }
+    
+    func checkFilter(){
+        if self.filterCaption != nil || (self.filterRange != nil) || (self.filterMinRating != 0) || (self.filterType != nil) || (self.filterMaxPrice != nil) {
             self.isFiltering = true
         } else {
             self.isFiltering = false
         }
-        
-        
     }
 
     // Home Post Search Delegates
@@ -402,7 +387,6 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
             print("Searching for \(searchedText)")
             defaultSearchBar.text = searchedText!
             self.filterCaption = searchedText
-            self.resultSearchController?.searchBar.text = searchedText
             self.refreshPagination()
             self.collectionView?.reloadData()
             self.scrolltoFirst = true
@@ -442,7 +426,6 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     
     func clearSearch(){
         self.defaultSearchBar.text?.removeAll()
-        self.resultSearchController?.searchBar.text = nil
         self.filterCaption = nil
     }
     
@@ -798,7 +781,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
-        return CGSize(width: view.frame.width, height: 30 + 2)
+        return CGSize(width: view.frame.width, height: 40 + 5)
     }
     
     

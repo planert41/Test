@@ -474,7 +474,7 @@ class BookMarkController: UIViewController, UICollectionViewDelegate, UICollecti
     }
     
     
-    func filterControllerFinished(selectedRange: String?, selectedLocation: CLLocation?, selectedLocationName: String?, selectedMinRating: Double, selectedType: String?, selectedMaxPrice: String?, selectedSort: String) {
+    func filterControllerFinished(selectedCaption: String?, selectedRange: String?, selectedLocation: CLLocation?, selectedLocationName: String?, selectedMinRating: Double, selectedType: String?, selectedMaxPrice: String?, selectedSort: String) {
 //        self.filterRange = selectedRange
 //        self.filterLocation = selectedLocation
 //        self.filterSort = selectedSort

@@ -20,7 +20,7 @@ import UIKit
 import Firebase
 import GooglePlaces
 
-protocol PostSearchDelegate {
+protocol PostSearchControllerDelegate {
     func filterCaptionSelected(searchedText: String?)
     func userSelected(uid: String?)
     func locationSelected(googlePlaceId: String?)
@@ -65,7 +65,7 @@ class PostSearchController : UITableViewController, UISearchResultsUpdating, UIS
             self.tableView.reloadData()
         }
     }
-    var delegate: HomePostSearchDelegate?
+    var delegate: PostSearchControllerDelegate?
     
     let searchController = UISearchController(searchResultsController: nil)
     var searchBar = UISearchBar()
@@ -115,7 +115,7 @@ class PostSearchController : UITableViewController, UISearchResultsUpdating, UIS
         searchBar.delegate = self
         searchBar.placeholder =  searchBarPlaceholderText
         searchBar.backgroundColor = UIColor.white
-        definesPresentationContext = false
+        definesPresentationContext = true
 
         
         if #available(iOS 11.0, *) {
@@ -210,7 +210,7 @@ class PostSearchController : UITableViewController, UISearchResultsUpdating, UIS
             let filterText = emojiSelected?.emoji
             self.delegate?.filterCaptionSelected(searchedText: filterText)
             
-            self.dismiss(animated: true) {}
+            self.navigationController?.popViewController(animated: true)
         }
         
         // User Selected
@@ -222,7 +222,7 @@ class PostSearchController : UITableViewController, UISearchResultsUpdating, UIS
                 userSelected = allUsers[indexPath.row]
             }
             delegate?.userSelected(uid: userSelected?.uid)
-            self.dismiss(animated: true) {}
+            self.navigationController?.popViewController(animated: true)
         }
         
         // Location Selected is handled by Google Autocomplete below
@@ -355,8 +355,8 @@ class PostSearchController : UITableViewController, UISearchResultsUpdating, UIS
         self.selectedGoogleId = place.placeID
         print("Selected Google Location is: ", place.placeID, " name: ", place.name)
         delegate?.locationSelected(googlePlaceId: self.selectedGoogleId)
-        self.dismiss(animated: true, completion: nil)
-        
+        self.navigationController?.popViewController(animated: true)
+
         
     }
     

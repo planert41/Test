@@ -472,14 +472,14 @@
 		A5C6451B1F57AE4800C78244 /* Search */ = {
 			isa = PBXGroup;
 			children = (
+				A542FF2A200D4E55005F925A /* PostSearchController.swift */,
+				A5A17BAA1FA582B4001F227D /* FilterController.swift */,
 				A5C6451C1F57AE5A00C78244 /* UserSearchController.swift */,
 				A5C6451E1F57B1BD00C78244 /* UserSearchCell.swift */,
 				A530FE8E1F8B17BA003C3591 /* LocationSearchController.swift */,
 				A5AEB9711F96A82B00E88CAC /* HomePostSearch.swift */,
-				A542FF2A200D4E55005F925A /* PostSearchController.swift */,
 				A5F3E32D1FBD486D00A3E3A0 /* UserCell.swift */,
 				A5AEB9731F96B00500E88CAC /* EmojiCell.swift */,
-				A5A17BAA1FA582B4001F227D /* FilterController.swift */,
 			);
 			name = Search;
 			sourceTree = "<group>";
@@ -588,6 +588,7 @@
 				"${BUILT_PRODUCTS_DIR}/Alamofire/Alamofire.framework",
 				"${BUILT_PRODUCTS_DIR}/Bolts/Bolts.framework",
 				"${BUILT_PRODUCTS_DIR}/Cosmos/Cosmos.framework",
+				"${BUILT_PRODUCTS_DIR}/EmptyDataSet-Swift/EmptyDataSet_Swift.framework",
 				"${BUILT_PRODUCTS_DIR}/FBSDKCoreKit/FBSDKCoreKit.framework",
 				"${BUILT_PRODUCTS_DIR}/FBSDKLoginKit/FBSDKLoginKit.framework",
 				"${BUILT_PRODUCTS_DIR}/FacebookCore/FacebookCore.framework",
@@ -614,6 +615,7 @@
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Alamofire.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Bolts.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Cosmos.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/EmptyDataSet_Swift.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/FBSDKCoreKit.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/FBSDKLoginKit.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/FacebookCore.framework",

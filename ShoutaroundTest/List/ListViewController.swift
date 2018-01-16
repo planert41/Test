@@ -13,6 +13,7 @@ import CoreLocation
 
 class ListViewController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, BookmarkPhotoCellDelegate, HomePostCellDelegate, ListViewHeaderDelegate, SortFilterHeaderDelegate, FilterControllerDelegate {
 
+
     static let refreshListViewNotificationName = NSNotification.Name(rawValue: "RefreshListView")
 
     let bookmarkCellId = "bookmarkCellId"
@@ -257,12 +258,13 @@ class ListViewController: UIViewController, UICollectionViewDelegate, UICollecti
     // Search Delegates
     
     
-    func filterControllerFinished(selectedRange: String?, selectedLocation: CLLocation?, selectedLocationName: String?, selectedMinRating: Double, selectedType: String?, selectedMaxPrice: String?, selectedSort: String){
+    func filterControllerFinished(selectedCaption: String?, selectedRange: String?, selectedLocation: CLLocation?, selectedLocationName: String?, selectedMinRating: Double, selectedType: String?, selectedMaxPrice: String?, selectedSort: String){
         
         // Clears all Filters, Puts in new Filters, Refreshes all Post IDS and Posts
         
         self.clearFilter()
         
+        self.filterCaption = selectedCaption
         self.filterRange = selectedRange
         self.filterLocation = selectedLocation
         self.filterLocationName = selectedLocationName
@@ -390,7 +392,7 @@ class ListViewController: UIViewController, UICollectionViewDelegate, UICollecti
         collectionView.reloadData()
     }
     
-    func activateFilter(){
+    func openFilter(){
         let filterController = FilterController()
         filterController.delegate = self
         

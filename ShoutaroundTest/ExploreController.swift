@@ -468,9 +468,10 @@ class ExploreController: UIViewController, UISearchBarDelegate, HomePostSearchDe
         
     }
     
-    func filterControllerFinished(selectedRange: String?, selectedLocation: CLLocation?, selectedLocationName: String?, selectedMinRating: Double, selectedType: String?, selectedMaxPrice: String?, selectedSort: String) {
+    func filterControllerFinished(selectedCaption: String?, selectedRange: String?, selectedLocation: CLLocation?, selectedLocationName: String?, selectedMinRating: Double, selectedType: String?, selectedMaxPrice: String?, selectedSort: String) {
         print("Filter by Range: \(self.filterRange) at \(self.filterLocation), Group: \(self.filterGroup), Time: \(self.filterTime)")
         
+        self.filterCaption = selectedCaption
         self.filterLocation = selectedLocation
         self.filterSort = selectedSort
         self.refreshPosts()
