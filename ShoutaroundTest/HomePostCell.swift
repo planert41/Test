@@ -694,7 +694,7 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
 
     
     
-    func setupExtraTagButtons() {
+    func setupExtraTags() {
 
         // Refresh Tags
         extraTagsNameArray.removeAll()
@@ -796,52 +796,58 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
 
                 if extraTagsNameArray[index] == legitListName {
 //                    extraTagsArray[index].setTitleColor(UIColor.rgb(red: 255, green: 128, blue: 0), for: .normal)
-                    extraTagsArray[index].setTitleColor(UIColor.mainBlue(), for: .normal)
+                    extraTagsArray[index].setTitleColor(UIColor(hexColor: "FA7921"), for: .normal)
                     extraTagsArray[index].setImage(#imageLiteral(resourceName: "legit").withRenderingMode(.alwaysOriginal), for: .normal)
 //                    extraTagsArray[index].imageView?.contentMode = UIViewContentMode.scaleAspectFit
 //                    extraTagsArray[index].imageView?.backgroundColor = UIColor.red
                 }
                 else if extraTagsNameArray[index] == bookmarkListName {
 //                    extraTagsArray[index].setTitleColor(UIColor.rgb(red: 255, green: 0, blue: 0), for: .normal)
-                    extraTagsArray[index].setTitleColor(UIColor.rgb(red: 215, green: 38, blue: 61), for: .normal)
+                    extraTagsArray[index].setTitleColor(UIColor(hexColor: "E55934"), for: .normal)
                     extraTagsArray[index].setImage(#imageLiteral(resourceName: "bookmark_filled").withRenderingMode(.alwaysOriginal), for: .normal)
                 }
                 else if extraTagsIdArray[index] == "price" {
-                    extraTagsArray[index].setTitleColor(UIColor.rgb(red: 0, green: 153, blue: 0), for: .normal)
+                    extraTagsArray[index].setTitleColor(UIColor(hexColor: "9BC53D"), for: .normal)
                 }
                 else {
                     if index < extraTagsNameArray.count - userTagsNameArray.count {
                         // Creator Tags
                         extraTagsArray[index].setTitle(extraTagsNameArray[index].truncate(length: 10) + "!", for: .normal)
                         extraTagsArray[index].backgroundColor = UIColor.white
-                        extraTagsArray[index].setTitleColor(UIColor.mainBlue(), for: .normal)
+                        extraTagsArray[index].setTitleColor(UIColor(hexColor: "FA7921"), for: .normal)
                     } else {
                         // User Tags
                         extraTagsArray[index].setTitle(extraTagsNameArray[index].truncate(length: 10) + "!", for: .normal)
                         extraTagsArray[index].backgroundColor = UIColor(white: 0, alpha: 0.2)
-                        extraTagsArray[index].setTitleColor(UIColor.rgb(red: 215, green: 38, blue: 61), for: .normal)
+                        extraTagsArray[index].setTitleColor(UIColor(hexColor: "E55934"), for: .normal)
                     }
                 }
                 
                 extraTagsArray[index].layer.borderWidth = 1
 
-                // Extra Tag Background Color (Different Fill Color for Creator Vs User
-                if index < extraTagsNameArray.count - userTagsNameArray.count {
-                    // Creator Tags
-                    extraTagsArray[index].backgroundColor = UIColor.white
-                    extraTagsArray[index].layer.borderColor = UIColor.mainBlue().cgColor
-                } else {
-                    // User Tags
-                    extraTagsArray[index].backgroundColor = UIColor.rgb(red: 215, green: 38, blue: 61).withAlphaComponent(0.1)
-                    extraTagsArray[index].layer.borderColor = UIColor.rgb(red: 215, green: 38, blue: 61).cgColor
-                }
+//                // Extra Tag Background Color (Different Fill Color for Creator Vs User
+//                if index < extraTagsNameArray.count - userTagsNameArray.count {
+//                    // Creator Tags
+//                    extraTagsArray[index].backgroundColor = UIColor.white
+//                    extraTagsArray[index].layer.borderColor = UIColor.lightGray.cgColor
+//                } else {
+//                    // User Tags
+//                    extraTagsArray[index].backgroundColor = UIColor.rgb(red: 215, green: 38, blue: 61).withAlphaComponent(0.1)
+//                    extraTagsArray[index].layer.borderColor = UIColor.rgb(red: 215, green: 38, blue: 61).cgColor
+//                }
+//
+//                // Green Border For Price
+//                if extraTagsIdArray[index] == "price" {
+//                    extraTagsArray[index].layer.borderColor = UIColor.lightGray.cgColor
+//                }
                 
-                // Green Border For Price
-                if extraTagsIdArray[index] == "price" {
-                    extraTagsArray[index].layer.borderColor = UIColor.rgb(red: 0, green: 153, blue: 0).cgColor
-                }
+//                extraTagsArray[index].layer.borderColor = extraTagsArray[index].currentTitleColor.cgColor
+
                 
-        // Add Creator Tag Button to View
+                
+                
+                
+        // Add Tags to View
                 let displayButton = extraTagsArray[index]
                 self.addSubview(displayButton)
                 
@@ -851,6 +857,12 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
                     displayButton.anchor(top: extraTagView.topAnchor, left: extraTagsArray[index - 1].rightAnchor, bottom: extraTagView.bottomAnchor, right: nil, paddingTop: 1, paddingLeft: 6, paddingBottom: 1, paddingRight: 0, width: 0, height: 0)
                 }
             }
+        }
+        
+        if extraTagsNameArray.count == 0 {
+            extraTagViewHeight?.constant = 0
+        } else {
+            extraTagViewHeight?.constant = extraTagViewHeightSize
         }
     
     }
@@ -881,22 +893,12 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         } else {
             self.legitIcon.isHidden = true
         }
-        
+       
+        //Override
+        self.legitIcon.isHidden = true
+
     }
  
-    func setupExtraTags(){
-        setupExtraTagButtons()
-        setupLegitIcon()
-        
-        
-        if extraTagsNameArray.count == 0 {
-            extraTagViewHeight?.constant = 0
-        } else {
-            extraTagViewHeight?.constant = extraTagViewHeightSize
-        }        
-        
-    }
-    
     func displayCaptionBubble(){
         
         print("Bubble Caption Displayed")
@@ -1081,19 +1083,7 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         self.photoImageView.addGestureRecognizer(pan)
 
         
-// Location View
-        
-        addSubview(locationView)
-        locationView.anchor(top: photoImageView.bottomAnchor, left: leftAnchor, bottom: nil, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 25)
-        //        locationView.backgroundColor = UIColor.yellow
-        
-        addSubview(locationLabel)
-        addSubview(locationDistanceLabel)
-        
-        locationDistanceLabel.anchor(top: locationView.topAnchor, left: nil, bottom: locationView.bottomAnchor, right: locationView.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 5, width: 0, height: 0)
-        
-        locationLabel.anchor(top: locationView.topAnchor, left: leftAnchor, bottom: locationView.bottomAnchor, right: locationDistanceLabel.leftAnchor, paddingTop: 3, paddingLeft: 10, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
-        
+
         
 
 //        extraTagView.layer.borderWidth = 0.5
@@ -1103,7 +1093,7 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
 
         
         addSubview(actionBar)
-        actionBar.anchor(top: locationView.bottomAnchor, left: leftAnchor, bottom: nil, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 40)
+        actionBar.anchor(top: photoImageView.bottomAnchor, left: leftAnchor, bottom: nil, right: rightAnchor, paddingTop: 5, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 40)
 
         
 //        actionBar.layer.borderColor = UIColor.lightGray.cgColor
@@ -1116,13 +1106,30 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
 //
 //        bottomDividerView.anchor(top: nil, left: leftAnchor, bottom: actionBar.bottomAnchor, right: rightAnchor, paddingTop: 1, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0.5)
 //
-        // Setup List and Price Tags
+
+        // Location View
         
+        addSubview(locationView)
+        locationView.anchor(top: actionBar.bottomAnchor, left: leftAnchor, bottom: nil, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 25)
+        //        locationView.backgroundColor = UIColor.yellow
+        
+        addSubview(locationLabel)
+        addSubview(locationDistanceLabel)
+        
+        locationDistanceLabel.anchor(top: locationView.topAnchor, left: nil, bottom: locationView.bottomAnchor, right: locationView.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 5, width: 0, height: 0)
+        
+        locationLabel.anchor(top: locationView.topAnchor, left: leftAnchor, bottom: locationView.bottomAnchor, right: locationDistanceLabel.leftAnchor, paddingTop: 3, paddingLeft: 10, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
+        
+
+        
+//        Setup Extra Tags
+
         addSubview(extraTagView)
-        extraTagView.anchor(top: actionBar.bottomAnchor, left: leftAnchor, bottom: nil, right: rightAnchor, paddingTop: 1, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
+        extraTagView.anchor(top: locationView.bottomAnchor, left: leftAnchor, bottom: nil, right: rightAnchor, paddingTop: 5, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
         extraTagViewHeight = NSLayoutConstraint(item: extraTagView, attribute: NSLayoutAttribute.height, relatedBy: NSLayoutRelation.equal, toItem: nil, attribute: NSLayoutAttribute.width, multiplier: 1, constant: extraTagViewHeightSize)
         extraTagViewHeight?.isActive = true
 
+        
         
         addSubview(postDateLabel)
         postDateLabel.anchor(top: extraTagView.bottomAnchor, left: leftAnchor, bottom: nil, right: rightAnchor, paddingTop: 0, paddingLeft: 10, paddingBottom: 0, paddingRight: 0, width: 0, height: 30)

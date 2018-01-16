@@ -254,7 +254,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
 // Setup for Geo Range Button, Dummy TextView and UIPicker
     
     func searchBarShouldBeginEditing(_ searchBar: UISearchBar) -> Bool {
-        self.openSearch()
+        self.openSearch(index: 0)
         return false
     }
     
@@ -269,11 +269,17 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     
 
     
-    func openSearch(){
+    func openSearch(index: Int?){
 
         let postSearch = PostSearchController()
         postSearch.delegate = self
+
         self.navigationController?.pushViewController(postSearch, animated: true)
+        if index != nil {
+            postSearch.selectedScope = index!
+            postSearch.searchController.searchBar.selectedScopeButtonIndex = index!
+        }
+        
     }
     
     
@@ -774,7 +780,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         var font: UIFont?
         var textColor: UIColor?
         
-        text = "OOPS!"
+        text = "The World Is Full Of Wonderful Things"
         font = UIFont.boldSystemFont(ofSize: 17.0)
         textColor = UIColor(hexColor: "25282b")
         
@@ -792,7 +798,11 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         var font: UIFont?
         var textColor: UIColor?
         
-        text = "Nobody Has Posted Anything Legit"
+        if isFiltering {
+            text = "We Found Nothing Legit"
+        } else {
+            text = nil
+        }
         font = UIFont.boldSystemFont(ofSize: 13.0)
         textColor = UIColor(hexColor: "7b8994")
         
@@ -815,7 +825,12 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         var font: UIFont?
         var textColor: UIColor?
         
-        text = "Try Searching For Something Else"
+        if isFiltering {
+            text = "We Found Nothing Legit"
+        } else {
+            text = "Find Friends To Follow"
+        }
+        
         font = UIFont.boldSystemFont(ofSize: 14.0)
         textColor = UIColor(hexColor: "00aeef")
         
@@ -844,7 +859,11 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     }
     
     func emptyDataSet(_ scrollView: UIScrollView, didTapButton button: UIButton) {
-        self.openFilter()
+        if isFiltering {
+            self.openFilter()
+        } else {
+            self.openSearch(index: 1)
+        }
     }
     
     func emptyDataSet(_ scrollView: UIScrollView, didTapView view: UIView) {

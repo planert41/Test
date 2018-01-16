@@ -42,7 +42,11 @@ class testSearchBar: UISearchBar {
 
 class PostSearchController : UITableViewController, UISearchResultsUpdating, UISearchControllerDelegate, UISearchBarDelegate, GMSAutocompleteTableDataSourceDelegate {
     
-    var selectedScope = 0
+    var selectedScope = 0 {
+        didSet{
+            self.tableView.reloadData()
+        }
+    }
     var searchTerm: String? = nil
     
     // Emojis - Pulls in Default Emojis and Emojis filtered by searchText

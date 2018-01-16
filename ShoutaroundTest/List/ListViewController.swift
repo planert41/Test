@@ -10,8 +10,10 @@ import Foundation
 import UIKit
 import Firebase
 import CoreLocation
+import EmptyDataSet_Swift
 
-class ListViewController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, BookmarkPhotoCellDelegate, HomePostCellDelegate, ListViewHeaderDelegate, SortFilterHeaderDelegate, FilterControllerDelegate {
+
+class ListViewController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, BookmarkPhotoCellDelegate, HomePostCellDelegate, ListViewHeaderDelegate, SortFilterHeaderDelegate, FilterControllerDelegate, EmptyDataSetSource, EmptyDataSetDelegate {
 
 
     static let refreshListViewNotificationName = NSNotification.Name(rawValue: "RefreshListView")
@@ -93,18 +95,7 @@ class ListViewController: UIViewController, UICollectionViewDelegate, UICollecti
         
         self.navigationController?.navigationBar.tintColor = UIColor.blue
         self.navigationItem.title = displayList?.name
-        
-        collectionView.register(BookmarkPhotoCell.self, forCellWithReuseIdentifier: bookmarkCellId)
-        collectionView.register(HomePostCell.self, forCellWithReuseIdentifier: homePostCellId)
-        collectionView.register(ListViewHeader.self, forSupplementaryViewOfKind: UICollectionElementKindSectionHeader, withReuseIdentifier: listHeaderId)
-        
-        collectionView.backgroundColor = .white
-        
-        let refreshControl = UIRefreshControl()
-        refreshControl.addTarget(self, action: #selector(handleRefresh), for: .valueChanged)
-        collectionView.refreshControl = refreshControl
-        collectionView.alwaysBounceVertical = true
-        collectionView.keyboardDismissMode = .onDrag
+        setupCollectionView()
         
         view.addSubview(collectionView)
         collectionView.anchor(top: view.topAnchor, left: view.leftAnchor, bottom: view.bottomAnchor, right: view.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
@@ -113,6 +104,27 @@ class ListViewController: UIViewController, UICollectionViewDelegate, UICollecti
         
         NotificationCenter.default.addObserver(self, selector: #selector(handleRefresh), name: ListViewController.refreshListViewNotificationName, object: nil)
 
+    
+    }
+    
+    func setupCollectionView(){
+    
+    collectionView.register(BookmarkPhotoCell.self, forCellWithReuseIdentifier: bookmarkCellId)
+    collectionView.register(HomePostCell.self, forCellWithReuseIdentifier: homePostCellId)
+    collectionView.register(ListViewHeader.self, forSupplementaryViewOfKind: UICollectionElementKindSectionHeader, withReuseIdentifier: listHeaderId)
+    
+    collectionView.backgroundColor = .white
+    
+    let refreshControl = UIRefreshControl()
+    refreshControl.addTarget(self, action: #selector(handleRefresh), for: .valueChanged)
+    collectionView.refreshControl = refreshControl
+    collectionView.alwaysBounceVertical = true
+    collectionView.keyboardDismissMode = .onDrag
+    
+    // Adding Empty Data Set
+    collectionView.emptyDataSetSource = self
+    collectionView.emptyDataSetDelegate = self
+    
     
     }
     
@@ -380,6 +392,123 @@ class ListViewController: UIViewController, UICollectionViewDelegate, UICollecti
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
         return CGSize(width: view.frame.width, height: 30 + 5 + 5)
     }
+    
+    // Empty Data Set Delegates
+    
+    // EMPTY DATA SET DELEGATES
+    
+    func title(forEmptyDataSet scrollView: UIScrollView) -> NSAttributedString? {
+        
+        var text: String?
+        var font: UIFont?
+        var textColor: UIColor?
+        
+            text = "OOPS!"
+        
+        font = UIFont.boldSystemFont(ofSize: 17.0)
+        textColor = UIColor(hexColor: "25282b")
+        
+        if text == nil {
+            return nil
+        }
+        
+        return NSMutableAttributedString(string: text!, attributes: [NSFontAttributeName: font, NSForegroundColorAttributeName: textColor])
+        
+    }
+    
+    func description(forEmptyDataSet scrollView: UIScrollView) -> NSAttributedString? {
+        
+        var text: String?
+        var font: UIFont?
+        var textColor: UIColor?
+        
+        if isFiltering {
+            text = "We Found Nothing Legit"
+        } else {
+            text = "Fill Up Your List!"
+        }
+        
+        
+        font = UIFont.boldSystemFont(ofSize: 13.0)
+        textColor = UIColor(hexColor: "7b8994")
+        
+        if text == nil {
+            return nil
+        }
+        
+        return NSMutableAttributedString(string: text!, attributes: [NSFontAttributeName: font, NSForegroundColorAttributeName: textColor])
+        
+    }
+    
+    func image(forEmptyDataSet scrollView: UIScrollView) -> UIImage? {
+        return #imageLiteral(resourceName: "emptydataset")
+    }
+    
+    
+    func buttonTitle(forEmptyDataSet scrollView: UIScrollView, for state: UIControlState) -> NSAttributedString? {
+        
+        var text: String?
+        var font: UIFont?
+        var textColor: UIColor?
+        
+        if isFiltering {
+            text = "Try Searching For Something Else"
+        } else {
+            text = "Start Adding Posts to Your Lists!"
+        }
+        
+        font = UIFont.boldSystemFont(ofSize: 14.0)
+        textColor = UIColor(hexColor: "00aeef")
+        
+        if text == nil {
+            return nil
+        }
+        
+        return NSMutableAttributedString(string: text!, attributes: [NSFontAttributeName: font, NSForegroundColorAttributeName: textColor])
+        
+    }
+    
+    func buttonBackgroundImage(forEmptyDataSet scrollView: UIScrollView, for state: UIControlState) -> UIImage? {
+        
+        var capInsets = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
+        var rectInsets = UIEdgeInsets.zero
+        
+        capInsets = UIEdgeInsets(top: 25, left: 25, bottom: 25, right: 25)
+        rectInsets = UIEdgeInsets(top: 0, left: 10, bottom: 0, right: 10)
+        
+        let image = #imageLiteral(resourceName: "emptydatasetbutton")
+        return image.resizableImage(withCapInsets: capInsets, resizingMode: .stretch).withAlignmentRectInsets(rectInsets)
+    }
+    
+    func backgroundColor(forEmptyDataSet scrollView: UIScrollView) -> UIColor? {
+        return UIColor(hexColor: "fcfcfa")
+    }
+    
+    func emptyDataSet(_ scrollView: UIScrollView, didTapButton button: UIButton) {
+        if isFiltering {
+             self.openFilter()
+        } else {
+            // Returns To Home Tab
+            self.tabBarController?.selectedIndex = 0
+        }
+    }
+    
+    func emptyDataSet(_ scrollView: UIScrollView, didTapView view: UIView) {
+        self.handleRefresh()
+    }
+    
+    func verticalOffset(forEmptyDataSet scrollView: UIScrollView) -> CGFloat {
+        let offset = (self.collectionView.frame.height) / 5
+        return -50
+    }
+    
+    func spaceHeight(forEmptyDataSet scrollView: UIScrollView) -> CGFloat {
+        return 9
+    }
+    
+    
+    
+    
     
     // List Header Delegate
     func didChangeToListView(){
