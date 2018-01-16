@@ -22,7 +22,13 @@ class SortFilterHeader: UICollectionViewCell {
     var delegate: SortFilterHeaderDelegate?
 
     var headerSortSegment = UISegmentedControl()
-    var selectedSort: String = defaultSort
+    var selectedSort: String = defaultSort {
+        didSet{
+            if HeaderSortOptions[headerSortSegment.selectedSegmentIndex] != selectedSort {
+                headerSortSegment.selectedSegmentIndex = HeaderSortOptions.index(of: selectedSort)!
+            }
+        }
+    }
     var isFiltering: Bool = false {
         didSet{
             filterButton.backgroundColor = isFiltering ? UIColor.mainBlue() : UIColor.clear

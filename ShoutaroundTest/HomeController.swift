@@ -107,7 +107,10 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     }
     
     // Header Sort Variables
-    var selectedHeaderSort = HeaderSortDefault
+    var selectedHeaderSort = HeaderSortDefault {
+        didSet {
+        }
+    }
     
     
     
@@ -754,6 +757,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         let header = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: "headerId", for: indexPath) as! SortFilterHeader
         header.isFiltering = self.isFiltering
         header.delegate = self
+        header.selectedSort = self.selectedHeaderSort
         return header
         
     }

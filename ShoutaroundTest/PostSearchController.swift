@@ -271,6 +271,7 @@ class PostSearchController : UITableViewController, UISearchResultsUpdating, UIS
         }
     }
     
+    
     func searchBarShouldBeginEditing(_ searchBar: UISearchBar) -> Bool {
         self.searchBar.sizeToFit()
         return true
@@ -289,6 +290,14 @@ class PostSearchController : UITableViewController, UISearchResultsUpdating, UIS
     override func viewWillAppear(_ animated: Bool) {
 //      Show Searchbar scope during transition
         self.searchBar.isHidden = false
+
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        DispatchQueue.main.async {
+            self.searchController.searchBar.becomeFirstResponder()
+        }
     }
     
     
