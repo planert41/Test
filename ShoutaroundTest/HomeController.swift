@@ -262,6 +262,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
         if (searchText.length == 0) {
             self.filterCaption = nil
+            self.checkFilter()
             self.refreshPostsForFilter()
             searchBar.endEditing(true)
         }
@@ -345,15 +346,15 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         
         self.selectedHeaderSort = selectedSort
         
-        // Refresh Everything
-        self.refreshPagination()
-        self.collectionView?.reloadData()
-        
-        self.refreshPostsForFilter()
-        self.scrolltoFirst = true
-        
         // Check for filtering
         self.checkFilter()
+        
+        // Refresh Everything
+//        self.refreshPagination()
+//        self.collectionView?.reloadData()
+//
+        self.refreshPostsForFilter()
+        
         
         
     }
@@ -377,10 +378,9 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
             print("Searching for \(searchedText)")
             defaultSearchBar.text = searchedText!
             self.filterCaption = searchedText
-            self.refreshPagination()
-            self.collectionView?.reloadData()
-            self.scrolltoFirst = true
-            self.fetchAllPosts()
+            self.checkFilter()
+            self.refreshPostsForFilter()
+
         }
     }
     
@@ -417,6 +417,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     func clearSearch(){
         self.defaultSearchBar.text?.removeAll()
         self.filterCaption = nil
+        self.checkFilter()
     }
     
     func clearFilter(){
@@ -428,7 +429,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         self.filterType = nil
         self.filterMaxPrice = nil
         self.selectedHeaderSort = defaultSort
-        self.isFiltering = false
+        self.checkFilter()
     }
     
     func refreshPagination(){
@@ -454,6 +455,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     func refreshPostsForFilter(){
         self.clearAllPosts()
         self.collectionView?.reloadData()
+        self.scrolltoFirst = true
         self.fetchAllPostIds()
     }
     
@@ -780,7 +782,12 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         var font: UIFont?
         var textColor: UIColor?
         
-        text = "The World Is Full Of Wonderful Things"
+        if isFiltering {
+            text = "We Found Nothing Legit"
+        } else {
+            text = "The World Is Full Of Wonderful Things"
+        }
+        
         font = UIFont.boldSystemFont(ofSize: 17.0)
         textColor = UIColor(hexColor: "25282b")
         
@@ -799,7 +806,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         var textColor: UIColor?
         
         if isFiltering {
-            text = "We Found Nothing Legit"
+            text = nil
         } else {
             text = nil
         }
@@ -826,7 +833,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         var textColor: UIColor?
         
         if isFiltering {
-            text = "We Found Nothing Legit"
+            text = "Try Searching For Something Else"
         } else {
             text = "Find Friends To Follow"
         }
@@ -870,10 +877,10 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         self.handleRefresh()
     }
     
-    func verticalOffset(forEmptyDataSet scrollView: UIScrollView) -> CGFloat {
-        let offset = (self.collectionView?.frame.height)! / 5
-            return -50
-    }
+//    func verticalOffset(forEmptyDataSet scrollView: UIScrollView) -> CGFloat {
+//        let offset = (self.collectionView?.frame.height)! / 5
+//            return -50
+//    }
     
     func spaceHeight(forEmptyDataSet scrollView: UIScrollView) -> CGFloat {
         return 9

@@ -287,18 +287,20 @@ class ListViewController: UIViewController, UICollectionViewDelegate, UICollecti
         
         self.selectedHeaderSort = selectedSort
         
+        // Check for filtering
+        self.checkFilter()
+        
         // Refresh Everything
         self.refreshPostsForFilter()
-        
-        // Check for filtering
-        if (self.filterRange != nil) || (self.filterMinRating != 0) || (self.filterType != nil) || (self.filterMaxPrice != nil) {
+    }
+    
+    func checkFilter(){
+        if self.filterCaption != nil || (self.filterRange != nil) || (self.filterMinRating != 0) || (self.filterType != nil) || (self.filterMaxPrice != nil) {
             self.isFiltering = true
         } else {
             self.isFiltering = false
         }
-        
     }
-    
     func headerSortSelected(sort: String) {
         self.selectedHeaderSort = sort
         self.collectionView.reloadData()
@@ -403,7 +405,11 @@ class ListViewController: UIViewController, UICollectionViewDelegate, UICollecti
         var font: UIFont?
         var textColor: UIColor?
         
-            text = "OOPS!"
+        if isFiltering {
+            text = "We Found Nothing Legit"
+        } else {
+            text = "Fill Up Your List!"
+        }
         
         font = UIFont.boldSystemFont(ofSize: 17.0)
         textColor = UIColor(hexColor: "25282b")
@@ -422,11 +428,11 @@ class ListViewController: UIViewController, UICollectionViewDelegate, UICollecti
         var font: UIFont?
         var textColor: UIColor?
         
-        if isFiltering {
-            text = "We Found Nothing Legit"
-        } else {
-            text = "Fill Up Your List!"
-        }
+//        if isFiltering {
+//            text = "Try Something Further or Ramen"
+//        } else {
+//            text = "Fill Up Your List!"
+//        }
         
         
         font = UIFont.boldSystemFont(ofSize: 13.0)
@@ -497,10 +503,10 @@ class ListViewController: UIViewController, UICollectionViewDelegate, UICollecti
         self.handleRefresh()
     }
     
-    func verticalOffset(forEmptyDataSet scrollView: UIScrollView) -> CGFloat {
-        let offset = (self.collectionView.frame.height) / 5
-        return -50
-    }
+//    func verticalOffset(forEmptyDataSet scrollView: UIScrollView) -> CGFloat {
+//        let offset = (self.collectionView.frame.height) / 5
+//        return -50
+//    }
     
     func spaceHeight(forEmptyDataSet scrollView: UIScrollView) -> CGFloat {
         return 9
