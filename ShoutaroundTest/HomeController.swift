@@ -16,7 +16,7 @@ import EmptyDataSet_Swift
 
 
 
-class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLayout, HomePostCellDelegate, HomePostSearchDelegate, UIGestureRecognizerDelegate, FilterControllerDelegate, UISearchBarDelegate, SortFilterHeaderDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate, SharePhotoListControllerDelegate, PostSearchControllerDelegate, EmptyDataSource, EmptyDataSetDelegate  {
+class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLayout, HomePostCellDelegate, HomePostSearchDelegate, UIGestureRecognizerDelegate, FilterControllerDelegate, UISearchBarDelegate, SortFilterHeaderDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate, SharePhotoListControllerDelegate, PostSearchControllerDelegate, EmptyDataSetSource, EmptyDataSetDelegate {
     
     let cellId = "cellId"
     var scrolltoFirst: Bool = false
@@ -152,35 +152,10 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         //    3. Filter displayedPosts based on Conditions/Sorting (All Fetched Posts are saved to cache anyways)
         //    4. Control Pagination by increasing displayedPostsCount to fetchedpostCount
         
-        
-// 1.  Checks if Both User and Following Post Ids are colelctved before proceeding
-        NotificationCenter.default.addObserver(self, selector: #selector(finishFetchingPostIds), name: HomeController.finishFetchingUserPostIdsNotificationName, object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(finishFetchingPostIds), name: HomeController.finishFetchingFollowingPostIdsNotificationName, object: nil)
+        setupNotificationCenters()
 
-// 2.  Fetches all Posts and Filters/Sorts
-
-// 3. Paginates Post by increasing displayedPostCount after Filtering and Sorting
-        NotificationCenter.default.addObserver(self, selector: #selector(paginatePosts), name: HomeController.finishSortingFetchedPostsNotificationName, object: nil)
         
-// 4. Checks after pagination Ends
-        
-        NotificationCenter.default.addObserver(self, selector: #selector(finishPaginationCheck), name: HomeController.finishPaginationNotificationName, object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(handleUpdateFeed), name: SharePhotoListController.updateFeedNotificationName, object: nil)
-
-        view.addSubview(noResultsLabel)
-        noResultsLabel.anchor(top: topLayoutGuide.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 50)
-        collectionView?.backgroundColor = .white
-        collectionView?.register(HomePostCell.self, forCellWithReuseIdentifier: cellId)
-        
-        collectionView?.register(SortFilterHeader.self, forSupplementaryViewOfKind: UICollectionElementKindSectionHeader, withReuseIdentifier: "headerId")
-        
-        let refreshControl = UIRefreshControl()
-        refreshControl.addTarget(self, action: #selector(handleRefresh), for: .valueChanged)
-        collectionView?.refreshControl = refreshControl
-        collectionView?.alwaysBounceVertical = true
-        collectionView?.keyboardDismissMode = .onDrag
-        
-        NotificationCenter.default.addObserver(self, selector: #selector(handleRefresh), name: HomeController.refreshPostsNotificationName, object: nil)
+        setupCollectionView()
 
 
 // 1. Clear out all Filters, Fetched Post Ids and Pagination Variables
@@ -194,6 +169,44 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         setupEmojiDetailLabel()
     }
 
+    
+    func setupCollectionView(){
+        collectionView?.backgroundColor = .white
+        
+        collectionView?.register(HomePostCell.self, forCellWithReuseIdentifier: cellId)
+        collectionView?.register(SortFilterHeader.self, forSupplementaryViewOfKind: UICollectionElementKindSectionHeader, withReuseIdentifier: "headerId")
+        
+        let refreshControl = UIRefreshControl()
+        refreshControl.addTarget(self, action: #selector(handleRefresh), for: .valueChanged)
+        collectionView?.refreshControl = refreshControl
+        collectionView?.alwaysBounceVertical = true
+        collectionView?.keyboardDismissMode = .onDrag
+        
+        // Adding Empty Data Set
+        collectionView?.emptyDataSetSource = self
+        collectionView?.emptyDataSetDelegate = self
+    }
+    
+    func setupNotificationCenters(){
+        
+        // 1.  Checks if Both User and Following Post Ids are colelctved before proceeding
+        NotificationCenter.default.addObserver(self, selector: #selector(finishFetchingPostIds), name: HomeController.finishFetchingUserPostIdsNotificationName, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(finishFetchingPostIds), name: HomeController.finishFetchingFollowingPostIdsNotificationName, object: nil)
+        
+        // 2.  Fetches all Posts and Filters/Sorts
+        
+        // 3. Paginates Post by increasing displayedPostCount after Filtering and Sorting
+        NotificationCenter.default.addObserver(self, selector: #selector(paginatePosts), name: HomeController.finishSortingFetchedPostsNotificationName, object: nil)
+        
+        // 4. Checks after pagination Ends
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(finishPaginationCheck), name: HomeController.finishPaginationNotificationName, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(handleUpdateFeed), name: SharePhotoListController.updateFeedNotificationName, object: nil)
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(handleRefresh), name: HomeController.refreshPostsNotificationName, object: nil)
+
+
+    }
 
     
     // Emoji description
@@ -237,16 +250,6 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     
 // Setup for Geo Range Button, Dummy TextView and UIPicker
     
-    var noResultsLabel: UILabel = {
-        let label = UILabel()
-        label.text = "Loading"
-        label.font = UIFont.boldSystemFont(ofSize: 20)
-        label.textColor = UIColor.black
-        label.isHidden = true
-        label.textAlignment = NSTextAlignment.center
-        return label
-    }()
-
     func searchBarShouldBeginEditing(_ searchBar: UISearchBar) -> Bool {
         self.openSearch()
         return false
@@ -342,28 +345,6 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         
         // Check for filtering
         self.checkFilter()
-        
-        if filterCaption != nil {
-            defaultSearchBar.text = self.filterCaption ?? ""
-        }
-        
-        if self.filterLocationName != nil {
-            defaultSearchBar.text = defaultSearchBar.text! + " @ " + self.filterLocationName!
-        }
-        
-        if self.filterMinRating != nil {
-//            defaultSearchBar.text = defaultSearchBar.text! + " @ " + String(self.filterMinRating)
-        }
-        
-        if self.filterType != nil {
-            defaultSearchBar.text = defaultSearchBar.text! + " @ " + self.filterType!
-        }
-        
-        if self.filterMaxPrice != nil {
-            defaultSearchBar.text = defaultSearchBar.text! + " @ " + self.filterMaxPrice!
-        }
-        
-        
         
         
     }
@@ -590,19 +571,16 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         
         if self.fetchedPosts.count == 0 && self.isFinishedPaging == true {
             print("Finish Pagination Check: No Results")
-            self.noResultsLabel.text = "No Results"
-            self.noResultsLabel.isHidden = false
+
         }
         else if self.fetchedPosts.count == 0 && self.isFinishedPaging != true {
             print("Finish Pagination Check: No Results, Still Paging")
-            self.noResultsLabel.text = "Loading"
-            self.noResultsLabel.isHidden = false
+
             self.paginatePosts()
         } else {
             print("Finish Pagination Check: Success, Post: \(self.fetchedPosts.count)")
             DispatchQueue.main.async(execute: { self.collectionView?.reloadData()
             
-                self.noResultsLabel.isHidden = true
                 
                 // Scrolling for refreshed results
                 if self.scrolltoFirst && self.fetchedPosts.count > 1{
@@ -784,8 +762,99 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         return CGSize(width: view.frame.width, height: 40 + 5)
     }
     
+// EMPTY DATA SET DELEGATES
+    
+    func title(forEmptyDataSet scrollView: UIScrollView) -> NSAttributedString? {
+        
+        var text: String?
+        var font: UIFont?
+        var textColor: UIColor?
+        
+        text = "OOPS!"
+        font = UIFont.boldSystemFont(ofSize: 17.0)
+        textColor = UIColor(hexColor: "25282b")
+        
+        if text == nil {
+            return nil
+        }
+
+        return NSMutableAttributedString(string: text!, attributes: [NSFontAttributeName: font, NSForegroundColorAttributeName: textColor])
+
+    }
+    
+    func description(forEmptyDataSet scrollView: UIScrollView) -> NSAttributedString? {
+        
+        var text: String?
+        var font: UIFont?
+        var textColor: UIColor?
+        
+        text = "Nobody Has Posted Anything Legit"
+        font = UIFont.boldSystemFont(ofSize: 13.0)
+        textColor = UIColor(hexColor: "7b8994")
+        
+        if text == nil {
+            return nil
+        }
+        
+        return NSMutableAttributedString(string: text!, attributes: [NSFontAttributeName: font, NSForegroundColorAttributeName: textColor])
+        
+    }
+    
+    func image(forEmptyDataSet scrollView: UIScrollView) -> UIImage? {
+        return #imageLiteral(resourceName: "emptydataset")
+    }
     
     
+    func buttonTitle(forEmptyDataSet scrollView: UIScrollView, for state: UIControlState) -> NSAttributedString? {
+
+        var text: String?
+        var font: UIFont?
+        var textColor: UIColor?
+        
+        text = "Try Searching For Something Else"
+        font = UIFont.boldSystemFont(ofSize: 14.0)
+        textColor = UIColor(hexColor: "00aeef")
+        
+        if text == nil {
+            return nil
+        }
+        
+        return NSMutableAttributedString(string: text!, attributes: [NSFontAttributeName: font, NSForegroundColorAttributeName: textColor])
+        
+    }
+    
+    func buttonBackgroundImage(forEmptyDataSet scrollView: UIScrollView, for state: UIControlState) -> UIImage? {
+
+        var capInsets = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
+        var rectInsets = UIEdgeInsets.zero
+
+        capInsets = UIEdgeInsets(top: 25, left: 25, bottom: 25, right: 25)
+        rectInsets = UIEdgeInsets(top: 0, left: 10, bottom: 0, right: 10)
+        
+        let image = #imageLiteral(resourceName: "emptydatasetbutton")
+        return image.resizableImage(withCapInsets: capInsets, resizingMode: .stretch).withAlignmentRectInsets(rectInsets)
+    }
+    
+    func backgroundColor(forEmptyDataSet scrollView: UIScrollView) -> UIColor? {
+        return UIColor(hexColor: "fcfcfa")
+    }
+    
+    func emptyDataSet(_ scrollView: UIScrollView, didTapButton button: UIButton) {
+        self.openFilter()
+    }
+    
+    func emptyDataSet(_ scrollView: UIScrollView, didTapView view: UIView) {
+        self.handleRefresh()
+    }
+    
+    func verticalOffset(forEmptyDataSet scrollView: UIScrollView) -> CGFloat {
+        let offset = (self.collectionView?.frame.height)! / 5
+            return -50
+    }
+    
+    func spaceHeight(forEmptyDataSet scrollView: UIScrollView) -> CGFloat {
+        return 9
+    }
     
     
 // HOME POST CELL DELEGATE METHODS

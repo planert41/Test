@@ -281,7 +281,15 @@ class PostSearchController : UITableViewController, UISearchResultsUpdating, UIS
         return true
     }
 
+    override func viewWillDisappear(_ animated: Bool) {
+//      Remove Searchbar scope during transition
+        self.searchBar.isHidden = true
+    }
     
+    override func viewWillAppear(_ animated: Bool) {
+//      Show Searchbar scope during transition
+        self.searchBar.isHidden = false
+    }
     
     
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
@@ -311,7 +319,6 @@ class PostSearchController : UITableViewController, UISearchResultsUpdating, UIS
             self.delegate?.filterCaptionSelected(searchedText: nil)
         }
 
-        
         searchBar.resignFirstResponder()
     }
     
