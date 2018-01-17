@@ -216,6 +216,10 @@ class MessageController: UIViewController, UICollectionViewDataSource, UICollect
     }
     
     
+    override func viewWillAppear(_ animated: Bool) {
+        self.fromInput.becomeFirstResponder()
+    }
+    
     
     fileprivate func setupNavigationButtons() {
         navigationItem.title = "Message"

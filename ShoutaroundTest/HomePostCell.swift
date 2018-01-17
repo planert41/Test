@@ -88,23 +88,24 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
             captionBubble.sizeToFit()
             
             
+            // Distance
             if post?.distance != nil && post?.locationGPS?.coordinate.longitude != 0 && post?.locationGPS?.coordinate.latitude != 0 {
-                
                 let distanceformat = ".2"
                 
                 // Convert to M to KM (Temp Miles just for display)
                 let locationDistance = (post?.distance)!/1000
                 if locationDistance < 1000 {
-                    locationDistanceLabel.text = String(locationDistance.format(f: distanceformat)) + " Miles"
+                    locationDistanceLabel.text = String(locationDistance.format(f: distanceformat)) + " mi"
                 } else {
                     locationDistanceLabel.text = ""
-
                 }
-
             } else {
                 locationDistanceLabel.text = ""
             }
+            locationDistanceLabel.sizeToFit()
 
+            // Options Button
+            
             if post?.creatorUID == Auth.auth().currentUser?.uid {
                 optionsButton.isHidden = false
             } else {
@@ -434,8 +435,8 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
     
     let locationView: UIView = {
         let uv = UIView()
-        let locationTapGesture = UITapGestureRecognizer(target: self, action: #selector(locationTap))
-        uv.addGestureRecognizer(locationTapGesture)
+//        let locationTapGesture = UITapGestureRecognizer(target: self, action: #selector(locationTap))
+//        uv.addGestureRecognizer(locationTapGesture)
 //        uv.isUserInteractionEnabled = true
         return uv
     }()
@@ -454,18 +455,16 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         label.text = "Location"
         label.font = UIFont.boldSystemFont(ofSize: 14)
         label.textColor = UIColor.black
-        let locationTapGesture = UITapGestureRecognizer(target: self, action: #selector(locationTap))
         label.isUserInteractionEnabled = true
-        label.addGestureRecognizer(locationTapGesture)
         return label
     }()
     
     let locationDistanceLabel: UILabel = {
         let label = UILabel()
         label.text = ""
-        label.font = UIFont.boldSystemFont(ofSize: 11)
+        label.font = UIFont.boldSystemFont(ofSize: 12)
         
-        label.textColor = UIColor.mainBlue()
+        label.textColor = UIColor.darkGray
         label.textAlignment = NSTextAlignment.right
         return label
     }()
@@ -689,6 +688,8 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
     var extraTagsIdArray: [String] = []
     var userTagsNameArray: [String] = []
     var userTagsIdArray: [String] = []
+    var creatorTagsNameArray: [String] = []
+    var creatorTagsIdArray: [String] = []
     
 
 
@@ -701,6 +702,8 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         extraTagsIdArray.removeAll()
         userTagsNameArray.removeAll()
         userTagsIdArray.removeAll()
+        creatorTagsNameArray.removeAll()
+        creatorTagsIdArray.removeAll()
         
     // Reset Extra Tags
         extraTagsArray = [extraTagLabel1, extraTagLabel2, extraTagLabel3, extraTagLabel4,extraTagLabel5,extraTagLabel6]
@@ -712,40 +715,8 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
             label.removeFromSuperview()
         }
         
-    // Creator Extra Tags
-        if post?.creatorListId != nil {
-            var listCount = post?.creatorListId?.count
-            
-            // Add Legit List
-            for list in (post?.creatorListId)! {
-                if list.value == legitListName {
-                    extraTagsNameArray.append(list.value)
-                    extraTagsIdArray.append(list.key)
-                }
-            }
-            
-            // Add Other List
-            for list in (post?.creatorListId)! {
-                if list.value != legitListName && list.value != bookmarkListName {
-                    if extraTagsNameArray.count < 2 {
-                        extraTagsNameArray.append(list.value)
-                        extraTagsIdArray.append(list.key)
-                    } else if extraTagsNameArray.count == 2 && listCount! > 2 {
-                        extraTagsNameArray.append("+\(listCount! - 2)")
-                        extraTagsIdArray.append("creatorLists")
-                    }
-                }
-            }
-        }
         
-    // Creator Price Tag
-        if post?.price != nil {
-            extraTagsNameArray.append((post?.price)!)
-            extraTagsIdArray.append("price")
-        }
-        
-    
-    // User Extra Tags
+    // User Created Tags
         
         guard let uid = Auth.auth().currentUser?.uid else {
             print("SetupUserTag: Invalid Current User UID")
@@ -755,7 +726,7 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         if post?.creatorUID != uid && post?.selectedListId != nil {
             
             var userListCount = post?.selectedListId?.count
-
+            
             
             // User Bookmarks
             for list in (post?.selectedListId)! {
@@ -764,26 +735,70 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
                     userTagsIdArray.append(list.key)
                 }
             }
-
+            
             // Add Other User List
             for list in (post?.selectedListId)! {
                 if list.value != legitListName && list.value != bookmarkListName {
                     if userTagsNameArray.count == 0 {
                         userTagsNameArray.append(list.value)
                         userTagsIdArray.append(list.key)
-                    } else if userTagsNameArray.count == 1 && userListCount! > 1{
-                        userTagsNameArray.append("+\(userListCount! - 1)")
+                    } else if userTagsNameArray.count == 1 && userListCount! == 2{
+                        userTagsNameArray.append(list.value)
+                        userTagsIdArray.append(list.key)
+                    } else if userTagsNameArray.count == 1 && userListCount! > 2{
+                        userTagsNameArray.append("\(userListCount! - 1)")
                         userTagsIdArray.append("userLists")
                     }
                 }
             }
             
             // Add User Tags to Extra Tags
-            extraTagsNameArray = extraTagsNameArray + userTagsNameArray
-            extraTagsIdArray = extraTagsIdArray + userTagsIdArray
-        
+            extraTagsNameArray = userTagsNameArray
+            extraTagsIdArray = userTagsIdArray
+            
         }
         
+        
+        
+    // Creator Created Tags
+        if post?.creatorListId != nil {
+            var listCount = post?.creatorListId?.count
+            
+            // Add Legit List
+            for list in (post?.creatorListId)! {
+                if list.value == legitListName {
+                    creatorTagsNameArray.append(list.value)
+                    creatorTagsIdArray.append(list.key)
+                }
+            }
+            
+            // Add Other List
+            for list in (post?.creatorListId)! {
+                if list.value != legitListName && list.value != bookmarkListName {
+                    if creatorTagsNameArray.count < 2 {
+                        creatorTagsNameArray.append(list.value)
+                        creatorTagsIdArray.append(list.key)
+                    } else if creatorTagsNameArray.count == 2 && listCount! == 3 {
+                        creatorTagsNameArray.append(list.value)
+                        creatorTagsIdArray.append(list.key)
+                    } else if creatorTagsNameArray.count == 2 && listCount! > 3 {
+                        creatorTagsNameArray.append("\(listCount! - 2)")
+                        creatorTagsIdArray.append("creatorLists")
+                    }
+                }
+            }
+        }
+        
+    // Creator Price Tag
+        if post?.price != nil {
+            creatorTagsNameArray.append((post?.price)!)
+            creatorTagsIdArray.append("price")
+        }
+        
+        extraTagsNameArray = extraTagsNameArray + creatorTagsNameArray
+        extraTagsIdArray = extraTagsIdArray + creatorTagsIdArray
+        
+
 
         // Creator Tag Button Label
         if extraTagsNameArray.count > 0 {
@@ -792,34 +807,50 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
                 extraTagsArray[index].setTitle(extraTagsNameArray[index], for: .normal)
                 extraTagsArray[index].titleLabel?.font = UIFont.boldSystemFont(ofSize: extraTagFontSize)
                 extraTagsArray[index].layer.borderWidth = 1
+                extraTagsArray[index].layer.backgroundColor = UIColor.white.cgColor
+                extraTagsArray[index].layer.borderColor = UIColor.white.cgColor
 
 
-                if extraTagsNameArray[index] == legitListName {
-//                    extraTagsArray[index].setTitleColor(UIColor.rgb(red: 255, green: 128, blue: 0), for: .normal)
-                    extraTagsArray[index].setTitleColor(UIColor(hexColor: "FA7921"), for: .normal)
+                if extraTagsNameArray[index] == bookmarkListName {
+                    //                    extraTagsArray[index].setTitleColor(UIColor.rgb(red: 255, green: 0, blue: 0), for: .normal)
+                    extraTagsArray[index].setImage(#imageLiteral(resourceName: "bookmark_filled").withRenderingMode(.alwaysOriginal), for: .normal)
+                    extraTagsArray[index].setTitle(nil, for: .normal)
+                    extraTagsArray[index].setTitleColor(UIColor.white, for: .normal)
+                    //                    extraTagsArray[index].layer.backgroundColor = UIColor(hexColor: "FE5F55").cgColor
+                    extraTagsArray[index].layer.backgroundColor = UIColor.white.cgColor
+                }
+                    
+                else if extraTagsNameArray[index] == legitListName {
+                    extraTagsArray[index].setTitleColor(UIColor.white, for: .normal)
                     extraTagsArray[index].setImage(#imageLiteral(resourceName: "legit").withRenderingMode(.alwaysOriginal), for: .normal)
 //                    extraTagsArray[index].imageView?.contentMode = UIViewContentMode.scaleAspectFit
-//                    extraTagsArray[index].imageView?.backgroundColor = UIColor.red
+//                    extraTagsArray[index].layer.backgroundColor = UIColor(hexColor: "0B4F6C").cgColor
+                    extraTagsArray[index].layer.backgroundColor = UIColor(hexColor: "107896").cgColor
+
                 }
-                else if extraTagsNameArray[index] == bookmarkListName {
-//                    extraTagsArray[index].setTitleColor(UIColor.rgb(red: 255, green: 0, blue: 0), for: .normal)
-                    extraTagsArray[index].setTitleColor(UIColor(hexColor: "E55934"), for: .normal)
-                    extraTagsArray[index].setImage(#imageLiteral(resourceName: "bookmark_filled").withRenderingMode(.alwaysOriginal), for: .normal)
-                }
+
                 else if extraTagsIdArray[index] == "price" {
-                    extraTagsArray[index].setTitleColor(UIColor(hexColor: "9BC53D"), for: .normal)
+                    extraTagsArray[index].setTitleColor(UIColor.white, for: .normal)
+                    extraTagsArray[index].layer.backgroundColor = UIColor(hexColor: "107896").cgColor
                 }
                 else {
-                    if index < extraTagsNameArray.count - userTagsNameArray.count {
-                        // Creator Tags
-                        extraTagsArray[index].setTitle(extraTagsNameArray[index].truncate(length: 10) + "!", for: .normal)
-                        extraTagsArray[index].backgroundColor = UIColor.white
-                        extraTagsArray[index].setTitleColor(UIColor(hexColor: "FA7921"), for: .normal)
-                    } else {
+                    if index < userTagsNameArray.count {
                         // User Tags
                         extraTagsArray[index].setTitle(extraTagsNameArray[index].truncate(length: 10) + "!", for: .normal)
-                        extraTagsArray[index].backgroundColor = UIColor(white: 0, alpha: 0.2)
-                        extraTagsArray[index].setTitleColor(UIColor(hexColor: "E55934"), for: .normal)
+                        extraTagsArray[index].setTitleColor(UIColor.white, for: .normal)
+//                        extraTagsArray[index].layer.backgroundColor = UIColor(hexColor: "C02F1D").cgColor
+                        extraTagsArray[index].layer.backgroundColor = UIColor(hexColor: "FE5F55").cgColor
+
+
+                    
+                    } else {
+                        // Creator Tags
+                        extraTagsArray[index].setTitle(extraTagsNameArray[index].truncate(length: 10) + "!", for: .normal)
+                        extraTagsArray[index].setTitleColor(UIColor.white, for: .normal)
+//                        extraTagsArray[index].layer.backgroundColor = UIColor(hexColor: "1496BB").cgColor
+                        extraTagsArray[index].layer.backgroundColor = UIColor(hexColor: "107896").cgColor
+
+
                     }
                 }
                 
@@ -901,30 +932,43 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
  
     func displayCaptionBubble(){
         
-        print("Bubble Caption Displayed")
+        print(self.post)
+        
         guard let post = self.post else {return}
         
-        captionBubble.text = post.caption
+        let attributedString = NSMutableAttributedString(string: post.caption, attributes: [NSFontAttributeName: UIFont.boldSystemFont(ofSize: 30)])
+        
+        let rating = NSAttributedString(string: String(describing: post.rating!), attributes: [NSFontAttributeName: UIFont.boldSystemFont(ofSize: 30), NSForegroundColorAttributeName: RatingColors.ratingColor(rating: post.rating)])
+        
+        if post.rating! > 0 {
+            attributedString.append(rating)
+        }
+        
+        captionBubble.attributedText = attributedString
         captionBubble.sizeToFit()
-        starRatingLabel.rating = post.rating!
+
+//
+//        captionBubble.text = post.caption
+//        captionBubble.sizeToFit()
+//        starRatingLabel.rating = post.rating!
         
         self.addSubview(captionView)
         captionView.anchor(top: photoImageView.topAnchor, left: photoImageView.leftAnchor, bottom: nil, right: photoImageView.rightAnchor, paddingTop: 30, paddingLeft: 30, paddingBottom: 0, paddingRight: 30, width: 0, height: 0)
         
         captionView.addSubview(captionBubble)
-        captionBubble.anchor(top: captionView.topAnchor, left: captionView.leftAnchor, bottom: nil, right: captionView.rightAnchor, paddingTop: 10, paddingLeft: 10, paddingBottom: 10, paddingRight: 10, width: 0, height: 0)
+        captionBubble.anchor(top: captionView.topAnchor, left: captionView.leftAnchor, bottom: captionView.bottomAnchor, right: captionView.rightAnchor, paddingTop: 10, paddingLeft: 10, paddingBottom: 10, paddingRight: 10, width: 0, height: 0)
         
-        captionView.addSubview(starRatingLabel)
-        starRatingLabel.anchor(top: captionBubble.bottomAnchor, left: nil, bottom: captionView.bottomAnchor, right: nil, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 30, height: 0)
-        starRatingLabel.centerXAnchor.constraint(equalTo: captionView.centerXAnchor).isActive = true
-        starRatingLabelHeight = NSLayoutConstraint(item: starRatingLabel, attribute: NSLayoutAttribute.height, relatedBy: NSLayoutRelation.equal, toItem: nil, attribute: NSLayoutAttribute.height, multiplier: 1, constant: 30)
-        starRatingLabelHeight?.isActive = true
-        
-        if post.rating == 0 {
-            starRatingLabelHeight?.constant = 0
-        } else {
-            starRatingLabelHeight?.constant = 30
-        }
+//        captionView.addSubview(starRatingLabel)
+//        starRatingLabel.anchor(top: captionBubble.bottomAnchor, left: nil, bottom: captionView.bottomAnchor, right: nil, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 30, height: 0)
+//        starRatingLabel.centerXAnchor.constraint(equalTo: captionView.centerXAnchor).isActive = true
+//        starRatingLabelHeight = NSLayoutConstraint(item: starRatingLabel, attribute: NSLayoutAttribute.height, relatedBy: NSLayoutRelation.equal, toItem: nil, attribute: NSLayoutAttribute.height, multiplier: 1, constant: 30)
+//        starRatingLabelHeight?.isActive = true
+//
+//        if post.rating == 0 {
+//            starRatingLabelHeight?.constant = 0
+//        } else {
+//            starRatingLabelHeight?.constant = 30
+//        }
 
 //
 //        let attributedString = NSMutableAttributedString(string: post.caption, attributes: [NSFontAttributeName: UIFont.boldSystemFont(ofSize: 30)])
@@ -939,14 +983,16 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         captionView.duration = 0.5
         captionView.animation = "zoomIn"
         captionView.curve = "spring"
-        captionView.animateNext {
-            self.captionView.animation = "fadeOut"
-            self.captionView.delay = 3
-            self.captionView.animate()
+        
+        // Display only if there is caption
+        
+        if (captionBubble.attributedText?.length)! > 1 {
+            captionView.animateNext {
+                self.captionView.animation = "fadeOut"
+                self.captionView.delay = 3
+                self.captionView.animate()
+            }
         }
-        
-        
-//        self.fadeViewInThenOut(inputView: captionView, delay: 3)
     }
     
     func hideCaptionBubble(){
@@ -1116,9 +1162,12 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         addSubview(locationLabel)
         addSubview(locationDistanceLabel)
         
-        locationDistanceLabel.anchor(top: locationView.topAnchor, left: nil, bottom: locationView.bottomAnchor, right: locationView.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 5, width: 0, height: 0)
+        locationDistanceLabel.anchor(top: locationView.topAnchor, left: nil, bottom: locationView.bottomAnchor, right: locationView.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 5, width: 50, height: 0)
         
         locationLabel.anchor(top: locationView.topAnchor, left: leftAnchor, bottom: locationView.bottomAnchor, right: locationDistanceLabel.leftAnchor, paddingTop: 3, paddingLeft: 10, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
+        
+        let locationTapGesture = UITapGestureRecognizer(target: self, action: #selector(locationTap))
+        locationLabel.addGestureRecognizer(locationTapGesture)
         
 
         
@@ -1132,7 +1181,7 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         
         
         addSubview(postDateLabel)
-        postDateLabel.anchor(top: extraTagView.bottomAnchor, left: leftAnchor, bottom: nil, right: rightAnchor, paddingTop: 0, paddingLeft: 10, paddingBottom: 0, paddingRight: 0, width: 0, height: 30)
+        postDateLabel.anchor(top: extraTagView.bottomAnchor, left: leftAnchor, bottom: nil, right: rightAnchor, paddingTop: 0, paddingLeft: 10, paddingBottom: 0, paddingRight: 0, width: 0, height: 20)
         
         addSubview(optionsButton)
         optionsButton.anchor(top: postDateLabel.topAnchor, left: nil, bottom: postDateLabel.bottomAnchor, right: postDateLabel.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 10, width: 0, height: 0)

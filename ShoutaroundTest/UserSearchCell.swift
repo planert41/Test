@@ -58,7 +58,6 @@ class UserSearchCell: UICollectionViewCell {
         } else {
             self.followButton.setTitle("Follow", for: .normal)
             self.followButton.backgroundColor = UIColor.mainBlue()
-
         }
     }
     

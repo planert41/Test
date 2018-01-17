@@ -707,12 +707,12 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
 
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         
-        var height: CGFloat = 40 + 8 + 8 //username userprofileimageview
+        var height: CGFloat = 50 //headerview = username userprofileimageview
         height += view.frame.width  // Picture
-        height += 25    // Location View
-        height += 40    // Action Bar
-        height += 25    // Extra Tag Bar
-        height += 30    // Date Bar
+        height += 40 + 5    // Action Bar
+        height += 25        // Location View
+        height += 25 + 5    // Extra Tag Bar
+        height += 20    // Date Bar
 
         
 ////        height += 20    // Social Counts
@@ -771,7 +771,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
-        return CGSize(width: view.frame.width, height: 40 + 5)
+        return CGSize(width: view.frame.width, height: 35 + 5)
     }
     
 // EMPTY DATA SET DELEGATES

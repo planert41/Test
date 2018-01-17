@@ -56,6 +56,7 @@ class SortFilterHeader: UICollectionViewCell {
         headerSortSegment = UISegmentedControl(items: HeaderSortOptions)
         headerSortSegment.selectedSegmentIndex = HeaderSortOptions.index(of: self.selectedSort)!
         headerSortSegment.addTarget(self, action: #selector(selectSort), for: .valueChanged)
+        headerSortSegment.tintColor = UIColor(hexColor: "107896")
         
         addSubview(filterButton)
         filterButton.anchor(top: topAnchor, left: nil, bottom: bottomAnchor, right: rightAnchor, paddingTop: 2, paddingLeft: 1, paddingBottom: 3, paddingRight: 3, width: 0, height: 0)

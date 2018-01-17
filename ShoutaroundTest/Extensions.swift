@@ -150,7 +150,15 @@ extension String {
         } else {
             return self
         }
+    }
+    
+    func cutoff(length: Int) -> String {
+        if self.characters.count > length {
+            return String(self.characters.prefix(length))
+        } else {
+            return self
         }
+    }
     
     func removingWhitespaces() -> String {
         return components(separatedBy: .whitespaces).joined()

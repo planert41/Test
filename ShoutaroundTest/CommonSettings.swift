@@ -56,6 +56,36 @@ var searchScopeButtons = ["Posts","Users","Places"]
 var defaultRankOptions = ["likes", "bookmarks", "messages"]
 var firebaseCountVariable:[String:String] = ["likes":"likeCount", "bookmarks":"bookmarkCount", "messages":"messageCount"]
 
+struct RatingColors {
+    static func ratingColor (rating: Double?) -> UIColor {
+        
+        guard let rating = rating else {
+            return UIColor.white
+        }
+        
+        if rating == 0 {
+            return UIColor.white    }
+        else if rating <= Double(1) {
+            return UIColor.rgb(red: 227, green: 27, blue: 35)   }
+        else if rating <= Double(2) {
+            return UIColor.rgb(red: 227, green: 27, blue: 35).withAlphaComponent(0.55)  }
+        else if rating <= Double(3) {
+            return UIColor.rgb(red: 255, green: 173, blue: 0).withAlphaComponent(0.55)  }
+        else if rating <= Double(4) {
+            return UIColor.rgb(red: 255, green: 173, blue: 0)   }
+        else if rating <= Double(5) {
+            return UIColor.rgb(red: 252, green: 227, blue: 0).withAlphaComponent(0.55)  }
+        else if rating <= Double(6) {
+            return UIColor.rgb(red: 252, green: 227, blue: 0)   }
+        else if rating <= Double(7) {
+            return UIColor.rgb(red: 91, green: 197, blue: 51)    }
+        else {
+            return UIColor.clear
+        }
+    }
+}
+
+
 struct Common {
 
 }
