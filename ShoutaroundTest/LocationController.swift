@@ -14,59 +14,72 @@ import GeoFire
 import GooglePlaces
 import Alamofire
 import SwiftyJSON
+import EmptyDataSet_Swift
 
 var placeCache = [String: JSON]()
 
-class LocationController: UIViewController, UIScrollViewDelegate, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, GMSMapViewDelegate, UserProfilePhotoCellDelegate  {
+class LocationController: UIViewController, UIScrollViewDelegate, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, GMSMapViewDelegate, UserProfilePhotoCellDelegate, EmptyDataSetSource, EmptyDataSetDelegate  {
     
-    let locationManager = CLLocationManager()
+    var placesClient: GMSPlacesClient!
+    var marker = GMSMarker()
+    var map: GMSMapView?
+    
     let locationCellId = "locationCellID"
     let photoCellId = "photoCellId"
-    
+    var displayedPosts = [Post]()
     var postNearby: [String: CLLocation] = [:]
-    
+
+    // INPUT FROM DELEGATE
     var selectedPost: Post?{
         didSet{
 //            locationNameLabel.text = selectedPost?.locationName
 //            locationDistanceLabel.text = selectedPost?.locationAdress
-            
 //            self.refreshMap(long: selectedLong!, lat: selectedLat!)
             
-            // Passes Coordinates And/Or Google Place ID
-            selectedLat = selectedPost?.locationGPS?.coordinate.latitude
-            selectedLong = selectedPost?.locationGPS?.coordinate.longitude
             selectedLocation = selectedPost?.locationGPS
+            selectedName = selectedPost?.locationName
             selectedAdress = selectedPost?.locationAdress
             self.googlePlaceId = selectedPost?.locationGooglePlaceID
+            self.checkHasRestaurantLocation()
         }
     }
     
-    
+    // MAIN INPUT
     var googlePlaceId: String? = nil {
         didSet{
-            if googlePlaceId != "" && googlePlaceId != nil {
-                // Google Place ID Exists
-                self.populatePlaceDetails(placeId: googlePlaceId)
-                self.fetchPostForPostLocation(placeId: googlePlaceId!)
-//            self.filterPostByLocation(location: CLLocation(latitude: self.selectedLat!, longitude: self.selectedLong!))
+            self.checkHasRestaurantLocation()
+            // Google Place ID Exists
+        }
+    }
+    
+    var hasRestaurantLocation: Bool = false
+    
+    var selectedLocation: CLLocation? {
+        didSet{
+            if selectedLocation?.coordinate.latitude == 0 && selectedLocation?.coordinate.longitude == 0 {
+                selectedLat = CurrentUser.currentLocation?.coordinate.latitude
+                selectedLong = CurrentUser.currentLocation?.coordinate.longitude
+                print("Selected Post Location: Nil, Using Current User Position: \(self.selectedLat), \(self.selectedLong)")
             } else {
-                // Google Place ID Doesnt Exist
-                self.fetchPostWithLocation(location: CLLocation(latitude: self.selectedLat!, longitude: self.selectedLong!))
-                self.googleLocationSearch(GPSLocation: CLLocation(latitude: self.selectedLat!, longitude: self.selectedLong!))
-                
+            selectedLat = selectedLocation?.coordinate.latitude
+            selectedLong = selectedLocation?.coordinate.longitude
+            }
+            self.checkHasRestaurantLocation()
+        }
+    }
+    
+    var selectedLong: Double? = 0
+    var selectedLat: Double? = 0
+    
+    var selectedName: String? {
+        didSet {
+            if selectedName != nil {
+                self.locationNameLabel.text = selectedName!
             }
         }
     }
-    var displayedPosts = [Post]()
-    var placesClient: GMSPlacesClient!
-
-    var selectedLong: Double? = 0
-    var selectedLat: Double? = 0
-    var selectedLocation: CLLocation?
-    
     var selectedAdress: String?
     
-    var marker = GMSMarker()
     
     lazy var scrollView: UIScrollView = {
         let view = UIScrollView()
@@ -88,11 +101,7 @@ class LocationController: UIViewController, UIScrollViewDelegate, UICollectionVi
     }()
     
     
-    lazy var map: GMSMapView = {
-        let mp = GMSMapView()
-        mp.mapType = .normal
-        return mp
-    }()
+
     
     func mapView(_ mapView: GMSMapView, didTap overlay: GMSOverlay) {
         mapView.delegate = self
@@ -100,72 +109,66 @@ class LocationController: UIViewController, UIScrollViewDelegate, UICollectionVi
         self.activateMap()
     }
     
-    let locationNameView: UIView = {
-        let view = UIView()
-        view.backgroundColor = UIColor.rgb(red: 128, green: 191, blue: 255)
-        return view
-    }()
-    
-    lazy var locationNameLabel: PaddedUILabel = {
-        let ul = PaddedUILabel()
-        ul.text = "Name: "
-        ul.font = UIFont.systemFont(ofSize: 12)
-        ul.backgroundColor = UIColor(white: 1, alpha: 0.75)
-        ul.layer.backgroundColor = UIColor.rgb(red: 128, green: 191, blue: 255).cgColor
-        ul.layer.borderWidth = 1
-        ul.layer.cornerRadius = 5
-        ul.layer.masksToBounds = true
+    func checkHasRestaurantLocation(){
+        self.hasRestaurantLocation = true
+
+        guard let googlePlaceId = googlePlaceId else {
+            self.hasRestaurantLocation = false
+            return
+        }
         
-        return ul
-    }()
+        if googlePlaceId == "" {
+            self.hasRestaurantLocation = false
+        }
+            
+        if selectedAdress != nil && selectedName != nil {
+           // If User uses Google to input adress, it will produce a GooglePlaceID, but won't be a location
+            if (selectedName?.length)! > 1 && (selectedAdress?.length)! > 1 && selectedName == selectedAdress {
+                self.hasRestaurantLocation = false
+            }
+        }
+
+        print("Restaurant Location Check: \(self.hasRestaurantLocation) : \(googlePlaceId)")
+    }
     
+    
+    
+// Location Detail Items
+    
+    let locationDetailRowHeight: CGFloat = 30
+    
+    // Google Place Variables
+    var placeName: String?
+    var placeOpeningHours: [JSON]?
+    var placePhoneNo: String?
+    var placeWebsite: String?
+    var placeGoogleRating: Double?
+    var placeOpenNow: Bool?
+    var placeGoogleMapUrl: String?
+    var placeDetailStackview = UIStackView()
+    
+    // Location Name
+    let locationNameView = UIView()
+    lazy var locationNameLabel = PaddedUILabel()
     let locationNameIcon: UIButton = {
         let button = UIButton()
         button.setImage(#imageLiteral(resourceName: "home").withRenderingMode(.alwaysOriginal), for: .normal)
         return button
     }()
     
-    let locationDistanceView: UIView = {
-        let view = UIView()
-        view.backgroundColor = UIColor.rgb(red: 128, green: 191, blue: 255)
-        return view
-    }()
-    
-    lazy var locationDistanceLabel: PaddedUILabel = {
-        let ul = PaddedUILabel()
-        ul.text = "Name: "
-        ul.isUserInteractionEnabled = true
-        ul.font = UIFont.systemFont(ofSize: 10)
-        ul.backgroundColor = UIColor(white: 1, alpha: 0.75)
-        ul.layer.backgroundColor = UIColor.rgb(red: 128, green: 191, blue: 255).cgColor
-        ul.layer.borderWidth = 0.5
-        ul.layer.cornerRadius = 5
-        ul.layer.masksToBounds = true
-        ul.addGestureRecognizer(UITapGestureRecognizer(target: self, action:  #selector(activateMap)))
-        return ul
-    }()
-    
-    let locationDistanceIcon: UIButton = {
+    // Location Adress
+    let locationAdressView = UIView()
+    lazy var locationAdressLabel = PaddedUILabel()
+    let locationAdressIcon: UIButton = {
         let button = UIButton()
         button.setImage(#imageLiteral(resourceName: "GeoFence").withRenderingMode(.alwaysOriginal), for: .normal)
         button.addTarget(self, action: #selector(activateMap), for: .touchUpInside)
         return button
     }()
 
-    let locationHoursView: UIView = {
-        let view = UIView()
-        view.backgroundColor = UIColor.clear
-        return view
-    }()
-    
-    lazy var locationHoursLabel: PaddedUILabel = {
-        let ul = PaddedUILabel()
-        ul.text = "Name: "
-        ul.isUserInteractionEnabled = true
-        ul.addGestureRecognizer(UITapGestureRecognizer(target: self, action:  #selector(locationHoursIconTapped)))
-        return ul
-    }()
-    
+    // Location Hours
+    let locationHoursView = UIView()
+    lazy var locationHoursLabel = PaddedUILabel()
     let locationHoursIcon: UIButton = {
         let button = UIButton()
         button.setImage(#imageLiteral(resourceName: "hours").withRenderingMode(.alwaysOriginal), for: .normal)
@@ -173,62 +176,57 @@ class LocationController: UIViewController, UIScrollViewDelegate, UICollectionVi
         return button
     }()
     
-    let locationPhoneView: UIView = {
-        let view = UIView()
-        view.backgroundColor = UIColor.clear
-        return view
-    }()
-    
-    lazy var locationPhoneLabel: PaddedUILabel = {
-        let ul = PaddedUILabel()
-        ul.text = "Name: "
-        ul.addGestureRecognizer(UITapGestureRecognizer(target: self, action:  #selector(activatePhone)))
-        
-        return ul
-    }()
-    
+    // Location Phone
+    let locationPhoneView = UIView()
+    lazy var locationPhoneLabel = PaddedUILabel()
     let locationPhoneIcon: UIButton = {
         let button = UIButton()
         button.setImage(#imageLiteral(resourceName: "phone").withRenderingMode(.alwaysOriginal), for: .normal)
         button.addTarget(self, action: #selector(activatePhone), for: .touchUpInside)
-        
         return button
     }()
     
-    let locationWebsiteView: UIView = {
-        let view = UIView()
-        view.backgroundColor = UIColor.clear
-        return view
-    }()
-    
-    lazy var locationWebsiteLabel: PaddedUILabel = {
-        let ul = PaddedUILabel()
-        ul.text = "Name: "
-        ul.addGestureRecognizer(UITapGestureRecognizer(target: self, action:  #selector(activateBrowser)))
-        return ul
-    }()
-    
+    // Location Website
+    let locationWebsiteView = UIView()
+    lazy var locationWebsiteLabel = PaddedUILabel()
     let locationWebsiteIcon: UIButton = {
         let button = UIButton()
         button.setImage(#imageLiteral(resourceName: "website").withRenderingMode(.alwaysOriginal), for: .normal)
         button.addTarget(self, action: #selector(activateBrowser), for: .touchUpInside)
         return button
     }()
+    
+    // Location Places Collection View
+    lazy var placesCollectionView : UICollectionView = {
+        let uploadLocationTagList = UploadLocationTagList()
+        let cv = UICollectionView(frame: .zero, collectionViewLayout: uploadLocationTagList)
+        cv.translatesAutoresizingMaskIntoConstraints = false
+        cv.delegate = self
+        cv.dataSource = self
+        cv.backgroundColor = UIColor(white: 0, alpha: 0.03)
+        return cv
+    }()
 
+// Location Detail Functions
     func locationHoursIconTapped(){
-        
         var timeString = "" as String
         for time in self.placeOpeningHours! {
             timeString = timeString + time.string! + "\n"
         }
-        
         self.alert(title: "Opening Hours", message: timeString)
     }
     
-    func activatePhone(){
-        guard let url = URL(string: "tel://\(self.placePhoneNo!)") else {
-            return //be safe
+    func activateMap() {
+        if (UIApplication.shared.canOpenURL(NSURL(string:"https://www.google.com/maps/search/?api=1&query=\(selectedLat!),\(selectedLong!)")! as URL)) {
+            UIApplication.shared.openURL(NSURL(string:
+                "https://www.google.com/maps/search/?api=1&query=\(selectedLat!),\(selectedLong!)")! as URL)
+        } else {
+            NSLog("Can't use comgooglemaps://");
         }
+    }
+    
+    func activatePhone(){
+        guard let url = URL(string: "tel://\(self.placePhoneNo!)") else {return}
         
         if #available(iOS 10.0, *) {
             UIApplication.shared.open(url, options: [:], completionHandler: nil)
@@ -238,16 +236,17 @@ class LocationController: UIViewController, UIScrollViewDelegate, UICollectionVi
     }
     
     func activateBrowser(){
-        guard let url = URL(string: self.placeWebsite!) else {
-            return //be safe
-        }
-        
+        guard let url = URL(string: self.placeWebsite!) else {return}
+
         if #available(iOS 10.0, *) {
             UIApplication.shared.open(url, options: [:], completionHandler: nil)
         } else {
             UIApplication.shared.openURL(url)
         }
     }
+    
+    
+// Collection View Title
     
     lazy var collectionViewTitleLabel: PaddedUILabel = {
         let ul = PaddedUILabel()
@@ -271,147 +270,20 @@ class LocationController: UIViewController, UIScrollViewDelegate, UICollectionVi
         cv.dataSource = self
         cv.backgroundColor = UIColor(white: 0, alpha: 0.03)
         cv.isScrollEnabled = false
+        cv.emptyDataSetSource = self
+        cv.emptyDataSetDelegate = self
         return cv
     }()
     
-    lazy var placesCollectionView : UICollectionView = {
-        let uploadLocationTagList = UploadLocationTagList()
-        let cv = UICollectionView(frame: .zero, collectionViewLayout: uploadLocationTagList)
-        cv.translatesAutoresizingMaskIntoConstraints = false
-        cv.delegate = self
-        cv.dataSource = self
-        cv.backgroundColor = UIColor(white: 0, alpha: 0.03)
-        return cv
-    }()
-    
-    
+
     func didTapPicture(post: Post) {
         let pictureController = PictureController(collectionViewLayout: UICollectionViewFlowLayout())
         pictureController.selectedPost = post
-        
         navigationController?.pushViewController(pictureController, animated: true)
     }
     
 
-    var placeName: String?
-    var placeOpeningHours: [JSON]?
-    var placePhoneNo: String?
-    var placeWebsite: String?
-    var placeGoogleRating: Double?
-    var placeOpenNow: Bool?
-    var placeGoogleMapUrl: String?
-    var placeDetailStackview = UIStackView()
-    
-    
-    func populatePlaceDetails(placeId: String?){
-        guard let placeId = placeId else {
-            print("Google Place Id is nil")
-            return
-        }
-
-        let URL_Search = "https://maps.googleapis.com/maps/api/place/details/json?"
-        let API_iOSKey = GoogleAPIKey()
-        
-//        https://maps.googleapis.com/maps/api/place/details/json?placeid=ChIJbd2OryfY3IARR6800Hij7-Q&key=AIzaSyAzwACZh50Qq1V5YYKpmfN21mZs8dW6210
-        
-        let urlString = "\(URL_Search)placeid=\(placeId)&key=\(API_iOSKey)"
-        let url = URL(string: urlString)!
-        print("Google Places URL: ",urlString)
-
-//        print("Place Cache for postid: ", placeId, placeCache[placeId])
-        if let result = placeCache[placeId] {
-//            print("Using Place Cache for placeId: ", placeId)
-            self.extractPlaceDetails(fetchedResults: result)
-        } else {
-        
-        Alamofire.request(url).responseJSON { (response) -> Void in
-//                        print("Google Response: ",response)
-            if let value  = response.result.value {
-                let json = JSON(value)
-                let result = json["result"]
-
-                placeCache[placeId] = result
-                self.extractPlaceDetails(fetchedResults: result)
-                }
-            }
-        }
-    }
-    
-    func extractPlaceDetails(fetchedResults: JSON){
-        
-        let result = fetchedResults
-//        print("Fetched Results: ",result)
-        if result["place_id"].string != nil {
-            
-            self.placeName = result["name"].string ?? ""
-//            print("place Name: ", self.placeName)
-            self.locationNameLabel.text = self.placeName
-            self.navigationItem.title = self.placeName
-            
-            self.placeOpeningHours = result["opening_hours"]["weekday_text"].arrayValue
-//            print("placeOpeningHours: ", self.placeOpeningHours)
-            
-            let today = Date()
-            let myCalendar = Calendar(identifier: .gregorian)
-            let weekDay = myCalendar.component(.weekday, from: today)
-            
-            var hourIndex: Int?
-            if weekDay == 1 {
-                hourIndex = 6
-            } else {
-                hourIndex = weekDay - 2
-            }
-            
-            self.placeOpenNow = result["open_now"].boolValue ?? false
-//            print("placeOpenNow: ", self.placeOpenNow)
-            
-            if self.placeOpeningHours! != [] {
-                let todayHours = String(describing: (self.placeOpeningHours?[hourIndex!])!)
-                    self.locationHoursLabel.text = todayHours
-                
-            if self.placeOpenNow! {
-                // If Open Now
-                var attributedText = NSMutableAttributedString(string: todayHours, attributes: [NSFontAttributeName: UIFont.boldSystemFont(ofSize: 12),NSForegroundColorAttributeName: UIColor.mainBlue()])
-                attributedText.append(NSMutableAttributedString(string: " (Open Now)", attributes: [NSFontAttributeName: UIFont.boldSystemFont(ofSize: 12),NSForegroundColorAttributeName: UIColor.rgb(red: 0, green: 153, blue: 51)]))
-                self.locationHoursLabel.attributedText = attributedText
-            } else {
-                var attributedText = NSMutableAttributedString(string: todayHours, attributes: [NSFontAttributeName: UIFont.systemFont(ofSize: 12),NSForegroundColorAttributeName: UIColor.black])
-                attributedText.append(NSMutableAttributedString(string: " (Closed)", attributes: [NSFontAttributeName: UIFont.boldSystemFont(ofSize: 12),NSForegroundColorAttributeName: UIColor.red]))
-                self.locationHoursLabel.attributedText = attributedText
-            }
-            } else {
-                // No Opening Hours from Google
-                self.locationHoursLabel.text = ""
-                
-            }
-        
-            self.placePhoneNo = result["formatted_phone_number"].string ?? ""
-//            print("placePhoneNo: ", self.placePhoneNo)
-            self.locationPhoneLabel.text = self.placePhoneNo
-            
-            self.placeWebsite = result["website"].string ?? ""
-//            print("placeWebsite: ", self.placeWebsite)
-            self.locationWebsiteLabel.text = self.placeWebsite
-            
-            self.placeGoogleRating = result["rating"].double ?? 0
-//            print("placeGoogleRating: ", self.placeGoogleRating)
-            
-            self.placeGoogleMapUrl = result["url"].string!
-            
-            self.selectedLong = result["geometry"]["location"]["lat"].double ?? 0
-            self.selectedLat = result["geometry"]["location"]["lng"].double ?? 0
-            self.selectedLocation = CLLocation(latitude: self.selectedLat!, longitude: self.selectedLong!)
-            self.refreshMap(long: self.selectedLat!, lat: self.selectedLong!)
-            
-            self.selectedAdress = result["formatted_address"].string ?? ""
-            self.locationDistanceLabel.text = self.selectedAdress
-            
-            
-        } else {
-            print("Failed to extract Google Place Details")
-        }
-    }
-    
+ 
     
     func updateAdressLabel() {
         
@@ -429,85 +301,149 @@ class LocationController: UIViewController, UIScrollViewDelegate, UICollectionVi
         if locationDistance < 1000 {
             var attributedString = NSMutableAttributedString(string: " \(adressString)", attributes: [NSFontAttributeName: UIFont.systemFont(ofSize: 12),NSForegroundColorAttributeName: UIColor.black])
             attributedString.append(NSMutableAttributedString(string: " (\(locationDistance.format(f: distanceformat)) KM)", attributes: [NSFontAttributeName: UIFont.boldSystemFont(ofSize: 12),NSForegroundColorAttributeName: UIColor.mainBlue()]))
-            self.locationDistanceLabel.attributedText = attributedString
+            self.locationAdressLabel.attributedText = attributedString
         }
     }
     
-    
+
     
     override func viewDidLoad() {
         super.viewDidLoad()
     
+        setupNavigationItems()
+        if CurrentUser.currentLocation == nil {
+            LocationSingleton.sharedInstance.determineCurrentLocation()
+        }
 
-// Created a temp uiview and pinned all labels/map/pics onto temp uiview
-// Created scrollview and pinned temp uiview on top of scroll view
-// Added ScrollView onto view
+    // Created a temp uiview and pinned all labels/map/pics onto temp uiview
+    // Created scrollview and pinned temp uiview on top of scroll view
+    // Added ScrollView onto view
         
-        LocationSingleton.sharedInstance.determineCurrentLocation()
-
         scrollView.frame = view.bounds
         scrollView.backgroundColor = UIColor.white
         scrollView.isScrollEnabled = true
         scrollView.showsVerticalScrollIndicator = true
         scrollView.contentSize = CGSize(width: view.bounds.width, height: view.bounds.height * 2)
+        self.view.addSubview(scrollView)
+
+        scrollView.addSubview(tempView)
+        tempView.anchor(top: scrollView.topAnchor, left: view.leftAnchor, bottom: scrollView.bottomAnchor, right: view.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
         
+        
+    // Place Details View
         tempView.addSubview(placeDetailsView)
-        placeDetailsView.anchor(top: tempView.topAnchor, left: tempView.leftAnchor, bottom: nil, right: tempView.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 5 * (30 + 2 + 2))
+        placeDetailsView.anchor(top: tempView.topAnchor, left: tempView.leftAnchor, bottom: nil, right: tempView.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 4 * (locationDetailRowHeight + 2 + 2))
         
-        // Location Adress Label
-        setupLocationLabels(containerview: locationDistanceView, icon: locationDistanceIcon, label: locationDistanceLabel)
-        tempView.addSubview(locationDistanceView)
-        locationDistanceView.anchor(top: nil, left: placeDetailsView.leftAnchor, bottom: placeDetailsView.bottomAnchor, right: placeDetailsView.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 30 + 2 + 2)
-        
-        // Location Name Label
-        placeDetailsView.addSubview(locationNameView)
-        locationNameView.anchor(top: nil, left: placeDetailsView.leftAnchor, bottom: locationDistanceView.topAnchor, right: placeDetailsView.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 30 + 2 + 2)
-        
-        let buttonStackView = UIStackView(arrangedSubviews: [locationHoursIcon, locationPhoneIcon,locationWebsiteIcon])
-        buttonStackView.distribution = .fillEqually
-        
-        locationNameView.addSubview(locationNameIcon)
-        locationNameView.addSubview(locationNameLabel)
-        locationNameView.addSubview(buttonStackView)
-        
-        buttonStackView.anchor(top: locationNameView.topAnchor, left: nil, bottom: locationNameView.bottomAnchor, right: locationNameView.rightAnchor, paddingTop: 2, paddingLeft: 5, paddingBottom: 2, paddingRight: 15, width: 90, height: 0)
-        
-        locationNameIcon.anchor(top: locationNameView.topAnchor, left: locationNameView.leftAnchor, bottom: locationNameView.bottomAnchor, right: nil, paddingTop: 2, paddingLeft: 15, paddingBottom: 2, paddingRight: 5, width: 30, height: 30)
-        
-        locationNameLabel.anchor(top: locationNameView.topAnchor, left: locationNameIcon.rightAnchor, bottom: locationNameView.bottomAnchor, right: buttonStackView.leftAnchor, paddingTop: 2, paddingLeft: 15, paddingBottom: 2, paddingRight: 5, width: 0, height: 0)
-        
-        // Add Map
-        placeDetailsView.addSubview(map)
-        map.anchor(top: placeDetailsView.topAnchor, left: placeDetailsView.leftAnchor, bottom: locationNameView.topAnchor, right: placeDetailsView.rightAnchor, paddingTop: 1, paddingLeft: 1, paddingBottom: 0, paddingRight: 1, width: 0, height: 0)
-        map.delegate = self
-        
-        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(activateMap))
-        tapGesture.numberOfTapsRequired = 1
-        
-        map.addGestureRecognizer(tapGesture)
-        map.isUserInteractionEnabled = true
-        
-        if self.selectedLong != nil && self.selectedLat != nil {
-            self.refreshMap(long: self.selectedLong!, lat: self.selectedLat!)
-        }
-        
+    // CollectionView Title Header
         tempView.addSubview(collectionViewTitleLabel)
         collectionViewTitleLabel.anchor(top: placeDetailsView.bottomAnchor, left: tempView.leftAnchor, bottom: nil, right: tempView.rightAnchor, paddingTop: 10, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 20)
-        
         
         let bottomDividerView = UIView()
         bottomDividerView.backgroundColor = UIColor.white
         tempView.addSubview(bottomDividerView)
         bottomDividerView.anchor(top: collectionViewTitleLabel.bottomAnchor, left: tempView.leftAnchor, bottom: nil, right: tempView.rightAnchor, paddingTop: 5, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0.5)
         
+    // Photo CollectionView
+        
         tempView.addSubview(photoCollectionView)
         photoCollectionView.anchor(top: bottomDividerView.bottomAnchor, left: tempView.leftAnchor, bottom: tempView.bottomAnchor, right: tempView.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 500)
         photoCollectionView.register(UserProfilePhotoCell.self, forCellWithReuseIdentifier: photoCellId)
         
-        scrollView.addSubview(tempView)
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        
+        if hasRestaurantLocation{
+            print("Google Location: \(self.googlePlaceId)")
+            setupPlaceDetailStackview()
+            self.populatePlaceDetails(placeId: googlePlaceId)
+            self.fetchPostForPostLocation(placeId: googlePlaceId!)
+        } else {
+            print("Google Location: No Location: (\(self.selectedLat), \(self.selectedLong))")
+            setupNoLocationView()
+            self.googleLocationSearch(GPSLocation: CLLocation(latitude: self.selectedLat!, longitude: self.selectedLong!))
+            self.fetchPostWithLocation(location: CLLocation(latitude: self.selectedLat!, longitude: self.selectedLong!))
+        }
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        // Helps with Memory usage for Map View
+        map?.clear()
+        map?.stopRendering()
+        map?.removeFromSuperview()
+        map?.delegate = nil
+        map = nil
+    }
+    
+    func setupNoLocationView(){
+        
+    // Add Suggested Places CollectionView
 
-        self.view.addSubview(scrollView)
-        tempView.anchor(top: scrollView.topAnchor, left: view.leftAnchor, bottom: scrollView.bottomAnchor, right: view.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
+        placesCollectionView.delegate = self
+        placesCollectionView.dataSource = self
+        placesCollectionView.showsHorizontalScrollIndicator = false
+        
+        tempView.addSubview(placesCollectionView)
+        placesCollectionView.anchor(top: nil, left: placeDetailsView.leftAnchor, bottom: placeDetailsView.bottomAnchor, right: placeDetailsView.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: locationDetailRowHeight)
+        placesCollectionView.backgroundColor = UIColor.rgb(red: 128, green: 191, blue: 255)
+        placesCollectionView.register(UploadLocationCell.self, forCellWithReuseIdentifier: locationCellId)
+
+        setupLocationLabels(containerview: locationNameView, icon: locationNameIcon, label: locationNameLabel)
+        tempView.addSubview(locationNameView)
+        locationNameView.anchor(top: nil, left: placeDetailsView.leftAnchor, bottom: placesCollectionView.topAnchor, right: placeDetailsView.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: locationDetailRowHeight)
+        
+        locationNameLabel.text = self.selectedName ?? ""
+    
+    // Add Map
+        
+        let camera = GMSCameraPosition.camera(withLatitude: self.selectedLat!, longitude: self.selectedLong!, zoom: 15)
+        map = GMSMapView.map(withFrame: CGRect.zero, camera: camera)
+        map?.mapType = .normal
+        
+        // Add Marker
+        let position = CLLocationCoordinate2DMake(self.selectedLat!, self.selectedLong!)
+        let marker = GMSMarker(position: position)
+        marker.title = "Hello World"
+        marker.isDraggable = false
+        marker.appearAnimation = .pop
+        marker.map = self.map
+        marker.tracksViewChanges = false
+        
+        tempView.addSubview(map!)
+        map?.anchor(top: placeDetailsView.topAnchor, left: placeDetailsView.leftAnchor, bottom: locationNameView.topAnchor, right: placeDetailsView.rightAnchor, paddingTop: 1, paddingLeft: 1, paddingBottom: 0, paddingRight: 1, width: 0, height: 0)
+        map?.delegate = self
+
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(activateMap))
+        tapGesture.numberOfTapsRequired = 1
+
+        map?.addGestureRecognizer(tapGesture)
+        map?.isUserInteractionEnabled = true
+        
+        collectionViewTitleLabel.text = "Photos Around Location"
+        
+    }
+    
+    func setupPlaceDetailStackview(){
+        
+        setupLocationLabels(containerview: locationNameView, icon: locationNameIcon, label: locationNameLabel)
+        setupLocationLabels(containerview: locationHoursView, icon: locationHoursIcon, label: locationHoursLabel)
+        setupLocationLabels(containerview: locationPhoneView, icon: locationPhoneIcon, label: locationPhoneLabel)
+        setupLocationLabels(containerview: locationAdressView, icon: locationAdressIcon, label: locationAdressLabel)
+        
+        // Add Gesture Recognizers
+        locationAdressLabel.addGestureRecognizer(UITapGestureRecognizer(target: self, action:  #selector(activateMap)))
+        locationHoursLabel.addGestureRecognizer(UITapGestureRecognizer(target: self, action:  #selector(locationHoursIconTapped)))
+        locationPhoneLabel.addGestureRecognizer(UITapGestureRecognizer(target: self, action:  #selector(activatePhone)))
+        
+        placeDetailStackview = UIStackView(arrangedSubviews: [locationNameView, locationHoursView, locationAdressView, locationPhoneView])
+        placeDetailStackview.distribution = .fillEqually
+        placeDetailStackview.axis = .vertical
+        
+        tempView.addSubview(placeDetailStackview)
+        placeDetailStackview.anchor(top: placeDetailsView.topAnchor, left: placeDetailsView.leftAnchor, bottom: placeDetailsView.bottomAnchor, right: placeDetailsView.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
+    }
+    
+    func setupNavigationItems(){
         
         let tapGestureMsg = UITapGestureRecognizer(target: self, action: #selector(didTapNavMessage))
         tapGestureMsg.numberOfTapsRequired = 1
@@ -518,90 +454,68 @@ class LocationController: UIViewController, UIScrollViewDelegate, UICollectionVi
         rangeImageButton.sizeToFit()
         rangeImageButton.backgroundColor = UIColor.clear
         rangeImageButton.addGestureRecognizer(tapGestureMsg)
-
+        
         let rangeBarButton = UIBarButtonItem.init(customView: rangeImageButton)
         navigationItem.rightBarButtonItem = rangeBarButton
-
-        
-        if googlePlaceId != ""{
-            self.populatePlaceDetails(placeId: self.googlePlaceId)
-        } else{
-            self.googleLocationSearch(GPSLocation: CLLocation(latitude: self.selectedLat!, longitude: self.selectedLong!))
-            
-            tempView.addSubview(placesCollectionView)
-            placesCollectionView.anchor(top: locationNameView.topAnchor, left: locationNameView.leftAnchor, bottom: locationNameView.bottomAnchor, right: locationNameView.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
-            placesCollectionView.backgroundColor = UIColor.rgb(red: 128, green: 191, blue: 255)
-            placesCollectionView.register(UploadLocationCell.self, forCellWithReuseIdentifier: locationCellId)
-            
-            placesCollectionView.delegate = self
-            placesCollectionView.dataSource = self
-            placesCollectionView.showsHorizontalScrollIndicator = false
-            
-            collectionViewTitleLabel.text = "Photos Around Location"
-            self.placesCollectionView.reloadData()
-            self.photoCollectionView.reloadData()
-
-        }
-        
-        // Location Posts Fetching functions are called on the top when posts and googleplaceids are set
-        
     }
-    
-    func setupPlaceDetailStackview(){
-        
-        setupLocationLabels(containerview: locationNameView, icon: locationNameIcon, label: locationNameLabel)
-        setupLocationLabels(containerview: locationHoursView, icon: locationHoursIcon, label: locationHoursLabel)
-        setupLocationLabels(containerview: locationPhoneView, icon: locationPhoneIcon, label: locationPhoneLabel)
-        setupLocationLabels(containerview: locationWebsiteView, icon: locationWebsiteIcon, label: locationWebsiteLabel)
-        setupLocationLabels(containerview: locationDistanceView, icon: locationDistanceIcon, label: locationDistanceLabel)
-        
-        placeDetailStackview = UIStackView(arrangedSubviews: [locationNameView, locationHoursView, locationPhoneView, locationWebsiteView, locationDistanceView])
-        placeDetailStackview.distribution = .fillEqually
-        placeDetailStackview.axis = .vertical
-   
-    }
-    
+
     
     var noIdView = UIView()
     
-    func showNoPlaceIDStackview(){
-
-        noIdView.addSubview(locationDistanceView)
-        locationDistanceView.anchor(top: nil, left: noIdView.leftAnchor, bottom: noIdView.bottomAnchor, right: noIdView.rightAnchor, paddingTop: 2, paddingLeft: 0, paddingBottom: 2, paddingRight: 0, width: 0, height: 35)
+//    func showNoPlaceIDStackview(){
+//
+//        noIdView.addSubview(locationAdressView)
+//        locationAdressView.anchor(top: nil, left: noIdView.leftAnchor, bottom: noIdView.bottomAnchor, right: noIdView.rightAnchor, paddingTop: 2, paddingLeft: 0, paddingBottom: 2, paddingRight: 0, width: 0, height: 35)
+//
+//        noIdView.addSubview(locationNameIcon)
+//        locationNameIcon.anchor(top: nil, left: noIdView.leftAnchor, bottom: locationAdressView.topAnchor, right: nil, paddingTop: 2, paddingLeft: 15, paddingBottom: 2, paddingRight: 5, width: 30, height: 30)
+//
+//        noIdView.addSubview(placesCollectionView)
+//        placesCollectionView.anchor(top: nil, left: locationNameIcon.rightAnchor, bottom: locationAdressView.topAnchor, right: noIdView.rightAnchor, paddingTop: 2, paddingLeft: 5, paddingBottom: 2, paddingRight: 5, width: 0, height: 40)
+//        placesCollectionView.backgroundColor = UIColor.white
+//        placesCollectionView.register(UploadLocationCell.self, forCellWithReuseIdentifier: locationCellId)
+//        placesCollectionView.delegate = self
+//        placesCollectionView.dataSource = self
+//
+//        noIdView.addSubview(map)
+//        map.anchor(top: noIdView.topAnchor, left: noIdView.leftAnchor, bottom: placesCollectionView.topAnchor, right: noIdView.rightAnchor, paddingTop: 1, paddingLeft: 1, paddingBottom: 0, paddingRight: 1, width: 0, height: 0)
+//        map.delegate = self
+//
+//        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(activateMap))
+//        tapGesture.numberOfTapsRequired = 1
+//
+//        map.addGestureRecognizer(tapGesture)
+//        map.isUserInteractionEnabled = true
+//        self.refreshMap(long: self.selectedLong!, lat: self.selectedLat!)
+//        //        map.heightAnchor.constraint(equalTo: map.widthAnchor, multiplier: 1).isActive = true
+//
+//    }
+    
+    func refreshMap(long: Double, lat: Double) -> (){
+        self.map?.clear()
         
-        noIdView.addSubview(locationNameIcon)
-        locationNameIcon.anchor(top: nil, left: noIdView.leftAnchor, bottom: locationDistanceView.topAnchor, right: nil, paddingTop: 2, paddingLeft: 15, paddingBottom: 2, paddingRight: 5, width: 30, height: 30)
+        let camera = GMSCameraPosition.camera(withLatitude: lat, longitude: long, zoom: 16)
+        print("refresh map", camera)
+        self.map?.camera = camera
         
-        noIdView.addSubview(placesCollectionView)
-        placesCollectionView.anchor(top: nil, left: locationNameIcon.rightAnchor, bottom: locationDistanceView.topAnchor, right: noIdView.rightAnchor, paddingTop: 2, paddingLeft: 5, paddingBottom: 2, paddingRight: 5, width: 0, height: 40)
-        placesCollectionView.backgroundColor = UIColor.white
-        placesCollectionView.register(UploadLocationCell.self, forCellWithReuseIdentifier: locationCellId)
-        placesCollectionView.delegate = self
-        placesCollectionView.dataSource = self
-        
-        noIdView.addSubview(map)
-        map.anchor(top: noIdView.topAnchor, left: noIdView.leftAnchor, bottom: placesCollectionView.topAnchor, right: noIdView.rightAnchor, paddingTop: 1, paddingLeft: 1, paddingBottom: 0, paddingRight: 1, width: 0, height: 0)
-        map.delegate = self
-        
-        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(activateMap))
-        tapGesture.numberOfTapsRequired = 1
-        
-        map.addGestureRecognizer(tapGesture)
-        map.isUserInteractionEnabled = true
-        self.refreshMap(long: self.selectedLong!, lat: self.selectedLat!)
-        //        map.heightAnchor.constraint(equalTo: map.widthAnchor, multiplier: 1).isActive = true
-        
-        
-
-
+        let position = CLLocationCoordinate2DMake(lat, long)
+        let marker = GMSMarker(position: position)
+        print("Marker GPS, ", marker)
+        marker.title = "Hello World"
+        marker.isDraggable = false
+        marker.appearAnimation = .pop
+        marker.map = self.map
+        marker.tracksViewChanges = false
     }
+    
     
     func setupLocationLabels(containerview: UIView, icon: UIButton, label: UILabel){
         containerview.addSubview(icon)
         containerview.addSubview(label)
         containerview.backgroundColor = UIColor.rgb(red: 128, green: 191, blue: 255)
         
-        icon.anchor(top: containerview.topAnchor, left: containerview.leftAnchor, bottom: containerview.bottomAnchor, right: nil, paddingTop: 2, paddingLeft: 15, paddingBottom: 2, paddingRight: 5, width: 30, height: 30)
+        //Icon Height Anchor determines row height
+        icon.anchor(top: containerview.topAnchor, left: containerview.leftAnchor, bottom: containerview.bottomAnchor, right: nil, paddingTop: 2, paddingLeft: 15, paddingBottom: 2, paddingRight: 5, width: locationDetailRowHeight, height: locationDetailRowHeight)
         //        icon.widthAnchor.constraint(equalTo: locationNameIcon.heightAnchor, multiplier: 1)
         
         label.anchor(top: containerview.topAnchor, left: icon.rightAnchor, bottom: containerview.bottomAnchor, right: containerview.rightAnchor, paddingTop: 2, paddingLeft: 15, paddingBottom: 2, paddingRight: 15, width: 0, height: 0)
@@ -610,20 +524,13 @@ class LocationController: UIViewController, UIScrollViewDelegate, UICollectionVi
         label.backgroundColor = UIColor(white: 1, alpha: 0.75)
         label.layer.borderWidth = 0.5
         label.layer.cornerRadius = 5
+        label.layer.masksToBounds = true
+        label.isUserInteractionEnabled = true
     }
     
     
     
-    func activateMap() {
-        if (UIApplication.shared.canOpenURL(NSURL(string:"https://www.google.com/maps/search/?api=1&query=\(selectedLat!),\(selectedLong!)")! as URL)) {
-            UIApplication.shared.openURL(NSURL(string:
-                "https://www.google.com/maps/search/?api=1&query=\(selectedLat!),\(selectedLong!)")! as URL)
-            
-        } else {
 
-            NSLog("Can't use comgooglemaps://");
-        }
-    }
     
 
      func didTapNavMessage() {
@@ -647,10 +554,6 @@ class LocationController: UIViewController, UIScrollViewDelegate, UICollectionVi
         
     }
     
-    override func viewDidLayoutSubviews() {
-
-        
-    }
     
     func fetchPostForPostLocation(placeId:String){
         
@@ -673,7 +576,7 @@ class LocationController: UIViewController, UIScrollViewDelegate, UICollectionVi
         Database.fetchAllPostWithLocation(location: location, distance: 25) { (fetchedPosts) in
 
             self.displayedPosts = fetchedPosts
-            print("Fetching Post with Location: \(location)")
+            print("Fetched Post with Location: \(location) : \(self.displayedPosts.count) Posts")
             self.photoCollectionView.reloadData()
         }
         
@@ -683,31 +586,13 @@ class LocationController: UIViewController, UIScrollViewDelegate, UICollectionVi
         print("Searching Posts by Google Place ID: ", googlePlaceID)
         Database.fetchAllPostWithGooglePlaceID(googlePlaceId: googlePlaceID) { (fetchedPosts) in
             self.displayedPosts = fetchedPosts
-            print("Fetching Post with googlePlaceId: \(googlePlaceID)")
+            print("Fetching Post with googlePlaceId: \(googlePlaceID) : \(self.displayedPosts.count) Posts")
             self.photoCollectionView.reloadData()
         }
         
     }
     
-    func refreshMap(long: Double, lat: Double) -> (){
-        
-        self.map.clear()
-        
-        let camera = GMSCameraPosition.camera(withLatitude: lat, longitude: long, zoom: 13)
-        print("refresh map", camera)
-        self.map.camera = camera
-        
-        let position = CLLocationCoordinate2DMake(lat, long)
-        let marker = GMSMarker(position: position)
-        print("Marker GPS, ", marker)
-        marker.title = "Hello World"
-        marker.isDraggable = false
-        marker.appearAnimation = .pop
-        
-        marker.map = self.map
-        
-        
-    }
+
     
     func filterPostByLocation(location: CLLocation){
         
@@ -795,6 +680,7 @@ class LocationController: UIViewController, UIScrollViewDelegate, UICollectionVi
             let locationController = LocationController()
             print(googlePlaceIDs[indexPath.row])
             locationController.googlePlaceId = googlePlaceIDs[indexPath.item]
+            locationController.selectedName = googlePlaceNames[indexPath.item]
             navigationController?.pushViewController(locationController, animated: true)
             
         }
@@ -862,36 +748,235 @@ class LocationController: UIViewController, UIScrollViewDelegate, UICollectionVi
         }
         
     }
+    
+    
+    // EMPTY DATA SET DELEGATES
+    
+    func title(forEmptyDataSet scrollView: UIScrollView) -> NSAttributedString? {
+        
+        var text: String?
+        var font: UIFont?
+        var textColor: UIColor?
+        
+        if let name = self.selectedName {
+            text = "No Photos From \(self.selectedName!)"
+        } else {
+            text = "No Photos From Location"
+        }
 
-//    // LOCATION MANAGER DELEGATE METHODS
-//
-//    func determineCurrentLocation(){
-//
-//        CurrentUser.currentLocation = nil
-//        locationManager.delegate = self
-//        if CLLocationManager.locationServicesEnabled() {
-//            locationManager.startUpdatingLocation()
-//        }
-//    }
-//
-//    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-//        let userLocation:CLLocation = locations[0] as CLLocation
-//
-//        if userLocation != nil {
-//            print("Current User Location", userLocation)
-//            CurrentUser.currentLocation = userLocation
-//            manager.stopUpdatingLocation()
-//            updateAdressLabel()
-//        }
-//    }
-//
-//    func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
-//        print("GPS Location Not Found")
-//    }
+        font = UIFont.boldSystemFont(ofSize: 17.0)
+        textColor = UIColor(hexColor: "25282b")
+        
+        if text == nil {
+            return nil
+        }
+        
+        return NSMutableAttributedString(string: text!, attributes: [NSFontAttributeName: font, NSForegroundColorAttributeName: textColor])
+        
+    }
+    
+    func description(forEmptyDataSet scrollView: UIScrollView) -> NSAttributedString? {
+        
+        var text: String?
+        var font: UIFont?
+        var textColor: UIColor?
+        
+        text = nil
+
+        font = UIFont.boldSystemFont(ofSize: 13.0)
+        textColor = UIColor(hexColor: "7b8994")
+        
+        if text == nil {
+            return nil
+        }
+        
+        return NSMutableAttributedString(string: text!, attributes: [NSFontAttributeName: font, NSForegroundColorAttributeName: textColor])
+        
+    }
+    
+    func verticalOffset(forEmptyDataSet scrollView: UIScrollView) -> CGFloat {
+        return -100
+    }
+    
+    func image(forEmptyDataSet scrollView: UIScrollView) -> UIImage? {
+        return #imageLiteral(resourceName: "emptydataset")
+    }
+    
+    
+    func buttonTitle(forEmptyDataSet scrollView: UIScrollView, for state: UIControlState) -> NSAttributedString? {
+        
+        var text: String?
+        var font: UIFont?
+        var textColor: UIColor?
+        
+        text = "Search Nearby"
+
+        font = UIFont.boldSystemFont(ofSize: 14.0)
+        textColor = UIColor(hexColor: "00aeef")
+        
+        if text == nil {
+            return nil
+        }
+        
+        return NSMutableAttributedString(string: text!, attributes: [NSFontAttributeName: font, NSForegroundColorAttributeName: textColor])
+        
+    }
+    
+    func buttonBackgroundImage(forEmptyDataSet scrollView: UIScrollView, for state: UIControlState) -> UIImage? {
+        
+        var capInsets = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
+        var rectInsets = UIEdgeInsets.zero
+        
+        capInsets = UIEdgeInsets(top: 25, left: 25, bottom: 25, right: 25)
+        rectInsets = UIEdgeInsets(top: 0, left: 10, bottom: 0, right: 10)
+        
+        let image = #imageLiteral(resourceName: "emptydatasetbutton")
+        return image.resizableImage(withCapInsets: capInsets, resizingMode: .stretch).withAlignmentRectInsets(rectInsets)
+    }
+    
+    func backgroundColor(forEmptyDataSet scrollView: UIScrollView) -> UIColor? {
+        return UIColor(hexColor: "fcfcfa")
+    }
+    
+    func emptyDataSet(_ scrollView: UIScrollView, didTapButton button: UIButton) {
+       
+        let locationController = LocationController()
+        locationController.selectedLocation = self.selectedLocation
+        locationController.selectedName = self.selectedAdress
+        
+        navigationController?.pushViewController(locationController, animated: true)
+        
+    }
+    
+    func emptyDataSet(_ scrollView: UIScrollView, didTapView view: UIView) {
+    }
+    
+    //    func verticalOffset(forEmptyDataSet scrollView: UIScrollView) -> CGFloat {
+    //        let offset = (self.collectionView?.frame.height)! / 5
+    //            return -50
+    //    }
+    
+    func spaceHeight(forEmptyDataSet scrollView: UIScrollView) -> CGFloat {
+        return 0
+    }
+
+    
+// Google Location Search Functions
+    
+    func populatePlaceDetails(placeId: String?){
+        guard let placeId = placeId else {
+            print("Google Place Id is nil")
+            return
+        }
+        
+        let URL_Search = "https://maps.googleapis.com/maps/api/place/details/json?"
+        let API_iOSKey = GoogleAPIKey()
+        
+        //        https://maps.googleapis.com/maps/api/place/details/json?placeid=ChIJbd2OryfY3IARR6800Hij7-Q&key=AIzaSyAzwACZh50Qq1V5YYKpmfN21mZs8dW6210
+        
+        let urlString = "\(URL_Search)placeid=\(placeId)&key=\(API_iOSKey)"
+        let url = URL(string: urlString)!
+        print("Google Places URL: ",urlString)
+        
+        //        print("Place Cache for postid: ", placeId, placeCache[placeId])
+        if let result = placeCache[placeId] {
+            //            print("Using Place Cache for placeId: ", placeId)
+            self.extractPlaceDetails(fetchedResults: result)
+        } else {
+            
+            Alamofire.request(url).responseJSON { (response) -> Void in
+                //                        print("Google Response: ",response)
+                if let value  = response.result.value {
+                    let json = JSON(value)
+                    let result = json["result"]
+                    
+                    placeCache[placeId] = result
+                    self.extractPlaceDetails(fetchedResults: result)
+                }
+            }
+        }
+    }
+    
+    func extractPlaceDetails(fetchedResults: JSON){
+        
+        let result = fetchedResults
+        //        print("Fetched Results: ",result)
+        if result["place_id"].string != nil {
+            
+            self.placeName = result["name"].string ?? ""
+            //            print("place Name: ", self.placeName)
+            self.locationNameLabel.text = self.placeName
+            self.selectedName = self.placeName
+            self.navigationItem.title = self.placeName
+            
+            self.placeOpeningHours = result["opening_hours"]["weekday_text"].arrayValue
+            //            print("placeOpeningHours: ", self.placeOpeningHours)
+            
+            let today = Date()
+            let myCalendar = Calendar(identifier: .gregorian)
+            let weekDay = myCalendar.component(.weekday, from: today)
+            
+            var hourIndex: Int?
+            if weekDay == 1 {
+                hourIndex = 6
+            } else {
+                hourIndex = weekDay - 2
+            }
+            
+            self.placeOpenNow = result["open_now"].boolValue ?? false
+            //            print("placeOpenNow: ", self.placeOpenNow)
+            
+            if self.placeOpeningHours! != [] {
+                let todayHours = String(describing: (self.placeOpeningHours?[hourIndex!])!)
+                self.locationHoursLabel.text = todayHours
+                
+                if self.placeOpenNow! {
+                    // If Open Now
+                    var attributedText = NSMutableAttributedString(string: todayHours, attributes: [NSFontAttributeName: UIFont.boldSystemFont(ofSize: 12),NSForegroundColorAttributeName: UIColor.mainBlue()])
+                    attributedText.append(NSMutableAttributedString(string: " (Open Now)", attributes: [NSFontAttributeName: UIFont.boldSystemFont(ofSize: 12),NSForegroundColorAttributeName: UIColor.rgb(red: 0, green: 153, blue: 51)]))
+                    self.locationHoursLabel.attributedText = attributedText
+                } else {
+                    var attributedText = NSMutableAttributedString(string: todayHours, attributes: [NSFontAttributeName: UIFont.systemFont(ofSize: 12),NSForegroundColorAttributeName: UIColor.black])
+                    attributedText.append(NSMutableAttributedString(string: " (Closed)", attributes: [NSFontAttributeName: UIFont.boldSystemFont(ofSize: 12),NSForegroundColorAttributeName: UIColor.red]))
+                    self.locationHoursLabel.attributedText = attributedText
+                }
+            } else {
+                // No Opening Hours from Google
+                self.locationHoursLabel.text = ""
+                
+            }
+            
+            self.placePhoneNo = result["formatted_phone_number"].string ?? ""
+            //            print("placePhoneNo: ", self.placePhoneNo)
+            self.locationPhoneLabel.text = self.placePhoneNo
+            
+            self.placeWebsite = result["website"].string ?? ""
+            //            print("placeWebsite: ", self.placeWebsite)
+            self.locationWebsiteLabel.text = self.placeWebsite
+            
+            self.placeGoogleRating = result["rating"].double ?? 0
+            //            print("placeGoogleRating: ", self.placeGoogleRating)
+            
+            self.placeGoogleMapUrl = result["url"].string!
+            
+            self.selectedLong = result["geometry"]["location"]["lng"].double ?? 0
+            self.selectedLat = result["geometry"]["location"]["lat"].double ?? 0
+            self.selectedLocation = CLLocation(latitude: self.selectedLat!, longitude: self.selectedLong!)
+            
+            self.selectedAdress = result["formatted_address"].string ?? ""
+            self.locationAdressLabel.text = self.selectedAdress
+            
+            
+        } else {
+            print("Failed to extract Google Place Details")
+        }
+    }
+    
+    
     
     func googleLocationSearch(GPSLocation: CLLocation){
         
-        let dataProvider = GoogleDataProvider()
+//        let dataProvider = GoogleDataProvider()
         let searchRadius: Double = 100
         var searchedTypes = ["restaurant"]
         var searchTerm = "restaurant"
@@ -931,8 +1016,9 @@ class LocationController: UIViewController, UIScrollViewDelegate, UICollectionVi
                 let json = JSON(value)
                 
                 if let results = json["results"].array {
+                    print("Found Google Places Results: \(results.count)")
                     for result in results {
-                        print("Fetched Google Place Names Results: ",result)
+//                        print("Fetched Google Place Names Results: ",result)
                         if result["place_id"].string != nil {
                             guard let placeID = result["place_id"].string else {return}
                             guard let name = result["name"].string else {return}
@@ -963,3 +1049,4 @@ class LocationController: UIViewController, UIScrollViewDelegate, UICollectionVi
 
 
 }
+

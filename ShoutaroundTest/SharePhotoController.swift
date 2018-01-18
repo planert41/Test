@@ -2004,7 +2004,7 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
             return
         }
         
-        let dataProvider = GoogleDataProvider()
+//        let dataProvider = GoogleDataProvider()
         let searchRadius: Double = 100
         var searchedTypes = ["restaurant"]
         var searchTerm = "restaurant"
