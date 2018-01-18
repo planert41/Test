@@ -21,6 +21,10 @@ extension UIColor {
         return UIColor.rgb(red: 17, green: 154, blue: 237)
     }
     
+    static func legitColor() -> UIColor {
+        return UIColor(hexColor: "107896")
+    }
+    
     convenience init(hexColor: String) {
         var red: UInt32 = 0, green: UInt32 = 0, blue: UInt32 = 0
         

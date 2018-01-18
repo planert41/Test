@@ -24,7 +24,7 @@ var emptyLegitList = List.init(id: nil, name: "Legit")
 var defaultListNames:[String] = ["Bookmarks", "Legit"]
 
 // Upload Defaults
-var UploadPostTypeDefault:[String] = ["Breakfast", "Lunch", "Dinner", "Snack"]
+var UploadPostTypeDefault:[String] = ["Brunch", "Lunch", "Dinner", "Late", "Coffee"]
 var UploadPostPriceDefault:[String] = ["$5", "$10", "$20", "$35", "$50", "$$$"]
 
 // Home Header Sort Defaults

@@ -704,6 +704,8 @@ class LocationController: UIViewController, UIScrollViewDelegate, UICollectionVi
         filterController.selectedLocationName = self.selectedName
         
         filterController.selectedSort = self.selectedHeaderSort
+        // Change filter controller for Location Controller
+        filterController.sortOptionsInd = 1
         
         self.navigationController?.pushViewController(filterController, animated: true)
     }

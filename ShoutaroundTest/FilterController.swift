@@ -71,19 +71,12 @@ class FilterController: UIViewController, GMSAutocompleteViewControllerDelegate,
     // 0 For Default Header Sort Options, 1 for Location Sort Options
     var sortOptionsInd: Int = 0 {
         didSet{
-            if sortOptionsInd == 0 {
-                filterSortOptions = HeaderSortOptions
-            } else if sortOptionsInd == 1 {
-                // Location Post Search Mode
-                filterSortOptions = LocationSortOptions
-                self.locationNameLabel.isUserInteractionEnabled = false
-            } else {
-                filterSortOptions = HeaderSortOptions
-            }
+            self.updateForSortOptionsInd()
         }
     }
     var filterSortOptions: [String] = HeaderSortOptions
 
+    
     
     var selectedSort: String = defaultSort {
         didSet{
@@ -101,7 +94,7 @@ class FilterController: UIViewController, GMSAutocompleteViewControllerDelegate,
     var selectedLocation: CLLocation? = nil {
         didSet{
             if selectedLocation == CurrentUser.currentLocation {
-                let attributedText = NSMutableAttributedString(string: "Current Location", attributes: [NSFontAttributeName: UIFont.boldSystemFont(ofSize: 14),NSForegroundColorAttributeName: UIColor.mainBlue()])
+                let attributedText = NSMutableAttributedString(string: "Current Location", attributes: [NSFontAttributeName: UIFont.boldSystemFont(ofSize: 14),NSForegroundColorAttributeName: UIColor.legitColor()])
                 locationNameLabel.attributedText = attributedText
 
                 self.currentLocationButton.isHidden = true
@@ -120,7 +113,7 @@ class FilterController: UIViewController, GMSAutocompleteViewControllerDelegate,
     
     lazy var filterCaptionLabel: UILabel = {
         let ul = UILabel()
-        ul.text = "Search Post For"
+        ul.text = "Search Posts For"
         ul.font = UIFont.boldSystemFont(ofSize: 14.0)
         return ul
     }()
@@ -129,7 +122,7 @@ class FilterController: UIViewController, GMSAutocompleteViewControllerDelegate,
     
     lazy var filterDistanceLabel: UILabel = {
         let ul = UILabel()
-        ul.text = "Filter Within (KM)"
+        ul.text = "Distance Within (Mi)"
         ul.font = UIFont.boldSystemFont(ofSize: 14.0)
         return ul
     }()
@@ -144,7 +137,8 @@ class FilterController: UIViewController, GMSAutocompleteViewControllerDelegate,
     let locationNameLabel: UILabel = {
         let tv = LocationLabel()
         tv.font = UIFont.systemFont(ofSize: 14)
-        tv.backgroundColor = UIColor(white: 0, alpha: 0.03)
+        tv.backgroundColor = UIColor(white: 0, alpha: 0.05)
+        tv.layer.borderColor = UIColor(white: 0, alpha: 0.15).cgColor
         tv.layer.borderWidth = 0.5
         tv.layer.cornerRadius = 5
         return tv
@@ -199,8 +193,8 @@ class FilterController: UIViewController, GMSAutocompleteViewControllerDelegate,
     
     var filterButton: UIButton = {
         let button = UIButton()
-        button.backgroundColor = UIColor.mainBlue()
-        button.setTitle("Filter", for: .normal)
+        button.backgroundColor = UIColor.legitColor()
+        button.setTitle("Search", for: .normal)
         button.titleLabel?.textAlignment = NSTextAlignment.center
         button.addTarget(self, action: #selector(filterSelected), for: .touchUpInside)
         button.layer.borderColor = UIColor.lightGray.cgColor
@@ -290,7 +284,7 @@ class FilterController: UIViewController, GMSAutocompleteViewControllerDelegate,
         else {
             self.selectedMaxPrice = UploadPostPriceDefault[sender.selectedSegmentIndex]
         }
-        print("Selected Price is ",self.selectedMaxPrice)
+        print("Selected Max Price is ",self.selectedMaxPrice)
     }
     
     var sortSegment: UISegmentedControl = {
@@ -326,19 +320,8 @@ class FilterController: UIViewController, GMSAutocompleteViewControllerDelegate,
         
         super.viewDidLoad()
         
-        // Update Sort Options
-        if sortOptionsInd == 0 {
-            sortSegment = UISegmentedControl(items: HeaderSortOptions)
-        } else if sortOptionsInd == 1 {
-            sortSegment = UISegmentedControl(items: LocationSortOptions)
-        } else {
-            print("Invalid Sort Ind, Reverting To Default")
-            sortSegment = UISegmentedControl(items: HeaderSortOptions)
-        }
-        
-        
         if self.selectedLocation == nil {
-            let attributedText = NSMutableAttributedString(string: "Current Location", attributes: [NSFontAttributeName: UIFont.boldSystemFont(ofSize: 14),NSForegroundColorAttributeName: UIColor.mainBlue()])
+            let attributedText = NSMutableAttributedString(string: "Current Location", attributes: [NSFontAttributeName: UIFont.boldSystemFont(ofSize: 14),NSForegroundColorAttributeName: UIColor.legitColor()])
             locationNameLabel.attributedText = attributedText
             
             self.findCurrentLocation()
@@ -346,86 +329,96 @@ class FilterController: UIViewController, GMSAutocompleteViewControllerDelegate,
 
         let scrollview = UIScrollView()
         
+//        // Add Filter Button
+//        view.addSubview(filterButton)
+//        filterButton.anchor(top: nil, left: view.leftAnchor, bottom: bottomLayoutGuide.topAnchor, right: view.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 40)
+//        
+//        
         scrollview.frame = view.bounds
         scrollview.backgroundColor = UIColor.white
         scrollview.isScrollEnabled = true
         scrollview.showsVerticalScrollIndicator = true
         scrollview.contentSize = CGSize(width: view.bounds.width, height: view.bounds.height * 1.25)
-        
         view.addSubview(scrollview)
+//        scrollview.anchor(top: topLayoutGuide.bottomAnchor, left: view.leftAnchor, bottom: filterButton.topAnchor, right: view.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
     
-        self.navigationItem.rightBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "filter").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(filterSelected))
+        self.navigationItem.rightBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "search_selected").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(filterSelected))
         
         view.backgroundColor = UIColor.white
         
     // 0. Filter Post By Caption
         
-        scrollview.addSubview(filterCaptionLabel)
-        filterCaptionLabel.anchor(top: scrollview.topAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: selectionMargin, paddingLeft: 20, paddingBottom: 0, paddingRight: 20, width: 0, height: 30)
+//        scrollview.addSubview(filterCaptionLabel)
+//        filterCaptionLabel.anchor(top: scrollview.topAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: selectionMargin, paddingLeft: 20, paddingBottom: 0, paddingRight: 20, width: 0, height: 25)
+        
+        let searchHeaderView = UIView()
+        searchHeaderView.backgroundColor = UIColor.rgb(red: 223, green: 85, blue: 78)
+        scrollview.addSubview(searchHeaderView)
+//        searchHeaderView.anchor(top: scrollview.topAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 50)
         
         filterCaptionSearchBar.delegate = self
-        filterCaptionSearchBar.placeholder = searchBarPlaceholderText
-        filterCaptionSearchBar.searchBarStyle = .minimal
-        
-        
-//        filterCaptionSearchBar.backgroundColor = UIColor.red
-//        filterCaptionSearchBar.tintColor = UIColor.red
-        filterCaptionSearchBar.barTintColor = UIColor.white
+        filterCaptionSearchBar.placeholder = "Search Posts For"
+        filterCaptionSearchBar.searchBarStyle = .prominent
+//        filterCaptionSearchBar.tintColor = UIColor.white
+
+//        filterCaptionSearchBar.backgroundColor = UIColor.legitColor()
+        filterCaptionSearchBar.barTintColor = UIColor.rgb(red: 223, green: 85, blue: 78)
         scrollview.addSubview(filterCaptionSearchBar)
-        filterCaptionSearchBar.anchor(top: filterCaptionLabel.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: segmentHeight)
+        filterCaptionSearchBar.anchor(top: scrollview.topAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 5, paddingRight: 0, width: 0, height: segmentHeight+20)
 
         
-    // 1. Filter By Distance
+        
+// 1. Filter By Location + Distance
         scrollview.addSubview(filterDistanceLabel)
-        scrollview.addSubview(distanceSegment)
         
-        filterDistanceLabel.anchor(top: filterCaptionSearchBar.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: selectionMargin, paddingLeft: 20, paddingBottom: 0, paddingRight: 20, width: 0, height: 30)
+        filterDistanceLabel.anchor(top: filterCaptionSearchBar.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: selectionMargin, paddingLeft: 20, paddingBottom: 0, paddingRight: 20, width: 0, height: 25)
         
-        distanceSegment.anchor(top: filterDistanceLabel.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 1, paddingLeft: 20, paddingBottom: 0, paddingRight: 20, width: 0, height: segmentHeight)
-        
-    // 2. Select Location
-        scrollview.addSubview(locationLabel)
         scrollview.addSubview(locationNameLabel)
         scrollview.addSubview(currentLocationButton)
         
         locationNameLabel.isUserInteractionEnabled = true
         let TapGesture = UITapGestureRecognizer(target: self, action: #selector(tapSearchBar))
         locationNameLabel.addGestureRecognizer(TapGesture)
+        locationNameLabel.isUserInteractionEnabled = false
         
-        locationLabel.anchor(top: distanceSegment.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: selectionMargin, paddingLeft: 20, paddingBottom: 0, paddingRight: 20, width: 0, height: 30)
-        locationNameLabel.anchor(top: locationLabel.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 1, paddingLeft: 20, paddingBottom: 0, paddingRight: 20, width: 0, height: segmentHeight)
+        locationNameLabel.anchor(top: filterDistanceLabel.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 2, paddingLeft: 20, paddingBottom: 0, paddingRight: 20, width: 0, height: segmentHeight)
         
         currentLocationButton.anchor(top: locationNameLabel.topAnchor, left: nil, bottom: locationNameLabel.bottomAnchor, right: locationNameLabel.rightAnchor, paddingTop: 5, paddingLeft: 0, paddingBottom: 5, paddingRight: 5, width: 0, height: 0)
         currentLocationButton.widthAnchor.constraint(equalTo: currentLocationButton.heightAnchor, multiplier: 1).isActive = true
         currentLocationButton.isHidden = true
         
+        scrollview.addSubview(distanceSegment)
+        distanceSegment.anchor(top: locationNameLabel.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 5, paddingLeft: 20, paddingBottom: 0, paddingRight: 20, width: 0, height: segmentHeight)
+
+        
+        
     // 3. Select Min Rating
         scrollview.addSubview(filterRatingLabel)
         scrollview.addSubview(starRating)
-        filterRatingLabel.anchor(top: locationNameLabel.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: selectionMargin, paddingLeft: 20, paddingBottom: 0, paddingRight: 20, width: 0, height: 30)
+        filterRatingLabel.anchor(top: distanceSegment.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: selectionMargin, paddingLeft: 20, paddingBottom: 0, paddingRight: 20, width: 0, height: 25)
         starRating.anchor(top: filterRatingLabel.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 1, paddingLeft: 20, paddingBottom: 0, paddingRight: 20, width: 0, height: segmentHeight)
         starRating.didFinishTouchingCosmos = starRatingSelectFunction
 
-        
-    // 4. Select Post Type (Breakfast, Lunch, Dinner, Snack)
-        scrollview.addSubview(filterTimeLabel)
-        scrollview.addSubview(typeSegment)
-        filterTimeLabel.anchor(top: starRating.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: selectionMargin, paddingLeft: 20, paddingBottom: 0, paddingRight: 20, width: 0, height: 30)
-        typeSegment.anchor(top: filterTimeLabel.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 1, paddingLeft: 20, paddingBottom: 0, paddingRight: 20, width: 0, height: segmentHeight)
-        
-    // 5. Select Price Filter
+    // 4. Select Price Filter
         scrollview.addSubview(filterPriceLabel)
         scrollview.addSubview(priceSegment)
         
-        filterPriceLabel.anchor(top: typeSegment.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: selectionMargin, paddingLeft: 20, paddingBottom: 0, paddingRight: 20, width: 0, height: 30)
+        filterPriceLabel.anchor(top: starRating.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: selectionMargin, paddingLeft: 20, paddingBottom: 0, paddingRight: 20, width: 0, height: 25)
         priceSegment.anchor(top: filterPriceLabel.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 1, paddingLeft: 20, paddingBottom: 0, paddingRight: 20, width: 0, height: segmentHeight)
+        filterPriceLabel.text = "Max Price"
+        
+    // 5. Select Post Type (Breakfast, Lunch, Dinner, Snack)
+//        scrollview.addSubview(filterTimeLabel)
+        scrollview.addSubview(typeSegment)
+//        filterTimeLabel.anchor(top: filterPriceLabel.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: selectionMargin, paddingLeft: 20, paddingBottom: 0, paddingRight: 20, width: 0, height: 25)
+        typeSegment.anchor(top: priceSegment.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: selectionMargin, paddingLeft: 20, paddingBottom: 0, paddingRight: 20, width: 0, height: segmentHeight)
         
     // 6. Sort Filter
-        scrollview.addSubview(sortByLabel)
+//        scrollview.addSubview(sortByLabel)
         scrollview.addSubview(sortSegment)
         
-        sortByLabel.anchor(top: priceSegment.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: selectionMargin, paddingLeft: 20, paddingBottom: 0, paddingRight: 20, width: 0, height: 30)
-        sortSegment.anchor(top: sortByLabel.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 1, paddingLeft: 20, paddingBottom: 0, paddingRight: 20, width: 0, height: segmentHeight)
+//        sortByLabel.anchor(top: priceSegment.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: selectionMargin, paddingLeft: 20, paddingBottom: 0, paddingRight: 20, width: 0, height: 30)
+        sortSegment.anchor(top: typeSegment.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: selectionMargin, paddingLeft: 20, paddingBottom: 0, paddingRight: 20, width: 0, height: segmentHeight)
 
     // 7. Sort button
         scrollview.addSubview(filterButton)
@@ -474,6 +467,24 @@ class FilterController: UIViewController, GMSAutocompleteViewControllerDelegate,
         print("Selected Rating: \(self.selectedMinRating)")
     }
     
+
+    func updateForSortOptionsInd(){
+        
+        if sortOptionsInd == 1 {
+            self.locationNameLabel.isUserInteractionEnabled = false
+            filterSortOptions = LocationSortOptions
+        } else {
+            self.locationNameLabel.isUserInteractionEnabled = true
+            filterSortOptions = HeaderSortOptions
+        }
+        
+        for i in 0..<sortSegment.numberOfSegments {
+            if sortSegment.titleForSegment(at: i) != filterSortOptions[i] {
+                //Update Segment Label
+                sortSegment.setTitle(filterSortOptions[i], forSegmentAt: i)
+            }
+        }
+    }
     
     func filterSelected(){
         

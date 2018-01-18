@@ -34,15 +34,17 @@ class SortFilterHeader: UICollectionViewCell {
         }
     }
     
-    var sortOptions: [String] = HeaderSortOptions
+    var sortOptions: [String] = HeaderSortOptions {
+        didSet{
+            self.updateSegments()
+        }
+    }
     
     
     var headerSortSegment = UISegmentedControl()
     var selectedSort: String = defaultSort {
         didSet{
-            if sortOptions[headerSortSegment.selectedSegmentIndex] != selectedSort {
-                headerSortSegment.selectedSegmentIndex = sortOptions.index(of: selectedSort)!
-            }
+            headerSortSegment.selectedSegmentIndex = sortOptions.index(of: selectedSort)!
         }
     }
     var isFiltering: Bool = false {
@@ -84,6 +86,15 @@ class SortFilterHeader: UICollectionViewCell {
         addSubview(headerSortSegment)
         headerSortSegment.anchor(top: topAnchor, left: leftAnchor, bottom: bottomAnchor, right: filterButton.leftAnchor, paddingTop: 2, paddingLeft: 3, paddingBottom: 4, paddingRight: 1, width: 0, height: 0)
         
+    }
+    
+    func updateSegments(){
+        for i in 0..<headerSortSegment.numberOfSegments {
+            if headerSortSegment.titleForSegment(at: i) != sortOptions[i] {
+                //Update Segment Label
+                headerSortSegment.setTitle(sortOptions[i], forSegmentAt: i)
+            }
+        }
     }
     
     func selectSort(sender: UISegmentedControl) {
