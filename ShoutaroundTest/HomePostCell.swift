@@ -1319,7 +1319,9 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
     
     lazy var sendMessageButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setImage(#imageLiteral(resourceName: "message").withRenderingMode(.alwaysOriginal), for: .normal)
+//        button.setImage(#imageLiteral(resourceName: "message").withRenderingMode(.alwaysOriginal), for: .normal)
+        button.setImage(#imageLiteral(resourceName: "send2").withRenderingMode(.alwaysOriginal), for: .normal)
+
         button.addTarget(self, action: #selector(handleMessage), for: .touchUpInside)
         return button
         
@@ -1406,7 +1408,7 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
             },
                        completion: nil)
         
-        Database.handleVote(postId: postId, creatorUid: creatorId, vote: 1) { 
+        Database.handleVote(post: post, creatorUid: creatorId, vote: 1) {
             
         }
 
@@ -1451,7 +1453,7 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
             },
                        completion: nil)
         
-        Database.handleVote(postId: postId, creatorUid: creatorId, vote: -1) {
+        Database.handleVote(post: post, creatorUid: creatorId, vote: -1) {
             
         }
         

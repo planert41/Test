@@ -325,7 +325,7 @@ class SharePhotoListController: UIViewController, UICollectionViewDelegate, UICo
             postCache[(self.uploadPost?.id)!] = tempPost
             
             self.navigationItem.rightBarButtonItem?.isEnabled = true
-            self.navigationController?.popViewController(animated: true)
+            self.navigationController?.popToRootViewController(animated: true)
             self.delegate?.refreshPost(post: tempPost!)
 
             

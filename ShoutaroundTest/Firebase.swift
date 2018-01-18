@@ -275,7 +275,7 @@ extension Database{
                 }
                 if lists.count > 0 {
                     for list in lists {
-                        self.addPostForList(postId: postId, listId: list.id)
+                        self.addPostForList(postId: postId, listId: list.id, postCreationDate: uploadTime)
                     }
                 }
                 completion()
@@ -412,6 +412,7 @@ extension Database{
         var uploadValues = uploadDictionary
         uploadValues["imageUrl"] = imageUrl
 
+
         // SAVE EDITED POST IN POST DATABASE
         userPostRef.updateChildValues(uploadValues) { (err, ref) in
             if let err = err {
@@ -431,6 +432,9 @@ extension Database{
         let previousList = prevList as! [String:String]? ?? [:]
         var deletedList: [String] = []
         var addedList: [String] = []
+        let postCreationTime = uploadValues["creationDate"] as! Double?
+
+
         
         for (listId,listName) in previousList {
             if currentList[listId] != nil {
@@ -450,11 +454,11 @@ extension Database{
         }
         
         for list in deletedList {
-            Database.DeletePostForList(postId: postId, listId: list)
+            Database.DeletePostForList(postId: postId, listId: list, postCreationDate: postCreationTime)
         }
         
         for list in addedList {
-            Database.addPostForList(postId: postId, listId: list)
+            Database.addPostForList(postId: postId, listId: list, postCreationDate: postCreationTime)
         }
         
         // Replace Post Cache
@@ -779,7 +783,7 @@ extension Database{
         guard let uid = Auth.auth().currentUser?.uid else {return}
         var tempPost = post
         
-        Database.database().reference().child("votes").child(post.id!).observeSingleEvent(of: .value, with: { (snapshot) in
+        Database.database().reference().child("post_votes").child(post.id!).observeSingleEvent(of: .value, with: { (snapshot) in
             
             let post = snapshot.value as? [String: Any] ?? [:]
             var votes: Dictionary<String, Int>
@@ -1273,17 +1277,16 @@ extension Database{
         
     }
     
-    static func addPostForList(postId: String, listId: String?){
+    static func addPostForList(postId: String, listId: String?, postCreationDate: Double?){
         guard let uid = Auth.auth().currentUser?.uid else {return}
         guard let listId = listId else {
             print("Add Post to List: ERROR, No List ID")
             return
         }
         
-        let createdDate = Date().timeIntervalSince1970
+        let listAddDate = Date().timeIntervalSince1970
         let listRef = Database.database().reference().child("lists").child(listId).child("posts")
-        
-        let values = [postId: createdDate] as [String:Any]
+        let values = [postId: listAddDate] as [String:Any]
         
         // Add Post to List
         listRef.updateChildValues(values) { (err, ref) in
@@ -1299,11 +1302,61 @@ extension Database{
         if let listIndex = CurrentUser.lists.index(where: { (currentList) -> Bool in
             currentList.id == listId
         }) {
-            CurrentUser.lists[listIndex].postIds![postId] = createdDate
+            CurrentUser.lists[listIndex].postIds![postId] = listAddDate
         }
+        
+        // Add to Post Lists
+        let postListRef = Database.database().reference().child("post_lists").child(postId)
+
+        postListRef.runTransactionBlock({ (currentData: MutableData) -> TransactionResult in
+            
+            var post = currentData.value as? [String : AnyObject] ?? [:]
+            var lists: Dictionary<String, Double>
+            lists = post["lists"] as? [String : Double] ?? [:]
+            var listCount = post["listCount"] as? Int ?? 0
+            var postDate = post["creationDate"] as? Double ?? 0
+            
+            // Add List to Post List
+            listCount += 1
+            lists[listId] = listAddDate
+            
+            // Handle/Update Post Creation Date
+            if let postCreationDate = postCreationDate {
+                if postDate != postCreationDate {
+                    postDate = postCreationDate
+                }
+            }
+            
+            post["listCount"] = listCount as AnyObject?
+            post["lists"] = lists as AnyObject?
+            post["creationDate"] = postDate as AnyObject?
+            
+            // Enables firebase sort by count adjusted by recency
+            let  uploadTime = Date().timeIntervalSince1970/1000000000000000
+            post["sort"] = (Double(listCount) + uploadTime) as AnyObject
+            
+            // Set value and report transaction success
+            currentData.value = post
+            print("Post_Lists Add: Success, \(postId):\(listId):\(lists[postId])")
+            return TransactionResult.success(withValue: currentData)
+            
+        }) { (error, committed, snapshot) in
+            if let error = error {
+                print(error.localizedDescription)
+            } else {
+//                var post = snapshot?.value as? [String : AnyObject] ?? [:]
+//                var votes = post["votes"] as? [String : Int] ?? [:]
+//                spotUpdateSocialCount(creatorUid: uid, receiverUid: creatorUid, action: "vote", change: voteChange)
+                // Completion after updating Likes
+//                completion()
+            }
+        }
+        
+        
+        
     }
     
-    static func DeletePostForList(postId: String, listId: String?){
+    static func DeletePostForList(postId: String, listId: String?, postCreationDate: Double?){
         guard let uid = Auth.auth().currentUser?.uid else {return}
         guard let listId = listId else {
             print("Delete Post in List: ERROR, No List ID")
@@ -1319,6 +1372,60 @@ extension Database{
             CurrentUser.lists[listIndex].postIds?.remove(at: postIndex)
             }
         }
+        
+        // Delete From Post Lists
+        let postListRef = Database.database().reference().child("post_lists").child(postId)
+        
+        postListRef.runTransactionBlock({ (currentData: MutableData) -> TransactionResult in
+            
+            var post = currentData.value as? [String : AnyObject] ?? [:]
+            var lists: Dictionary<String, Double>
+            lists = post["lists"] as? [String : Double] ?? [:]
+            var listCount = post["listCount"] as? Int ?? 0
+            var postDate = post["creationDate"] as? Double ?? 0
+            
+            // Add List to Post List
+            if let deleteIndex = lists.index(forKey: listId) {
+                listCount += -1
+                lists.remove(at: deleteIndex)
+            } else {
+                print("Post_Lists Delete: ERROR, Can't Find Deleted ListId in Post?")
+            }
+            
+            // Handle/Update Post Creation Date
+            if let postCreationDate = postCreationDate {
+                if postDate != postCreationDate {
+                    postDate = postCreationDate
+                }
+            }
+            
+            post["listCount"] = listCount as AnyObject?
+            post["lists"] = lists as AnyObject?
+            post["creationDate"] = postDate as AnyObject?
+            
+            // Enables firebase sort by count adjusted by recency
+            let  uploadTime = Date().timeIntervalSince1970/1000000000000000
+            post["sort"] = (Double(listCount) + uploadTime) as AnyObject
+            
+            // Set value and report transaction success
+            currentData.value = post
+            print("Post_Lists Delete: Success, \(postId):\(listId):\(lists[postId])")
+            return TransactionResult.success(withValue: currentData)
+            
+        }) { (error, committed, snapshot) in
+            if let error = error {
+                print(error.localizedDescription)
+            } else {
+                //                var post = snapshot?.value as? [String : AnyObject] ?? [:]
+                //                var votes = post["votes"] as? [String : Int] ?? [:]
+                //                spotUpdateSocialCount(creatorUid: uid, receiverUid: creatorUid, action: "vote", change: voteChange)
+                // Completion after updating Likes
+                //                completion()
+            }
+        }
+        
+        
+        
     }
     
     static func fetchListForMultListIds(listUid: [String]?, completion: @escaping ([List]) -> ()){
@@ -1374,6 +1481,7 @@ extension Database{
         let previousList = prevList as! [String:String]? ?? [:]
         var deletedList: [String] = []
         var addedList: [String] = []
+        let postCreationTime = post?.creationDate.timeIntervalSince1970
         
         guard let postId = post?.id else {
             print("Update List for Post: ERROR, No PostID")
@@ -1398,11 +1506,11 @@ extension Database{
         }
         
         for list in deletedList {
-            Database.DeletePostForList(postId: postId, listId: list)
+            Database.DeletePostForList(postId: postId, listId: list, postCreationDate: postCreationTime)
         }
         
         for list in addedList {
-            Database.addPostForList(postId: postId, listId: list)
+            Database.addPostForList(postId: postId, listId: list, postCreationDate: postCreationTime)
         }
         
         // Replace Post Cache
@@ -1531,10 +1639,12 @@ extension Database{
     
     // Social Functions
     
-    static func handleVote(postId: String!, creatorUid: String!, vote: Int!, completion: @escaping () -> Void){
+    static func handleVote(post: Post!, creatorUid: String!, vote: Int!, completion: @escaping () -> Void){
 
-        let ref = Database.database().reference().child("votes").child(postId)
+        guard let postId = post.id else {return}
+        let postCreationDate = post.creationDate.timeIntervalSince1970
         guard let uid = Auth.auth().currentUser?.uid else {return}
+        let ref = Database.database().reference().child("post_votes").child(postId)
         var voteChange = 0 as Int
         
         ref.runTransactionBlock({ (currentData: MutableData) -> TransactionResult in
@@ -1543,6 +1653,9 @@ extension Database{
             var votes: Dictionary<String, Int>
             votes = post["votes"] as? [String : Int] ?? [:]
             var voteCount = post["voteCount"] as? Int ?? 0
+            var postDate = post["creationDate"] as? Double ?? 0
+            
+        // Handle Change Vote
             if let curVote = votes[uid] {
                 // Has Current Vote
                 if curVote == vote {
@@ -1560,11 +1673,17 @@ extension Database{
                 voteChange = vote
             }
             
+        // Handle Creation Date
+            if postDate != postCreationDate {
+                postDate = postCreationDate
+            }
+            
             voteCount += voteChange
             post["voteCount"] = voteCount as AnyObject?
             post["votes"] = votes as AnyObject?
+            post["creationDate"] = postDate as AnyObject?
             
-            // Enables firebase sort by count and recent upload time
+            // Enables firebase sort by count adjusted by recency
             let  uploadTime = Date().timeIntervalSince1970/1000000000000000
             post["sort"] = (Double(voteCount) + uploadTime) as AnyObject
             
