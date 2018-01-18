@@ -328,19 +328,13 @@ class FilterController: UIViewController, GMSAutocompleteViewControllerDelegate,
         }
 
         let scrollview = UIScrollView()
-        
-//        // Add Filter Button
-//        view.addSubview(filterButton)
-//        filterButton.anchor(top: nil, left: view.leftAnchor, bottom: bottomLayoutGuide.topAnchor, right: view.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 40)
-//        
-//        
+       
         scrollview.frame = view.bounds
         scrollview.backgroundColor = UIColor.white
         scrollview.isScrollEnabled = true
         scrollview.showsVerticalScrollIndicator = true
         scrollview.contentSize = CGSize(width: view.bounds.width, height: view.bounds.height * 1.25)
         view.addSubview(scrollview)
-//        scrollview.anchor(top: topLayoutGuide.bottomAnchor, left: view.leftAnchor, bottom: filterButton.topAnchor, right: view.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
     
         self.navigationItem.rightBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "search_selected").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(filterSelected))
         
@@ -348,13 +342,6 @@ class FilterController: UIViewController, GMSAutocompleteViewControllerDelegate,
         
     // 0. Filter Post By Caption
         
-//        scrollview.addSubview(filterCaptionLabel)
-//        filterCaptionLabel.anchor(top: scrollview.topAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: selectionMargin, paddingLeft: 20, paddingBottom: 0, paddingRight: 20, width: 0, height: 25)
-        
-        let searchHeaderView = UIView()
-        searchHeaderView.backgroundColor = UIColor.rgb(red: 223, green: 85, blue: 78)
-        scrollview.addSubview(searchHeaderView)
-//        searchHeaderView.anchor(top: scrollview.topAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 50)
         
         filterCaptionSearchBar.delegate = self
         filterCaptionSearchBar.placeholder = "Search Posts For"
@@ -362,7 +349,8 @@ class FilterController: UIViewController, GMSAutocompleteViewControllerDelegate,
 //        filterCaptionSearchBar.tintColor = UIColor.white
 
 //        filterCaptionSearchBar.backgroundColor = UIColor.legitColor()
-        filterCaptionSearchBar.barTintColor = UIColor.rgb(red: 223, green: 85, blue: 78)
+//        filterCaptionSearchBar.barTintColor = UIColor.rgb(red: 223, green: 85, blue: 78)
+        filterCaptionSearchBar.barTintColor = UIColor.legitColor()
         scrollview.addSubview(filterCaptionSearchBar)
         filterCaptionSearchBar.anchor(top: scrollview.topAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 5, paddingRight: 0, width: 0, height: segmentHeight+20)
 

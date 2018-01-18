@@ -49,13 +49,14 @@ class SortFilterHeader: UICollectionViewCell {
     }
     var isFiltering: Bool = false {
         didSet{
-            filterButton.backgroundColor = isFiltering ? UIColor.mainBlue() : UIColor.clear
+            filterButton.backgroundColor = isFiltering ? UIColor.legitColor() : UIColor.clear
+            filterButton.setImage((isFiltering ? #imageLiteral(resourceName: "search_unselected")  : #imageLiteral(resourceName: "search_selected")).withRenderingMode(.alwaysOriginal), for: .normal)
         }
     }
     
     lazy var filterButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setImage(#imageLiteral(resourceName: "search_blank").withRenderingMode(.alwaysOriginal), for: .normal)
+        button.setImage(#imageLiteral(resourceName: "search_selected").withRenderingMode(.alwaysOriginal), for: .normal)
         button.addTarget(self, action: #selector(activateFilter), for: .touchUpInside)
         button.layer.borderWidth = 0
         button.layer.borderColor = UIColor.darkGray.cgColor
@@ -80,7 +81,7 @@ class SortFilterHeader: UICollectionViewCell {
         filterButton.anchor(top: topAnchor, left: nil, bottom: bottomAnchor, right: rightAnchor, paddingTop: 2, paddingLeft: 1, paddingBottom: 3, paddingRight: 3, width: 0, height: 0)
         filterButton.widthAnchor.constraint(equalTo: filterButton.heightAnchor, multiplier: 1).isActive = true
         filterButton.layer.cornerRadius = filterButton.frame.width/2
-        filterButton.backgroundColor = UIColor.mainBlue()
+        filterButton.backgroundColor = UIColor.clear
         filterButton.layer.masksToBounds = true
         
         addSubview(headerSortSegment)
