@@ -18,7 +18,7 @@ import EmptyDataSet_Swift
 
 var placeCache = [String: JSON]()
 
-class LocationController: UIViewController, UIScrollViewDelegate, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, GMSMapViewDelegate, UserProfilePhotoCellDelegate, EmptyDataSetSource, EmptyDataSetDelegate  {
+class LocationController: UIViewController, UIScrollViewDelegate, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, GMSMapViewDelegate, UserProfilePhotoCellDelegate, EmptyDataSetSource, EmptyDataSetDelegate, LastLocationPhotoCellDelegate  {
     
     var placesClient: GMSPlacesClient!
     var marker = GMSMarker()
@@ -26,6 +26,8 @@ class LocationController: UIViewController, UIScrollViewDelegate, UICollectionVi
     
     let locationCellId = "locationCellID"
     let photoCellId = "photoCellId"
+    let lastPhotoCellId = "lastPhotoCellId"
+
     var displayedPosts = [Post]()
     var postNearby: [String: CLLocation] = [:]
 
@@ -333,22 +335,23 @@ class LocationController: UIViewController, UIScrollViewDelegate, UICollectionVi
     // Place Details View
         tempView.addSubview(placeDetailsView)
         placeDetailsView.anchor(top: tempView.topAnchor, left: tempView.leftAnchor, bottom: nil, right: tempView.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 4 * (locationDetailRowHeight + 2 + 2))
-        
-    // CollectionView Title Header
-        tempView.addSubview(collectionViewTitleLabel)
-        collectionViewTitleLabel.anchor(top: placeDetailsView.bottomAnchor, left: tempView.leftAnchor, bottom: nil, right: tempView.rightAnchor, paddingTop: 10, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 20)
+//
+//    // CollectionView Title Header
+//        tempView.addSubview(collectionViewTitleLabel)
+//        collectionViewTitleLabel.anchor(top: placeDetailsView.bottomAnchor, left: tempView.leftAnchor, bottom: nil, right: tempView.rightAnchor, paddingTop: 10, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 20)
         
         let bottomDividerView = UIView()
         bottomDividerView.backgroundColor = UIColor.white
         tempView.addSubview(bottomDividerView)
-        bottomDividerView.anchor(top: collectionViewTitleLabel.bottomAnchor, left: tempView.leftAnchor, bottom: nil, right: tempView.rightAnchor, paddingTop: 5, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0.5)
+        bottomDividerView.anchor(top: placeDetailsView.bottomAnchor, left: tempView.leftAnchor, bottom: nil, right: tempView.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0.5)
         
     // Photo CollectionView
         
         tempView.addSubview(photoCollectionView)
         photoCollectionView.anchor(top: bottomDividerView.bottomAnchor, left: tempView.leftAnchor, bottom: tempView.bottomAnchor, right: tempView.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 500)
         photoCollectionView.register(UserProfilePhotoCell.self, forCellWithReuseIdentifier: photoCellId)
-        
+        photoCollectionView.register(LastLocationPhotoCell.self, forCellWithReuseIdentifier: lastPhotoCellId)
+
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -529,7 +532,13 @@ class LocationController: UIViewController, UIScrollViewDelegate, UICollectionVi
     }
     
     
-    
+    func searchNearby(){
+        let locationController = LocationController()
+        locationController.selectedLocation = self.selectedLocation
+        locationController.selectedName = self.selectedAdress
+        
+        navigationController?.pushViewController(locationController, animated: true)
+    }
 
     
 
@@ -717,7 +726,11 @@ class LocationController: UIViewController, UIScrollViewDelegate, UICollectionVi
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         if collectionView == photoCollectionView {
-            return displayedPosts.count
+            if displayedPosts.count == 0 {
+                return 0
+            } else {
+            return displayedPosts.count + 1
+            }
         }
         if collectionView == placesCollectionView {
             return googlePlaceNames.count
@@ -728,10 +741,17 @@ class LocationController: UIViewController, UIScrollViewDelegate, UICollectionVi
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         if collectionView == photoCollectionView {
-            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: photoCellId, for: indexPath) as! UserProfilePhotoCell
-            cell.delegate = self
-            cell.post = displayedPosts[indexPath.item]
-            return cell
+            if indexPath.row == displayedPosts.count {
+            // Add Last Photo Cell to enable search nearby
+                let cell = collectionView.dequeueReusableCell(withReuseIdentifier: lastPhotoCellId, for: indexPath) as! LastLocationPhotoCell
+                cell.delegate = self
+                return cell
+            } else {
+                let cell = collectionView.dequeueReusableCell(withReuseIdentifier: photoCellId, for: indexPath) as! UserProfilePhotoCell
+                cell.delegate = self
+                cell.post = displayedPosts[indexPath.item]
+                return cell
+            }
         } else if collectionView == placesCollectionView{
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: locationCellId, for: indexPath) as! UploadLocationCell
             cell.uploadLocations.font = UIFont.systemFont(ofSize: 13)
@@ -840,11 +860,7 @@ class LocationController: UIViewController, UIScrollViewDelegate, UICollectionVi
     
     func emptyDataSet(_ scrollView: UIScrollView, didTapButton button: UIButton) {
        
-        let locationController = LocationController()
-        locationController.selectedLocation = self.selectedLocation
-        locationController.selectedName = self.selectedAdress
-        
-        navigationController?.pushViewController(locationController, animated: true)
+        searchNearby()
         
     }
     

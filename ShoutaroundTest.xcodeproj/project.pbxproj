@@ -46,6 +46,7 @@
 		A57A674F1F5FA8CC0063D400 /* UploadLocationCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = A57A674E1F5FA8CC0063D400 /* UploadLocationCell.swift */; };
 		A57C060C1F76037C00A0568F /* BookmarkPhotoCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = A57C060B1F76037C00A0568F /* BookmarkPhotoCell.swift */; };
 		A57C060E1F7611A000A0568F /* BookmarkController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A57C060D1F7611A000A0568F /* BookmarkController.swift */; };
+		A580CFA220104ECC007D2C3C /* LastLocationPhotoCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = A580CFA120104ECC007D2C3C /* LastLocationPhotoCell.swift */; };
 		A58477A61F6DBFDA007DE06C /* Emoji.swift in Sources */ = {isa = PBXBuildFile; fileRef = A58477A51F6DBFDA007DE06C /* Emoji.swift */; };
 		A58477A81F6EB720007DE06C /* EmojiExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = A58477A71F6EB720007DE06C /* EmojiExtensions.swift */; };
 		A58477AA1F6EFFD7007DE06C /* LocationLabels.swift in Sources */ = {isa = PBXBuildFile; fileRef = A58477A91F6EFFD7007DE06C /* LocationLabels.swift */; };
@@ -146,6 +147,7 @@
 		A57A674E1F5FA8CC0063D400 /* UploadLocationCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UploadLocationCell.swift; sourceTree = "<group>"; };
 		A57C060B1F76037C00A0568F /* BookmarkPhotoCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BookmarkPhotoCell.swift; sourceTree = "<group>"; };
 		A57C060D1F7611A000A0568F /* BookmarkController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BookmarkController.swift; sourceTree = "<group>"; };
+		A580CFA120104ECC007D2C3C /* LastLocationPhotoCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LastLocationPhotoCell.swift; sourceTree = "<group>"; };
 		A58477A51F6DBFDA007DE06C /* Emoji.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Emoji.swift; sourceTree = "<group>"; };
 		A58477A71F6EB720007DE06C /* EmojiExtensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EmojiExtensions.swift; sourceTree = "<group>"; };
 		A58477A91F6EFFD7007DE06C /* LocationLabels.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LocationLabels.swift; sourceTree = "<group>"; };
@@ -340,6 +342,7 @@
 			children = (
 				A5516BC11F8ED0D5003C3E22 /* LocationController.swift */,
 				A5AEB9751F986F8200E88CAC /* PictureController.swift */,
+				A580CFA120104ECC007D2C3C /* LastLocationPhotoCell.swift */,
 				A55E6AF11FD2388100DEC490 /* TEST.swift */,
 			);
 			name = ItemCells;
@@ -750,6 +753,7 @@
 				A5D942E91FC5145C00A189DD /* ExploreController.swift in Sources */,
 				A5F990841FCF84540086E661 /* ThreadMessageCell.swift in Sources */,
 				A51C13C31F4FBF2F00CEB740 /* Extensions.swift in Sources */,
+				A580CFA220104ECC007D2C3C /* LastLocationPhotoCell.swift in Sources */,
 				A5C6451F1F57B1BD00C78244 /* UserSearchCell.swift in Sources */,
 				A5F46C3E1FC5EBE400D69945 /* SMSegmentView.swift in Sources */,
 				A5A2E5DB20067B1900D7E8F5 /* ListNameFlowLayout.swift in Sources */,
