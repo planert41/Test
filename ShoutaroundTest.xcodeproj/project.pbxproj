@@ -27,7 +27,7 @@
 		A5516BC21F8ED0D5003C3E22 /* LocationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5516BC11F8ED0D5003C3E22 /* LocationController.swift */; };
 		A552EA5F1F997973005A0977 /* Message.swift in Sources */ = {isa = PBXBuildFile; fileRef = A552EA5E1F997973005A0977 /* Message.swift */; };
 		A552EA611F99BE76005A0977 /* PhotoSelectorControllerDummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = A552EA601F99BE76005A0977 /* PhotoSelectorControllerDummy.swift */; };
-		A552EA631F9A49EA005A0977 /* CommonSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = A552EA621F9A49EA005A0977 /* CommonSettings.swift */; };
+		A552EA631F9A49EA005A0977 /* SharedSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = A552EA621F9A49EA005A0977 /* SharedSettings.swift */; };
 		A55E6AF21FD2388100DEC490 /* TEST.swift in Sources */ = {isa = PBXBuildFile; fileRef = A55E6AF11FD2388100DEC490 /* TEST.swift */; };
 		A562E5161F5354A50095C7C1 /* LoginController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A562E5151F5354A50095C7C1 /* LoginController.swift */; };
 		A562E5191F539C040095C7C1 /* PhotoSelectorController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A562E5181F539C040095C7C1 /* PhotoSelectorController.swift */; };
@@ -128,7 +128,7 @@
 		A5516BC11F8ED0D5003C3E22 /* LocationController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LocationController.swift; sourceTree = "<group>"; };
 		A552EA5E1F997973005A0977 /* Message.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Message.swift; sourceTree = "<group>"; };
 		A552EA601F99BE76005A0977 /* PhotoSelectorControllerDummy.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PhotoSelectorControllerDummy.swift; sourceTree = "<group>"; };
-		A552EA621F9A49EA005A0977 /* CommonSettings.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CommonSettings.swift; sourceTree = "<group>"; };
+		A552EA621F9A49EA005A0977 /* SharedSettings.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SharedSettings.swift; sourceTree = "<group>"; };
 		A55E6AF11FD2388100DEC490 /* TEST.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TEST.swift; sourceTree = "<group>"; };
 		A562E5151F5354A50095C7C1 /* LoginController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoginController.swift; sourceTree = "<group>"; };
 		A562E5181F539C040095C7C1 /* PhotoSelectorController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PhotoSelectorController.swift; sourceTree = "<group>"; };
@@ -313,7 +313,7 @@
 				A51C13C61F51B59900CEB740 /* MainTabBarController.swift */,
 				A5D942E71FC5144100A189DD /* Explore */,
 				A5A17BAE1FA6496B001F227D /* OLD */,
-				A5516BC01F8ED0B9003C3E22 /* ItemCells */,
+				A5516BC01F8ED0B9003C3E22 /* Location */,
 				A56868BB1F78A0E50050C406 /* Message */,
 				A5A2E5CF20028E5B00D7E8F5 /* List */,
 				A57C060A1F7602F100A0568F /* Bookmark */,
@@ -337,7 +337,7 @@
 			path = ShoutaroundTest;
 			sourceTree = "<group>";
 		};
-		A5516BC01F8ED0B9003C3E22 /* ItemCells */ = {
+		A5516BC01F8ED0B9003C3E22 /* Location */ = {
 			isa = PBXGroup;
 			children = (
 				A5516BC11F8ED0D5003C3E22 /* LocationController.swift */,
@@ -345,7 +345,7 @@
 				A580CFA120104ECC007D2C3C /* LastLocationPhotoCell.swift */,
 				A55E6AF11FD2388100DEC490 /* TEST.swift */,
 			);
-			name = ItemCells;
+			name = Location;
 			sourceTree = "<group>";
 		};
 		A562E5141F5354980095C7C1 /* Login */ = {
@@ -397,7 +397,7 @@
 				A57941C81F6A27A6004EC40D /* EmojiDictionary.swift */,
 				A5BBD2891FB26401004367E7 /* Notes.swift */,
 				A5BBD28B1FB26F4B004367E7 /* Notes2.swift */,
-				A552EA621F9A49EA005A0977 /* CommonSettings.swift */,
+				A552EA621F9A49EA005A0977 /* SharedSettings.swift */,
 			);
 			name = Shared;
 			sourceTree = "<group>";
@@ -724,7 +724,7 @@
 				A57941C61F6A225D004EC40D /* UploadEmojiCell.swift in Sources */,
 				A542FF2B200D4E56005F925A /* PostSearchController.swift in Sources */,
 				A58477AA1F6EFFD7007DE06C /* LocationLabels.swift in Sources */,
-				A552EA631F9A49EA005A0977 /* CommonSettings.swift in Sources */,
+				A552EA631F9A49EA005A0977 /* SharedSettings.swift in Sources */,
 				A5C6450A1F54F68800C78244 /* SharePhotoController.swift in Sources */,
 				A5F46C3D1FC5EBE400D69945 /* SMSegment.swift in Sources */,
 				A5CC6EE01FCC81050074AB78 /* ThreadCell.swift in Sources */,

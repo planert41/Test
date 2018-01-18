@@ -18,13 +18,14 @@ import EmptyDataSet_Swift
 
 var placeCache = [String: JSON]()
 
-class LocationController: UIViewController, UIScrollViewDelegate, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, GMSMapViewDelegate, UserProfilePhotoCellDelegate, EmptyDataSetSource, EmptyDataSetDelegate, LastLocationPhotoCellDelegate  {
+class LocationController: UIViewController, UIScrollViewDelegate, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, GMSMapViewDelegate, UserProfilePhotoCellDelegate, EmptyDataSetSource, EmptyDataSetDelegate, LastLocationPhotoCellDelegate, SortFilterHeaderDelegate, FilterControllerDelegate  {
     
     var placesClient: GMSPlacesClient!
     var marker = GMSMarker()
     var map: GMSMapView?
     
     let locationCellId = "locationCellID"
+    let photoHeaderId = "photoHeaderId"
     let photoCellId = "photoCellId"
     let lastPhotoCellId = "lastPhotoCellId"
 
@@ -72,15 +73,31 @@ class LocationController: UIViewController, UIScrollViewDelegate, UICollectionVi
     
     var selectedLong: Double? = 0
     var selectedLat: Double? = 0
-    
     var selectedName: String? {
         didSet {
             if selectedName != nil {
                 self.locationNameLabel.text = selectedName!
-            }
+            }}}
+    var selectedAdress: String?
+
+    // Filter Variables
+    let defaultFilterRange = "25"
+    
+    var isFiltering: Bool = false
+    var filterCaption: String? = nil
+    var filterRange: String? = nil
+    var filterLocation: CLLocation? = nil
+    var filterLocationName: String? = nil
+    var filterGoogleLocationID: String? = nil
+    var filterMinRating: Double = 0
+    var filterType: String? = nil
+    var filterMaxPrice: String? = nil
+    
+    // Header Sort Variables
+    var selectedHeaderSort = HeaderSortDefault {
+        didSet {
         }
     }
-    var selectedAdress: String?
     
     
     lazy var scrollView: UIScrollView = {
@@ -248,6 +265,8 @@ class LocationController: UIViewController, UIScrollViewDelegate, UICollectionVi
     }
     
     
+    
+    
 // Collection View Title
     
     lazy var collectionViewTitleLabel: PaddedUILabel = {
@@ -351,6 +370,9 @@ class LocationController: UIViewController, UIScrollViewDelegate, UICollectionVi
         photoCollectionView.anchor(top: bottomDividerView.bottomAnchor, left: tempView.leftAnchor, bottom: tempView.bottomAnchor, right: tempView.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 500)
         photoCollectionView.register(UserProfilePhotoCell.self, forCellWithReuseIdentifier: photoCellId)
         photoCollectionView.register(LastLocationPhotoCell.self, forCellWithReuseIdentifier: lastPhotoCellId)
+        photoCollectionView.register(SortFilterHeader.self, forSupplementaryViewOfKind: UICollectionElementKindSectionHeader, withReuseIdentifier: photoHeaderId)
+        
+        self.clearFilter()
 
     }
     
@@ -365,6 +387,15 @@ class LocationController: UIViewController, UIScrollViewDelegate, UICollectionVi
             print("Google Location: No Location: (\(self.selectedLat), \(self.selectedLong))")
             setupNoLocationView()
             self.googleLocationSearch(GPSLocation: CLLocation(latitude: self.selectedLat!, longitude: self.selectedLong!))
+            self.fetchPostWithLocation(location: CLLocation(latitude: self.selectedLat!, longitude: self.selectedLong!))
+        }
+    }
+    
+    func refreshAllPosts(){
+        self.displayedPosts.removeAll()
+        if hasRestaurantLocation{
+            self.fetchPostForPostLocation(placeId: googlePlaceId!)
+        } else {
             self.fetchPostWithLocation(location: CLLocation(latitude: self.selectedLat!, longitude: self.selectedLong!))
         }
     }
@@ -390,7 +421,12 @@ class LocationController: UIViewController, UIScrollViewDelegate, UICollectionVi
         placesCollectionView.anchor(top: nil, left: placeDetailsView.leftAnchor, bottom: placeDetailsView.bottomAnchor, right: placeDetailsView.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: locationDetailRowHeight)
         placesCollectionView.backgroundColor = UIColor.rgb(red: 128, green: 191, blue: 255)
         placesCollectionView.register(UploadLocationCell.self, forCellWithReuseIdentifier: locationCellId)
+        
+        // Dummy Header, Won't get shown
+        placesCollectionView.register(SortFilterHeader.self, forSupplementaryViewOfKind: UICollectionElementKindSectionHeader, withReuseIdentifier: photoHeaderId)
 
+        
+        
         setupLocationLabels(containerview: locationNameView, icon: locationNameIcon, label: locationNameLabel)
         tempView.addSubview(locationNameView)
         locationNameView.anchor(top: nil, left: placeDetailsView.leftAnchor, bottom: placesCollectionView.topAnchor, right: placeDetailsView.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: locationDetailRowHeight)
@@ -465,34 +501,6 @@ class LocationController: UIViewController, UIScrollViewDelegate, UICollectionVi
     
     var noIdView = UIView()
     
-//    func showNoPlaceIDStackview(){
-//
-//        noIdView.addSubview(locationAdressView)
-//        locationAdressView.anchor(top: nil, left: noIdView.leftAnchor, bottom: noIdView.bottomAnchor, right: noIdView.rightAnchor, paddingTop: 2, paddingLeft: 0, paddingBottom: 2, paddingRight: 0, width: 0, height: 35)
-//
-//        noIdView.addSubview(locationNameIcon)
-//        locationNameIcon.anchor(top: nil, left: noIdView.leftAnchor, bottom: locationAdressView.topAnchor, right: nil, paddingTop: 2, paddingLeft: 15, paddingBottom: 2, paddingRight: 5, width: 30, height: 30)
-//
-//        noIdView.addSubview(placesCollectionView)
-//        placesCollectionView.anchor(top: nil, left: locationNameIcon.rightAnchor, bottom: locationAdressView.topAnchor, right: noIdView.rightAnchor, paddingTop: 2, paddingLeft: 5, paddingBottom: 2, paddingRight: 5, width: 0, height: 40)
-//        placesCollectionView.backgroundColor = UIColor.white
-//        placesCollectionView.register(UploadLocationCell.self, forCellWithReuseIdentifier: locationCellId)
-//        placesCollectionView.delegate = self
-//        placesCollectionView.dataSource = self
-//
-//        noIdView.addSubview(map)
-//        map.anchor(top: noIdView.topAnchor, left: noIdView.leftAnchor, bottom: placesCollectionView.topAnchor, right: noIdView.rightAnchor, paddingTop: 1, paddingLeft: 1, paddingBottom: 0, paddingRight: 1, width: 0, height: 0)
-//        map.delegate = self
-//
-//        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(activateMap))
-//        tapGesture.numberOfTapsRequired = 1
-//
-//        map.addGestureRecognizer(tapGesture)
-//        map.isUserInteractionEnabled = true
-//        self.refreshMap(long: self.selectedLong!, lat: self.selectedLat!)
-//        //        map.heightAnchor.constraint(equalTo: map.widthAnchor, multiplier: 1).isActive = true
-//
-//    }
     
     func refreshMap(long: Double, lat: Double) -> (){
         self.map?.clear()
@@ -559,10 +567,7 @@ class LocationController: UIViewController, UIScrollViewDelegate, UICollectionVi
         
     }
     
-    func pushMessage(post: Post){
-        
-    }
-    
+
     
     func fetchPostForPostLocation(placeId:String){
         
@@ -581,24 +586,41 @@ class LocationController: UIViewController, UIScrollViewDelegate, UICollectionVi
     
     func fetchPostWithLocation(location: CLLocation){
         
+        let searchDistance = Double(self.filterRange!)!
         print("No Google Place ID. Searching Posts by Location: ", location)
-        Database.fetchAllPostWithLocation(location: location, distance: 25) { (fetchedPosts) in
-
+        Database.fetchAllPostWithLocation(location: location, distance: searchDistance) { (fetchedPosts) in
+            print("Fetched Post with Location: \(location) : \(fetchedPosts.count) Posts")
             self.displayedPosts = fetchedPosts
-            print("Fetched Post with Location: \(location) : \(self.displayedPosts.count) Posts")
-            self.photoCollectionView.reloadData()
+            self.filterSortFetchedPosts()
         }
-        
     }
     
     func fetchPostWithGooglePlaceID(googlePlaceID: String){
         print("Searching Posts by Google Place ID: ", googlePlaceID)
         Database.fetchAllPostWithGooglePlaceID(googlePlaceId: googlePlaceID) { (fetchedPosts) in
+            print("Fetching Post with googlePlaceId: \(googlePlaceID) : \(fetchedPosts.count) Posts")
             self.displayedPosts = fetchedPosts
-            print("Fetching Post with googlePlaceId: \(googlePlaceID) : \(self.displayedPosts.count) Posts")
-            self.photoCollectionView.reloadData()
+            self.filterSortFetchedPosts()
         }
+    }
+    
+    func filterSortFetchedPosts(){
         
+        // Filter Posts
+        // Not Filtering for Location and Range/Distances
+        Database.filterPosts(inputPosts: self.displayedPosts, filterCaption: self.filterCaption, filterRange: nil, filterLocation: nil, filterMinRating: self.filterMinRating, filterType: self.filterType, filterMaxPrice: self.filterMaxPrice) { (filteredPosts) in
+            
+            // Sort Posts
+            Database.sortPosts(inputPosts: filteredPosts, selectedSort: self.selectedHeaderSort, selectedLocation: self.filterLocation, completion: { (filteredPosts) in
+                
+                self.displayedPosts = []
+                if filteredPosts != nil {
+                    self.displayedPosts = filteredPosts!
+                }
+                print("Finish Filter and Sorting Post")
+                self.photoCollectionView.reloadData()
+            })
+        }
     }
     
 
@@ -631,8 +653,6 @@ class LocationController: UIViewController, UIScrollViewDelegate, UICollectionVi
     }
     
     func addMarkers() {
-        
-        
         for post in self.displayedPosts {
             
             let postUID: String = post.id!
@@ -646,28 +666,7 @@ class LocationController: UIViewController, UIScrollViewDelegate, UICollectionVi
             state_marker.isTappable = true
             state_marker.map = self.map
         }
-  
     }
-//    
-//    func addMarkers() {
-//        
-//        
-//        for post in self.postNearby {
-//            
-//            let postUID: String = post.key
-//            let postLocation: CLLocation = post.value
-//            
-//            let state_marker = GMSMarker()
-//            print(postLocation.coordinate.latitude)
-//            print(postLocation.coordinate.latitude)
-//            state_marker.position = CLLocationCoordinate2D(latitude: postLocation.coordinate.latitude, longitude: postLocation.coordinate.longitude)
-//            state_marker.title = postUID
-//            state_marker.snippet = "Hey, this is \(postLocation.description)"
-//            state_marker.isTappable = true
-//            state_marker.map = self.map
-//        }
-//        
-//    }
     
     func mapView(_ mapView: GMSMapView, didTap marker: GMSMarker) -> Bool {
         Database.fetchPostWithPostID(postId: marker.title!) { (post, error) in
@@ -682,6 +681,83 @@ class LocationController: UIViewController, UIScrollViewDelegate, UICollectionVi
         return true
     }
     
+    // Sort Delegate
+    
+    func headerSortSelected(sort: String) {
+        self.selectedHeaderSort = sort
+        print("Filter Sort is ", self.selectedHeaderSort)
+        self.refreshAllPosts()
+    }
+    
+    // Search Delegate And Methods
+    
+    func openFilter(){
+        let filterController = FilterController()
+        filterController.delegate = self
+        
+        filterController.selectedCaption = self.filterCaption
+        filterController.selectedRange = self.filterRange
+        filterController.selectedMinRating = self.filterMinRating
+        filterController.selectedMaxPrice = self.filterMaxPrice
+        filterController.selectedType = self.filterType
+        filterController.selectedLocation = self.selectedLocation
+        filterController.selectedLocationName = self.selectedName
+        
+        filterController.selectedSort = self.selectedHeaderSort
+        
+        self.navigationController?.pushViewController(filterController, animated: true)
+    }
+    
+    
+    // Search Delegates
+    
+    
+    func filterControllerFinished(selectedCaption: String?, selectedRange: String?, selectedLocation: CLLocation?, selectedLocationName: String?, selectedMinRating: Double, selectedType: String?, selectedMaxPrice: String?, selectedSort: String){
+        
+        // Clears all Filters, Puts in new Filters, Refreshes all Post IDS and Posts
+        
+        
+        self.clearFilter()
+        
+        self.filterCaption = selectedCaption
+        self.filterRange = selectedRange
+        self.filterLocation = selectedLocation
+        self.filterLocationName = selectedLocationName
+        self.filterMinRating = selectedMinRating
+        self.filterType = selectedType
+        self.filterMaxPrice = selectedMaxPrice
+        self.selectedHeaderSort = selectedSort
+        
+        // Check for filtering
+        self.checkFilter()
+        
+        self.refreshAllPosts()
+    }
+    
+    func clearFilter(){
+        self.filterLocation = nil
+        self.filterLocationName = nil
+        self.filterRange = defaultFilterRange
+        self.filterGoogleLocationID = nil
+        self.filterMinRating = 0
+        self.filterType = nil
+        self.filterMaxPrice = nil
+        self.selectedHeaderSort = defaultSort
+        self.checkFilter()
+    }
+    
+    func checkFilter(){
+        if self.filterCaption != nil || (self.filterRange != nil) || (self.filterMinRating != 0) || (self.filterType != nil) || (self.filterMaxPrice != nil) {
+            self.isFiltering = true
+        } else {
+            self.isFiltering = false
+        }
+    }
+
+    
+    
+// Collection View Delegates
+    
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         
         if collectionView == placesCollectionView{
@@ -695,7 +771,6 @@ class LocationController: UIViewController, UIScrollViewDelegate, UICollectionVi
         }
         
     }
-    
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat {
         if collectionView == photoCollectionView {
@@ -769,7 +844,29 @@ class LocationController: UIViewController, UIScrollViewDelegate, UICollectionVi
         
     }
     
+    // SORT FILTER HEADER
     
+    func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
+        
+            let header = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: photoHeaderId, for: indexPath) as! SortFilterHeader
+            header.isFiltering = self.isFiltering
+            header.delegate = self
+            header.selectedSort = self.selectedHeaderSort
+            // For Location Sort Ind
+            header.sortOptionsInd = 1
+            return header
+        
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
+        if collectionView == photoCollectionView {
+            return CGSize(width: view.frame.width, height: 35 + 5)
+        } else {
+            return CGSize.zero
+        }
+    }
+    
+
     // EMPTY DATA SET DELEGATES
     
     func title(forEmptyDataSet scrollView: UIScrollView) -> NSAttributedString? {

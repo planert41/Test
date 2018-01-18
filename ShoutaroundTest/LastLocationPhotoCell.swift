@@ -24,7 +24,7 @@ class LastLocationPhotoCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         
         self.backgroundView = UIImageView(image: #imageLiteral(resourceName: "button_background"))
         
-        label.font = UIFont.boldSystemFont(ofSize: 20)
+        label.font = UIFont.boldSystemFont(ofSize: 15)
         label.numberOfLines = 0
         label.textAlignment = NSTextAlignment.center
         label.text = "Search Posts Nearby"

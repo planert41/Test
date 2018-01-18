@@ -54,18 +54,8 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
 // Filter Variables
     
     var isFiltering: Bool = false
-    
-    var filterCaption: String? = nil{
-        didSet{
-        }
-    }
-    
-    
-    var filterRange: String? = nil {
-        didSet{
-            setupNavigationItems()
-        }
-    }
+    var filterCaption: String? = nil
+    var filterRange: String? = nil
     
     var filterLocation: CLLocation? = nil{
         didSet{
@@ -78,33 +68,10 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         }
     }
     var filterLocationName: String? = nil
-    
-
-    
-    var filterGoogleLocationID: String? = nil {
-        didSet{
-            
-        }
-    }
-
-    
-    var filterMinRating: Double = 0 {
-        didSet{
-            
-        }
-    }
-        
-    var filterType: String? = nil{
-        didSet{
-            setupNavigationItems()
-        }
-    }
-    
-    var filterMaxPrice: String? = nil{
-        didSet{
-            setupNavigationItems()
-        }
-    }
+    var filterGoogleLocationID: String? = nil
+    var filterMinRating: Double = 0
+    var filterType: String? = nil
+    var filterMaxPrice: String? = nil
     
     // Header Sort Variables
     var selectedHeaderSort = HeaderSortDefault {
@@ -284,24 +251,6 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     }
     
     
-// Search Delegate And Methods
-
-    func openFilter(){
-        let filterController = FilterController()
-        filterController.delegate = self
-        
-        filterController.selectedCaption = self.filterCaption
-        filterController.selectedRange = self.filterRange
-        filterController.selectedMinRating = self.filterMinRating
-        filterController.selectedMaxPrice = self.filterMaxPrice
-        filterController.selectedType = self.filterType
-        filterController.selectedLocation = self.filterLocation
-        filterController.selectedLocationName = self.filterLocationName
-
-        filterController.selectedSort = self.selectedHeaderSort
-        
-        self.navigationController?.pushViewController(filterController, animated: true)
-    }
 
 // Sort Delegate
     
@@ -324,6 +273,25 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         print("Filter Sort is ", self.selectedHeaderSort)
     }
     
+    // Search Delegate And Methods
+    
+    func openFilter(){
+        let filterController = FilterController()
+        filterController.delegate = self
+        
+        filterController.selectedCaption = self.filterCaption
+        filterController.selectedRange = self.filterRange
+        filterController.selectedMinRating = self.filterMinRating
+        filterController.selectedMaxPrice = self.filterMaxPrice
+        filterController.selectedType = self.filterType
+        filterController.selectedLocation = self.filterLocation
+        filterController.selectedLocationName = self.filterLocationName
+        
+        filterController.selectedSort = self.selectedHeaderSort
+        
+        self.navigationController?.pushViewController(filterController, animated: true)
+    }
+
     
 // Search Delegates
     

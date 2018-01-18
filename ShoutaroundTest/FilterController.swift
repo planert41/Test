@@ -67,9 +67,27 @@ class FilterController: UIViewController, GMSAutocompleteViewControllerDelegate,
             }
         }
     }
+    
+    // 0 For Default Header Sort Options, 1 for Location Sort Options
+    var sortOptionsInd: Int = 0 {
+        didSet{
+            if sortOptionsInd == 0 {
+                filterSortOptions = HeaderSortOptions
+            } else if sortOptionsInd == 1 {
+                // Location Post Search Mode
+                filterSortOptions = LocationSortOptions
+                self.locationNameLabel.isUserInteractionEnabled = false
+            } else {
+                filterSortOptions = HeaderSortOptions
+            }
+        }
+    }
+    var filterSortOptions: [String] = HeaderSortOptions
+
+    
     var selectedSort: String = defaultSort {
         didSet{
-            if let index = HeaderSortOptions.index(of: selectedSort){
+            if let index = filterSortOptions.index(of: selectedSort){
                 self.sortSegment.selectedSegmentIndex = index
             }
         }
@@ -284,7 +302,7 @@ class FilterController: UIViewController, GMSAutocompleteViewControllerDelegate,
     }()
     
     func handleSelectSort(sender: UISegmentedControl) {
-        self.selectedSort = HeaderSortOptions[sender.selectedSegmentIndex]
+        self.selectedSort = filterSortOptions[sender.selectedSegmentIndex]
         print("Selected Sort is ",self.selectedSort)
     }
     
@@ -307,6 +325,17 @@ class FilterController: UIViewController, GMSAutocompleteViewControllerDelegate,
     override func viewDidLoad() {
         
         super.viewDidLoad()
+        
+        // Update Sort Options
+        if sortOptionsInd == 0 {
+            sortSegment = UISegmentedControl(items: HeaderSortOptions)
+        } else if sortOptionsInd == 1 {
+            sortSegment = UISegmentedControl(items: LocationSortOptions)
+        } else {
+            print("Invalid Sort Ind, Reverting To Default")
+            sortSegment = UISegmentedControl(items: HeaderSortOptions)
+        }
+        
         
         if self.selectedLocation == nil {
             let attributedText = NSMutableAttributedString(string: "Current Location", attributes: [NSFontAttributeName: UIFont.boldSystemFont(ofSize: 14),NSForegroundColorAttributeName: UIColor.mainBlue()])

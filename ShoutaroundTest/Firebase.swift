@@ -2016,6 +2016,16 @@ extension Database{
             completion(tempPosts)
         }
             
+            
+            // Ratings
+        else if selectedSort == LocationSortOptions[1] {
+            tempPosts.sort(by: { (p1, p2) -> Bool in
+                return (p1.rating! > p2.rating!)
+            })
+            completion(tempPosts)
+        }
+            
+            
             // ERROR - Invalid Sort
         else {
             print("Fetched Post Sort: ERROR, Invalid Sort")

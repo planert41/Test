@@ -21,11 +21,27 @@ class SortFilterHeader: UICollectionViewCell {
     
     var delegate: SortFilterHeaderDelegate?
 
+    // 0 For Default Header Sort Options, 1 for Location Sort Options
+    var sortOptionsInd: Int = 0 {
+        didSet{
+            if sortOptionsInd == 0 {
+                sortOptions = HeaderSortOptions
+            } else if sortOptionsInd == 1 {
+                sortOptions = LocationSortOptions
+            } else {
+                sortOptions = HeaderSortOptions
+            }
+        }
+    }
+    
+    var sortOptions: [String] = HeaderSortOptions
+    
+    
     var headerSortSegment = UISegmentedControl()
     var selectedSort: String = defaultSort {
         didSet{
-            if HeaderSortOptions[headerSortSegment.selectedSegmentIndex] != selectedSort {
-                headerSortSegment.selectedSegmentIndex = HeaderSortOptions.index(of: selectedSort)!
+            if sortOptions[headerSortSegment.selectedSegmentIndex] != selectedSort {
+                headerSortSegment.selectedSegmentIndex = sortOptions.index(of: selectedSort)!
             }
         }
     }
@@ -53,8 +69,8 @@ class SortFilterHeader: UICollectionViewCell {
         super.init(frame:frame)
      
         backgroundColor = UIColor.white
-        headerSortSegment = UISegmentedControl(items: HeaderSortOptions)
-        headerSortSegment.selectedSegmentIndex = HeaderSortOptions.index(of: self.selectedSort)!
+        headerSortSegment = UISegmentedControl(items: sortOptions)
+        headerSortSegment.selectedSegmentIndex = sortOptions.index(of: self.selectedSort)!
         headerSortSegment.addTarget(self, action: #selector(selectSort), for: .valueChanged)
         headerSortSegment.tintColor = UIColor(hexColor: "107896")
         
@@ -72,23 +88,7 @@ class SortFilterHeader: UICollectionViewCell {
     
     func selectSort(sender: UISegmentedControl) {
         
-
-//        switch sender.selectedSegmentIndex {
-//        case 0:
-//            self.selectedSort = optionSort[sender.selectedSegmentIndex]
-//            if self.selectedRange == optionRanges[optionRanges.endIndex - 1]
-//            {
-//                self.selectedRange = optionRanges[0]
-//                self.distanceSegment.selectedSegmentIndex = 0
-//                print(self.distanceSegment.selectedSegmentIndex)
-//            }
-//        case 1...optionSort.count - 2:
-//            self.selectedSort = optionSort[sender.selectedSegmentIndex]
-//        default:
-//            self.selectedSort = optionSort[0]
-//
-//        }
-        self.selectedSort = HeaderSortOptions[sender.selectedSegmentIndex]
+        self.selectedSort = sortOptions[sender.selectedSegmentIndex]
         delegate?.headerSortSelected(sort: self.selectedSort)
         print("Selected Sort is ",self.selectedSort)
     }
