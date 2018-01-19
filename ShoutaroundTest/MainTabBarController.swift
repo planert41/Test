@@ -223,6 +223,7 @@ class MainTabBarController: UITabBarController, UITabBarControllerDelegate, UIIm
             Database.fetchListForMultListIds(listUid: CurrentUser.listIds, completion: { (fetchedLists) in
                 CurrentUser.lists = fetchedLists
                 print("Current User List: \(CurrentUser.lists)")
+                Database.checkUserSocialStats(user: CurrentUser.user!, socialField: "lists_created", socialCount: fetchedLists.count)
             })
         }
     }

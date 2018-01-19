@@ -14,7 +14,7 @@ import GeoFire
 import CoreGraphics
 import CoreLocation
 
-class ExploreController: UIViewController, UISearchBarDelegate, HomePostSearchDelegate, UISearchControllerDelegate, FilterControllerDelegate, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, UserProfilePhotoCellDelegate, UIPickerViewDelegate, UIPickerViewDataSource {
+class ExploreController: UIViewController, UISearchBarDelegate, HomePostSearchDelegate, UISearchControllerDelegate, FilterControllerDelegate, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, UserProfilePhotoCellDelegate, UIPickerViewDelegate, UIPickerViewDataSource, PostSearchControllerDelegate {
 
     
     // CollectionView Variables
@@ -58,11 +58,7 @@ class ExploreController: UIViewController, UISearchBarDelegate, HomePostSearchDe
         }
     }
     
-    var displayedPosts = [Post]() {
-        didSet{
-            self.noResultsLabel.isHidden = true
-        }
-    }
+    var displayedPosts = [Post]()
     
     
     // Search and Filter Variables
@@ -83,72 +79,31 @@ class ExploreController: UIViewController, UISearchBarDelegate, HomePostSearchDe
         return sb
     }()
     
-//    var filterButtonImage: UIImageView = {
-//        let view = UIImageView(frame: CGRect(x: 0, y: 0, width: 20, height: 20))
-//        view.contentMode = .scaleAspectFit
-//        view.sizeToFit()
-//        view.backgroundColor = UIColor.clear
-//        return view
-//    }()
-//    
-//    var rangeButtonImage: UIImageView = {
-//        let view = UIImageView(frame: CGRect(x: 0, y: 0, width: 20, height: 20))
-//        view.contentMode = .scaleAspectFit
-//        view.sizeToFit()
-//        view.backgroundColor = UIColor.clear
-//        return view
-//    }()
-//    
-//    var filterButton: UIButton {
-//        let button = UIButton.init(type: .custom)
-//        button.frame = CGRect(x: 0, y: 0, width: 20, height: 20)
-//        button.addTarget(self, action: #selector(activateFilter), for: .touchUpInside)
-//        return button
-//    }
-//    
-//    var rangeButton: UIButton {
-//        let button = UIButton.init(type: .custom)
-//        button.frame = CGRect(x: 0, y: 0, width: 20, height: 20)
-//        button.addTarget(self, action: #selector(activateRange), for: .touchUpInside)
-//        return button
-//    }
-
-    var filterButton = UIButton()
-    var rangeButton = UIButton()
+    // Filter Variables
     
-    var resultSearchController:UISearchController? = nil
-
-    var filterCaption: String? = nil{
-        didSet{
-            
-        }
-    }
-    var filterLocation: CLLocation? = nil
-    var filterGroup: String = defaultGroup {
-        didSet{
-            setupNavigationItems()
-        }
-    }
-    var filterRange: String = defaultRange {
-        didSet{
-            setupNavigationItems()
-        }
-    }
+    var isFiltering: Bool = false
+    var filterCaption: String? = nil
+    var filterRange: String? = nil
     
-    var filterSort: String = defaultSort
-    var filterTime: String = defaultTime{
+    var filterLocation: CLLocation? = nil{
         didSet{
-            setupNavigationItems()
-        }
-    }
-    
-    var isFiltering: Bool = false {
-        didSet {
-            if isFiltering{
-//                filterButton.image = #imageLiteral(resourceName: "filter").withRenderingMode(.alwaysOriginal)
-            } else {
-//                filterButton.image = #imageLiteral(resourceName: "blankfilter").withRenderingMode(.alwaysOriginal)
+            self.updatePostDistances(refLocation: filterLocation){}
+            if filterLocation == nil {
+                self.filterLocationName = nil
+            } else if filterLocation == CurrentUser.currentLocation{
+                self.filterLocationName = "Current Location"
             }
+        }
+    }
+    var filterLocationName: String? = nil
+    var filterGoogleLocationID: String? = nil
+    var filterMinRating: Double = 0
+    var filterType: String? = nil
+    var filterMaxPrice: String? = nil
+    
+    // Header Sort Variables
+    var selectedHeaderSort = HeaderSortDefault {
+        didSet {
         }
     }
     
@@ -209,15 +164,6 @@ class ExploreController: UIViewController, UISearchBarDelegate, HomePostSearchDe
         return button
     }()
 
-    var noResultsLabel: UILabel = {
-        let label = UILabel()
-        label.text = "Loading"
-        label.font = UIFont.boldSystemFont(ofSize: 20)
-        label.textColor = UIColor.black
-        label.isHidden = true
-        label.textAlignment = NSTextAlignment.center
-        return label
-    }()
 
     
     
@@ -225,18 +171,6 @@ class ExploreController: UIViewController, UISearchBarDelegate, HomePostSearchDe
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        // Add search bar and filter button
-//        view.addSubview(searchView)
-//        view.addSubview(filterButton)
-//        view.addSubview(defaultSearchBar)
-//        searchView.anchor(top: topLayoutGuide.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 50)
-//        
-//        filterButton.anchor(top: searchView.topAnchor, left: nil, bottom: searchView.bottomAnchor, right: searchView.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: view.frame.width/6, height: 0)
-////        filterButton.widthAnchor.constraint(equalTo: filterButton.heightAnchor, multiplier: 1).isActive = true
-//        
-//        defaultSearchBar.delegate = self
-//        defaultSearchBar.anchor(top: searchView.topAnchor, left: searchView.leftAnchor, bottom: searchView.bottomAnchor, right: filterButton.leftAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
-//        
         view.backgroundColor = UIColor.white
         setupNavigationItems()
         
@@ -266,11 +200,7 @@ class ExploreController: UIViewController, UISearchBarDelegate, HomePostSearchDe
         collectionView.register(UserProfilePhotoCell.self, forCellWithReuseIdentifier: cellId)
         view.addSubview(collectionView)
         collectionView.anchor(top: rankingView.bottomAnchor, left: view.leftAnchor, bottom: bottomLayoutGuide.topAnchor, right: view.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
-        
-        view.addSubview(noResultsLabel)
-        noResultsLabel.anchor(top: collectionView.topAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 50)
-        noResultsLabel.isHidden = true
-        
+
         // Add Pagination Notifications
         
         NotificationCenter.default.addObserver(self, selector: #selector(finishFetchingPostIds), name: ExploreController.finishFetchingRankPostIdsNotificationName, object: nil)
@@ -286,6 +216,23 @@ class ExploreController: UIViewController, UISearchBarDelegate, HomePostSearchDe
         collectionView.keyboardDismissMode = .onDrag
         
     }
+    
+    func updatePostDistances(refLocation: CLLocation?, completion:() -> ()){
+        if let refLocation = refLocation {
+            let count = displayedPosts.count
+            for i in 0 ..< count {
+                var tempPost = displayedPosts[i]
+                tempPost.distance = Double((tempPost.locationGPS?.distance(from: refLocation))!)
+                displayedPosts[i] = tempPost
+            }
+            completion()
+        } else {
+            print("No Filter Location")
+            completion()
+        }
+    }
+    
+// Refresh Functions
 
     func handleRefresh(){
         self.clearFilter()
@@ -301,24 +248,48 @@ class ExploreController: UIViewController, UISearchBarDelegate, HomePostSearchDe
         self.collectionView.refreshControl?.endRefreshing()
     }
     
+    func refreshPostsForFilter(){
+        self.clearAllPosts()
+        self.collectionView.reloadData()
+        fetchingPostIds()
+    }
+    
     func refreshPagination(){
         self.isFinishedPaging = false
         self.isFinishedPagingPostIds = false
         self.fetchedPostCount = 0
     }
     
+    func clearPostIds(){
+        self.fetchedPostIds.removeAll()
+    }
+    
+    func clearAllPosts(){
+        self.fetchedPostIds.removeAll()
+        self.displayedPosts.removeAll()
+//        self.refreshPagination()
+    }
+    
     func clearFilter(){
-        self.defaultSearchBar.text = nil
-        self.filterCaption = nil
         self.filterLocation = nil
-        self.filterGroup = defaultGroup
-        self.filterRange = defaultRange
-        self.filterSort = defaultSort
-        self.filterTime = defaultTime
+        self.filterLocationName = nil
+        self.filterRange = nil
+        self.filterGoogleLocationID = nil
+        self.filterMinRating = 0
+        self.filterType = nil
+        self.filterMaxPrice = nil
+        self.selectedHeaderSort = defaultSort
+        self.checkFilter()
     }
     
 
-    
+    func checkFilter(){
+        if self.filterCaption != nil || (self.filterRange != nil) || (self.filterMinRating != 0) || (self.filterType != nil) || (self.filterMaxPrice != nil) {
+            self.isFiltering = true
+        } else {
+            self.isFiltering = false
+        }
+    }
     
     fileprivate func setupRankingView(){
         
@@ -380,71 +351,55 @@ class ExploreController: UIViewController, UISearchBarDelegate, HomePostSearchDe
     
     fileprivate func setupNavigationItems(){
         
-        let homePostSearchResults = HomePostSearch()
-        homePostSearchResults.delegate = self
-        resultSearchController = UISearchController(searchResultsController: homePostSearchResults)
-        resultSearchController?.searchResultsUpdater = homePostSearchResults
-        resultSearchController?.delegate = self
-        let searchBar = resultSearchController?.searchBar
-        searchBar?.backgroundColor = UIColor.clear
-        searchBar?.placeholder =  searchBarPlaceholderText
-        searchBar?.delegate = homePostSearchResults
-        navigationItem.titleView = searchBar
-        
-        resultSearchController?.hidesNavigationBarDuringPresentation = false
-        resultSearchController?.dimsBackgroundDuringPresentation = true
-        definesPresentationContext = true
+        navigationItem.titleView = defaultSearchBar
+        defaultSearchBar.delegate = self
+        defaultSearchBar.placeholder = "Food, User, Location"
         
         navigationController?.navigationBar.backgroundColor = UIColor.white
-        
-        // Setup Filter Button
-        
-        filterButton = UIButton.init(type: .custom)
-        filterButton.addTarget(self, action: #selector(activateFilter), for: .touchUpInside)
-        filterButton.frame = CGRect(x: 0, y: 0, width: 30, height: 30)
-        
-        if self.filterGroup == defaultGroup && self.filterRange == defaultRange && self.filterTime == defaultTime && self.filterGroup == "All" {
-            filterButton.setImage(#imageLiteral(resourceName: "blankfilter").withRenderingMode(.alwaysOriginal), for: .normal)
-        } else {
-            filterButton.setImage(#imageLiteral(resourceName: "filter").withRenderingMode(.alwaysOriginal), for: .normal)
-        }
-        let rightBarButton = UIBarButtonItem(customView: filterButton)
-        navigationItem.rightBarButtonItem = rightBarButton
-        
-        // Setup Range Button
-        
-        rangeButton = UIButton.init(type: .custom)
-        rangeButton.addTarget(self, action: #selector(activateRange), for: .touchUpInside)
-        rangeButton.frame = CGRect(x: 0, y: 0, width: 30, height: 30)
-        
-        if self.filterRange != defaultRange {
-            rangeButton.setBackgroundImage(#imageLiteral(resourceName: "GeoFence").withRenderingMode(.alwaysOriginal), for: .normal)
-            rangeButton.setTitle(self.filterRange, for: .normal)
-            rangeButton.titleLabel!.font = UIFont(name: "Helvetica", size: 12)
-            rangeButton.setTitleColor(UIColor.black, for: .normal)
-
-        } else {
-            rangeButton.setBackgroundImage(#imageLiteral(resourceName: "Globe").withRenderingMode(.alwaysOriginal), for: .normal)
-        }
-        
-        let leftBarButton = UIBarButtonItem(customView: rangeButton)
-        navigationItem.leftBarButtonItem = leftBarButton
-        
     }
     
     
     func searchBarShouldBeginEditing(_ searchBar: UISearchBar) -> Bool {
-        self.present(resultSearchController!, animated: true, completion: nil)
+        self.openSearch(index: 0)
         return false
     }
     
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        if (searchText.length == 0) {
+            self.filterCaption = nil
+            self.checkFilter()
+            self.refreshPostsForFilter()
+            searchBar.endEditing(true)
+        }
+    }
     
-    func activateFilter(){
+    func openSearch(index: Int?){
+        
+        let postSearch = PostSearchController()
+        postSearch.delegate = self
+        
+        self.navigationController?.pushViewController(postSearch, animated: true)
+        if index != nil {
+            postSearch.selectedScope = index!
+            postSearch.searchController.searchBar.selectedScopeButtonIndex = index!
+        }
+        
+    }
+    
+    func openFilter(){
         let filterController = FilterController()
         filterController.delegate = self
+        
+        filterController.selectedCaption = self.filterCaption
         filterController.selectedRange = self.filterRange
-        filterController.selectedSort = self.filterSort
-        filterController.selectedType = self.filterTime
+        filterController.selectedMinRating = self.filterMinRating
+        filterController.selectedMaxPrice = self.filterMaxPrice
+        filterController.selectedType = self.filterType
+        filterController.selectedLocation = self.filterLocation
+        filterController.selectedLocationName = self.filterLocationName
+        
+        filterController.selectedSort = self.selectedHeaderSort
+        
         self.navigationController?.pushViewController(filterController, animated: true)
     }
     
@@ -469,12 +424,25 @@ class ExploreController: UIViewController, UISearchBarDelegate, HomePostSearchDe
     }
     
     func filterControllerFinished(selectedCaption: String?, selectedRange: String?, selectedLocation: CLLocation?, selectedLocationName: String?, selectedMinRating: Double, selectedType: String?, selectedMaxPrice: String?, selectedSort: String) {
-        print("Filter by Range: \(self.filterRange) at \(self.filterLocation), Group: \(self.filterGroup), Time: \(self.filterTime)")
+        
+        // Clears all Filters, Puts in new Filters, Refreshes all Post IDS and Posts
+        self.clearFilter()
         
         self.filterCaption = selectedCaption
+        self.filterRange = selectedRange
         self.filterLocation = selectedLocation
-        self.filterSort = selectedSort
-        self.refreshPosts()
+        self.filterLocationName = selectedLocationName
+        
+        self.filterMinRating = selectedMinRating
+        self.filterType = selectedType
+        self.filterMaxPrice = selectedMaxPrice
+        
+        self.selectedHeaderSort = selectedSort
+        
+        // Check for filtering
+        self.checkFilter()
+        
+        self.refreshPostsForFilter()
     }
     
     
@@ -532,9 +500,9 @@ class ExploreController: UIViewController, UISearchBarDelegate, HomePostSearchDe
     
     func activateRange() {
     
-        let rangeIndex = geoFilterRangeDefault.index(of: self.filterRange)
-        pickerView.selectRow(rangeIndex!, inComponent: 0, animated: false)
-        dummyTextView.perform(#selector(becomeFirstResponder), with: nil, afterDelay: 0.1)
+//        let rangeIndex = geoFilterRangeDefault.index(of: self.filterRange)
+//        pickerView.selectRow(rangeIndex!, inComponent: 0, animated: false)
+//        dummyTextView.perform(#selector(becomeFirstResponder), with: nil, afterDelay: 0.1)
     }
     
     // UIPicker DataSource
@@ -574,40 +542,40 @@ class ExploreController: UIViewController, UISearchBarDelegate, HomePostSearchDe
     
     func finishPaginationCheck() {
         
-        if self.fetchedPostCount == (self.fetchedPostIds.count) {
-            self.isFinishedPaging = true
-        }
-        
-        print("Pagination Check, Fetched Posts: \(self.isFinishedPaging), Post Ids: \(self.isFinishedPagingPostIds)")
-        
-        if self.displayedPosts.count < 1 && self.isFinishedPaging == true && self.isFinishedPagingPostIds == true{
-            // No Result = No Results, Finished Paging Posts and Post ids
-            print("No Results Pagination Finished")
-            self.noResultsLabel.text = "No Results"
-            self.noResultsLabel.isHidden = false
-        }
-        else if self.displayedPosts.count < 1 && self.isFinishedPaging != true{
-            // Paginate Post = No Result, Not finished Paging Post
-            print("No Display, Paginate More Posts")
-            self.noResultsLabel.text = "Loading"
-            self.noResultsLabel.isHidden = false
-            self.paginatePosts()
-        }
-        else if self.displayedPosts.count < 1 && self.isFinishedPagingPostIds != true{
-            // Paginate Post = No Result, Not finished Fetch More Post Ids
-            print("No Display, Fetch More Post Ids")
-            self.noResultsLabel.text = "Loading"
-            self.noResultsLabel.isHidden = false
-            self.fetchingPostIds()
-        } else {
-            DispatchQueue.main.async(execute: { self.collectionView.reloadData() })
-            print("Loading View with \(self.displayedPosts.count) posts")
-            if self.collectionView.numberOfItems(inSection: 0) != 0 && self.displayedPosts.count < 4{
-                let indexPath = IndexPath(item: 0, section: 0)
-                self.collectionView.scrollToItem(at: indexPath, at: .bottom, animated: true)
-                self.noResultsLabel.isHidden = true
-            }
-        }
+//        if self.fetchedPostCount == (self.fetchedPostIds.count) {
+//            self.isFinishedPaging = true
+//        }
+//
+//        print("Pagination Check, Fetched Posts: \(self.isFinishedPaging), Post Ids: \(self.isFinishedPagingPostIds)")
+//
+//        if self.displayedPosts.count < 1 && self.isFinishedPaging == true && self.isFinishedPagingPostIds == true{
+//            // No Result = No Results, Finished Paging Posts and Post ids
+//            print("No Results Pagination Finished")
+//            self.noResultsLabel.text = "No Results"
+//            self.noResultsLabel.isHidden = false
+//        }
+//        else if self.displayedPosts.count < 1 && self.isFinishedPaging != true{
+//            // Paginate Post = No Result, Not finished Paging Post
+//            print("No Display, Paginate More Posts")
+//            self.noResultsLabel.text = "Loading"
+//            self.noResultsLabel.isHidden = false
+//            self.paginatePosts()
+//        }
+//        else if self.displayedPosts.count < 1 && self.isFinishedPagingPostIds != true{
+//            // Paginate Post = No Result, Not finished Fetch More Post Ids
+//            print("No Display, Fetch More Post Ids")
+//            self.noResultsLabel.text = "Loading"
+//            self.noResultsLabel.isHidden = false
+//            self.fetchingPostIds()
+//        } else {
+//            DispatchQueue.main.async(execute: { self.collectionView.reloadData() })
+//            print("Loading View with \(self.displayedPosts.count) posts")
+//            if self.collectionView.numberOfItems(inSection: 0) != 0 && self.displayedPosts.count < 4{
+//                let indexPath = IndexPath(item: 0, section: 0)
+//                self.collectionView.scrollToItem(at: indexPath, at: .bottom, animated: true)
+//                self.noResultsLabel.isHidden = true
+//            }
+//        }
     }
     
 
@@ -693,129 +661,60 @@ class ExploreController: UIViewController, UISearchBarDelegate, HomePostSearchDe
     
     func paginatePosts(){
         
-        let paginateFetchPostSize = 4
-        var paginateFetchPostsLimit = min(self.fetchedPostCount + paginateFetchPostSize, self.fetchedPostIds.count)
-        
-        print("Start Pagination \(self.fetchedPostCount) to \(paginateFetchPostsLimit) : \(self.fetchedPostIds.count)")
-        
-        // Start Loop for Posts
-        for i in self.fetchedPostCount ..< paginateFetchPostsLimit  {
-            let fetchPostId = fetchedPostIds[i]
-            var fetchedPost: Post? = nil
+//        let paginateFetchPostSize = 4
+//        var paginateFetchPostsLimit = min(self.fetchedPostCount + paginateFetchPostSize, self.fetchedPostIds.count)
+//
+//        print("Start Pagination \(self.fetchedPostCount) to \(paginateFetchPostsLimit) : \(self.fetchedPostIds.count)")
+//
+//        // Start Loop for Posts
+//        for i in self.fetchedPostCount ..< paginateFetchPostsLimit  {
+//            let fetchPostId = fetchedPostIds[i]
+//            var fetchedPost: Post? = nil
+//
+//            //Fetch Post
+//            Database.fetchPostWithPostID(postId: fetchPostId.id, completion: { (post, error) in
+//
+//                self.fetchedPostCount += 1
+//                if let error = error {
+//                    print("Error Fetching \(fetchPostId.id), \(error)")
+//                } else {
+//                fetchedPost = post
+//
+//                // Update Post with Location Distance from selected Location
+//                    if self.filterLocation != nil {
+//                    fetchedPost?.distance = Double((fetchedPost?.locationGPS?.distance(from: self.filterLocation!))!)
+//                    }
+//
+////                print(fetchedPost)
+//
+//                // Filter Post based on conditions
+//                self.filterPosts(post: fetchedPost!, completion: { (filteredPost, filterCondition) in
+//
+//                        if filteredPost == nil {
+//                            print("\(post?.id) was filtered by \(filterCondition). Current Posts: \(self.displayedPosts.count)")
+//                        } else {
+//                            self.displayedPosts.append(filteredPost!)
+//                        }
+//
+//                    if self.fetchedPostCount == paginateFetchPostsLimit {
+//                        print("Finish Paging Posts")
+//                        NotificationCenter.default.post(name: ExploreController.finishPaginationRankPostIdsNotificationName, object: nil)
+//                    }
+//                })
+//                }
+//            })
+//        }
+//
+//        // Fetched more post ids and only 1 post id came back. Loop would not be initiaited and finish paging wouldne bt called
+//
+//        if self.fetchedPostCount == paginateFetchPostsLimit {
+//            print("Finish Paging Posts")
+//            NotificationCenter.default.post(name: ExploreController.finishPaginationRankPostIdsNotificationName, object: nil)
+//        }
+    }
+    
+    
 
-            //Fetch Post
-            Database.fetchPostWithPostID(postId: fetchPostId.id, completion: { (post, error) in
-                
-                self.fetchedPostCount += 1
-                if let error = error {
-                    print("Error Fetching \(fetchPostId.id), \(error)")
-                } else {
-                fetchedPost = post
-                    
-                // Update Post with Location Distance from selected Location
-                    if self.filterLocation != nil {
-                    fetchedPost?.distance = Double((fetchedPost?.locationGPS?.distance(from: self.filterLocation!))!)
-                    }
-                    
-//                print(fetchedPost)
-                
-                // Filter Post based on conditions
-                self.filterPosts(post: fetchedPost!, completion: { (filteredPost, filterCondition) in
-                    
-                        if filteredPost == nil {
-                            print("\(post?.id) was filtered by \(filterCondition). Current Posts: \(self.displayedPosts.count)")
-                        } else {
-                            self.displayedPosts.append(filteredPost!)
-                        }
-                    
-                    if self.fetchedPostCount == paginateFetchPostsLimit {
-                        print("Finish Paging Posts")
-                        NotificationCenter.default.post(name: ExploreController.finishPaginationRankPostIdsNotificationName, object: nil)
-                    }
-                })
-                }
-            })
-        }
-        
-        // Fetched more post ids and only 1 post id came back. Loop would not be initiaited and finish paging wouldne bt called
-        
-        if self.fetchedPostCount == paginateFetchPostsLimit {
-            print("Finish Paging Posts")
-            NotificationCenter.default.post(name: ExploreController.finishPaginationRankPostIdsNotificationName, object: nil)
-        }
-    }
-    
-    
-    func filterPosts(post:Post, completion: @escaping (Post?, String?) -> () ){
-        
-        guard var fetchedPost: Post? = post else {return}
-        var filterCondition: String? = nil
-        
-        // Filter Time
-        if self.filterTime != defaultTime && fetchedPost != nil {
-            
-            let calendar = Calendar.current
-            let tagHour = Double(calendar.component(.hour, from: (fetchedPost?.tagTime)!))
-            guard let filterIndex = FilterSortTimeDefault.index(of: self.filterTime) else {return}
-            
-            if FilterSortTimeStart[filterIndex] > tagHour || tagHour > FilterSortTimeEnd[filterIndex] {
-                // Delete Post If not within selected time frame
-                // print("Skipped Post: ", fetchPostId.id, " TagHour: ",tagHour, " Start: ", FilterSortTimeStart[filterIndex]," End: ",FilterSortTimeEnd[filterIndex])
-                
-                fetchedPost = nil
-                filterCondition = "Time"
-            }
-        }
-        
-        // Filter Group
-        
-        if self.filterGroup != defaultGroup && fetchedPost != nil{
-            if CurrentUser.groupUids.contains((fetchedPost?.creatorUID)!){
-            } else {
-                // Skip Post if not in group
-                // print("Skipped Post: ", fetchPostId.id, " Creator Not in Group: ",fetchPostId.creatorUID!)
-                
-                fetchedPost = nil
-                filterCondition = "Group"
-                
-            }
-        }
-        
-        // Filter Caption
-        
-        if self.filterCaption != nil && self.filterCaption != "" && fetchedPost != nil {
-            guard let searchedText = self.filterCaption else {return}
-            guard let post = fetchedPost else {return}
-            let searchedEmoji = ReverseEmojiDictionary[searchedText.lowercased()] ?? ""
-            
-            if post.caption.lowercased().contains(searchedText.lowercased()) || post.emoji.contains(searchedText.lowercased()) || post.nonRatingEmojiTags.joined(separator: " ").lowercased().contains(searchedText.lowercased()) || post.nonRatingEmojiTags.joined(separator: " ").lowercased().contains(searchedEmoji) || post.locationName.lowercased().contains(searchedText.lowercased()) || post.locationAdress.lowercased().contains(searchedText.lowercased()) {
-                // Post Contains Caption
-                
-            } else {
-                fetchedPost = nil
-                filterCondition = "Caption"
-                
-            }
-        }
-        
-        // Filter Distance
-        
-        if self.filterRange != defaultRange && self.filterLocation != nil && fetchedPost != nil{
-            
-            guard let filterDistance = Double(self.filterRange) else {return}
-            fetchedPost?.distance = Double((fetchedPost?.locationGPS?.distance(from: self.filterLocation!))!)/1000
-            
-            
-            if (fetchedPost?.distance)! > filterDistance {
-                fetchedPost = nil
-                filterCondition = "Distance"
-            }
-        }
-        
-        completion(fetchedPost, filterCondition)
-    }
-    
-    
     
 // CollectionView Delegate Methods
     

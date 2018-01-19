@@ -20,12 +20,11 @@ struct User {
     var status: String?
     
     //Social Data
-    var postCount: Int = 0
+    var posts_created: Int = 0
     var followingCount: Int = 0
-    var followerCount: Int = 0
-    var bookmarkCount: Int = 0
-    var bookmarkedCount: Int = 0
-    var likedCount: Int = 0
+    var followersCount: Int = 0
+    var votes_received: Int = 0
+    var lists_created: Int = 0
     
 
     init(uid: String, dictionary: [String:Any]) {
@@ -41,14 +40,11 @@ struct User {
         }
         
         let social = dictionary["social"] as? [String:Int] ?? [:]
-        self.postCount = social["postCount"] as? Int ?? 0
+        self.posts_created = social["posts_created"] as? Int ?? 0
         self.followingCount = social["followingCount"] as? Int ?? 0
-        self.followerCount = social["followerCount"] as? Int ?? 0
-        self.bookmarkCount = social["bookmarkCount"] as? Int ?? 0
-        self.bookmarkedCount = social["bookmarkedCount"] as? Int ?? 0
-        self.likedCount = social["likedCount"] as? Int ?? 0
-        
-
+        self.followersCount = social["followersCount"] as? Int ?? 0
+        self.votes_received = social["votes_received"] as? Int ?? 0
+        self.lists_created = social["lists_created"] as? Int ?? 0
     }
     
 }

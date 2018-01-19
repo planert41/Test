@@ -57,14 +57,14 @@ class SortFilterHeader: UICollectionViewCell {
     lazy var filterButton: UIButton = {
         let button = UIButton(type: .system)
         button.setImage(#imageLiteral(resourceName: "search_selected").withRenderingMode(.alwaysOriginal), for: .normal)
-        button.addTarget(self, action: #selector(activateFilter), for: .touchUpInside)
+        button.addTarget(self, action: #selector(openFilter), for: .touchUpInside)
         button.layer.borderWidth = 0
         button.layer.borderColor = UIColor.darkGray.cgColor
         button.clipsToBounds = true
         return button
     }()
     
-    func activateFilter(){
+    func openFilter(){
         self.delegate?.openFilter()
     }
     

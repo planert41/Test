@@ -23,7 +23,8 @@ var newPostId: PostId? = nil
 class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout, UICollectionViewDelegate,UICollectionViewDataSource, UITextViewDelegate, LocationSearchControllerDelegate, UIGestureRecognizerDelegate, GMSAutocompleteViewControllerDelegate, UITableViewDelegate, UITableViewDataSource {
     
     
-    
+    static let updateFeedNotificationName = NSNotification.Name(rawValue: "UpdateFeed")
+
     
     // Setup Default Variables
     
@@ -1646,139 +1647,7 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
     }
     
     
-    func handleShare() {
-        // If imageurl exist, then post is being edited. New posts do not have prior image url
-        // Check for Caption and Location Data
-        guard let postImage = selectedImage else {
-            self.alert(title: "Upload Post Requirement", message: "Please Insert Picture")
-            return}
-//        guard let caption = captionTextView.text, caption.characters.count > 0 else {
-//            self.alert(title: "Upload Post Requirement", message: "Please Insert Caption")
-//            return}
-        guard let postLocationName = self.selectPostLocationName else {return}
-        if postLocationName == self.blankGPSName {
-            self.alert(title: "Upload Post Requirement", message: "Please Tag Location")
-            return}
-        guard let postLocationAdress = self.selectPostLocationAdress else {
-            self.alert(title: "Upload Post Requirement", message: "Please Tag Location")
-            return}
-        
-        if editPostInd{
-            // Editing Post
-            guard let postId = self.editPostId else {return}
-            guard let imageUrl = self.editPostImageUrl else {return}
-            self.saveEditedPost(postId: postId, imageUrl: imageUrl)
-            
-        } else {
-            //Create New Post
-            guard let image = selectedImage?.resizeImageWith(newSize: defaultPhotoResize) else {
-                self.alert(title: "Upload Post Requirement", message: "Please Insert Picture")
-                return }
-            guard let uploadData = UIImageJPEGRepresentation(image, 0.5) else {
-                self.alert(title: "Upload Post Requirement", message: "Please Insert Picture")
-                return}
-            navigationItem.rightBarButtonItem?.isEnabled = false
-            
-            let filename = NSUUID().uuidString
-            Storage.storage().reference().child("posts").child(filename).putData(uploadData, metadata: nil) { (metadata, err) in
-                if let err = err {
-                    self.navigationItem.rightBarButtonItem?.isEnabled = true
-                    print("Failed to upload post image:", err)
-                    return
-                }
-                guard let imageUrl = metadata?.downloadURL()?.absoluteString else {return}
-                print("Successfully uploaded post image:",  imageUrl)
-                self.saveToDatabaseWithImageURL(imageUrl: imageUrl)
-            }
-        }
-    }
-    
-    static let updateFeedNotificationName = NSNotification.Name(rawValue: "UpdateFeed")
-    
-    fileprivate func saveToDatabaseWithImageURL(imageUrl: String) {
-        // SAVE POST
-        
-        guard let postImage = selectedImage else {return}
-        var caption = captionTextView.text
-        if caption == captionDefault {caption = nil}
-        let googlePlaceID = selectPostGooglePlaceID ?? nil
-        
-        // Upload Name Adress that matches inputs
-        guard let postLocationName = self.selectPostLocationName else {return}
-        if postLocationName == self.blankGPSName {return}
-        guard let postLocationAdress = self.selectPostLocationAdress else {return}
-        guard let uid = Auth.auth().currentUser?.uid else {return}
-        
-        let nonratingEmojiUpload = self.nonRatingEmoji ?? nil
-        let nonratingEmojiTagsUpload = self.nonRatingEmojiTags ?? nil
-        
-        var uploadedLocationGPSLatitude: String?
-        var uploadedlocationGPSLongitude: String?
-        var uploadedLocationGPS: String?
-        
-        if selectPostLocation == nil {
-            uploadedLocationGPSLatitude = "0"
-            uploadedlocationGPSLongitude = "0"
-            uploadedLocationGPS = nil
-        } else {
-            uploadedLocationGPSLatitude = String(format: "%f", (selectPostLocation?.coordinate.latitude)!)
-            uploadedlocationGPSLongitude = String(format: "%f", (selectPostLocation?.coordinate.longitude)!)
-            uploadedLocationGPS = uploadedLocationGPSLatitude! + "," + uploadedlocationGPSLongitude!
-        }
-        
-        let userPostRef = Database.database().reference().child("posts")
-        let ref = userPostRef.childByAutoId()
-        let uploadTime = Date().timeIntervalSince1970
-        let tagTime = self.selectTime.timeIntervalSince1970
-        
-        let values = ["imageUrl": imageUrl, "caption": caption, "imageWidth": postImage.size.width, "imageHeight": postImage.size.height, "creationDate": uploadTime, "googlePlaceID": googlePlaceID, "locationName": postLocationName, "locationAdress": postLocationAdress, "postLocationGPS": uploadedLocationGPS, "creatorUID": uid, "tagTime": tagTime,"nonratingEmoji": nonratingEmojiUpload, "nonratingEmojiTags": nonratingEmojiTagsUpload] as [String:Any]
-        
-        // SAVE POST IN POST DATABASE
-        
-        ref.updateChildValues(values) { (err, ref) in
-            if let err = err {
-                self.navigationItem.rightBarButtonItem?.isEnabled = true
-                print("Failed to save post to DB", err)
-                return}
-            
-            print("Successfully save post to DB")
-            Database.spotUpdateSocialCount(creatorUid: uid, receiverUid: nil, action: "post", change: 1)
-            
-            // Put new post in cache
-            self.uploadnewPostCache(uid: uid,postid: ref.key, dictionary: values)
-            
-            // SAVE USER AND POSTID IN USERPOSTS
-            
-            let postref = ref.key
-            let userPostRef = Database.database().reference().child("userposts").child(uid).child(postref)
-            let values = ["creationDate": uploadTime, "tagTime": tagTime, "emoji": nonratingEmojiUpload] as [String:Any]
-            
-            userPostRef.updateChildValues(values) { (err, ref) in
-                if let err = err {
-                    print("Failed to save post to user", err)
-                    return
-                }
-                print("Successfully save post to user")
-            }
-            
-            
-            // SAVE GEOFIRE LOCATION DATA
-            let geofireRef = Database.database().reference().child("postlocations")
-            guard let geoFire = GeoFire(firebaseRef: geofireRef) else {return}
-            //            let geofirekeytest = uid+","+postref
-            
-            geoFire.setLocation(self.selectPostLocation, forKey: postref) { (error) in
-                if (error != nil) {
-                    print("An error occured: \(error)")
-                } else {
-                    print("Saved location successfully!")
-                }
-            }
-            
-            self.dismiss(animated: true, completion: nil)
-            NotificationCenter.default.post(name: SharePhotoController.updateFeedNotificationName, object: nil)
-        }
-    }
+  
     
     fileprivate func uploadnewPostCache(uid: String?, postid: String?, dictionary: [String:Any]?){
         guard let uid = uid else {return}

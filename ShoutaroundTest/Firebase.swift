@@ -1990,6 +1990,43 @@ extension Database{
         
     }
     
+    static func checkUserSocialStats(user: User, socialField: String, socialCount: Int){
+        if socialField == "posts_created"{
+            if user.posts_created != socialCount {
+                let change = socialCount - user.posts_created
+                Database.spotUpdateSocialCount(creatorUid: user.uid, socialField: "posts_created", change: change)
+            }
+        }
+            
+        else if socialField == "followingCount"{
+            if user.followingCount != socialCount {
+                let change = socialCount - user.followingCount
+                Database.spotUpdateSocialCount(creatorUid: user.uid, socialField: "followingCount", change: change)
+            }
+        }
+            
+        else if socialField == "followersCount"{
+            if user.followersCount != socialCount {
+                let change = socialCount - user.followersCount
+                Database.spotUpdateSocialCount(creatorUid: user.uid, socialField: "followersCount", change: change)
+            }
+        }
+            
+        else if socialField == "lists_created"{
+            if user.lists_created != socialCount {
+                let change = socialCount - user.lists_created
+                Database.spotUpdateSocialCount(creatorUid: user.uid, socialField: "lists_created", change: change)
+            }
+        }
+            
+        else if socialField == "votes_received"{
+            if user.votes_received != socialCount {
+                let change = socialCount - user.votes_received
+                Database.spotUpdateSocialCount(creatorUid: user.uid, socialField: "votes_received", change: change)
+            }
+        }
+    }
+    
     
     static func spotUpdateSocialCountOLD(creatorUid: String!, receiverUid: String?, action: String!, change: Int!){
         

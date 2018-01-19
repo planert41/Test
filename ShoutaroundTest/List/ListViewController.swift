@@ -248,7 +248,7 @@ class ListViewController: UIViewController, UICollectionViewDelegate, UICollecti
                     thisGroup.leave()
                 } else {
                     print("Fetch Post: ERROR, \(postId), No Post, Will Delete from List")
-                    Database.DeletePostForList(postId: postId, listId: list.id)
+                    Database.DeletePostForList(postId: postId, listId: list.id, postCreationDate: nil)
                     thisGroup.leave()
                 }
             

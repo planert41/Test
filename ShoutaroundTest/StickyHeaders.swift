@@ -115,7 +115,7 @@ class StickyHeadersCollectionViewFlowLayout: UICollectionViewFlowLayout {
         layoutAttributes.frame = frameForSupplementaryView
         
         
-        print("contentoffsety : ", contentOffsetY, "Prior Offset: ", self.priorYOffset, " min: ", minimum, "max: ", maximum, "Haader Postion ", layoutAttributes.frame.origin.y)
+//        print("contentoffsety : ", contentOffsetY, "Prior Offset: ", self.priorYOffset, " min: ", minimum, "max: ", maximum, "Haader Postion ", layoutAttributes.frame.origin.y)
         self.priorYOffset = contentOffsetY
         self.priorHeaderPosition = frameForSupplementaryView.origin.y
         

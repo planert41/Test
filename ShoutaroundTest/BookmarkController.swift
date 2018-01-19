@@ -62,7 +62,7 @@ class BookMarkController: UIViewController, UICollectionViewDelegate, UICollecti
     lazy var filterButton: UIButton = {
         let button = UIButton(type: .system)
         button.setImage(#imageLiteral(resourceName: "grid"), for: .normal)
-        button.addTarget(self, action: #selector(activateFilter), for: .touchUpInside)
+        button.addTarget(self, action: #selector(openFilter), for: .touchUpInside)
         return button
     }()
     
@@ -88,7 +88,7 @@ class BookMarkController: UIViewController, UICollectionViewDelegate, UICollecti
     
     lazy var singleTap: UIGestureRecognizer = {
         
-        let tap = UITapGestureRecognizer(target: self, action: #selector(activateFilter))
+        let tap = UITapGestureRecognizer(target: self, action: #selector(openFilter))
         tap.delegate = self
         return tap
     }()
@@ -341,7 +341,7 @@ class BookMarkController: UIViewController, UICollectionViewDelegate, UICollecti
 
     // Search Delegate And Methods
     
-    func activateFilter(){
+    func openFilter(){
         let filterController = FilterController()
         filterController.delegate = self
         filterController.selectedRange = self.filterRange

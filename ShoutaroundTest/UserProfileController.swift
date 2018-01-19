@@ -91,7 +91,7 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
     }
     
     lazy var singleTap: UIGestureRecognizer = {
-        let tap = UITapGestureRecognizer(target: self, action: #selector(activateFilter))
+        let tap = UITapGestureRecognizer(target: self, action: #selector(openFilter))
         tap.delegate = self
         return tap
     }()
@@ -122,7 +122,7 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
         self.present(resultSearchController!, animated: true, completion: nil)
     }
     
-    func activateFilter(){
+    func openFilter(){
         let filterController = FilterController()
         filterController.delegate = self
         filterController.selectedRange = self.filterRange

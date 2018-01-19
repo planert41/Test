@@ -297,8 +297,6 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     func filterControllerFinished(selectedCaption: String?, selectedRange: String?, selectedLocation: CLLocation?, selectedLocationName: String?, selectedMinRating: Double, selectedType: String?, selectedMaxPrice: String?, selectedSort: String){
         
         // Clears all Filters, Puts in new Filters, Refreshes all Post IDS and Posts
-        
-        
         self.clearFilter()
         
         self.filterCaption = selectedCaption
@@ -315,14 +313,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         // Check for filtering
         self.checkFilter()
         
-        // Refresh Everything
-//        self.refreshPagination()
-//        self.collectionView?.reloadData()
-//
         self.refreshPostsForFilter()
-        
-        
-        
     }
     
     func checkFilter(){
@@ -483,8 +474,11 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
             print("Current User Posts: ", self.fetchedPostIds.count)
             self.userPostIdFetched = true
             NotificationCenter.default.post(name: HomeController.finishFetchingUserPostIdsNotificationName, object: nil)
+            Database.checkUserSocialStats(user: CurrentUser.user!, socialField: "posts_created", socialCount: self.fetchedPostIds.count)
         }
     }
+    
+
 
     
     fileprivate func fetchFollowingUserPostIds(){
@@ -515,6 +509,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
                 print("Number of Following: ",CurrentUser.followingUids.count)
                 self.followingPostIdFetched = true
                 NotificationCenter.default.post(name: HomeController.finishFetchingFollowingPostIdsNotificationName, object: nil)
+                Database.checkUserSocialStats(user: CurrentUser.user!, socialField: "followingCount", socialCount: CurrentUser.followingUids.count)
             }
         }
     }

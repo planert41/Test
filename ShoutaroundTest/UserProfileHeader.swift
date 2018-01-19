@@ -15,7 +15,7 @@ protocol UserProfileHeaderDelegate {
     func didChangeToGridView()
     func didSignOut()
     func activateSearchBar()
-    func activateFilter()
+    func openFilter()
 }
 
 
@@ -147,7 +147,7 @@ class UserProfileHeader: UICollectionViewCell, UITextFieldDelegate, UISearchBarD
     lazy var filterButton: UIButton = {
         let button = UIButton(type: .system)
         button.setImage(#imageLiteral(resourceName: "grid"), for: .normal)
-        button.addTarget(self, action: #selector(activateFilter), for: .touchUpInside)
+        button.addTarget(self, action: #selector(openFilter), for: .touchUpInside)
         return button
     }()
     
@@ -170,8 +170,8 @@ class UserProfileHeader: UICollectionViewCell, UITextFieldDelegate, UISearchBarD
         delegate?.didChangeToListView()
     }
     
-    func activateFilter(){
-        self.delegate?.activateFilter()
+    func openFilter(){
+        self.delegate?.openFilter()
     }
     
     let bookmarkButton: UIButton = {
@@ -228,7 +228,7 @@ class UserProfileHeader: UICollectionViewCell, UITextFieldDelegate, UISearchBarD
         return label
     }()
     
-    let bookmarkedLabel: UILabel = {
+    let listCountLabel: UILabel = {
         
         let label = UILabel()
         let attributedText = NSMutableAttributedString(string: "11\n", attributes: [NSFontAttributeName: UIFont.boldSystemFont(ofSize: 14)])
@@ -241,7 +241,7 @@ class UserProfileHeader: UICollectionViewCell, UITextFieldDelegate, UISearchBarD
         return label
     }()
     
-    let likedLabel: UILabel = {
+    let voteCountLabel: UILabel = {
         
         let label = UILabel()
         let attributedText = NSMutableAttributedString(string: "11\n", attributes: [NSFontAttributeName: UIFont.boldSystemFont(ofSize: 14)])
@@ -257,17 +257,17 @@ class UserProfileHeader: UICollectionViewCell, UITextFieldDelegate, UISearchBarD
     
     fileprivate func setupSocialLabels(){
         
-        let postCount = user?.postCount ?? 0
+        let postCount = user?.posts_created ?? 0
         let followingCount = user?.followingCount ?? 0
-        let followerCount = user?.followerCount ?? 0
-        let bookmarkedCount = user?.bookmarkedCount ?? 0
-        let likedCount = user?.likedCount ?? 0
+        let followerCount = user?.followersCount ?? 0
+        let listCount = user?.lists_created ?? 0
+        let voteCount = user?.votes_received ?? 0
         
         setupAttributedSocialLabel(labelName: postsLabel, count: postCount, metric: "posts")
         setupAttributedSocialLabel(labelName: followingLabel, count: followingCount, metric: "following")
         setupAttributedSocialLabel(labelName: followersLabel, count: followerCount, metric: "followers")
-        setupAttributedSocialLabel(labelName: bookmarkedLabel, count: bookmarkedCount, metric: "bookmarks")
-        setupAttributedSocialLabel(labelName: likedLabel, count: likedCount, metric: "likes")
+        setupAttributedSocialLabel(labelName: listCountLabel, count: listCount, metric: "lists")
+        setupAttributedSocialLabel(labelName: voteCountLabel, count: voteCount, metric: "votes")
         
     }
     
@@ -350,7 +350,7 @@ class UserProfileHeader: UICollectionViewCell, UITextFieldDelegate, UISearchBarD
     fileprivate func setupUserStatsView(){
         
         setupSocialLabels()
-        let stackView = UIStackView(arrangedSubviews: [postsLabel, followersLabel, followingLabel, bookmarkedLabel, likedLabel])
+        let stackView = UIStackView(arrangedSubviews: [postsLabel, followersLabel, followingLabel, listCountLabel, voteCountLabel])
 
         stackView.distribution = .fillEqually
         addSubview(stackView)
@@ -368,7 +368,7 @@ class UserProfileHeader: UICollectionViewCell, UITextFieldDelegate, UISearchBarD
 
     
     lazy var singleTap: UIGestureRecognizer = {
-        let tap = UITapGestureRecognizer(target: self, action: #selector(activateFilter))
+        let tap = UITapGestureRecognizer(target: self, action: #selector(openFilter))
         tap.delegate = self
         return tap
     }()
