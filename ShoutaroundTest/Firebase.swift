@@ -1248,6 +1248,7 @@ extension Database{
                 }
             
                 print("Create List ID with User: SUCCESS: \(listId):\(listName), User: \(uid)")
+                Database.spotUpdateSocialCount(creatorUid: uid, socialField: "lists_created", change: 1)
             }
         }
         
@@ -1274,6 +1275,9 @@ extension Database{
         
         Database.database().reference().child("users").child(uid).child("lists").child(listId).removeValue()
         print("Delete List Oject: Success: \(uploadList.name), User: \(uid)")
+        
+        Database.spotUpdateSocialCount(creatorUid: uid, socialField: "lists_created", change: -1)
+
         
     }
     
@@ -1877,7 +1881,7 @@ extension Database{
             
             // Set value and report transaction success
             currentData.value = user
-            print("Add Following: Success, \(uid) following: \(userUid): \(following[userUid])")
+            print("Update Following: Success, \(uid) following: \(userUid): \(following[userUid])")
             return TransactionResult.success(withValue: currentData)
             
         }) { (error, committed, snapshot) in
@@ -1886,15 +1890,24 @@ extension Database{
             } else {
                 var user = snapshot?.value as? [String : AnyObject] ?? [:]
                 var following: Dictionary<String, Int>
+                following = user["following"] as? [String : Int] ?? [:]
                 var followedValue: Int? = following[userUid]
-
-                handleFollower(followedUid: userUid, followedValue: followedValue)
+                
+                handleFollower(followedUid: userUid, followedValue: followedValue){
+                    if followedValue == 1 {
+                        self.spotUpdateSocialCount(creatorUid: uid, socialField: "followingCount", change: 1)
+                        self.spotUpdateSocialCount(creatorUid: userUid, socialField: "followerCount", change: 1)
+                    } else {
+                        self.spotUpdateSocialCount(creatorUid: uid, socialField: "followingCount", change: -1)
+                        self.spotUpdateSocialCount(creatorUid: userUid, socialField: "followerCount", change: -1)
+                    }
+                }
                 completion()
             }
         }
     }
     
-    static func handleFollower(followedUid: String!, followedValue: Int?){
+    static func handleFollower(followedUid: String!, followedValue: Int?,  completion: @escaping() ->()){
         
         guard let uid = Auth.auth().currentUser?.uid else {return}
         let ref = Database.database().reference().child("follower").child(followedUid)
@@ -1938,6 +1951,8 @@ extension Database{
         }) { (error, committed, snapshot) in
             if let error = error {
                 print(error.localizedDescription)
+            } else {
+               completion()
             }
         }
     }
@@ -1945,9 +1960,8 @@ extension Database{
     static func spotUpdateSocialCount(creatorUid: String!, socialField: String!, change: Int!){
         
         // votes_received
-        // following, followers
+        // followingCount, followersCount
         // posts_created, lists_created
-        
         
         
         let creatorRef = Database.database().reference().child("users").child(creatorUid).child("social")

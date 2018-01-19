@@ -123,8 +123,6 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         //    4. Control Pagination by increasing displayedPostsCount to fetchedpostCount
         
         setupNotificationCenters()
-
-        
         setupCollectionView()
 
 

@@ -5008,7 +5008,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "1524"
             endingLineNumber = "1524"
-            landmarkName = "checkUpdateListDetailsWithPost(listName:listId:post:completion:)"
+            landmarkName = "updateListforPost(post:newList:prevList:completion:)"
             landmarkType = "7">
             <Locations>
                <Location
@@ -5056,8 +5056,8 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "1527"
             endingLineNumber = "1527"
-            landmarkName = "checkUpdateListDetailsWithPost(listName:listId:post:completion:)"
-            landmarkType = "7">
+            landmarkName = "Database"
+            landmarkType = "21">
             <Locations>
                <Location
                   shouldBeEnabled = "No"
@@ -5408,8 +5408,8 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "1558"
             endingLineNumber = "1558"
-            landmarkName = "Database"
-            landmarkType = "21">
+            landmarkName = "checkUpdateListDetailsWithPost(listName:listId:post:completion:)"
+            landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -5424,7 +5424,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "1560"
             endingLineNumber = "1560"
-            landmarkName = "updateMessageThread(threadKey:creatorUid:creatorUsername:receiveUid:message:)"
+            landmarkName = "checkUpdateListDetailsWithPost(listName:listId:post:completion:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -5456,7 +5456,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "1755"
             endingLineNumber = "1755"
-            landmarkName = "handleBookmark(postId:creatorUid:completion:)"
+            landmarkName = "handleLike(postId:creatorUid:completion:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -5488,7 +5488,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "1810"
             endingLineNumber = "1810"
-            landmarkName = "handleUserBookmark(postId:)"
+            landmarkName = "handleBookmark(postId:creatorUid:completion:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -7735,7 +7735,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "1466"
             endingLineNumber = "1466"
-            landmarkName = "fetchListforSingleListId(listId:completion:)"
+            landmarkName = "fetchListForMultListIds(listUid:completion:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -8263,8 +8263,8 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "2037"
             endingLineNumber = "2037"
-            landmarkName = "Database"
-            landmarkType = "21">
+            landmarkName = "spotUpdateSocialCountOLD(creatorUid:receiverUid:action:change:)"
+            landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -8279,7 +8279,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "2042"
             endingLineNumber = "2042"
-            landmarkName = "filterPosts(inputPosts:filterCaption:filterRange:filterLocation:filterMinRating:filterType:filterMaxPrice:completion:)"
+            landmarkName = "spotUpdateSocialCountOLD(creatorUid:receiverUid:action:change:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -8295,7 +8295,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "2050"
             endingLineNumber = "2050"
-            landmarkName = "filterPosts(inputPosts:filterCaption:filterRange:filterLocation:filterMinRating:filterType:filterMaxPrice:completion:)"
+            landmarkName = "spotUpdateSocialCountOLD(creatorUid:receiverUid:action:change:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -8311,7 +8311,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "2046"
             endingLineNumber = "2046"
-            landmarkName = "filterPosts(inputPosts:filterCaption:filterRange:filterLocation:filterMinRating:filterType:filterMaxPrice:completion:)"
+            landmarkName = "spotUpdateSocialCountOLD(creatorUid:receiverUid:action:change:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -8327,7 +8327,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "2053"
             endingLineNumber = "2053"
-            landmarkName = "filterPosts(inputPosts:filterCaption:filterRange:filterLocation:filterMinRating:filterType:filterMaxPrice:completion:)"
+            landmarkName = "spotUpdateSocialCountOLD(creatorUid:receiverUid:action:change:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -8343,7 +8343,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "2059"
             endingLineNumber = "2059"
-            landmarkName = "filterPosts(inputPosts:filterCaption:filterRange:filterLocation:filterMinRating:filterType:filterMaxPrice:completion:)"
+            landmarkName = "spotUpdateSocialCountOLD(creatorUid:receiverUid:action:change:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
