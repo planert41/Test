@@ -51,7 +51,7 @@ class TabListViewController: UIViewController, UICollectionViewDelegate, UIColle
     
     let listCellId = "listCellId"
     
-    let listCollectionViewHeight: CGFloat = 30
+    let listCollectionViewHeight: CGFloat = 35
     lazy var listCollectionView : UICollectionView = {
         let layout = ListNameFlowLayout()
         let cv = UICollectionView(frame: CGRect.zero, collectionViewLayout: layout)
@@ -67,6 +67,7 @@ class TabListViewController: UIViewController, UICollectionViewDelegate, UIColle
         label.addTarget(self, action: #selector(handleExpandList), for: .touchUpInside)
         label.setImage(#imageLiteral(resourceName: "expand"), for: .normal)
         label.layer.borderWidth = 0
+//        label.backgroundColor = UIColor.legitColor()
         return label
     }()
     

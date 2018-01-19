@@ -55,8 +55,13 @@ var searchScopeButtons = ["Posts","Users","Places"]
 
 // Rank Defaults
 
-var defaultRankOptions = ["likes", "bookmarks", "messages"]
-var firebaseCountVariable:[String:String] = ["likes":"likeCount", "bookmarks":"bookmarkCount", "messages":"messageCount"]
+var defaultRankOptions = ["post_votes", "post_lists", "messages"]
+var defaultRank = defaultRankOptions[0]
+
+
+
+
+var firebaseCountVariable:[String:String] = ["likes":"likeCount", "bookmarks":"bookmarkCount", "messages":"messageCount", "post_lists": "listCount", "post_votes": "voteCount"]
 
 struct RatingColors {
     static func ratingColor (rating: Double?) -> UIColor {

@@ -10,7 +10,7 @@ import Foundation
 import UIKit
 import Firebase
 
-protocol ListViewHeaderDelegate {
+protocol ListHeaderDelegate {
     func didChangeToListView()
     func didChangeToPostView()
     func openFilter()
@@ -20,7 +20,7 @@ protocol ListViewHeaderDelegate {
 
 class ListViewHeader: UICollectionViewCell, UIGestureRecognizerDelegate {
     
-    var delegate: ListViewHeaderDelegate?
+    var delegate: ListHeaderDelegate?
 
     var headerSortSegment = UISegmentedControl()
     var selectedSort: String = defaultSort
@@ -36,6 +36,7 @@ class ListViewHeader: UICollectionViewCell, UIGestureRecognizerDelegate {
         let button = UIButton(type: .system)
         button.setImage(self.isListView ? #imageLiteral(resourceName: "postview") :#imageLiteral(resourceName: "list"), for: .normal)
         button.addTarget(self, action: #selector(changeView), for: .touchUpInside)
+        button.tintColor = UIColor.legitColor()
         return button
     }()
     
@@ -54,7 +55,7 @@ class ListViewHeader: UICollectionViewCell, UIGestureRecognizerDelegate {
     
     var isFiltering: Bool = false {
         didSet{
-            filterButton.backgroundColor = isFiltering ? UIColor.mainBlue() : UIColor.clear
+            filterButton.backgroundColor = isFiltering ? UIColor.legitColor() : UIColor.clear
         }
     }
     
@@ -91,6 +92,7 @@ class ListViewHeader: UICollectionViewCell, UIGestureRecognizerDelegate {
         headerSortSegment = UISegmentedControl(items: HeaderSortOptions)
         headerSortSegment.selectedSegmentIndex = HeaderSortOptions.index(of: self.selectedSort)!
         headerSortSegment.addTarget(self, action: #selector(selectSort), for: .valueChanged)
+        headerSortSegment.tintColor = UIColor.legitColor()
         
         addSubview(headerSortSegment)
         headerSortSegment.anchor(top: topAnchor, left: leftAnchor, bottom: bottomAnchor, right: formatButton.leftAnchor, paddingTop: 5, paddingLeft: 3, paddingBottom: 5, paddingRight: 1, width: 0, height: 0)

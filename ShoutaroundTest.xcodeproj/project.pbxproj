@@ -90,6 +90,8 @@
 		A5C6452E1F5C481300C78244 /* Comment.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5C6452D1F5C481300C78244 /* Comment.swift */; };
 		A5CC6EE01FCC81050074AB78 /* ThreadCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5CC6EDF1FCC81050074AB78 /* ThreadCell.swift */; };
 		A5D942E91FC5145C00A189DD /* ExploreController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5D942E81FC5145C00A189DD /* ExploreController.swift */; };
+		A5F32BC220125A0E00DDF199 /* RankViewHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5F32BC120125A0E00DDF199 /* RankViewHeader.swift */; };
+		A5F32BC420127A2500DDF199 /* ExploreTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5F32BC320127A2500DDF199 /* ExploreTest.swift */; };
 		A5F3E32E1FBD486D00A3E3A0 /* UserCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5F3E32D1FBD486D00A3E3A0 /* UserCell.swift */; };
 		A5F46C3D1FC5EBE400D69945 /* SMSegment.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5F46C3B1FC5EBE400D69945 /* SMSegment.swift */; };
 		A5F46C3E1FC5EBE400D69945 /* SMSegmentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5F46C3C1FC5EBE400D69945 /* SMSegmentView.swift */; };
@@ -192,6 +194,8 @@
 		A5C6452D1F5C481300C78244 /* Comment.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Comment.swift; sourceTree = "<group>"; };
 		A5CC6EDF1FCC81050074AB78 /* ThreadCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ThreadCell.swift; sourceTree = "<group>"; };
 		A5D942E81FC5145C00A189DD /* ExploreController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ExploreController.swift; sourceTree = "<group>"; };
+		A5F32BC120125A0E00DDF199 /* RankViewHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RankViewHeader.swift; sourceTree = "<group>"; };
+		A5F32BC320127A2500DDF199 /* ExploreTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExploreTest.swift; sourceTree = "<group>"; };
 		A5F3E32D1FBD486D00A3E3A0 /* UserCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserCell.swift; sourceTree = "<group>"; };
 		A5F46C3B1FC5EBE400D69945 /* SMSegment.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SMSegment.swift; sourceTree = "<group>"; };
 		A5F46C3C1FC5EBE400D69945 /* SMSegmentView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SMSegmentView.swift; sourceTree = "<group>"; };
@@ -488,6 +492,8 @@
 			isa = PBXGroup;
 			children = (
 				A5D942E81FC5145C00A189DD /* ExploreController.swift */,
+				A5F32BC120125A0E00DDF199 /* RankViewHeader.swift */,
+				A5F32BC320127A2500DDF199 /* ExploreTest.swift */,
 			);
 			name = Explore;
 			sourceTree = "<group>";
@@ -703,6 +709,7 @@
 				A57C060E1F7611A000A0568F /* BookmarkController.swift in Sources */,
 				A5F46C411FC6057100D69945 /* SMSegmentAppearance.swift in Sources */,
 				A5A2E5D120028F0C00D7E8F5 /* ListViewController.swift in Sources */,
+				A5F32BC420127A2500DDF199 /* ExploreTest.swift in Sources */,
 				A552EA5F1F997973005A0977 /* Message.swift in Sources */,
 				A5A2E5D92005CB9000D7E8F5 /* TabListViewController.swift in Sources */,
 				A5AEB9721F96A82B00E88CAC /* HomePostSearch.swift in Sources */,
@@ -752,6 +759,7 @@
 				A5C6450F1F564C7700C78244 /* UserProfilePhotoCell.swift in Sources */,
 				A5D942E91FC5145C00A189DD /* ExploreController.swift in Sources */,
 				A5F990841FCF84540086E661 /* ThreadMessageCell.swift in Sources */,
+				A5F32BC220125A0E00DDF199 /* RankViewHeader.swift in Sources */,
 				A51C13C31F4FBF2F00CEB740 /* Extensions.swift in Sources */,
 				A580CFA220104ECC007D2C3C /* LastLocationPhotoCell.swift in Sources */,
 				A5C6451F1F57B1BD00C78244 /* UserSearchCell.swift in Sources */,

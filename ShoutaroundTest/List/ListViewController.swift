@@ -13,7 +13,7 @@ import CoreLocation
 import EmptyDataSet_Swift
 
 
-class ListViewController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, BookmarkPhotoCellDelegate, HomePostCellDelegate, ListViewHeaderDelegate, SortFilterHeaderDelegate, FilterControllerDelegate, EmptyDataSetSource, EmptyDataSetDelegate {
+class ListViewController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, BookmarkPhotoCellDelegate, HomePostCellDelegate, ListHeaderDelegate, SortFilterHeaderDelegate, FilterControllerDelegate, EmptyDataSetSource, EmptyDataSetDelegate {
 
 
     static let refreshListViewNotificationName = NSNotification.Name(rawValue: "RefreshListView")
