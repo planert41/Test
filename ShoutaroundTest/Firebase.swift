@@ -330,7 +330,7 @@ extension Database{
                 return}
 
             print("Save Post Dictionary: SUCCESS")
-            Database.spotUpdateSocialCount(creatorUid: uid, receiverUid: uid, action: "post", change: 1)
+            Database.spotUpdateSocialCount(creatorUid: uid, socialField: "posts_created", change: 1)
             completion(postId)
 //            // Put new post in cache
 //            self.uploadnewPostCache(uid: uid,postid: ref.key, dictionary: uploadValues)
@@ -1099,7 +1099,7 @@ extension Database{
         
         // Remove from cache
         postCache.removeValue(forKey: post.id!)
-        Database.spotUpdateSocialCount(creatorUid: uid, receiverUid: nil, action: "post", change: -1)
+        Database.spotUpdateSocialCount(creatorUid: uid, socialField: "posts_created", change: -1)
         
         // Bookmarked post is deleted when user fetches for post but it isn't there
 //        Database.database().reference().child("bookmarks").child(post.creatorUID!).child(post.id!).removeValue()
@@ -1554,12 +1554,6 @@ extension Database{
                 completion(list)
             }
         }
-        
-        
-        
-        
-        
-        
     }
     
     // Messages
@@ -1698,7 +1692,7 @@ extension Database{
             } else {
                 var post = snapshot?.value as? [String : AnyObject] ?? [:]
                 var votes = post["votes"] as? [String : Int] ?? [:]
-                spotUpdateSocialCount(creatorUid: uid, receiverUid: creatorUid, action: "vote", change: voteChange)
+                spotUpdateSocialCount(creatorUid: creatorUid, socialField: "votes_received", change: voteChange)
                 // Completion after updating Likes
                 completion()
             }
@@ -1746,9 +1740,9 @@ extension Database{
                 var post = snapshot?.value as? [String : AnyObject] ?? [:]
                 var likes = post["likes"] as? [String : Int] ?? [:]
                 if let _ = likes[uid] {
-                    spotUpdateSocialCount(creatorUid: uid, receiverUid: creatorUid, action: "like", change: 1)
+//                    spotUpdateSocialCount(creatorUid: uid, receiverUid: creatorUid, action: "like", change: 1)
                 } else {
-                    spotUpdateSocialCount(creatorUid: uid, receiverUid: creatorUid, action: "like", change: -1)
+//                    spotUpdateSocialCount(creatorUid: uid, receiverUid: creatorUid, action: "like", change: -1)
                 }
                 // Completion after updating Likes
                 completion()
@@ -1801,9 +1795,9 @@ extension Database{
                 var bookmarks = post["bookmarks"] as? [String : Int] ?? [:]
 
                 if let _ = bookmarks[uid] {
-                    spotUpdateSocialCount(creatorUid: uid, receiverUid: creatorUid, action: "bookmark", change: 1)
+//                    spotUpdateSocialCount(creatorUid: uid, receiverUid: creatorUid, action: "bookmark", change: 1)
                 } else {
-                    spotUpdateSocialCount(creatorUid: uid, receiverUid: creatorUid, action: "bookmark", change: -1)
+//                    spotUpdateSocialCount(creatorUid: uid, receiverUid: creatorUid, action: "bookmark", change: -1)
                 }
                 
                 // No Error Handle Bookmarking in User
@@ -1863,19 +1857,27 @@ extension Database{
             var followingCount = user["followingCount"] as? Int ?? 0
             if let _ = following[userUid] {
                 // Unfollow User
-                followingCount -= 1
-                following.removeValue(forKey: userUid)
+                if let deleteIndex = following.index(forKey: userUid) {
+                    following.remove(at: deleteIndex)
+                    followingCount -= 1
+                } else {
+                    print("Unfollow: ERROR: \(uid) not following \(userUid)")
+                }
             } else {
+                if following[userUid] == 1 || following[userUid] != nil {
+                    print("Following: ERROR: \(uid) already following \(userUid)")
+                } else {
                 // Follow User
-                followingCount += 1
-                following[userUid] = 1
+                    followingCount += 1
+                    following[userUid] = 1
+                }
             }
             user["followingCount"] = followingCount as AnyObject?
             user["following"] = following as AnyObject?
             
             // Set value and report transaction success
             currentData.value = user
-            print("Successfully Update \(uid) following: \(userUid): \(following[userUid])")
+            print("Add Following: Success, \(uid) following: \(userUid): \(following[userUid])")
             return TransactionResult.success(withValue: currentData)
             
         }) { (error, committed, snapshot) in
@@ -1883,24 +1885,16 @@ extension Database{
                 print(error.localizedDescription)
             } else {
                 var user = snapshot?.value as? [String : AnyObject] ?? [:]
-                var following = user["following"] as? [String : Int] ?? [:]
-                if let _ = following[userUid] {
-                    spotUpdateSocialCount(creatorUid: uid, receiverUid: userUid, action: "follow", change: 1)
-                    CurrentUser.followingUids.append(userUid)
-                } else {
-                    spotUpdateSocialCount(creatorUid: uid, receiverUid: userUid, action: "follow", change: -1)
-                    if let index = CurrentUser.followingUids.index(of: userUid) {
-                        CurrentUser.followingUids.remove(at: index)
-                    }
-                }
+                var following: Dictionary<String, Int>
+                var followedValue: Int? = following[userUid]
 
-                handleFollower(followedUid: userUid)
+                handleFollower(followedUid: userUid, followedValue: followedValue)
                 completion()
             }
         }
     }
     
-    static func handleFollower(followedUid: String!){
+    static func handleFollower(followedUid: String!, followedValue: Int?){
         
         guard let uid = Auth.auth().currentUser?.uid else {return}
         let ref = Database.database().reference().child("follower").child(followedUid)
@@ -1910,15 +1904,29 @@ extension Database{
             var followers: Dictionary<String, Int>
             followers = user["followers"] as? [String : Int] ?? [:]
             var followerCount = user["followerCount"] as? Int ?? 0
-            if let _ = followers[uid] {
-                // Unstar the post and remove self from stars
-                followerCount -= 1
-                followers.removeValue(forKey: uid)
+            
+            if followedValue == 1 {
+                // User gained a new follower
+                if followers[uid] == 1 {
+                    print("Add Follower: ERROR, /(followedUid) already has \(uid) follower")
+                } else {
+                    followerCount += 1
+                    followers[uid] = 1
+                }
             } else {
-                // Star the post and add self to stars
-                followerCount += 1
-                followers[uid] = 1
+                // User lost a follower
+                if followers[uid] == 1 {
+                    if let deleteIndex = followers.index(forKey: uid){
+                        followers.remove(at: deleteIndex)
+                        followerCount -= 1
+                    } else {
+                        print("Unfollow Error, /(followedUid) not followed by \(uid)")
+                    }
+                } else {
+                    print("Unfollow Error, /(followedUid) not followed by \(uid)")
+                }
             }
+
             user["followerCount"] = followerCount as AnyObject?
             user["follower"] = followers as AnyObject?
             
@@ -1934,7 +1942,42 @@ extension Database{
         }
     }
 
-    static func spotUpdateSocialCount(creatorUid: String!, receiverUid: String?, action: String!, change: Int!){
+    static func spotUpdateSocialCount(creatorUid: String!, socialField: String!, change: Int!){
+        
+        // votes_received
+        // following, followers
+        // posts_created, lists_created
+        
+        
+        
+        let creatorRef = Database.database().reference().child("users").child(creatorUid).child("social")
+        creatorRef.runTransactionBlock({ (currentData) -> TransactionResult in
+            var user = currentData.value as? [String : AnyObject] ?? [:]
+            var count = user[socialField] as? Int ?? 0
+            
+            if socialField != "votes_received"{
+                // Allow Negative Votes
+                count = count + change
+            } else {
+                count = max(0,count + change)
+            }
+            
+            user[socialField] = count as AnyObject?
+            
+            currentData.value = user
+            print("Update \(socialField!) for creator : \(creatorUid!) by: \(change!), New Count: \(count)")
+            return TransactionResult.success(withValue: currentData)
+            
+        }) { (error, committed, snapshot) in
+            if let error = error {
+                print("Creator Social Update Error: ", creatorUid, error.localizedDescription)
+            }
+        }
+        
+    }
+    
+    
+    static func spotUpdateSocialCountOLD(creatorUid: String!, receiverUid: String?, action: String!, change: Int!){
         
         guard let receiverUid = receiverUid else {
             print("No Receiver Uid Error")

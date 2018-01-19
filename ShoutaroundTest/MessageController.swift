@@ -432,6 +432,7 @@ class MessageController: UIViewController, UICollectionViewDataSource, UICollect
         guard let creatorUsername = CurrentUser.username else {return}
         guard let postId = self.post?.id else {return}
         guard let message = self.messageInput.text else {return}
+        let postCreationDate = self.post?.creationDate.timeIntervalSince1970
         let uploadTime = Date().timeIntervalSince1970
         let descTime = Date()
 
@@ -458,8 +459,6 @@ class MessageController: UIViewController, UICollectionViewDataSource, UICollect
             let messageThreadRef = Database.database().reference().child("messageThreads").childByAutoId()
             let values = ["postUID": postId, "creatorUID": creatorUID, "creatorUsername": creatorUsername, "sentMessage": message, "creationDate": uploadTime, "sentTo": toText] as [String:Any]
         
-        
-        
             messageThreadRef.updateChildValues(values, withCompletionBlock: { (err, ref) in
                 
                 if let err = err {
@@ -472,19 +471,28 @@ class MessageController: UIViewController, UICollectionViewDataSource, UICollect
                 
                 print("Successfully Created Message Thread \(threadKey) in Database")
 
-                // Update Message Count
-                let messageRef = Database.database().reference().child("messages").child(postId)
+                // Update Post_Messages
+                let messageRef = Database.database().reference().child("post_messages").child(postId)
                 messageRef.runTransactionBlock({ (currentData) -> TransactionResult in
                     
                     var post = currentData.value as? [String : AnyObject] ?? [:]
                     var count = post["messageCount"] as? Int ?? 0
                     var threads = post["threads"] as? [String : Any] ?? [:]
+                    var postDate = post["creationDate"] as? Double ?? 0
                     
                     count = max(0, count + 1)
                     threads[threadKey] = creatorUID
                     
+                    // Update Message Thread Counts
                     post["messageCount"] = count as AnyObject?
                     post["threads"] = threads as AnyObject?
+                    
+                    // Handle/Update Post Creation Date
+                    if let postCreationDate = postCreationDate {
+                        if postDate != postCreationDate {
+                            postDate = postCreationDate
+                        }
+                    }
                     
                     // Enables firebase sort by count and recent upload time
                     let  sortTime = uploadTime/1000000000000000
@@ -510,7 +518,6 @@ class MessageController: UIViewController, UICollectionViewDataSource, UICollect
                 print("Trying to send messages for user uids: \(receiveUserUid)")
                 if receiveUserUid.count > 0 {
                     Database.updateMessageThread(threadKey: threadKey, creatorUid: creatorUID, creatorUsername: creatorUsername, receiveUid: receiveUserUid, message: message)
-                
                 }
                 
                 self.navigationController?.popViewController(animated: true)
@@ -590,28 +597,8 @@ class MessageController: UIViewController, UICollectionViewDataSource, UICollect
         self.checkToText(inputString: toInput.text) { (users) in
             self.handleSendTest(sentUsers: users)
         }
-        
-//        guard let toText = toInput.text else {return}
-//        
-//        if toText.isUsername{
-//            handleSendMessage(userId: String)
-//        }
-//        else if toText.isValidEmail {
-//            handleSendEmail()
-//        } else{
-//            alert(title: "Sending Error", message: "Not a valid receipient")
-//        }
     }
     
-    
-    func handleSendUserMessage(threadKey: String!, creatorUserId: String!, receiveUserID: String!, message: String?){
-        
-        
-        
-        
-        
-        
-    }
     
     func handleSendMessage(userId: String) {
         
