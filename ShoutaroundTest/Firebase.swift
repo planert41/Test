@@ -1130,6 +1130,102 @@ extension Database{
         
     }
     
+    static func AddTagsForPost(post: Post){
+        guard let postId = post.id else {
+            print("Update Tags For Post: Error, no Post Id")
+            return
+        }
+        
+        if post.nonRatingEmoji.count == 0 {
+            print("Update Tags For Post: Error, no Emojis for \(postId)")
+            return
+        }
+        
+        for emoji in post.nonRatingEmoji {
+            Database.updatePostIdForTag(postId: postId, tag: emoji, add: 1)
+        }
+    }
+    
+    static func DeleteTagsForPost(post: Post){
+        guard let postId = post.id else {
+            print("Update Tags For Post: Error, no Post Id")
+            return
+        }
+        
+        if post.nonRatingEmoji.count == 0 {
+            print("Update Tags For Post: Error, no Emojis for \(postId)")
+            return
+        }
+        
+        for emoji in post.nonRatingEmoji {
+            Database.updatePostIdForTag(postId: postId, tag: emoji, add: -1)
+        }
+    }
+    
+    static func updatePostIdForTag(postId: String?, tag: String?, add: Int){
+        guard let postId = postId else {
+            print("Update Tags For Post: Error, no Post Id")
+            return}
+        
+        guard let tag = tag else {
+            print("Update Tags For Post: Error, no Tag")
+            return}
+        
+        if !(tag.containsOnlyEmoji) {
+            print("Update Tags For Post: Error, not Emoji Tag")
+            return}
+        
+        if !(add == 1 || add == -1) {
+            print("Update Tags For Post: Error, not Valid Add Function")
+            return}
+        
+        let tagRef = Database.database().reference().child("post_tags").child(tag)
+        tagRef.runTransactionBlock({ (currentData) -> TransactionResult in
+            var tags = currentData.value as? [String : AnyObject] ?? [:]
+            var posts = tags["posts"] as? [String] ?? []
+            var postCount = tags["postCount"] as? Int ?? 0
+            
+            if add == 1 {
+                // Add postid to Tag
+                if let index = posts.index(of: postId) {
+                    // Post Id already exist
+                    print("Add Post to Tag: Error, PostId already exist")
+                    return TransactionResult.abort()
+                } else {
+                    // Post Id doesn't exist, add postId
+                    posts.append(postId)
+                    postCount += 1
+                }
+            }
+            
+            else if add == -1 {
+                // Delete Post Id from Tag
+                if let index = posts.index(of: postId) {
+                    posts.remove(at: index)
+                    postCount -= 1
+                } else {
+                    // Post Id doesn't exist, No Delete
+                    print("Delete Post from Tag: Error, PostId does not exist")
+                    return TransactionResult.abort()
+                }
+            }
+            
+            tags["posts"] = posts as AnyObject?
+            tags["postCount"] = max(0,postCount) as AnyObject?
+            
+            
+            currentData.value = tags
+            print("Update Post to Tag: Success \(postId) to \(tag) : \(add)")
+            return TransactionResult.success(withValue: currentData)
+            
+        }) { (error, committed, snapshot) in
+            if let error = error {
+                print("Update Post to Tag: Error: ", postId, tag, add, error.localizedDescription)
+            }
+        }
+    }
+    
+    
     static func deletePost(post: Post){
         
         guard let uid = Auth.auth().currentUser?.uid else {return}

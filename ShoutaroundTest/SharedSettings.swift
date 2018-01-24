@@ -34,7 +34,7 @@ var UploadPostPriceDefault:[String] = ["$5", "$10", "$20", "$35", "$50", "$$$"]
 var HeaderSortOptions:[String] = ["Recent", "Nearest", "Trending"]
 let HeaderSortDefault:String = HeaderSortOptions[0]
 
-// Location Header Sort
+// Location Header Sort - 
 var LocationSortOptions:[String] = ["Recent", "Rating", "Trending"]
 
 // Rank Defaults

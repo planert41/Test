@@ -194,7 +194,7 @@ class FilterController: UIViewController, GMSAutocompleteViewControllerDelegate,
     var filterButton: UIButton = {
         let button = UIButton()
         button.backgroundColor = UIColor.legitColor()
-        button.setTitle("Search", for: .normal)
+        button.setTitle("Filter", for: .normal)
         button.titleLabel?.textAlignment = NSTextAlignment.center
         button.addTarget(self, action: #selector(filterSelected), for: .touchUpInside)
         button.layer.borderColor = UIColor.lightGray.cgColor
@@ -336,7 +336,7 @@ class FilterController: UIViewController, GMSAutocompleteViewControllerDelegate,
         scrollview.contentSize = CGSize(width: view.bounds.width, height: view.bounds.height * 1.25)
         view.addSubview(scrollview)
     
-        self.navigationItem.rightBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "search_selected").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(filterSelected))
+        self.navigationItem.rightBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "filter").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(filterSelected))
         
         view.backgroundColor = UIColor.white
         
@@ -344,7 +344,7 @@ class FilterController: UIViewController, GMSAutocompleteViewControllerDelegate,
         
         
         filterCaptionSearchBar.delegate = self
-        filterCaptionSearchBar.placeholder = "Search Posts For"
+        filterCaptionSearchBar.placeholder = "Filter Posts For"
         filterCaptionSearchBar.searchBarStyle = .prominent
         filterCaptionSearchBar.barTintColor = UIColor.legitColor()
         

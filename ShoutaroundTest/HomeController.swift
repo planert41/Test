@@ -54,7 +54,12 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     
 // Filter Variables
     
-    var isFiltering: Bool = false
+    var isFiltering: Bool = false {
+        didSet {
+            // Adjust Filter Button
+            setupNavigationItems()
+        }
+    }
     var filterCaption: String? = nil
     var filterRange: String? = nil
     
@@ -660,30 +665,43 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
 //        legitListTitle.font = UIFont(name: "TitilliumWeb-SemiBold", size: 20)
         legitListTitle.textAlignment = NSTextAlignment.center
         
+        var searchTerm: String = "Searching"
+            if filterCaption != nil {searchTerm += " \(filterCaption!)"}
+            if filterRange != nil {searchTerm += " Within \(filterRange!) Mi"}
+            if filterMaxPrice != nil {searchTerm += " \(filterMaxPrice!)"}
+            if filterType != nil {searchTerm += " \(filterType!)"}
         
-//        navigationItem.titleView = defaultSearchBar
-//        defaultSearchBar.delegate = self
-//        defaultSearchBar.placeholder = "Food, User, Location"
+        let searchTermLabel = UILabel()
+            searchTermLabel.text = searchTerm
+            searchTermLabel.font = UIFont(name: "TitilliumWeb-SemiBold", size: 15)
+            searchTermLabel.textAlignment = NSTextAlignment.center
+            searchTermLabel.adjustsFontSizeToFitWidth = true
         
-        navigationItem.titleView  = legitListTitle
-        
-        
-//        for s in defaultSearchBar.subviews[0].subviews {
-//            if s is UITextField {
-//                s.layer.borderWidth = 0.5
-//                s.layer.borderColor = UIColor.gray.cgColor
-//                s.layer.cornerRadius = 5
-//            }
-//        }
+        if isFiltering {
+            navigationItem.titleView  = searchTermLabel
+        } else {
+            navigationItem.titleView  = legitListTitle
+        }
         
         // Camera
         navigationItem.leftBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "camera3").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(openCamera))
         
         // Inbox
-        navigationItem.rightBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "mailbox").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(openInbox))
+//        navigationItem.rightBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "mailbox").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(openInbox))
 
         // Search
-        navigationItem.rightBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "filter_unselected").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(openFilter))
+        navigationItem.rightBarButtonItem = UIBarButtonItem(image: (isFiltering ? #imageLiteral(resourceName: "filterclear") : #imageLiteral(resourceName: "filter_unselected")).withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(openFilter))
+
+        //        navigationItem.titleView = defaultSearchBar
+        //        defaultSearchBar.delegate = self
+        //        defaultSearchBar.placeholder = "Food, User, Location"
+        //        for s in defaultSearchBar.subviews[0].subviews {
+        //            if s is UITextField {
+        //                s.layer.borderWidth = 0.5
+        //                s.layer.borderColor = UIColor.gray.cgColor
+        //                s.layer.cornerRadius = 5
+        //            }
+        //        }
 
         
     }

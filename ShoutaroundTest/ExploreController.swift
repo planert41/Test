@@ -109,7 +109,7 @@ class ExploreController: UIViewController, UICollectionViewDelegate, UICollectio
         defaultSearchBar.placeholder = "Food, User, Location"
         
         // Inbox
-        navigationItem.rightBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "filter_unselected").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(openFilter))
+        navigationItem.rightBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "search_unselected").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(openFilter))
         
     }
     
