@@ -107,6 +107,8 @@ class PostSearchController : UITableViewController, UISearchResultsUpdating, UIS
     
     
     func setupSearchController(){
+        navigationController?.navigationBar.barTintColor = UIColor.white
+        
         searchController.searchResultsUpdater = self
         searchController.obscuresBackgroundDuringPresentation = false
         searchController.hidesNavigationBarDuringPresentation = false
@@ -289,11 +291,14 @@ class PostSearchController : UITableViewController, UISearchResultsUpdating, UIS
     override func viewWillDisappear(_ animated: Bool) {
 //      Remove Searchbar scope during transition
         self.searchBar.isHidden = true
+        navigationController?.navigationBar.barTintColor = UIColor.legitColor()
     }
     
     override func viewWillAppear(_ animated: Bool) {
 //      Show Searchbar scope during transition
         self.searchBar.isHidden = false
+        navigationController?.navigationBar.barTintColor = UIColor.white
+
 
     }
     

@@ -8,14 +8,14 @@
 
 import UIKit
 
-protocol UserProfilePhotoCellDelegate {
+protocol GridPhotoCellDelegate {
     func didTapPicture(post:Post)
     
 }
 
-class UserProfilePhotoCell: UICollectionViewCell, UIGestureRecognizerDelegate {
+class GridPhotoCell: UICollectionViewCell, UIGestureRecognizerDelegate {
     
-    var delegate: UserProfilePhotoCellDelegate?
+    var delegate: GridPhotoCellDelegate?
     var post: Post? {
         didSet {
             guard let imageUrl = post?.imageUrl else {return}
@@ -24,7 +24,7 @@ class UserProfilePhotoCell: UICollectionViewCell, UIGestureRecognizerDelegate {
             photoImageView.loadImage(urlString: imageUrl)
             
             self.likeCount = post?.likeCount ?? 0
-            self.bookmarkCount = post?.bookmarkCount ?? 0
+            self.bookmarkCount = post?.listCount ?? 0
             self.messageCount = post?.messageCount ?? 0
             
             self.ratingEmojiLabel.text = post?.ratingEmoji
@@ -82,7 +82,7 @@ class UserProfilePhotoCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         
         addSubview(photoImageView)
         photoImageView.anchor(top: topAnchor, left: leftAnchor, bottom: bottomAnchor, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
-        let TapGesture = UITapGestureRecognizer(target: self, action: #selector(UserProfilePhotoCell.handlePictureTap))
+        let TapGesture = UITapGestureRecognizer(target: self, action: #selector(GridPhotoCell.handlePictureTap))
         photoImageView.addGestureRecognizer(TapGesture)
         photoImageView.isUserInteractionEnabled = true
         

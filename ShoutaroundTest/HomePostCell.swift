@@ -13,17 +13,17 @@ import Spring
 
 
 protocol HomePostCellDelegate {
-    func didTapBookmark(post: Post)
+    func didTapBookmark(post:Post)
     func didTapComment(post:Post)
     func didTapUser(post:Post)
     func didTapLocation(post:Post)
     func didTapMessage(post:Post)
-    func didTapExtraTag(tagName: String, tagId: String, post: Post)
     func refreshPost(post:Post)
+    
     func userOptionPost(post:Post)
+
     func displaySelectedEmoji(emoji: String, emojitag: String)
-//    func didLike(for cell: HomePostCell)
-//    func didBookmark(for cell: HomePostCell)
+    func didTapExtraTag(tagName: String, tagId: String, post: Post)
 
 }
 
@@ -144,8 +144,8 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         }
 //        self.messageCount.sizeToFit()
         
-        if post.bookmarkCount > 0 {
-            self.bookmarkCount.text = String( post.bookmarkCount)
+        if post.listCount > 0 {
+            self.bookmarkCount.text = String( post.listCount)
         } else {
             self.bookmarkCount.text = ""
         }

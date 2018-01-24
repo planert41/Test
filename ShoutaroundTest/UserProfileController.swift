@@ -11,7 +11,7 @@ import Firebase
 import FBSDKLoginKit
 import CoreLocation
 
-class UserProfileController: UICollectionViewController, UICollectionViewDelegateFlowLayout, UserProfileHeaderDelegate, HomePostCellDelegate,BookmarkPhotoCellDelegate, UserProfilePhotoCellDelegate, UISearchBarDelegate, HomePostSearchDelegate, FilterControllerDelegate, UISearchControllerDelegate, UIGestureRecognizerDelegate{
+class UserProfileController: UICollectionViewController, UICollectionViewDelegateFlowLayout, UserProfileHeaderDelegate, HomePostCellDelegate,ListPhotoCellDelegate, GridPhotoCellDelegate, UISearchBarDelegate, HomePostSearchDelegate, FilterControllerDelegate, UISearchControllerDelegate, UIGestureRecognizerDelegate{
     
     let cellId = "cellId"
     let homePostCellId = "homePostCellId"
@@ -177,7 +177,7 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
         
         collectionView?.register(UserProfileHeader.self, forSupplementaryViewOfKind: UICollectionElementKindSectionHeader, withReuseIdentifier: "headerId")
         
-        collectionView?.register(UserProfilePhotoCell.self, forCellWithReuseIdentifier: cellId)
+        collectionView?.register(GridPhotoCell.self, forCellWithReuseIdentifier: cellId)
         collectionView?.register(HomePostCell.self, forCellWithReuseIdentifier: homePostCellId)
         
         let refreshControl = UIRefreshControl()
@@ -587,9 +587,9 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
             
             self.checkDisplayPostIdForDups(postIds: postIds)
             self.fetchPostIds = self.fetchPostIds + postIds
-            self.fetchPostIds.sort(by: { (p1, p2) -> Bool in
-                return p1.creationDate!.compare(p2.creationDate!) == .orderedDescending
-            })
+//            self.fetchPostIds.sort(by: { (p1, p2) -> Bool in
+//                return p1.creationDate!.compare(p2.creationDate!) == .orderedDescending
+//            })
             print("Current User Posts: ", self.fetchPostIds.count)
             self.paginatePosts()
             
@@ -686,7 +686,8 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
             if self.filterTime != defaultTime  {
                 
                 let calendar = Calendar.current
-                let tagHour = Double(calendar.component(.hour, from: fetchPostId.tagTime!))
+                let tagHour = 5.0
+                
                 guard let filterIndex = FilterSortTimeDefault.index(of: self.filterTime) else {return}
                 
                 if FilterSortTimeStart[filterIndex] > tagHour || tagHour > FilterSortTimeEnd[filterIndex] {
@@ -855,7 +856,7 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
         
         
         if isGridView {
-            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: cellId, for: indexPath) as! UserProfilePhotoCell
+            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: cellId, for: indexPath) as! GridPhotoCell
             cell.post = displayedPosts[indexPath.item]
             cell.delegate = self
             return cell

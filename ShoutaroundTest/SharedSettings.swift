@@ -12,6 +12,9 @@ import UIKit
 
 var geoFilterImageDefault:[UIImage] = [#imageLiteral(resourceName: "GeoFence"),#imageLiteral(resourceName: "GeoFence"), #imageLiteral(resourceName: "City"), #imageLiteral(resourceName: "City"), #imageLiteral(resourceName: "Globe")]
 var geoFilterRangeDefault:[String] = ["1", "5", "25", "50", "100","250"]
+
+var rankRangeDefaultOptions :[String] = ["1", "5", "25", "50", "100","250","Global"]
+var rankRangeDefault: String = "Global"
 var defaultGeoWaitTime: Double = 0.5
 
 var defaultPhotoResize = CGSize(width: 500, height: 500)
@@ -34,6 +37,10 @@ let HeaderSortDefault:String = HeaderSortOptions[0]
 // Location Header Sort
 var LocationSortOptions:[String] = ["Recent", "Rating", "Trending"]
 
+// Rank Defaults
+var defaultRankOptions = ["Votes", "Lists", "Messages"]
+var defaultRank = defaultRankOptions[0]
+
 
 // Filter Defaults
 
@@ -53,15 +60,13 @@ let defaultTime =  FilterSortTimeDefault[FilterSortTimeDefault.endIndex - 1]
 var searchBarPlaceholderText = "Search...."
 var searchScopeButtons = ["Posts","Users","Places"]
 
-// Rank Defaults
-
-var defaultRankOptions = ["post_votes", "post_lists", "messages"]
-var defaultRank = defaultRankOptions[0]
 
 
 
 
-var firebaseCountVariable:[String:String] = ["likes":"likeCount", "bookmarks":"bookmarkCount", "messages":"messageCount", "post_lists": "listCount", "post_votes": "voteCount"]
+var firebaseCountVariable:[String:String] = ["likes":"likeCount", "bookmarks":"bookmarkCount", "Messages":"messageCount", "Lists": "listCount", "Votes": "voteCount"]
+var firebaseFieldVariable:[String:String] = [ "Votes": "post_votes", "Messages":"post_messages", "Lists": "post_lists", ]
+
 
 struct RatingColors {
     static func ratingColor (rating: Double?) -> UIColor {

@@ -178,9 +178,9 @@ class ThreadCell: UICollectionViewCell {
         // Animates before database function is complete
         
         if (self.post?.hasBookmarked)! {
-            self.post?.bookmarkCount -= 1
+            self.post?.listCount -= 1
         } else {
-            self.post?.bookmarkCount += 1
+            self.post?.listCount += 1
         }
         self.post?.hasBookmarked = !(self.post?.hasBookmarked)!
         self.delegate?.refreshPost(post: self.post!)

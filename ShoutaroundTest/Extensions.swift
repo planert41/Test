@@ -25,6 +25,10 @@ extension UIColor {
         return UIColor(hexColor: "107896")
     }
     
+    static func barColor() -> UIColor {
+        return UIColor(hexColor: "0a4a5c")
+    }
+    
     convenience init(hexColor: String) {
         var red: UInt32 = 0, green: UInt32 = 0, blue: UInt32 = 0
         

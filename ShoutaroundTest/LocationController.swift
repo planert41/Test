@@ -18,7 +18,7 @@ import EmptyDataSet_Swift
 
 var placeCache = [String: JSON]()
 
-class LocationController: UIViewController, UIScrollViewDelegate, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, GMSMapViewDelegate, UserProfilePhotoCellDelegate, EmptyDataSetSource, EmptyDataSetDelegate, LastLocationPhotoCellDelegate, SortFilterHeaderDelegate, FilterControllerDelegate  {
+class LocationController: UIViewController, UIScrollViewDelegate, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, GMSMapViewDelegate, GridPhotoCellDelegate, EmptyDataSetSource, EmptyDataSetDelegate, LastLocationPhotoCellDelegate, SortFilterHeaderDelegate, FilterControllerDelegate  {
     
     var placesClient: GMSPlacesClient!
     var marker = GMSMarker()
@@ -368,7 +368,7 @@ class LocationController: UIViewController, UIScrollViewDelegate, UICollectionVi
         
         tempView.addSubview(photoCollectionView)
         photoCollectionView.anchor(top: bottomDividerView.bottomAnchor, left: tempView.leftAnchor, bottom: tempView.bottomAnchor, right: tempView.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 500)
-        photoCollectionView.register(UserProfilePhotoCell.self, forCellWithReuseIdentifier: photoCellId)
+        photoCollectionView.register(GridPhotoCell.self, forCellWithReuseIdentifier: photoCellId)
         photoCollectionView.register(LastLocationPhotoCell.self, forCellWithReuseIdentifier: lastPhotoCellId)
         photoCollectionView.register(SortFilterHeader.self, forSupplementaryViewOfKind: UICollectionElementKindSectionHeader, withReuseIdentifier: photoHeaderId)
         
@@ -824,7 +824,7 @@ class LocationController: UIViewController, UIScrollViewDelegate, UICollectionVi
                 cell.delegate = self
                 return cell
             } else {
-                let cell = collectionView.dequeueReusableCell(withReuseIdentifier: photoCellId, for: indexPath) as! UserProfilePhotoCell
+                let cell = collectionView.dequeueReusableCell(withReuseIdentifier: photoCellId, for: indexPath) as! GridPhotoCell
                 cell.delegate = self
                 cell.post = displayedPosts[indexPath.item]
                 return cell
@@ -838,7 +838,7 @@ class LocationController: UIViewController, UIScrollViewDelegate, UICollectionVi
             
             return cell
         } else {
-            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: photoCellId, for: indexPath) as! UserProfilePhotoCell
+            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: photoCellId, for: indexPath) as! GridPhotoCell
             cell.delegate = self
             cell.post = displayedPosts[indexPath.item]
             return cell

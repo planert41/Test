@@ -346,11 +346,17 @@ class FilterController: UIViewController, GMSAutocompleteViewControllerDelegate,
         filterCaptionSearchBar.delegate = self
         filterCaptionSearchBar.placeholder = "Search Posts For"
         filterCaptionSearchBar.searchBarStyle = .prominent
-//        filterCaptionSearchBar.tintColor = UIColor.white
-
-//        filterCaptionSearchBar.backgroundColor = UIColor.legitColor()
-//        filterCaptionSearchBar.barTintColor = UIColor.rgb(red: 223, green: 85, blue: 78)
         filterCaptionSearchBar.barTintColor = UIColor.legitColor()
+        
+        // Add Border Color to Search Bar
+        for s in filterCaptionSearchBar.subviews[0].subviews {
+            if s is UITextField {
+                s.layer.borderWidth = 0.5
+                s.layer.borderColor = UIColor.legitColor().cgColor
+                s.layer.cornerRadius = 5
+            }
+        }
+        
         scrollview.addSubview(filterCaptionSearchBar)
         filterCaptionSearchBar.anchor(top: scrollview.topAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 5, paddingRight: 0, width: 0, height: segmentHeight+20)
 
@@ -444,6 +450,15 @@ class FilterController: UIViewController, GMSAutocompleteViewControllerDelegate,
         filterTimeLabel.attributedText = filterTimeAttributedText
         
     }
+    
+    
+//    override func viewWillDisappear(_ animated: Bool) {
+//        navigationController?.navigationBar.barTintColor = UIColor.legitColor()
+//    }
+//
+//    override func viewWillAppear(_ animated: Bool) {
+//        navigationController?.navigationBar.barTintColor = UIColor.white
+//    }
     
     func starRatingSelectFunction(rating: Double) {
         if rating < 2 {

@@ -75,17 +75,24 @@ class SortFilterHeader: UICollectionViewCell {
         headerSortSegment = UISegmentedControl(items: sortOptions)
         headerSortSegment.selectedSegmentIndex = sortOptions.index(of: self.selectedSort)!
         headerSortSegment.addTarget(self, action: #selector(selectSort), for: .valueChanged)
-        headerSortSegment.tintColor = UIColor(hexColor: "107896")
+//        headerSortSegment.tintColor = UIColor(hexColor: "107896")
+        headerSortSegment.tintColor = UIColor.legitColor()
+//        headerSortSegment.layer.cornerRadius = 0
+//        headerSortSegment.layer.borderColor = UIColor.legitColor().cgColor
+//        headerSortSegment.layer.borderWidth = 1
+//        headerSortSegment.layer.masksToBounds = true
         
-        addSubview(filterButton)
-        filterButton.anchor(top: topAnchor, left: nil, bottom: bottomAnchor, right: rightAnchor, paddingTop: 2, paddingLeft: 1, paddingBottom: 3, paddingRight: 3, width: 0, height: 0)
-        filterButton.widthAnchor.constraint(equalTo: filterButton.heightAnchor, multiplier: 1).isActive = true
-        filterButton.layer.cornerRadius = filterButton.frame.width/2
-        filterButton.backgroundColor = UIColor.clear
-        filterButton.layer.masksToBounds = true
+        
+        
+//        addSubview(filterButton)
+//        filterButton.anchor(top: topAnchor, left: nil, bottom: bottomAnchor, right: rightAnchor, paddingTop: 2, paddingLeft: 1, paddingBottom: 3, paddingRight: 3, width: 0, height: 0)
+//        filterButton.widthAnchor.constraint(equalTo: filterButton.heightAnchor, multiplier: 1).isActive = true
+//        filterButton.layer.cornerRadius = filterButton.frame.width/2
+//        filterButton.backgroundColor = UIColor.clear
+//        filterButton.layer.masksToBounds = true
         
         addSubview(headerSortSegment)
-        headerSortSegment.anchor(top: topAnchor, left: leftAnchor, bottom: bottomAnchor, right: filterButton.leftAnchor, paddingTop: 2, paddingLeft: 3, paddingBottom: 4, paddingRight: 1, width: 0, height: 0)
+        headerSortSegment.anchor(top: topAnchor, left: leftAnchor, bottom: bottomAnchor, right: rightAnchor, paddingTop: 5, paddingLeft: 20, paddingBottom: 0, paddingRight: 20, width: 0, height: 0)
         
     }
     

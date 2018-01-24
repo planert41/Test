@@ -99,8 +99,8 @@ class ThreadMessageHeader: UICollectionViewCell {
             
         // Post Social Details
         
-            if (post?.bookmarkCount)! > 0 {
-                bookmarkCount.text = String(describing: (post?.bookmarkCount)!)
+            if (post?.listCount)! > 0 {
+                bookmarkCount.text = String(describing: (post?.listCount)!)
             } else {
                 bookmarkCount.text = ""
             }
@@ -314,9 +314,9 @@ class ThreadMessageHeader: UICollectionViewCell {
         // Animates before database function is complete
         
         if (self.post?.hasBookmarked)! {
-            self.post?.bookmarkCount -= 1
+            self.post?.listCount -= 1
         } else {
-            self.post?.bookmarkCount += 1
+            self.post?.listCount += 1
         }
         self.post?.hasBookmarked = !(self.post?.hasBookmarked)!
         self.delegate?.refreshPost(post: self.post!)
@@ -404,7 +404,7 @@ class ThreadMessageHeader: UICollectionViewCell {
         photoImageView.anchor(top: topAnchor, left: leftAnchor, bottom: threadUsersView.topAnchor, right: nil, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
         photoImageView.widthAnchor.constraint(equalTo: photoImageView.heightAnchor, multiplier: 1).isActive = true
         
-        let TapGesture = UITapGestureRecognizer(target: self, action: #selector(BookmarkPhotoCell.handlePictureTap))
+        let TapGesture = UITapGestureRecognizer(target: self, action: #selector(ListPhotoCell.handlePictureTap))
         photoImageView.addGestureRecognizer(TapGesture)
         photoImageView.isUserInteractionEnabled = true
         
@@ -473,15 +473,15 @@ class ThreadMessageHeader: UICollectionViewCell {
         // Adding Gesture Recognizers
         
         userProfileImageView.isUserInteractionEnabled = true
-        let usernameTap = UITapGestureRecognizer(target: self, action: #selector(BookmarkPhotoCell.usernameTap))
+        let usernameTap = UITapGestureRecognizer(target: self, action: #selector(ListPhotoCell.usernameTap))
         userProfileImageView.addGestureRecognizer(usernameTap)
         userProfileImageView.isUserInteractionEnabled = true
         
         
-        let locationTapGesture = UITapGestureRecognizer(target: self, action: #selector(BookmarkPhotoCell.locationTap))
+        let locationTapGesture = UITapGestureRecognizer(target: self, action: #selector(ListPhotoCell.locationTap))
         locationNameLabel.addGestureRecognizer(locationTapGesture)
         locationNameLabel.isUserInteractionEnabled = true
-        let locationTapGesture2 = UITapGestureRecognizer(target: self, action: #selector(BookmarkPhotoCell.locationTap))
+        let locationTapGesture2 = UITapGestureRecognizer(target: self, action: #selector(ListPhotoCell.locationTap))
         
         locationAdressLabel.addGestureRecognizer(locationTapGesture2)
         locationAdressLabel.isUserInteractionEnabled = true

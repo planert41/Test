@@ -17,13 +17,13 @@ import EmptyDataSet_Swift
 
 
 class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLayout, HomePostCellDelegate, HomePostSearchDelegate, UIGestureRecognizerDelegate, FilterControllerDelegate, UISearchBarDelegate, SortFilterHeaderDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate, SharePhotoListControllerDelegate, PostSearchControllerDelegate, EmptyDataSetSource, EmptyDataSetDelegate {
-    
+
     let cellId = "cellId"
     var scrolltoFirst: Bool = false
     
     var fetchedPostIds: [PostId] = []
     var fetchedPosts: [Post] = []
-    var displayedPostsCount: Int = 0
+    var paginatePostsCount: Int = 0
 
 // Pagination Variables
     
@@ -33,7 +33,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     var isFinishedPaging = false {
         didSet{
             if isFinishedPaging == true {
-                print("Finished Paging :", self.displayedPostsCount)
+                print("Finished Paging :", self.paginatePostsCount)
             }
         }
     }
@@ -136,6 +136,12 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         setupNavigationItems()
         setupEmojiDetailLabel()
     }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        navigationController?.navigationBar.barTintColor = UIColor.legitColor()
+    }
+    
+
 
     
     func setupCollectionView(){
@@ -391,7 +397,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     
     func refreshPagination(){
         self.isFinishedPaging = false
-        self.displayedPostsCount = 0
+        self.paginatePostsCount = 0
         self.userPostIdFetched = false
         self.followingPostIdFetched = false
     }
@@ -443,7 +449,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         self.refreshAll()
         fetchAllPostIds()
         self.collectionView?.refreshControl?.endRefreshing()
-        print("Refresh Home Feed. FetchPostIds: ", self.fetchedPostIds.count, "FetchedPostCounr: ", self.fetchedPosts.count, " DisplayedPost: ", self.displayedPostsCount)
+        print("Refresh Home Feed. FetchPostIds: ", self.fetchedPostIds.count, "FetchedPostCounr: ", self.fetchedPosts.count, " DisplayedPost: ", self.paginatePostsCount)
     }
 
 // Post ID Fetching
@@ -468,9 +474,10 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         Database.fetchAllPostIDWithCreatorUID(creatoruid: uid) { (postIds) in
             self.checkDisplayPostIdForDups(postIds: postIds)
             self.fetchedPostIds = self.fetchedPostIds + postIds
-            self.fetchedPostIds.sort(by: { (p1, p2) -> Bool in
-                return p1.creationDate!.compare(p2.creationDate!) == .orderedDescending
-            })
+            // Unsorted Post Ids as posts will be sorted later
+//            self.fetchedPostIds.sort(by: { (p1, p2) -> Bool in
+//                return p1.creationDate!.compare(p2.creationDate!) == .orderedDescending
+//            })
             print("Current User Posts: ", self.fetchedPostIds.count)
             self.userPostIdFetched = true
             NotificationCenter.default.post(name: HomeController.finishFetchingUserPostIdsNotificationName, object: nil)
@@ -496,9 +503,9 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
                     
                     self.checkDisplayPostIdForDups(postIds: postIds)
                     self.fetchedPostIds = self.fetchedPostIds + postIds
-                    self.fetchedPostIds.sort(by: { (p1, p2) -> Bool in
-                        return p1.creationDate!.compare(p2.creationDate!) == .orderedDescending
-                    })
+//                    self.fetchedPostIds.sort(by: { (p1, p2) -> Bool in
+//                        return p1.creationDate!.compare(p2.creationDate!) == .orderedDescending
+//                    })
                     thisGroup.leave()
                 }
             }
@@ -537,7 +544,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         
         print("Finish Paging Check")
         
-        if self.displayedPostsCount == (self.fetchedPosts.count) {
+        if self.paginatePostsCount == (self.fetchedPosts.count) {
             self.isFinishedPaging = true
         }
         
@@ -617,8 +624,8 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
 
         let paginateFetchPostSize = 4
 
-        self.displayedPostsCount = min(self.displayedPostsCount + paginateFetchPostSize, self.fetchedPosts.count)
-        print("Home Paginate \(self.displayedPostsCount) : \(self.fetchedPosts.count)")
+        self.paginatePostsCount = min(self.paginatePostsCount + paginateFetchPostSize, self.fetchedPosts.count)
+        print("Home Paginate \(self.paginatePostsCount) : \(self.fetchedPosts.count)")
 
         NotificationCenter.default.post(name: HomeController.finishPaginationNotificationName, object: nil)
     }
@@ -645,16 +652,28 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     
     
     fileprivate func setupNavigationItems() {
-        
+
         navigationItem.titleView = defaultSearchBar
         defaultSearchBar.delegate = self
         defaultSearchBar.placeholder = "Food, User, Location"
+        
+//        for s in defaultSearchBar.subviews[0].subviews {
+//            if s is UITextField {
+//                s.layer.borderWidth = 0.5
+//                s.layer.borderColor = UIColor.gray.cgColor
+//                s.layer.cornerRadius = 5
+//            }
+//        }
         
         // Camera
         navigationItem.leftBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "camera3").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(openCamera))
         
         // Inbox
         navigationItem.rightBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "mailbox").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(openInbox))
+
+        // Search
+        navigationItem.rightBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "filter_unselected").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(openFilter))
+
         
     }
 
@@ -686,7 +705,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         
 //        return min(4, self.displayedPostsCount)
-        return displayedPostsCount
+        return paginatePostsCount
 //        return displayedPosts.count
     }
     
@@ -697,7 +716,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
 //            paginatePosts()
 //        }
         
-        if indexPath.item == self.displayedPostsCount - 1 && !isFinishedPaging{
+        if indexPath.item == self.paginatePostsCount - 1 && !isFinishedPaging{
             print("CollectionView Paginate")
             paginatePosts()
         }
@@ -730,6 +749,8 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         return header
         
     }
+    
+
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
         return CGSize(width: view.frame.width, height: 35 + 5)

@@ -20,13 +20,12 @@ import Firebase
 
 protocol RankViewHeaderDelegate {
     func didChangeToListView()
-    func didChangeToPostView()
-    func openFilter()
+    func didChangeToGridView()
     func headerRankSelected(rank: String)
 }
 
 
-class RankViewHeader: UICollectionViewCell, UIGestureRecognizerDelegate {
+class RankViewHeader: UICollectionViewCell, UIGestureRecognizerDelegate, UIPickerViewDelegate, UIPickerViewDataSource {
     
     var delegate: RankViewHeaderDelegate?
     
@@ -40,31 +39,33 @@ class RankViewHeader: UICollectionViewCell, UIGestureRecognizerDelegate {
     var selectedRank: String = defaultRank {
         didSet{
             headerSortSegment.selectedSegmentIndex = rankSortOptions.index(of: selectedRank)!
+            rankLabel.text = "Top 250 By \(self.selectedRank)"
         }
     }
     
-    var isGlobal: Bool = true {
+    
+// Rank Range
+    var selectedRangeOptions = rankRangeDefaultOptions
+    
+    var selectedRange: String = rankRangeDefault {
         didSet{
-            rankButton.setImage(self.isGlobal ? #imageLiteral(resourceName: "Globe") :#imageLiteral(resourceName: "GeoFence"), for: .normal)
+            rangeButton.setImage((self.selectedRange == rankRangeDefault) ? #imageLiteral(resourceName: "ranking").withRenderingMode(.alwaysOriginal) :#imageLiteral(resourceName: "GeoFence").withRenderingMode(.alwaysOriginal), for: .normal)
         }
     }
     
-    lazy var rankButton: UIButton = {
+    lazy var rangeButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setImage(self.isGlobal ? #imageLiteral(resourceName: "Globe").withRenderingMode(.alwaysOriginal) :#imageLiteral(resourceName: "GeoFence").withRenderingMode(.alwaysOriginal), for: .normal)
-        button.addTarget(self, action: #selector(changeScope), for: .touchUpInside)
+        button.setImage((self.selectedRange == rankRangeDefault) ? #imageLiteral(resourceName: "ranking").withRenderingMode(.alwaysOriginal) :#imageLiteral(resourceName: "GeoFence").withRenderingMode(.alwaysOriginal), for: .normal)
+        button.addTarget(self, action: #selector(activateRange), for: .touchUpInside)
         return button
     }()
     
-    func changeScope(){
-        
-    }
-    
     lazy var rankLabel: UILabel = {
         let ul = UILabel()
-        ul.text = "Rank By"
+        ul.text = "Top 250"
         ul.isUserInteractionEnabled = true
-        ul.font = UIFont.boldSystemFont(ofSize: 14)
+        ul.font = UIFont.boldSystemFont(ofSize: 12)
+        ul.numberOfLines = 0
         return ul
     }()
     
@@ -84,103 +85,60 @@ class RankViewHeader: UICollectionViewCell, UIGestureRecognizerDelegate {
     
     
     // Grid/List View Button
-    var isGridView = true {
+    var isListView = true {
         didSet{
-            formatButton.setImage(self.isGridView ? #imageLiteral(resourceName: "grid") :#imageLiteral(resourceName: "list"), for: .normal)
+            formatButton.setImage(self.isListView ? #imageLiteral(resourceName: "list"):#imageLiteral(resourceName: "grid"), for: .normal)
         }
     }
     
     lazy var formatButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setImage(self.isGridView ? #imageLiteral(resourceName: "postview") :#imageLiteral(resourceName: "list"), for: .normal)
         button.addTarget(self, action: #selector(changeView), for: .touchUpInside)
         button.tintColor = UIColor.legitColor()
         return button
     }()
+
     
     func changeView(){
-        if isGridView{
-            self.isGridView = false
-            delegate?.didChangeToPostView()
+        if isListView{
+            self.isListView = false
+            delegate?.didChangeToGridView()
         } else {
-            self.isGridView = true
+            self.isListView = true
             delegate?.didChangeToListView()
         }
     }
     
-    
-    // Filter Button
-    
-    var isFiltering: Bool = false {
-        didSet{
-            filterButton.backgroundColor = isFiltering ? UIColor.legitColor() : UIColor.clear
-        }
-    }
-    
-    lazy var filterButton: UIButton = {
-        let button = UIButton(type: .system)
-        button.setImage(#imageLiteral(resourceName: "filter").withRenderingMode(.alwaysOriginal), for: .normal)
-        button.addTarget(self, action: #selector(openFilter), for: .touchUpInside)
-        button.layer.borderWidth = 0
-        button.layer.borderColor = UIColor.darkGray.cgColor
-        button.clipsToBounds = true
-        return button
-    }()
-    
-    func openFilter(){
-        self.delegate?.openFilter()
-    }
-    
-    
     override init(frame: CGRect) {
         super.init(frame: frame)
         backgroundColor = UIColor.white
+        
     // Setup Filter View
         
-        addSubview(filterButton)
-        filterButton.anchor(top: topAnchor, left: nil, bottom: bottomAnchor, right: rightAnchor, paddingTop: 1, paddingLeft: 1, paddingBottom: 1, paddingRight: 3, width: 0, height: 0)
-        filterButton.widthAnchor.constraint(equalTo: filterButton.heightAnchor, multiplier: 1).isActive = true
-        //        filterButton.layer.cornerRadius = filterButton.frame.width/2
-        filterButton.layer.masksToBounds = true
-        
         addSubview(formatButton)
-        formatButton.anchor(top: topAnchor, left: nil, bottom: bottomAnchor, right: filterButton.leftAnchor, paddingTop: 1, paddingLeft: 1, paddingBottom: 1, paddingRight: 3, width: 0, height: 0)
+        formatButton.anchor(top: topAnchor, left: nil, bottom: bottomAnchor, right: rightAnchor, paddingTop: 1, paddingLeft: 1, paddingBottom: 1, paddingRight: 3, width: 0, height: 0)
         formatButton.widthAnchor.constraint(equalTo: formatButton.heightAnchor, multiplier: 1).isActive = true
         //        formatButton.layer.cornerRadius = formatButton.frame.width/2
         formatButton.layer.masksToBounds = true
         
-        setupRankSegmentControl()
-        
-        headerSortSegment = UISegmentedControl(items: rankSortOptions)
-        headerSortSegment.selectedSegmentIndex = rankSortOptions.index(of: self.selectedRank)!
-        headerSortSegment.addTarget(self, action: #selector(selectSort), for: .valueChanged)
-        headerSortSegment.tintColor = UIColor(hexColor: "107896")
-        headerSortSegment.isUserInteractionEnabled = true
-        
-        
-        addSubview(headerSortSegment)
-        headerSortSegment.anchor(top: topAnchor, left: nil, bottom: bottomAnchor, right: formatButton.leftAnchor, paddingTop: 5, paddingLeft: 3, paddingBottom: 5, paddingRight: 5, width: self.frame.width/2, height: 0)
-        
-//        addSubview(rankButton)
-//        rankButton.anchor(top: topAnchor, left: leftAnchor, bottom: bottomAnchor, right: nil, paddingTop: 1, paddingLeft: 3, paddingBottom: 1, paddingRight: 1, width: 0, height: 0)
-//        rankButton.widthAnchor.constraint(equalTo: rankButton.heightAnchor, multiplier: 1).isActive = true
-//        //        formatButton.layer.cornerRadius = formatButton.frame.width/2
-//        rankButton.layer.masksToBounds = true
-        
-        addSubview(rankLabel)
-        rankLabel.anchor(top: topAnchor, left: leftAnchor, bottom: bottomAnchor, right: headerSortSegment.leftAnchor, paddingTop: 1, paddingLeft: 10, paddingBottom: 1, paddingRight: 1, width: 0, height: 0)
-        rankLabel.layer.masksToBounds = true
-        
-        
+        setupRangePicker()
+        addSubview(rangeButton)
+        rangeButton.anchor(top: topAnchor, left: nil, bottom: bottomAnchor, right: formatButton.leftAnchor, paddingTop: 1, paddingLeft: 1, paddingBottom: 1, paddingRight: 1, width: 0, height: 0)
+        rangeButton.widthAnchor.constraint(equalTo: rangeButton.heightAnchor, multiplier: 1).isActive = true
+        //        formatButton.layer.cornerRadius = formatButton.frame.width/2
+        rangeButton.layer.masksToBounds = true
+
         
 
-    }
-    
-    func selectSort(sender: UISegmentedControl) {
         
-        self.selectedRank = rankSortOptions[sender.selectedSegmentIndex]
-//        delegate?.headerSortSelected(sort: self.selectedSort)
-        print("Selected Sort is ",self.selectedRank)
+        setupRankSegmentControl()
+        addSubview(rankSegmentControl)
+        rankSegmentControl.anchor(top: topAnchor, left: nil, bottom: bottomAnchor, right: rangeButton.leftAnchor, paddingTop: 5, paddingLeft: 3, paddingBottom: 5, paddingRight: 5, width: self.frame.width/2, height: 0)
+        
+        addSubview(rankLabel)
+        rankLabel.anchor(top: topAnchor, left: leftAnchor, bottom: bottomAnchor, right: rankSegmentControl.leftAnchor, paddingTop: 1, paddingLeft: 5, paddingBottom: 1, paddingRight: 1, width: 0, height: 0)
+        rankLabel.layer.masksToBounds = true
+
     }
     
     func setupRankSegmentControl(){
@@ -192,12 +150,13 @@ class RankViewHeader: UICollectionViewCell, UIGestureRecognizerDelegate {
         self.rankSegmentControl.addTarget(self, action: #selector(selectRank), for: .valueChanged)
         self.rankSegmentControl.tintColor = UIColor.legitColor()
         self.rankSegmentControl.selectedSegmentIndex = 0
+        self.selectRank(sender: self.rankSegmentControl)
         
     }
     
     func selectRank(sender: UISegmentedControl) {
         self.selectedRank = rankSortOptions[sender.selectedSegmentIndex]
-        print("Selected Rank is ",self.selectedRank)
+        print("Selected Rank is \(self.selectedRank)")
         
         rankSegmentControl.setImage(#imageLiteral(resourceName: "cred_unfilled").withRenderingMode(.alwaysOriginal), forSegmentAt: 0)
         rankSegmentControl.setImage(#imageLiteral(resourceName: "bookmark_unfilled").withRenderingMode(.alwaysOriginal), forSegmentAt: 1)
@@ -207,58 +166,107 @@ class RankViewHeader: UICollectionViewCell, UIGestureRecognizerDelegate {
             rankSegmentControl.setImage(#imageLiteral(resourceName: "cred_filled").withRenderingMode(.alwaysOriginal), forSegmentAt: 0)
         }  else if sender.selectedSegmentIndex == 1 {
             rankSegmentControl.setImage(#imageLiteral(resourceName: "bookmark_filled").withRenderingMode(.alwaysOriginal), forSegmentAt: 1)
-        } else if sender.selectedSegmentIndex == 1 {
-            rankSegmentControl.setImage(#imageLiteral(resourceName: "send_filled").withRenderingMode(.alwaysOriginal), forSegmentAt: 1)
+        } else if sender.selectedSegmentIndex == 2 {
+            rankSegmentControl.setImage(#imageLiteral(resourceName: "send_filled").withRenderingMode(.alwaysOriginal), forSegmentAt: 2)
         }
         
         delegate?.headerRankSelected(rank: self.selectedRank)
     }
-    func setupRankSortSegment() {
-        let appearance = SMSegmentAppearance()
-        appearance.segmentOnSelectionColour = UIColor.legitColor()
-        appearance.segmentOffSelectionColour = UIColor.white
-        appearance.titleOnSelectionFont = UIFont.systemFont(ofSize: 12.0)
-        appearance.titleOffSelectionFont = UIFont.systemFont(ofSize: 12.0)
-        appearance.contentVerticalMargin = 10.0
+    
+    // Set Up Range Picker for Distance Filtering
+    
+    lazy var dummyTextView: UITextView = {
+        let tv = UITextView()
+        return tv
+    }()
+    
+    var pickerView: UIPickerView = {
+        let pv = UIPickerView()
+        pv.backgroundColor = .white
+        pv.showsSelectionIndicator = true
+        return pv
+    }()
+    
+    func setupRangePicker() {
+        var toolBar = UIToolbar()
+        toolBar.barStyle = UIBarStyle.default
+        toolBar.isTranslucent = true
+        
+        toolBar.tintColor = UIColor(red: 76/255, green: 217/255, blue: 100/255, alpha: 1)
+        toolBar.sizeToFit()
+        
+        let doneButton = UIBarButtonItem(title: "Done", style: UIBarButtonItemStyle.bordered, target: self, action: Selector("donePicker"))
+        doneButton.setTitleTextAttributes([NSForegroundColorAttributeName: UIColor.legitColor()], for: .normal)
+        
+        let cancelButton = UIBarButtonItem(title: "Cancel", style: UIBarButtonItemStyle.bordered, target: self, action: Selector("cancelPicker"))
+        cancelButton.setTitleTextAttributes([NSForegroundColorAttributeName: UIColor.red], for: .normal)
+
+        var toolbarTitle = UILabel()
+        toolbarTitle.text = "Select Range"
+        toolbarTitle.textAlignment = NSTextAlignment.center
+        let toolbarTitleButton = UIBarButtonItem(customView: toolbarTitle)
+        
+        let space1Button = UIBarButtonItem(barButtonSystemItem: UIBarButtonSystemItem.flexibleSpace, target: nil, action: nil)
+        let space2Button = UIBarButtonItem(barButtonSystemItem: UIBarButtonSystemItem.flexibleSpace, target: nil, action: nil)
+        
+        toolBar.setItems([cancelButton,space1Button, toolbarTitleButton,space2Button, doneButton], animated: false)
+        toolBar.isUserInteractionEnabled = true
         
         
-        let segmentFrame = CGRect(x: 0, y: 0, width: (self.frame.size.width/3), height: self.frame.size.height)
-        self.rankSegmentView = SMSegmentView(frame: segmentFrame, dividerColour: UIColor(white: 0.95, alpha: 0.3), dividerWidth: 1.0, segmentAppearance: appearance)
-        self.rankSegmentView.backgroundColor = UIColor.clear
-        
-        self.rankSegmentView.layer.cornerRadius = 5.0
-        self.rankSegmentView.layer.borderColor = UIColor.black.cgColor
-        self.rankSegmentView.layer.borderWidth = 1.0
-        
-        self.rankSegmentView.addSegmentWithTitle("", onSelectionImage: #imageLiteral(resourceName: "cred_filled"), offSelectionImage: #imageLiteral(resourceName: "cred_unfilled"))
-        self.rankSegmentView.addSegmentWithTitle("", onSelectionImage: #imageLiteral(resourceName: "bookmark_filled"), offSelectionImage: #imageLiteral(resourceName: "bookmark_unfilled"))
-        self.rankSegmentView.addSegmentWithTitle("", onSelectionImage: #imageLiteral(resourceName: "send_filled"), offSelectionImage: #imageLiteral(resourceName: "send2"))
-        
-        self.rankSegmentView.addTarget(self, action: #selector(selectSegmentInSegmentView(segmentView:)), for: .valueChanged)
-        
-        
-        // Set segment with index 0 as selected by default
-        self.rankSegmentView.selectedSegmentIndex = rankSortOptions.index(of: defaultRank)!
-        
+        pickerView.delegate = self
+        pickerView.dataSource = self
+        self.dummyTextView.inputView = pickerView
+        self.dummyTextView.inputAccessoryView = toolBar
+        self.addSubview(dummyTextView)
     }
     
-    func selectSegmentInSegmentView(segmentView: SMSegmentView) {
-        
-        if selectedRank != rankSortOptions[segmentView.selectedSegmentIndex] {
-            selectedRank = rankSortOptions[segmentView.selectedSegmentIndex]
-            print("Selected Rank By \(selectedRank)")
-            
-            // Refreshs Post without clearing filters
-//            self.refreshPosts()
-        }
+    // UIPicker Delegate Functions
+    
+    func activateRange() {
+        let rangeIndex = selectedRangeOptions.index(of: self.selectedRange)
+        pickerView.selectRow(rangeIndex!, inComponent: 0, animated: false)
+        dummyTextView.perform(#selector(becomeFirstResponder), with: nil, afterDelay: 0.1)
     }
-//
-//    func selectSort(sender: UISegmentedControl) {
-//        self.selectedSort = HeaderSortOptions[sender.selectedSegmentIndex]
-//        delegate?.headerSortSelected(sort: self.selectedSort)
-//        print("Selected Sort is ",self.selectedSort)
-//    }
-//
+    
+    func donePicker(){
+        self.selectedRange = selectedRangeOptions[pickerView.selectedRow(inComponent: 0)]
+        print("Filter Range Selected: \(self.selectedRange)")
+        dummyTextView.resignFirstResponder()
+    }
+    
+    func cancelPicker(){
+        dummyTextView.resignFirstResponder()
+    }
+    
+    
+    // UIPicker DataSource
+    func numberOfComponents(in pickerView: UIPickerView) -> Int {
+        
+        return 1
+        
+    }
+    func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
+        return selectedRangeOptions.count
+    }
+    
+    // UIPicker Delegate
+    
+    func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
+        
+        var options = selectedRangeOptions[row]
+        if options != rankRangeDefault {
+            // Add Miles to end if not Global
+            options = options + " mi"
+        }
+        
+        return options
+    }
+    
+    func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
+        // If Select some number
+//        self.selectedRange = selectedRangeOptions[row]
+    }
+
     
     
     required init?(coder aDecoder: NSCoder) {

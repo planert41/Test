@@ -13,7 +13,7 @@ import CoreLocation
 import EmptyDataSet_Swift
 
 
-class ListViewController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, BookmarkPhotoCellDelegate, HomePostCellDelegate, ListHeaderDelegate, SortFilterHeaderDelegate, FilterControllerDelegate, EmptyDataSetSource, EmptyDataSetDelegate {
+class ListViewController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, ListPhotoCellDelegate, HomePostCellDelegate, ListHeaderDelegate, SortFilterHeaderDelegate, FilterControllerDelegate, EmptyDataSetSource, EmptyDataSetDelegate {
 
 
     static let refreshListViewNotificationName = NSNotification.Name(rawValue: "RefreshListView")
@@ -109,7 +109,7 @@ class ListViewController: UIViewController, UICollectionViewDelegate, UICollecti
     
     func setupCollectionView(){
     
-    collectionView.register(BookmarkPhotoCell.self, forCellWithReuseIdentifier: bookmarkCellId)
+    collectionView.register(ListPhotoCell.self, forCellWithReuseIdentifier: bookmarkCellId)
     collectionView.register(HomePostCell.self, forCellWithReuseIdentifier: homePostCellId)
     collectionView.register(ListViewHeader.self, forSupplementaryViewOfKind: UICollectionElementKindSectionHeader, withReuseIdentifier: listHeaderId)
     
@@ -362,7 +362,7 @@ class ListViewController: UIViewController, UICollectionViewDelegate, UICollecti
         var displayPost = fetchedPosts[indexPath.item]
         
         if isListView {
-            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: bookmarkCellId, for: indexPath) as! BookmarkPhotoCell
+            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: bookmarkCellId, for: indexPath) as! ListPhotoCell
             cell.delegate = self
             cell.bookmarkDate = displayPost.listedDate
             cell.post = displayPost

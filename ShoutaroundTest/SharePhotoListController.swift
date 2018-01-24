@@ -168,7 +168,7 @@ class SharePhotoListController: UIViewController, UICollectionViewDelegate, UICo
         
         
         // Setup CollectionView for Post
-        collectionView.register(BookmarkPhotoCell.self, forCellWithReuseIdentifier: postCellId)
+        collectionView.register(ListPhotoCell.self, forCellWithReuseIdentifier: postCellId)
         view.addSubview(collectionView)
         collectionView.anchor(top: topLayoutGuide.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 120)
         collectionView.isScrollEnabled = false
@@ -369,7 +369,7 @@ class SharePhotoListController: UIViewController, UICollectionViewDelegate, UICo
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: postCellId, for: indexPath) as! BookmarkPhotoCell
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: postCellId, for: indexPath) as! ListPhotoCell
         cell.bookmarkDate = uploadPost?.creationDate
         cell.post = uploadPost
         

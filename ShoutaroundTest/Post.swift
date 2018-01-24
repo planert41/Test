@@ -11,28 +11,49 @@ import CoreLocation
 import UIKit
 import Firebase
 
+//struct PostId {
+//
+//    var id: String
+//    var creatorUID: String?
+//    var creationDate: Date?
+//    var distance: Double? = 99999999
+//    var postGPS: String? = nil
+//    var emoji: String?
+//
+//    //Social
+//    var hasLiked: Bool = false
+//    var hasBookmarked: Bool = false
+//    var hasMessaged: Bool = false
+//    var likeCount: Int = 0
+//    var listCount:Int = 0
+//    var messageCount:Int = 0
+//    var voteCount:Int = 0
+//    var hasVoted:Int = 0
+//
+//    var sort: Double?
+//
+//    init(id: String, creatorUID: String, fetchedDate: Double, distance: Double?, postGPS: String?, postEmoji: String?) {
+//
+//        self.id = id
+//        self.creatorUID = creatorUID
+//        self.creationDate = Date(timeIntervalSince1970: fetchedDate)
+//        self.postGPS = postGPS
+//        self.emoji = postEmoji
+//
+//    }
+//}
+
 struct PostId {
     
     var id: String
     var creatorUID: String?
-    var creationDate: Date?
-    var distance: Double? = 99999999
-    var postGPS: String? = nil
-    var tagTime: Date?
-    var emoji: String?
-    var likeCount: Int?
-    var bookmarkCount: Int?
-    var messageCount: Int?
     var sort: Double?
     
-    init(id: String, creatorUID: String, fetchedTagTime: Double, fetchedDate: Double, distance: Double?, postGPS: String?, postEmoji: String?) {
+    init(id: String, creatorUID: String?, sort: Double?) {
         
         self.id = id
-        self.creatorUID = creatorUID
-        self.creationDate = Date(timeIntervalSince1970: fetchedDate)
-        self.tagTime = Date(timeIntervalSince1970: fetchedTagTime)
-        self.postGPS = postGPS
-        self.emoji = postEmoji
+        self.creatorUID = creatorUID ?? nil
+        self.sort = sort ?? 0
         
     }
 }
@@ -75,7 +96,7 @@ struct Post {
     var hasBookmarked: Bool = false
     var hasMessaged: Bool = false
     var likeCount: Int = 0
-    var bookmarkCount:Int = 0
+    var listCount:Int = 0
     var messageCount:Int = 0
     var voteCount:Int = 0
     var hasVoted:Int = 0
@@ -113,7 +134,7 @@ struct Post {
         }
         
         self.likeCount = dictionary["likeCount"] as? Int ?? 0
-        self.bookmarkCount = dictionary["bookmarkCount"] as? Int ?? 0
+        self.listCount = dictionary["bookmarkCount"] as? Int ?? 0
         self.messageCount = dictionary["messageCount"] as? Int ?? 0
         self.voteCount = dictionary["voteCount"] as? Int ?? 0
         

@@ -12,7 +12,7 @@ import Firebase
 import CoreGraphics
 import GeoFire
 
-class BookMarkController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, UISearchControllerDelegate, HomePostSearchDelegate, BookmarkPhotoCellDelegate, HomePostCellDelegate, UIGestureRecognizerDelegate, FilterControllerDelegate, UISearchBarDelegate {
+class BookMarkController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, UISearchControllerDelegate, HomePostSearchDelegate, ListPhotoCellDelegate, HomePostCellDelegate, UIGestureRecognizerDelegate, FilterControllerDelegate, UISearchBarDelegate {
 
     
     let bookmarkCellId = "bookmarkCellId"
@@ -204,7 +204,7 @@ class BookMarkController: UIViewController, UICollectionViewDelegate, UICollecti
 // Setup CollectionView
         
         collectionView.backgroundColor = .white
-        collectionView.register(BookmarkPhotoCell.self, forCellWithReuseIdentifier: bookmarkCellId)
+        collectionView.register(ListPhotoCell.self, forCellWithReuseIdentifier: bookmarkCellId)
         collectionView.register(HomePostCell.self, forCellWithReuseIdentifier: homePostCellId)
         
         view.addSubview(collectionView)
@@ -537,7 +537,7 @@ class BookMarkController: UIViewController, UICollectionViewDelegate, UICollecti
         }
         
         if isGridView {
-            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: bookmarkCellId, for: indexPath) as! BookmarkPhotoCell
+            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: bookmarkCellId, for: indexPath) as! ListPhotoCell
             cell.delegate = self
             cell.bookmarkDate = displayPost.bookmarkDate
             cell.post = displayPost.post

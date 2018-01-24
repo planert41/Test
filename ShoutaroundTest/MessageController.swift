@@ -135,7 +135,7 @@ class MessageController: UIViewController, UICollectionViewDataSource, UICollect
         self.automaticallyAdjustsScrollViewInsets  = false
         
         collectionView.backgroundColor = .white
-        collectionView.register(BookmarkPhotoCell.self, forCellWithReuseIdentifier: bookmarkCellId)
+        collectionView.register(ListPhotoCell.self, forCellWithReuseIdentifier: bookmarkCellId)
         
         view.addSubview(collectionView)
         collectionView.anchor(top: topLayoutGuide.bottomAnchor , left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: postDisplayHeight)
@@ -411,7 +411,7 @@ class MessageController: UIViewController, UICollectionViewDataSource, UICollect
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         
 
-            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: bookmarkCellId, for: indexPath) as! BookmarkPhotoCell
+            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: bookmarkCellId, for: indexPath) as! ListPhotoCell
             cell.post = post
             return cell
      

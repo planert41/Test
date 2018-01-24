@@ -238,9 +238,10 @@ class MainTabBarController: UITabBarController, UITabBarControllerDelegate, UIIm
         
         // search
 //        let searchNavController = templateNavController(unselectedImage: #imageLiteral(resourceName: "search_unselected"), selectedImage: #imageLiteral(resourceName: "search_selected"), rootViewController: UserSearchController(collectionViewLayout: UICollectionViewFlowLayout()))
+//        let searchNavController = templateNavController(unselectedImage: #imageLiteral(resourceName: "search_unselected"), selectedImage: #imageLiteral(resourceName: "search_selected"), rootViewController: ExploreController())
+        
         let searchNavController = templateNavController(unselectedImage: #imageLiteral(resourceName: "search_unselected"), selectedImage: #imageLiteral(resourceName: "search_selected"), rootViewController: ExploreController())
-        
-        
+
         let plusNavController = templateNavController(unselectedImage: #imageLiteral(resourceName: "plus_unselected"), selectedImage: #imageLiteral(resourceName: "plus_unselected"))
         
         let likeNavController = templateNavController(unselectedImage: #imageLiteral(resourceName: "like_unselected"), selectedImage: #imageLiteral(resourceName: "like_selected"), rootViewController:  BookMarkController())
@@ -294,10 +295,12 @@ class MainTabBarController: UITabBarController, UITabBarControllerDelegate, UIIm
     
     let viewController = rootViewController
     let navController = UINavigationController(rootViewController: viewController)
-    navController.tabBarItem.image = unselectedImage
-    navController.tabBarItem.selectedImage = selectedImage
+        navController.tabBarItem.image = unselectedImage
+        navController.tabBarItem.selectedImage = selectedImage
+        navController.navigationBar.barTintColor = UIColor.legitColor()
+        navController.navigationBar.tintColor = UIColor.white
     
-        return navController
+    return navController
     }
     
     

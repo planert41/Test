@@ -508,10 +508,9 @@ extension Database{
                 
                 let dictionary = value as? [String: Any]
                 let secondsFrom1970 = dictionary?["creationDate"] as? Double ?? 0
-                let tagTime = dictionary?["tagTime"] as? Double ?? 0
                 let emoji = dictionary?["emoji"] as? String ?? ""
                 
-                let tempID = PostId.init(id: key, creatorUID: creatoruid, fetchedTagTime: tagTime, fetchedDate: secondsFrom1970, distance: nil, postGPS: nil, postEmoji: emoji)
+                let tempID = PostId.init(id: key, creatorUID: creatoruid, sort: nil)
                 fetchedPostIds.append(tempID)
                 myGroup.leave()
             })
@@ -692,13 +691,13 @@ extension Database{
             
             guard let dictionary = snapshot.value as? [String: Any] else {return}
             let creatorUID = dictionary["creatorUID"] as? String ?? ""
-            let secondsFrom1970 = dictionary["creationDate"] as? Double ?? 0
-            let postGPS = dictionary["postLocationGPS"] as? String ?? ""
-            let tagTime = dictionary["tagTime"] as? Double ?? 0
-            let emoji = dictionary["emoji"] as? String ?? ""
+//            let secondsFrom1970 = dictionary["creationDate"] as? Double ?? 0
+//            let postGPS = dictionary["postLocationGPS"] as? String ?? ""
+//            let tagTime = dictionary["tagTime"] as? Double ?? 0
+//            let emoji = dictionary["emoji"] as? String ?? ""
             
             
-            let tempID = PostId.init(id: postId, creatorUID: creatorUID, fetchedTagTime: tagTime, fetchedDate: secondsFrom1970, distance: nil, postGPS: postGPS, postEmoji: emoji)
+            let tempID = PostId.init(id: postId, creatorUID: creatorUID, sort: nil)
             completion(tempID)
             
         })
@@ -723,7 +722,7 @@ extension Database{
             
             Database.fetchPostIDDetails(postId: key!, completion: { (fetchPostId) in
                 var tempPostId = fetchPostId
-                tempPostId.distance = firebaseLocation?.distance(from: selectedLocation)
+                tempPostId.sort = firebaseLocation?.distance(from: selectedLocation)
                 fetchedPostIds.append(tempPostId)
                 myGroup.leave()
             })
@@ -736,10 +735,55 @@ extension Database{
         myGroup.notify(queue: .main) {
             
             fetchedPostIds.sort(by: { (p1, p2) -> Bool in
-                return (p1.distance! < p2.distance!)
+                return (p1.sort! < p2.sort!)
             })
             print("Geofire Fetched Posts: \(fetchedPostIds.count)" )
             completion(fetchedPostIds)
+        }
+    }
+    
+    static func fetchPostIDBySocialRank(firebaseRank: String, fetchLimit: Int, completion: @escaping ([PostId]?) -> ()) {
+        
+        let myGroup = DispatchGroup()
+        var fetchedPostIds = [] as [PostId]
+        guard let firebaseCountVariable = firebaseCountVariable[firebaseRank] else {
+            print("Fetch Post Id by Social Rank: ERROR, Invalid Firebase Count for \(firebaseRank)")
+            return
+        }
+        guard let firebaseField = firebaseFieldVariable[firebaseRank] else {
+            print("Fetch Post Id by Social Rank: ERROR, Invalid Firebase Field for \(firebaseRank)")
+            return
+        }
+        
+        
+        print("Query Firebase by \(firebaseRank) : \(firebaseCountVariable)")
+
+        var query = Database.database().reference().child(firebaseField).queryOrdered(byChild: "sort").queryLimited(toLast: UInt(fetchLimit))
+        query.observe(.value, with: { (snapshot) in
+            guard let postIds = snapshot.value as? [String:Any] else {return}
+            
+            
+            postIds.forEach({ (key,value) in
+                
+                let details = value as? [String:Any]
+                var varCount = details?[firebaseCountVariable] as! Int
+                var varSort = details?["sort"] as! Double
+                
+                var tempPostId = PostId.init(id: key, creatorUID: " ", sort: varSort)
+                fetchedPostIds.append(tempPostId)
+
+            })
+            
+            // Sort Fetched Post Ids
+            fetchedPostIds.sort(by: { (p1, p2) -> Bool in
+                return (p1.sort! > p2.sort!)
+            })
+            
+            completion(fetchedPostIds)
+
+        }) { (error) in
+            print("Fetch Post Id by Social Rank: ERROR, \(error)")
+            completion(nil)
         }
     }
     
@@ -883,9 +927,9 @@ extension Database{
                 tempPost.hasBookmarked = false
             }
             
-            if tempPost.bookmarkCount != bookmarkCount {
+            if tempPost.listCount != bookmarkCount {
                 // Calculated Bookmark Count Different from Database
-                tempPost.bookmarkCount = bookmarkCount
+                tempPost.listCount = bookmarkCount
                 updateSocialCountsForPost(postId: tempPost.id, socialVariable: "bookmarkCount", newCount: bookmarkCount)
             }
             
@@ -900,7 +944,7 @@ extension Database{
         
         guard let uid = Auth.auth().currentUser?.uid else {return}
         var tempPost = post
-        Database.database().reference().child("messages").child(post.id!).observeSingleEvent(of: .value, with: { (snapshot) in
+        Database.database().reference().child("post_messages").child(post.id!).observeSingleEvent(of: .value, with: { (snapshot) in
             
             let post = snapshot.value as? [String: Any] ?? [:]
             var messages: Dictionary<String, Int>
@@ -2234,6 +2278,30 @@ extension Database{
         else if selectedSort == LocationSortOptions[1] {
             tempPosts.sort(by: { (p1, p2) -> Bool in
                 return (p1.rating! > p2.rating!)
+            })
+            completion(tempPosts)
+        }
+            
+            // Votes
+        else if selectedSort == defaultRankOptions[0] {
+            tempPosts.sort(by: { (p1, p2) -> Bool in
+                return (p1.voteCount > p2.voteCount)
+            })
+            completion(tempPosts)
+        }
+            
+            // Bookmarks
+        else if selectedSort == defaultRankOptions[1] {
+            tempPosts.sort(by: { (p1, p2) -> Bool in
+                return (p1.listCount > p2.listCount)
+            })
+            completion(tempPosts)
+        }
+            
+            // Message
+        else if selectedSort == defaultRankOptions[1] {
+            tempPosts.sort(by: { (p1, p2) -> Bool in
+                return (p1.messageCount > p2.messageCount)
             })
             completion(tempPosts)
         }

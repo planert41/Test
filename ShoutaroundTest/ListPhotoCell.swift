@@ -10,29 +10,31 @@
 import UIKit
 import Firebase
 
-protocol BookmarkPhotoCellDelegate {
+protocol ListPhotoCellDelegate {
     func didTapComment(post:Post)
     func didTapUser(post:Post)
     func didTapLocation(post:Post)
     func didTapMessage(post:Post)
-    func deletePost(post:Post)
     func refreshPost(post:Post)
+
+    func deletePost(post:Post)
     func didTapPicture(post:Post)
-    
 }
 
-class BookmarkPhotoCell: UICollectionViewCell {
+class ListPhotoCell: UICollectionViewCell {
     
     let adressLabelSize = 8 as CGFloat
-    var delegate: BookmarkPhotoCellDelegate?
+    var delegate: ListPhotoCellDelegate?
     
     var bookmarkDate: Date?{
         didSet{
 //            let timeAgoDisplay = bookmarkDate?.timeAgoDisplay()
-            let formatter = DateFormatter()
-            formatter.dateFormat = "MMM d YYYY"
-            let timeAgoDisplay = formatter.string(from: bookmarkDate!)
-            dateLabel.text = timeAgoDisplay
+            if let bookmarkDate = bookmarkDate {
+                let formatter = DateFormatter()
+                formatter.dateFormat = "MMM d YYYY"
+                let timeAgoDisplay = formatter.string(from: bookmarkDate)
+                dateLabel.text = timeAgoDisplay
+            }
         }
     }
     var post: Post? {
@@ -66,8 +68,8 @@ class BookmarkPhotoCell: UICollectionViewCell {
             captionLabel.text = post?.caption
             captionLabel.sizeToFit()
             
-            if (post?.bookmarkCount)! > 0 {
-                bookmarkCount.text = String(describing: (post?.bookmarkCount)!)
+            if (post?.listCount)! > 0 {
+                bookmarkCount.text = String(describing: (post?.listCount)!)
             } else {
                 bookmarkCount.text = ""
             }
@@ -322,9 +324,9 @@ class BookmarkPhotoCell: UICollectionViewCell {
         // Animates before database function is complete
         
         if (self.post?.hasBookmarked)! {
-            self.post?.bookmarkCount -= 1
+            self.post?.listCount -= 1
         } else {
-            self.post?.bookmarkCount += 1
+            self.post?.listCount += 1
         }
         self.post?.hasBookmarked = !(self.post?.hasBookmarked)!
         self.delegate?.refreshPost(post: self.post!)
@@ -413,7 +415,7 @@ class BookmarkPhotoCell: UICollectionViewCell {
 //        photoImageView.widthAnchor.constraint(equalToConstant: self.frame.height).isActive = true
         photoImageView.widthAnchor.constraint(equalTo: photoImageView.heightAnchor, multiplier: 1).isActive = true
         
-        let TapGesture = UITapGestureRecognizer(target: self, action: #selector(BookmarkPhotoCell.handlePictureTap))
+        let TapGesture = UITapGestureRecognizer(target: self, action: #selector(ListPhotoCell.handlePictureTap))
         photoImageView.addGestureRecognizer(TapGesture)
         photoImageView.isUserInteractionEnabled = true
         
@@ -548,15 +550,15 @@ class BookmarkPhotoCell: UICollectionViewCell {
 // Adding Gesture Recognizers
         
         userProfileImageView.isUserInteractionEnabled = true
-        let usernameTap = UITapGestureRecognizer(target: self, action: #selector(BookmarkPhotoCell.usernameTap))
+        let usernameTap = UITapGestureRecognizer(target: self, action: #selector(ListPhotoCell.usernameTap))
         userProfileImageView.addGestureRecognizer(usernameTap)
         userProfileImageView.isUserInteractionEnabled = true
         
         
-        let locationTapGesture = UITapGestureRecognizer(target: self, action: #selector(BookmarkPhotoCell.locationTap))
+        let locationTapGesture = UITapGestureRecognizer(target: self, action: #selector(ListPhotoCell.locationTap))
         locationNameLabel.addGestureRecognizer(locationTapGesture)
         locationNameLabel.isUserInteractionEnabled = true
-        let locationTapGesture2 = UITapGestureRecognizer(target: self, action: #selector(BookmarkPhotoCell.locationTap))
+        let locationTapGesture2 = UITapGestureRecognizer(target: self, action: #selector(ListPhotoCell.locationTap))
         
         locationAdressLabel.addGestureRecognizer(locationTapGesture2)
         locationAdressLabel.isUserInteractionEnabled = true
