@@ -1640,6 +1640,7 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         let sharePhotoListController = SharePhotoListController()
         sharePhotoListController.uploadPost = uploadPost
         sharePhotoListController.isEditingPost = self.editPostInd
+        sharePhotoListController.preEditPost = self.editPost
         
 //        sharePhotoListController.uploadPostDictionary = values
         sharePhotoListController.uploadPostLocation = self.selectPostLocation

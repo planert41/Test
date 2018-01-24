@@ -23,6 +23,7 @@ class SharePhotoListController: UIViewController, UICollectionViewDelegate, UICo
     var delegate: SharePhotoListControllerDelegate?
 
     var isEditingPost: Bool = false
+    var preEditPost: Post? = nil
     var editPrevList: [String:String]? = [:]
     var isBookmarkingPost: Bool = false
     
@@ -315,7 +316,7 @@ class SharePhotoListController: UIViewController, UICollectionViewDelegate, UICo
             return
         }
         
-        Database.editPostToDatabase(imageUrl: imageUrl, postId: postId, uploadDictionary: uploadPostDictionary, uploadLocation: uploadPostLocation, prevList: editPrevList) {
+        Database.editPostToDatabase(imageUrl: imageUrl, postId: postId, uploadDictionary: uploadPostDictionary, uploadLocation: uploadPostLocation, prevPost: preEditPost) {
             
             // Update Post Cache
             var tempPost = self.uploadPost

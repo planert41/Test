@@ -269,13 +269,20 @@ extension Database{
                 
                 self.savePostLocationToFirebase(postId: postId, uploadLocation: uploadLocation)
                 self.savePostIdForUser(postId: postId, userId: uid, uploadTime: uploadTime)
-                guard let lists = lists else {
-                    print("Save Post to List: NO LIST For \(postId)")
-                    return
+
+                // Update Emoji Tags
+                if let emojiTags = uploadDictionary["nonratingEmoji"] as! [String]? {
+                    for emoji in emojiTags {
+                        self.updatePostIdForTag(postId: postId, tag: emoji, add: 1)
+                    }
                 }
-                if lists.count > 0 {
-                    for list in lists {
-                        self.addPostForList(postId: postId, listId: list.id, postCreationDate: uploadTime)
+
+                // Update List
+                if lists != nil {
+                    if lists!.count > 0 {
+                        for list in lists! {
+                            self.addPostForList(postId: postId, listId: list.id, postCreationDate: uploadTime)
+                        }
                     }
                 }
                 completion()
@@ -384,12 +391,13 @@ extension Database{
     }
 
 // Edit Posts Function
-    static func editPostToDatabase(imageUrl: String?, postId: String?, uploadDictionary:[String:Any]?,uploadLocation: CLLocation?, prevList:[String:String]?, completion:@escaping () ->()){
+    static func editPostToDatabase(imageUrl: String?, postId: String?, uploadDictionary:[String:Any]?,uploadLocation: CLLocation?, prevPost: Post?, completion:@escaping () ->()){
     
         //    1. Update Post Dictionary
         //    2. Update Post Geofire Location
-        //    3. Create List if Needed
-        //    4. Add PostId to List if Needed
+        //    3. Update Emoji Tags
+        //    4. Create List if Needed
+        //    5. Add PostId to List if Needed
         
         guard let imageUrl = imageUrl else {
             print("Update Post: ERROR, No Image URL")
@@ -403,6 +411,11 @@ extension Database{
         
         guard let uploadDictionary = uploadDictionary else {
             print("Update Post: ERROR, No Post ID")
+            return
+        }
+        
+        guard let prevPost = prevPost else {
+            print("Update Post: ERROR, No Previous Post")
             return
         }
         
@@ -425,11 +438,22 @@ extension Database{
         // UPDATE LOCATION IN GEOFIRE
         savePostLocationToFirebase(postId: postId, uploadLocation: uploadLocation)
         
+        // UPDATE EMOJI TAGS
+        // Delete Preivous Emojis
+        self.DeleteTagsForPost(post: prevPost)
+        
+        // Update Emoji Tags
+        if let emojiTags = uploadDictionary["nonratingEmoji"] as! [String]? {
+            for emoji in emojiTags {
+                self.updatePostIdForTag(postId: postId, tag: emoji, add: 1)
+            }
+        }
+        
         // UPDATE LISTS
         
         // Find Deleted List
         let currentList = uploadValues["lists"] as! [String:String]? ?? [:]
-        let previousList = prevList as! [String:String]? ?? [:]
+        let previousList = prevPost.creatorListId as! [String:String]? ?? [:]
         var deletedList: [String] = []
         var addedList: [String] = []
         let postCreationTime = uploadValues["creationDate"] as! Double?
@@ -460,6 +484,7 @@ extension Database{
         for list in addedList {
             Database.addPostForList(postId: postId, listId: list, postCreationDate: postCreationTime)
         }
+        
         
         // Replace Post Cache
         var tempPost = Post.init(user: CurrentUser.user!, dictionary: uploadValues)
@@ -1233,9 +1258,14 @@ extension Database{
         Database.database().reference().child("posts").child(post.id!).removeValue()
         Database.database().reference().child("postlocations").child(post.id!).removeValue()
         Database.database().reference().child("userposts").child(post.creatorUID!).child(post.id!).removeValue()
+        Database.database().reference().child("comments").child(post.id!).removeValue()
+
+        Database.database().reference().child("post_lists").child(post.id!).removeValue()
+        Database.database().reference().child("post_messages").child(post.id!).removeValue()
+        Database.database().reference().child("post_votes").child(post.id!).removeValue()
         
-        Database.database().reference().child("likes").child(post.id!).removeValue()
-        Database.database().reference().child("bookmarks").child(post.id!).removeValue()
+        // Remove emoji tags
+        self.DeleteTagsForPost(post: post)
         
         // Remove from cache
         postCache.removeValue(forKey: post.id!)
