@@ -107,7 +107,7 @@ class PostSearchController : UITableViewController, UISearchResultsUpdating, UIS
     
     
     func setupSearchController(){
-        navigationController?.navigationBar.barTintColor = UIColor.white
+//        navigationController?.navigationBar.barTintColor = UIColor.white
         
         searchController.searchResultsUpdater = self
         searchController.obscuresBackgroundDuringPresentation = false
@@ -120,8 +120,19 @@ class PostSearchController : UITableViewController, UISearchResultsUpdating, UIS
         searchBar.sizeToFit()
         searchBar.delegate = self
         searchBar.placeholder =  searchBarPlaceholderText
-        searchBar.backgroundColor = UIColor.white
+//        searchBar.barTintColor = UIColor.white
+        searchBar.tintColor = UIColor.white
+//        searchBar.backgroundColor = UIColor.legitColor()
         definesPresentationContext = true
+        
+        for s in searchBar.subviews[0].subviews {
+            if s is UITextField {
+                s.layer.borderWidth = 0.5
+                s.layer.borderColor = UIColor.gray.cgColor
+                s.layer.cornerRadius = 10
+                s.layer.backgroundColor = UIColor.white.cgColor
+            }
+        }
 
         
         if #available(iOS 11.0, *) {
@@ -291,13 +302,13 @@ class PostSearchController : UITableViewController, UISearchResultsUpdating, UIS
     override func viewWillDisappear(_ animated: Bool) {
 //      Remove Searchbar scope during transition
         self.searchBar.isHidden = true
-        navigationController?.navigationBar.barTintColor = UIColor.legitColor()
+//        navigationController?.navigationBar.barTintColor = UIColor.legitColor()
     }
     
     override func viewWillAppear(_ animated: Bool) {
 //      Show Searchbar scope during transition
         self.searchBar.isHidden = false
-        navigationController?.navigationBar.barTintColor = UIColor.white
+//        navigationController?.navigationBar.barTintColor = UIColor.legitColor()
 
 
     }
@@ -336,8 +347,8 @@ class PostSearchController : UITableViewController, UISearchResultsUpdating, UIS
         } else {
             self.delegate?.filterCaptionSelected(searchedText: nil)
         }
-
         searchBar.resignFirstResponder()
+
     }
     
     func searchBar(_ searchBar: UISearchBar, selectedScopeButtonIndexDidChange selectedScope: Int) {

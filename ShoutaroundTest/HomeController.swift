@@ -13,6 +13,7 @@ import GeoFire
 import CoreGraphics
 import CoreLocation
 import EmptyDataSet_Swift
+import UIFontComplete
 
 
 
@@ -653,9 +654,19 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     
     fileprivate func setupNavigationItems() {
 
-        navigationItem.titleView = defaultSearchBar
-        defaultSearchBar.delegate = self
-        defaultSearchBar.placeholder = "Food, User, Location"
+        let legitListTitle = UILabel()
+        legitListTitle.text = "LegitList"
+        legitListTitle.font = UIFont(font: .noteworthyBold, size: 20)
+//        legitListTitle.font = UIFont(name: "TitilliumWeb-SemiBold", size: 20)
+        legitListTitle.textAlignment = NSTextAlignment.center
+        
+        
+//        navigationItem.titleView = defaultSearchBar
+//        defaultSearchBar.delegate = self
+//        defaultSearchBar.placeholder = "Food, User, Location"
+        
+        navigationItem.titleView  = legitListTitle
+        
         
 //        for s in defaultSearchBar.subviews[0].subviews {
 //            if s is UITextField {

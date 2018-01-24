@@ -48,7 +48,7 @@ class ExploreController: UIViewController, UICollectionViewDelegate, UICollectio
         return cv
     }()
     
-    var isListView: Bool = true
+    var isListView: Bool = false
     let bookmarkCellId = "bookmarkCellId"
     let gridCellId = "gridCellId"
     let listHeaderId = "listHeaderId"

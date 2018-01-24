@@ -40,6 +40,7 @@ class RankViewHeader: UICollectionViewCell, UIGestureRecognizerDelegate, UIPicke
         didSet{
             headerSortSegment.selectedSegmentIndex = rankSortOptions.index(of: selectedRank)!
             rankLabel.text = "Top 250 By \(self.selectedRank)"
+            rankLabel.adjustsFontSizeToFitWidth = true
         }
     }
     
@@ -85,7 +86,7 @@ class RankViewHeader: UICollectionViewCell, UIGestureRecognizerDelegate, UIPicke
     
     
     // Grid/List View Button
-    var isListView = true {
+    var isListView = false {
         didSet{
             formatButton.setImage(self.isListView ? #imageLiteral(resourceName: "list"):#imageLiteral(resourceName: "grid"), for: .normal)
         }
@@ -123,7 +124,7 @@ class RankViewHeader: UICollectionViewCell, UIGestureRecognizerDelegate, UIPicke
         
         setupRangePicker()
         addSubview(rangeButton)
-        rangeButton.anchor(top: topAnchor, left: nil, bottom: bottomAnchor, right: formatButton.leftAnchor, paddingTop: 1, paddingLeft: 1, paddingBottom: 1, paddingRight: 1, width: 0, height: 0)
+        rangeButton.anchor(top: topAnchor, left: leftAnchor, bottom: bottomAnchor, right: nil, paddingTop: 1, paddingLeft: 1, paddingBottom: 1, paddingRight: 1, width: 0, height: 0)
         rangeButton.widthAnchor.constraint(equalTo: rangeButton.heightAnchor, multiplier: 1).isActive = true
         //        formatButton.layer.cornerRadius = formatButton.frame.width/2
         rangeButton.layer.masksToBounds = true
@@ -133,10 +134,10 @@ class RankViewHeader: UICollectionViewCell, UIGestureRecognizerDelegate, UIPicke
         
         setupRankSegmentControl()
         addSubview(rankSegmentControl)
-        rankSegmentControl.anchor(top: topAnchor, left: nil, bottom: bottomAnchor, right: rangeButton.leftAnchor, paddingTop: 5, paddingLeft: 3, paddingBottom: 5, paddingRight: 5, width: self.frame.width/2, height: 0)
+        rankSegmentControl.anchor(top: topAnchor, left: nil, bottom: bottomAnchor, right: formatButton.leftAnchor, paddingTop: 5, paddingLeft: 3, paddingBottom: 5, paddingRight: 5, width: self.frame.width/2, height: 0)
         
         addSubview(rankLabel)
-        rankLabel.anchor(top: topAnchor, left: leftAnchor, bottom: bottomAnchor, right: rankSegmentControl.leftAnchor, paddingTop: 1, paddingLeft: 5, paddingBottom: 1, paddingRight: 1, width: 0, height: 0)
+        rankLabel.anchor(top: topAnchor, left: rangeButton.rightAnchor, bottom: bottomAnchor, right: rankSegmentControl.leftAnchor, paddingTop: 1, paddingLeft: 1, paddingBottom: 1, paddingRight: 1, width: 0, height: 0)
         rankLabel.layer.masksToBounds = true
 
     }

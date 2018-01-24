@@ -61,6 +61,11 @@
 	</dict>
 	<key>NSCameraUsageDescription</key>
 	<string>We would like to access the camera to take photos.</string>
+	<key>UIAppFonts</key>
+	<array>
+		<string>TitilliumWeb-SemiBoldItalic.ttf</string>
+		<string>TitilliumWeb-SemiBold.ttf</string>
+	</array>
 	<key>NSLocationAlwaysUsageDescription</key>
 	<string>Using GPS for Geo-Filtering</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
