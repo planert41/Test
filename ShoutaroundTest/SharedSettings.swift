@@ -14,7 +14,7 @@ var geoFilterImageDefault:[UIImage] = [#imageLiteral(resourceName: "GeoFence"),#
 var geoFilterRangeDefault:[String] = ["1", "5", "25", "50", "100","250"]
 
 var rankRangeDefaultOptions :[String] = ["1", "5", "25", "50", "100","250","Global"]
-var rankRangeDefault: String = "Global"
+var globalRangeDefault: String = "Global"
 var defaultGeoWaitTime: Double = 0.5
 
 var defaultPhotoResize = CGSize(width: 500, height: 500)
@@ -58,7 +58,7 @@ let defaultTime =  FilterSortTimeDefault[FilterSortTimeDefault.endIndex - 1]
 // Search Bar Defaults
 
 var searchBarPlaceholderText = "Search...."
-var searchScopeButtons = ["Emojis","Places","Users"]
+var searchScopeButtons = ["Emojis","Users","Places"]
 
 
 

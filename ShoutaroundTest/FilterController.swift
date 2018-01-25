@@ -17,7 +17,6 @@ protocol FilterControllerDelegate: class {
 }
 
 class FilterController: UIViewController, GMSAutocompleteViewControllerDelegate, PostSearchControllerDelegate, UISearchBarDelegate {
-    
 
     let locationManager = CLLocationManager()
     
@@ -29,10 +28,7 @@ class FilterController: UIViewController, GMSAutocompleteViewControllerDelegate,
     
     var selectedRange: String? = nil {
         didSet{
-            guard let selectedRange = selectedRange else {
-                return
-            }
-            
+            guard let selectedRange = selectedRange else {return}
             if let index = geoFilterRangeDefault.index(of: selectedRange){
                 self.distanceSegment.selectedSegmentIndex = index
             }
@@ -47,10 +43,7 @@ class FilterController: UIViewController, GMSAutocompleteViewControllerDelegate,
     }
     var selectedType: String? = nil {
         didSet{
-            guard let selectedType = selectedType else {
-                return
-            }
-            
+            guard let selectedType = selectedType else {return}
             if let index = UploadPostTypeDefault.index(of: selectedType){
                 self.typeSegment.selectedSegmentIndex = index
             }
@@ -58,10 +51,7 @@ class FilterController: UIViewController, GMSAutocompleteViewControllerDelegate,
     }
     var selectedMaxPrice: String? = nil {
         didSet{
-            guard let selectedMaxPrice = selectedMaxPrice else {
-                return
-            }
-            
+            guard let selectedMaxPrice = selectedMaxPrice else {return}
             if let index = UploadPostPriceDefault.index(of: selectedMaxPrice){
                 self.priceSegment.selectedSegmentIndex = index
             }
@@ -568,10 +558,13 @@ class FilterController: UIViewController, GMSAutocompleteViewControllerDelegate,
 //        self.navigationController?.pushViewController(userProfileController, animated: true)
     }
     
-    func locationSelected(googlePlaceId: String?, googlePlaceLocation: CLLocation?, googlePlaceType: [String]?){
-//        let locationController = LocationController()
-//        locationController.googlePlaceId = googlePlaceId
-//        navigationController?.pushViewController(locationController, animated: true)
+    
+    
+    func locationSelected(googlePlaceId: String?, googlePlaceName: String?, googlePlaceLocation: CLLocation?, googlePlaceType: [String]?) {
+        self.selectedLocation = googlePlaceLocation
+        self.selectedGooglePlaceID = googlePlaceId
+        self.selectedGooglePlaceType = googlePlaceType
+        self.selectedLocationName = googlePlaceName
     }
     
     
@@ -590,7 +583,7 @@ class FilterController: UIViewController, GMSAutocompleteViewControllerDelegate,
         self.selectedLocation = CLLocation.init(latitude: place.coordinate.latitude, longitude: place.coordinate.longitude)
         self.selectedGooglePlaceID = place.placeID
         self.selectedGooglePlaceType = place.types
-        locationNameLabel.text = place.name
+        self.selectedLocationName = place.name
         
         // Auto Select Closest Distance (5 KM)
         self.distanceSegment.selectedSegmentIndex = 1

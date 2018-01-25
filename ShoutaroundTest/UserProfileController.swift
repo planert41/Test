@@ -504,8 +504,8 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
         
     }
     
-    func locationSelected(googlePlaceId: String?, googlePlaceLocation: CLLocation?, googlePlaceType: [String]?) {
-        
+    func locationSelected(googlePlaceId: String?, googlePlaceName: String?, googlePlaceLocation: CLLocation?, googlePlaceType: [String]?) {
+
     }
     
 // Filter Delegate

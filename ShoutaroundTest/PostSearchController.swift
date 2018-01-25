@@ -23,7 +23,7 @@ import GooglePlaces
 protocol PostSearchControllerDelegate {
     func filterCaptionSelected(searchedText: String?)
     func userSelected(uid: String?)
-    func locationSelected(googlePlaceId: String?, googlePlaceLocation: CLLocation?, googlePlaceType: [String]?)
+    func locationSelected(googlePlaceId: String?, googlePlaceName: String?, googlePlaceLocation: CLLocation?, googlePlaceType: [String]?)
 }
 
 class testSearchBar: UISearchBar {
@@ -60,6 +60,7 @@ class PostSearchController : UITableViewController, UISearchResultsUpdating, UIS
     // Google Locations
     var tableDataSource: GMSAutocompleteTableDataSource?
     var selectedGoogleId: String? = nil
+    var selectedGoogleLocationName: String? = nil
     var selectedGoogleLocation: CLLocation? = nil
     var selectedGoogleLocationType: [String]? = nil
     
@@ -163,7 +164,7 @@ class PostSearchController : UITableViewController, UISearchResultsUpdating, UIS
         }
             
             // Users
-        else if self.selectedScope == 2 {
+        else if self.selectedScope == 1 {
             if isFiltering {
                 return filteredUsers.count
             } else {
@@ -193,7 +194,7 @@ class PostSearchController : UITableViewController, UISearchResultsUpdating, UIS
         }
             // Users
             
-        else if self.selectedScope == 2 {
+        else if self.selectedScope == 1 {
             let cell = tableView.dequeueReusableCell(withIdentifier: UserCellId, for: indexPath) as! UserCell
             if isFiltering{
                 cell.user = filteredUsers[indexPath.row]
@@ -233,7 +234,7 @@ class PostSearchController : UITableViewController, UISearchResultsUpdating, UIS
         }
         
         // User Selected
-        if selectedScope == 2 {
+        if selectedScope == 1 {
             var userSelected: User?
             if isFiltering {
                 userSelected = filteredUsers[indexPath.row]
@@ -261,7 +262,7 @@ class PostSearchController : UITableViewController, UISearchResultsUpdating, UIS
         }
             
             // Users
-        else if self.selectedScope == 2 {
+        else if self.selectedScope == 1 {
             filteredUsers = self.allUsers.filter { (user) -> Bool in
                 return user.username.lowercased().contains(searchText.lowercased())
             }
@@ -282,9 +283,9 @@ class PostSearchController : UITableViewController, UISearchResultsUpdating, UIS
         self.isFiltering = searchController.isActive && !(searchBar.text?.isEmpty)!
         
         if self.isFiltering {
-            if self.selectedScope == 0 || self.selectedScope == 2 {
+            if self.selectedScope == 0 || self.selectedScope == 1 {
                 filterContentForSearchText(searchBar.text!)
-            } else if self.selectedScope == 1 {
+            } else if self.selectedScope == 2 {
                 tableDataSource?.sourceTextHasChanged(searchBar.text!)
             }
         }
@@ -356,14 +357,14 @@ class PostSearchController : UITableViewController, UISearchResultsUpdating, UIS
         print("Selected Scope is: ", selectedScope)
         self.selectedScope = selectedScope
         
-        if selectedScope == 0 || selectedScope == 2 {
+        if selectedScope == 0 || selectedScope == 1 {
             self.tableView.dataSource = self
             self.tableView.delegate = self
             if self.isFiltering && self.searchTerm != nil {
                 filterContentForSearchText(self.searchTerm!)
             }
         }
-        else if selectedScope == 1 {
+        else if selectedScope == 2 {
             
             // Changes data source to Google Location Data Source when Location is selected
             self.tableView.dataSource = tableDataSource
@@ -390,12 +391,13 @@ class PostSearchController : UITableViewController, UISearchResultsUpdating, UIS
     func tableDataSource(_ tableDataSource: GMSAutocompleteTableDataSource, didAutocompleteWith place: GMSPlace) {
         // Do something with the selected place.
         self.selectedGoogleId = place.placeID
+        self.selectedGoogleLocationName = place.name
         self.selectedGoogleLocation = CLLocation.init(latitude: place.coordinate.latitude, longitude: place.coordinate.longitude)
         self.selectedGoogleLocationType = place.types
         
         print("Selected Google Location is: ", place.placeID, " name: ", place.name, "type: ", self.selectedGoogleLocationType, "GPS: ",self.selectedGoogleLocation)
-        delegate?.locationSelected(googlePlaceId: self.selectedGoogleId, googlePlaceLocation: self.selectedGoogleLocation, googlePlaceType: self.selectedGoogleLocationType)
-//        self.navigationController?.popViewController(animated: true)
+        delegate?.locationSelected(googlePlaceId: self.selectedGoogleId, googlePlaceName: self.selectedGoogleLocationName,  googlePlaceLocation: self.selectedGoogleLocation, googlePlaceType: self.selectedGoogleLocationType)
+        self.navigationController?.popViewController(animated: true)
 
         
     }

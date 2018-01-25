@@ -589,12 +589,13 @@ extension Database{
         }
     }
     
-    static func fetchAllPostWithGooglePlaceID(googlePlaceId: String, completion: @escaping ([Post]) -> ()) {
+    static func fetchAllPostWithGooglePlaceID(googlePlaceId: String, completion: @escaping ([Post], [PostId]) -> ()) {
         
         let myGroup = DispatchGroup()
         var query = Database.database().reference().child("posts").queryOrdered(byChild: "googlePlaceID").queryEqual(toValue: googlePlaceId)
         var fetchedPosts = [] as [Post]
-        
+        var fetchedPostIds = [] as [PostId]
+
         query.observe(.value, with: { (snapshot) in
             
             guard let locationPosts = snapshot.value as? [String: Any] else {return}
@@ -607,9 +608,11 @@ extension Database{
                 Database.fetchUserWithUID(uid: creatorUID) { (user) in
                     
                     var post = Post(user: user, dictionary: dictionary)
+                    var postId = PostId.init(id: key, creatorUID: nil, sort: nil)
                     post.id = key
 
                     Database.checkPostForSocial(post: post, completion: { (post) in
+                        fetchedPostIds.append(postId)
                         fetchedPosts.append(post)
                         fetchedPosts.sort(by: { (p1, p2) -> Bool in
                             return p1.creationDate.compare(p2.creationDate) == .orderedDescending })
@@ -618,7 +621,7 @@ extension Database{
                 }
             })
             myGroup.notify(queue: .main) {
-                completion(fetchedPosts)
+                completion(fetchedPosts, fetchedPostIds)
             }
         }) { (err) in
             print("Failed to fetch post for Google Place ID", err)
@@ -664,8 +667,9 @@ extension Database{
         }
     }
     
-    static func fetchAllPostWithLocation(location: CLLocation, distance: Double, completion: @escaping ([Post]) -> ()) {
+    static func fetchAllPostWithLocation(location: CLLocation, distance: Double, completion: @escaping ([Post], [PostId]) -> ()) {
         
+        var fetchedPostIds = [] as [PostId]
         var fetchedPosts = [] as [Post]
         
         let myGroup = DispatchGroup()
@@ -687,9 +691,11 @@ extension Database{
                 
                 guard let post = post else {return}
                 var tempPost = post
+                var tempPostId = PostId.init(id: key!, creatorUID: nil, sort: nil)
                 tempPost.distance = tempPost.locationGPS?.distance(from: location)
                 //                print(tempPost.distance, ": ", tempPost.caption, " : ", location, " : ", tempPost.locationGPS)
                 fetchedPosts.append(tempPost)
+                fetchedPostIds.append(tempPostId)
                 myGroup.leave()
             })
         })
@@ -702,7 +708,7 @@ extension Database{
             fetchedPosts.sort(by: { (p1, p2) -> Bool in
                 return (p1.distance! < p2.distance!)
             })
-            completion(fetchedPosts)
+            completion(fetchedPosts, fetchedPostIds)
         }
     }
     
@@ -2381,7 +2387,7 @@ extension Database{
         // Distances are updated in fetchallposts as they are filtered by distance
         
         // Filter Range
-        if filterLocation != nil && filterRange != nil {
+        if filterLocation != nil && filterRange != nil && filterRange != globalRangeDefault {
             tempPosts = tempPosts.filter { (post) -> Bool in
                 var filterDistance:Double = 99999999
                 if post.distance != nil {

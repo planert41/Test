@@ -360,7 +360,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         self.navigationController?.pushViewController(userProfileController, animated: true)
     }
     
-    func locationSelected(googlePlaceId: String?, googlePlaceLocation: CLLocation?, googlePlaceType: [String]?){
+    func locationSelected(googlePlaceId: String?, googlePlaceName: String?, googlePlaceLocation: CLLocation?, googlePlaceType: [String]?) {
         let locationController = LocationController()
         locationController.googlePlaceId = googlePlaceId
         navigationController?.pushViewController(locationController, animated: true)
@@ -666,8 +666,9 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
 //        legitListTitle.font = UIFont(name: "TitilliumWeb-SemiBold", size: 20)
         legitListTitle.textAlignment = NSTextAlignment.center
         
-        var searchTerm: String = "Searching"
+        var searchTerm: String = ""
             if filterCaption != nil {searchTerm += " \(filterCaption!)"}
+        if filterLocationName != nil {searchTerm += " @\(filterLocationName!)"}
             if filterRange != nil {searchTerm += " Within \(filterRange!) Mi"}
             if filterMaxPrice != nil {searchTerm += " \(filterMaxPrice!)"}
             if filterType != nil {searchTerm += " \(filterType!)"}

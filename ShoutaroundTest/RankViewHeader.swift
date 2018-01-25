@@ -17,6 +17,7 @@
 import Foundation
 import UIKit
 import Firebase
+import CoreLocation
 
 protocol RankViewHeaderDelegate {
     func didChangeToListView()
@@ -47,16 +48,23 @@ class RankViewHeader: UICollectionViewCell, UIGestureRecognizerDelegate, UIPicke
     
 // Rank Range
     var selectedRangeOptions = rankRangeDefaultOptions
-    
-    var selectedRange: String = rankRangeDefault {
+    var selectedLocation: CLLocation? = nil {
         didSet{
-            rangeButton.setImage((self.selectedRange == rankRangeDefault) ? #imageLiteral(resourceName: "ranking").withRenderingMode(.alwaysOriginal) :#imageLiteral(resourceName: "GeoFence").withRenderingMode(.alwaysOriginal), for: .normal)
+            rangeButton.setImage((self.selectedLocation == nil) ? #imageLiteral(resourceName: "ranking").withRenderingMode(.alwaysOriginal) :#imageLiteral(resourceName: "GeoFence").withRenderingMode(.alwaysOriginal), for: .normal)
+        }
+    }
+    
+    var selectedRange: String? = globalRangeDefault {
+        didSet{
+            if selectedRange == nil {
+                selectedRange = globalRangeDefault
+            }
         }
     }
     
     lazy var rangeButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setImage((self.selectedRange == rankRangeDefault) ? #imageLiteral(resourceName: "ranking").withRenderingMode(.alwaysOriginal) :#imageLiteral(resourceName: "GeoFence").withRenderingMode(.alwaysOriginal), for: .normal)
+        button.setImage((self.selectedRange == globalRangeDefault) ? #imageLiteral(resourceName: "ranking").withRenderingMode(.alwaysOriginal) :#imageLiteral(resourceName: "GeoFence").withRenderingMode(.alwaysOriginal), for: .normal)
         button.addTarget(self, action: #selector(activateRange), for: .touchUpInside)
         return button
     }()
@@ -224,7 +232,7 @@ class RankViewHeader: UICollectionViewCell, UIGestureRecognizerDelegate, UIPicke
     // UIPicker Delegate Functions
     
     func activateRange() {
-        let rangeIndex = selectedRangeOptions.index(of: self.selectedRange)
+        let rangeIndex = selectedRangeOptions.index(of: self.selectedRange!)
         pickerView.selectRow(rangeIndex!, inComponent: 0, animated: false)
         dummyTextView.perform(#selector(becomeFirstResponder), with: nil, afterDelay: 0.1)
     }
@@ -255,7 +263,7 @@ class RankViewHeader: UICollectionViewCell, UIGestureRecognizerDelegate, UIPicke
     func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
         
         var options = selectedRangeOptions[row]
-        if options != rankRangeDefault {
+        if options != globalRangeDefault {
             // Add Miles to end if not Global
             options = options + " mi"
         }

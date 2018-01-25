@@ -588,7 +588,7 @@ class LocationController: UIViewController, UIScrollViewDelegate, UICollectionVi
         
         let searchDistance = Double(self.filterRange!)!
         print("No Google Place ID. Searching Posts by Location: ", location)
-        Database.fetchAllPostWithLocation(location: location, distance: searchDistance) { (fetchedPosts) in
+        Database.fetchAllPostWithLocation(location: location, distance: searchDistance) { (fetchedPosts, fetchedPostIds) in
             print("Fetched Post with Location: \(location) : \(fetchedPosts.count) Posts")
             self.displayedPosts = fetchedPosts
             self.filterSortFetchedPosts()
@@ -597,7 +597,7 @@ class LocationController: UIViewController, UIScrollViewDelegate, UICollectionVi
     
     func fetchPostWithGooglePlaceID(googlePlaceID: String){
         print("Searching Posts by Google Place ID: ", googlePlaceID)
-        Database.fetchAllPostWithGooglePlaceID(googlePlaceId: googlePlaceID) { (fetchedPosts) in
+        Database.fetchAllPostWithGooglePlaceID(googlePlaceId: googlePlaceID) { (fetchedPosts, fetchedPostIds) in
             print("Fetching Post with googlePlaceId: \(googlePlaceID) : \(fetchedPosts.count) Posts")
             self.displayedPosts = fetchedPosts
             self.filterSortFetchedPosts()

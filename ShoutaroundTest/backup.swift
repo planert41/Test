@@ -190,7 +190,7 @@ class ExploreControllerbackup: UIViewController, UICollectionViewDelegate, UICol
         self.navigationController?.pushViewController(userProfileController, animated: true)
     }
     
-    func locationSelected(googlePlaceId: String?, googlePlaceLocation: CLLocation?, googlePlaceType: [String]?){
+    func locationSelected(googlePlaceId: String?, googlePlaceName: String?, googlePlaceLocation: CLLocation?, googlePlaceType: [String]?) {
         let locationController = LocationController()
         locationController.googlePlaceId = googlePlaceId
         navigationController?.pushViewController(locationController, animated: true)

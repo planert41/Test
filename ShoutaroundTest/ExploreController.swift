@@ -15,6 +15,8 @@ import EmptyDataSet_Swift
 
 class ExploreController: UICollectionViewController, UICollectionViewDelegateFlowLayout, UISearchBarDelegate, ListPhotoCellDelegate, SortFilterHeaderDelegate, FilterControllerDelegate, EmptyDataSetSource, EmptyDataSetDelegate, GridPhotoCellDelegate, RankViewHeaderDelegate, PostSearchControllerDelegate {
 
+    
+
 
     
     //INPUT
@@ -49,16 +51,13 @@ class ExploreController: UICollectionViewController, UICollectionViewDelegateFlo
         }
     }
     var filterCaption: String? = nil
-    var filterRange: String? = rankRangeDefault {
-        didSet{
-            if filterRange == nil {
-                filterRange = rankRangeDefault
-            }
-        }
-    }
-    var filterLocation: CLLocation? = nil
+    var filterRange: String? = nil
+    
     var filterLocationName: String? = nil
+    var filterLocation: CLLocation? = nil
     var filterGoogleLocationID: String? = nil
+    var filterGoogleLocationType: [String]? = []
+    
     var filterMinRating: Double = 0
     var filterType: String? = nil
     var filterMaxPrice: String? = nil
@@ -92,7 +91,7 @@ class ExploreController: UICollectionViewController, UICollectionViewDelegateFlo
         
         fetchPostIds()
         
-        NotificationCenter.default.addObserver(self, selector: #selector(fetchPosts), name: ExploreController.finishFetchingPostIdsNotificationName, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(fetchSortFilterPosts), name: ExploreController.finishFetchingPostIdsNotificationName, object: nil)
         
         NotificationCenter.default.addObserver(self, selector: #selector(handleRefresh), name: ExploreController.searchRefreshNotificationName, object: nil)
         
@@ -104,6 +103,18 @@ class ExploreController: UICollectionViewController, UICollectionViewDelegateFlo
         navigationItem.titleView = defaultSearchBar
         defaultSearchBar.delegate = self
         defaultSearchBar.placeholder = "Food, User, Location"
+        
+        // Fill in Default Search Bar Text
+        if isFiltering {
+            var searchTerm: String = ""
+            if filterCaption != nil {searchTerm += " \(filterCaption!)"}
+            if filterLocationName != nil {searchTerm += " @\(filterLocationName!)"}
+            if (filterRange != nil) {searchTerm += " Within \(filterRange!) Mi"}
+            if filterMaxPrice != nil {searchTerm += " \(filterMaxPrice!)"}
+            if filterType != nil {searchTerm += " \(filterType!)"}
+            defaultSearchBar.text = searchTerm
+        }
+        
         
         navigationItem.rightBarButtonItem = UIBarButtonItem(image: (isFiltering ? #imageLiteral(resourceName: "filterclear") : #imageLiteral(resourceName: "filter_unselected")).withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(openFilter))
     }
@@ -142,7 +153,7 @@ class ExploreController: UICollectionViewController, UICollectionViewDelegateFlo
         if (searchText.length == 0) {
             self.filterCaption = nil
             self.checkFilter()
-            self.refreshPostsForFilter()
+            self.handleRefresh()
             searchBar.endEditing(true)
         }
     }
@@ -155,7 +166,7 @@ class ExploreController: UICollectionViewController, UICollectionViewDelegateFlo
         
         let postSearch = PostSearchController()
         postSearch.delegate = self
-        postSearch.searchBar.text = self.filterCaption
+        postSearch.searchController.searchBar.text = self.filterCaption
         
         self.navigationController?.pushViewController(postSearch, animated: true)
         if index != nil {
@@ -187,16 +198,22 @@ class ExploreController: UICollectionViewController, UICollectionViewDelegateFlo
         self.navigationController?.pushViewController(userProfileController, animated: true)
     }
     
-    func locationSelected(googlePlaceId: String?, googlePlaceLocation: CLLocation?, googlePlaceType: [String]?){
-        let locationController = LocationController()
-        locationController.googlePlaceId = googlePlaceId
-        navigationController?.pushViewController(locationController, animated: true)
+
+    
+    func locationSelected(googlePlaceId: String?, googlePlaceName: String?, googlePlaceLocation: CLLocation?, googlePlaceType: [String]?) {
+        self.filterRange = nil
+        self.filterGoogleLocationID = googlePlaceId
+        self.filterLocation = googlePlaceLocation
+        self.filterLocationName = googlePlaceName
+        self.filterGoogleLocationType = googlePlaceType
+        self.refreshPostsForSearch()
+
     }
     
     
     // Post Fetching
     
-    func fetchPosts(){
+    func fetchSortFilterPosts(){
         Database.fetchAllPosts(fetchedPostIds: self.fetchedPostIds, completion: { (firebaseFetchedPosts) in
             self.displayedPosts = firebaseFetchedPosts
             self.filterSortFetchedPosts()
@@ -204,6 +221,7 @@ class ExploreController: UICollectionViewController, UICollectionViewDelegateFlo
     }
     
     func fetchPostIds(){
+        self.checkFilter()
         
         if filterLocation == nil && filterCaption == nil {
             // If No Filter Location and Caption, Fetch Top Posts by Social
@@ -213,7 +231,14 @@ class ExploreController: UICollectionViewController, UICollectionViewDelegateFlo
             fetchPostIdsByTag()
         } else if filterLocation != nil {
             // If has Filter Location, Pull all Post Id for Location
-            fetchPostIdsByLocation()
+            if (self.filterGoogleLocationType?.contains("establishment"))! {
+                // Selected Google Location is a restaurant, search posts by Restaurant
+                fetchPostIdsByRestaurant()
+            } else {
+                // Selected Google Location not a restaurant, search posts by Location with Range
+                fetchPostIdsByLocation()
+            }
+            
         }
     }
     
@@ -266,7 +291,54 @@ class ExploreController: UICollectionViewController, UICollectionViewDelegateFlo
     
     
     func fetchPostIdsByLocation(){
+        guard let location = self.filterLocation else {
+            print("Fetch Post ID By Location GPS: ERROR, No Location GPS")
+            return}
         
+        if (self.filterGoogleLocationType?.contains("establishment"))!{
+            print("Fetch Post ID By Location: ERROR, Is an Establishment")
+            return}
+        
+        var range: Double = 0
+        if (self.filterGoogleLocationType?.contains("locality"))! {
+            // Selected City, So range is 25 Miles
+            range = 25
+            self.filterRange = "25"
+        } else if (self.filterGoogleLocationType?.contains("neighbourhood"))! {
+            // Selected City, So range is 25 Miles
+            range = 5
+            self.filterRange = "5"
+        } else {
+            range = 5
+            self.filterRange = "5"
+        }
+        
+        Database.fetchAllPostWithLocation(location: location, distance: range) { (fetchedPosts, fetchedPostIds) in
+            self.fetchedPostIds = fetchedPostIds
+            self.displayedPosts = fetchedPosts
+            self.filterSortFetchedPosts()
+            print("Fetch Posts By Location: Success, Posts: \(self.displayedPosts.count), Range: \(range), Location: \(location.coordinate.latitude),\(location.coordinate.longitude)")
+        }
+        
+        
+    }
+    
+    func fetchPostIdsByRestaurant(){
+        guard let googlePlaceID = self.filterGoogleLocationID else {
+            print("Fetch Post ID By Restaurant: ERROR, No Google Place ID")
+            return}
+        
+        if !(self.filterGoogleLocationType?.contains("establishment"))!{
+            print("Fetch Post ID By Restaurant: ERROR, Not An Establishment")
+            return}
+        
+        Database.fetchAllPostWithGooglePlaceID(googlePlaceId: googlePlaceID) { (fetchedPosts, fetchedPostIds) in
+            
+            self.fetchedPostIds = fetchedPostIds
+            self.displayedPosts = fetchedPosts
+            self.filterSortFetchedPosts()
+            print("Fetch Posts By Location: Success, Posts: \(self.displayedPosts.count), Google Place Id: \(googlePlaceID)")
+        }
     }
     
     func filterSortFetchedPosts(){
@@ -303,10 +375,11 @@ class ExploreController: UICollectionViewController, UICollectionViewDelegateFlo
         self.collectionView?.refreshControl?.endRefreshing()
     }
     
-    func refreshPostsForFilter(){
+    func refreshPostsForSort(){
         print("Refresh Posts For Filter")
+        // Does not repull post ids, just resorts displayed posts
         self.displayedPosts = []
-        self.fetchPosts()
+        self.fetchSortFilterPosts()
         self.paginatePosts()
         self.collectionView?.refreshControl?.endRefreshing()
     }
@@ -320,8 +393,9 @@ class ExploreController: UICollectionViewController, UICollectionViewDelegateFlo
     func clearFilter(){
         self.filterLocation = nil
         self.filterLocationName = nil
-        self.filterRange = rankRangeDefault
+        self.filterRange = nil
         self.filterGoogleLocationID = nil
+        self.filterGoogleLocationType = []
         self.filterMinRating = 0
         self.filterType = nil
         self.filterMaxPrice = nil
@@ -363,11 +437,11 @@ class ExploreController: UICollectionViewController, UICollectionViewDelegateFlo
         self.checkFilter()
         
         // Refresh Everything
-        self.refreshPostsForFilter()
+        self.refreshPostsForSearch()
     }
     
     func checkFilter(){
-        if self.filterCaption != nil || (self.filterRange != nil) || (self.filterMinRating != 0) || (self.filterType != nil) || (self.filterMaxPrice != nil) {
+        if self.filterCaption != nil || (self.filterRange != nil) || (self.filterMinRating != 0) || (self.filterType != nil) || (self.filterMaxPrice != nil) || (self.filterLocation != nil) {
             self.isFiltering = true
         } else {
             self.isFiltering = false
@@ -384,10 +458,10 @@ class ExploreController: UICollectionViewController, UICollectionViewDelegateFlo
             DispatchQueue.main.asyncAfter(deadline: when) {
                 //Delay for 1 second to find current location
                 self.filterLocation = CurrentUser.currentLocation
-                self.refreshPostsForFilter()
+                self.refreshPostsForSort()
             }
         } else {
-            self.refreshPostsForFilter()
+            self.refreshPostsForSort()
         }
         
         print("Filter Sort is ", self.selectedHeaderSort)
@@ -474,8 +548,14 @@ class ExploreController: UICollectionViewController, UICollectionViewDelegateFlo
     
     override func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
         let header = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: listHeaderId, for: indexPath) as! RankViewHeader
-        
-        header.selectedRange = self.filterRange!
+//
+//        if self.filterRange == nil {
+//            header.selectedRange = globalRangeDefault
+//        } else {
+//            header.selectedRange = self.filterRange
+//        }
+        header.selectedLocation = self.filterLocation
+        header.selectedRange = self.filterRange
         header.selectedRank = self.selectedHeaderRank
         header.isListView = self.isListView
         header.delegate = self
@@ -626,6 +706,13 @@ class ExploreController: UICollectionViewController, UICollectionViewDelegateFlo
         let filterController = FilterController()
         filterController.delegate = self
         
+        if self.filterLocation != nil {
+            filterController.selectedLocation = self.filterLocation
+            filterController.selectedLocationName = self.filterLocationName
+            filterController.selectedGooglePlaceID = self.filterGoogleLocationID
+            filterController.selectedGooglePlaceType = self.filterGoogleLocationType
+        }
+        
         filterController.selectedRange = self.filterRange
         filterController.selectedMinRating = self.filterMinRating
         filterController.selectedMaxPrice = self.filterMaxPrice
@@ -637,10 +724,17 @@ class ExploreController: UICollectionViewController, UICollectionViewDelegateFlo
     }
     
     func headerRankSelected(rank: String) {
-        self.selectedHeaderRank = rank
-        self.clearAllPosts()
-        self.fetchPostIds()
-        print("Selected Rank is \(self.selectedHeaderRank), Refreshing")
+        
+        if !self.isFiltering {
+            // Not Filtering for anything, so Pull in Post Ids by top social rank
+            self.selectedHeaderRank = rank
+            self.clearAllPosts()
+            self.fetchPostIds()
+            print("Refreshing Post Ids for Rank: \(self.selectedHeaderRank), No Location")
+        } else {
+            // Filtered for something else, so just resorting posts based on social
+            self.refreshPostsForSort()
+        }
     }
     
     
