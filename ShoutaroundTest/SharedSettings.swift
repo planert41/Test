@@ -58,7 +58,7 @@ let defaultTime =  FilterSortTimeDefault[FilterSortTimeDefault.endIndex - 1]
 // Search Bar Defaults
 
 var searchBarPlaceholderText = "Search...."
-var searchScopeButtons = ["Posts","Users","Places"]
+var searchScopeButtons = ["Emojis","Places","Users"]
 
 
 

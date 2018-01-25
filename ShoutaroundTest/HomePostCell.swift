@@ -1509,13 +1509,13 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         addSubview(downVoteButton)
         addSubview(voteCount)
         
-        upVoteButton.anchor(top: voteView.topAnchor, left: voteView.leftAnchor, bottom: voteView.bottomAnchor, right: nil, paddingTop: 5, paddingLeft: 5, paddingBottom: 5, paddingRight: 0, width: 0, height: 0)
+        upVoteButton.anchor(top: voteView.topAnchor, left: nil, bottom: voteView.bottomAnchor, right: voteView.rightAnchor, paddingTop: 5, paddingLeft: 0, paddingBottom: 5, paddingRight: 5, width: 0, height: 0)
         upVoteButton.widthAnchor.constraint(equalTo: upVoteButton.heightAnchor, multiplier: 1).isActive = true
         
-        downVoteButton.anchor(top: voteView.topAnchor, left: nil, bottom: voteView.bottomAnchor, right: voteView.rightAnchor, paddingTop: 5, paddingLeft: 0, paddingBottom: 5, paddingRight: 5, width: 0, height: 0)
+        downVoteButton.anchor(top: voteView.topAnchor, left: voteView.leftAnchor, bottom: voteView.bottomAnchor, right: nil, paddingTop: 5, paddingLeft: 5, paddingBottom: 5, paddingRight: 0, width: 0, height: 0)
         downVoteButton.widthAnchor.constraint(equalTo: downVoteButton.heightAnchor, multiplier: 1).isActive = true
-        
-        voteCount.anchor(top: voteView.topAnchor, left: upVoteButton.rightAnchor, bottom: voteView.bottomAnchor, right: downVoteButton.leftAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
+
+        voteCount.anchor(top: voteView.topAnchor, left: downVoteButton.rightAnchor, bottom: voteView.bottomAnchor, right: upVoteButton.leftAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
         voteCount.sizeToFit()
         
     // Comments

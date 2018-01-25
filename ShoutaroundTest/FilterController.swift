@@ -13,7 +13,7 @@ import Cosmos
 
 
 protocol FilterControllerDelegate: class {
-    func filterControllerFinished(selectedCaption: String?, selectedRange: String?, selectedLocation: CLLocation?, selectedLocationName: String?, selectedMinRating: Double, selectedType: String?, selectedMaxPrice: String?, selectedSort: String)
+    func filterControllerFinished(selectedCaption: String?, selectedRange: String?, selectedLocation: CLLocation?, selectedLocationName: String?, selectedGooglePlaceId: String?, selectedGooglePlaceType: [String]?, selectedMinRating: Double, selectedType: String?, selectedMaxPrice: String?, selectedSort: String)
 }
 
 class FilterController: UIViewController, GMSAutocompleteViewControllerDelegate, PostSearchControllerDelegate, UISearchBarDelegate {
@@ -91,6 +91,7 @@ class FilterController: UIViewController, GMSAutocompleteViewControllerDelegate,
     weak var delegate: FilterControllerDelegate?
 
     var selectedGooglePlaceID: String? = nil
+    var selectedGooglePlaceType: [String]? = nil
     var selectedLocation: CLLocation? = nil {
         didSet{
             if selectedLocation == CurrentUser.currentLocation {
@@ -491,7 +492,7 @@ class FilterController: UIViewController, GMSAutocompleteViewControllerDelegate,
     
     func filterSelected(){
         
-        delegate?.filterControllerFinished(selectedCaption: self.selectedCaption, selectedRange: self.selectedRange, selectedLocation: self.selectedLocation, selectedLocationName: self.locationNameLabel.text, selectedMinRating: self.selectedMinRating, selectedType: self.selectedType, selectedMaxPrice: self.selectedMaxPrice, selectedSort: self.selectedSort)
+        delegate?.filterControllerFinished(selectedCaption: self.selectedCaption, selectedRange: self.selectedRange, selectedLocation: self.selectedLocation, selectedLocationName: self.locationNameLabel.text, selectedGooglePlaceId: self.selectedGooglePlaceID, selectedGooglePlaceType: self.selectedGooglePlaceType, selectedMinRating: self.selectedMinRating, selectedType: self.selectedType, selectedMaxPrice: self.selectedMaxPrice, selectedSort: self.selectedSort)
 
         print("Filter By ",self.selectedRange,self.selectedLocation, self.locationNameLabel.text, self.selectedMinRating, self.selectedType, self.selectedMaxPrice,  self.selectedSort)
 
@@ -567,7 +568,7 @@ class FilterController: UIViewController, GMSAutocompleteViewControllerDelegate,
 //        self.navigationController?.pushViewController(userProfileController, animated: true)
     }
     
-    func locationSelected(googlePlaceId: String?){
+    func locationSelected(googlePlaceId: String?, googlePlaceLocation: CLLocation?, googlePlaceType: [String]?){
 //        let locationController = LocationController()
 //        locationController.googlePlaceId = googlePlaceId
 //        navigationController?.pushViewController(locationController, animated: true)
@@ -588,6 +589,7 @@ class FilterController: UIViewController, GMSAutocompleteViewControllerDelegate,
         
         self.selectedLocation = CLLocation.init(latitude: place.coordinate.latitude, longitude: place.coordinate.longitude)
         self.selectedGooglePlaceID = place.placeID
+        self.selectedGooglePlaceType = place.types
         locationNameLabel.text = place.name
         
         // Auto Select Closest Distance (5 KM)

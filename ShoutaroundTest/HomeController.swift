@@ -17,7 +17,8 @@ import UIFontComplete
 
 
 
-class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLayout, HomePostCellDelegate, HomePostSearchDelegate, UIGestureRecognizerDelegate, FilterControllerDelegate, UISearchBarDelegate, SortFilterHeaderDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate, SharePhotoListControllerDelegate, PostSearchControllerDelegate, EmptyDataSetSource, EmptyDataSetDelegate {
+class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLayout, HomePostCellDelegate, UIGestureRecognizerDelegate, FilterControllerDelegate, UISearchBarDelegate, SortFilterHeaderDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate, SharePhotoListControllerDelegate, PostSearchControllerDelegate, EmptyDataSetSource, EmptyDataSetDelegate {
+    
 
     let cellId = "cellId"
     var scrolltoFirst: Bool = false
@@ -306,7 +307,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
 // Search Delegates
     
     
-    func filterControllerFinished(selectedCaption: String?, selectedRange: String?, selectedLocation: CLLocation?, selectedLocationName: String?, selectedMinRating: Double, selectedType: String?, selectedMaxPrice: String?, selectedSort: String){
+    func filterControllerFinished(selectedCaption: String?, selectedRange: String?, selectedLocation: CLLocation?, selectedLocationName: String?, selectedGooglePlaceId: String?, selectedGooglePlaceType: [String]?, selectedMinRating: Double, selectedType: String?, selectedMaxPrice: String?, selectedSort: String){
         
         // Clears all Filters, Puts in new Filters, Refreshes all Post IDS and Posts
         self.clearFilter()
@@ -359,7 +360,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         self.navigationController?.pushViewController(userProfileController, animated: true)
     }
     
-    func locationSelected(googlePlaceId: String?){
+    func locationSelected(googlePlaceId: String?, googlePlaceLocation: CLLocation?, googlePlaceType: [String]?){
         let locationController = LocationController()
         locationController.googlePlaceId = googlePlaceId
         navigationController?.pushViewController(locationController, animated: true)
@@ -691,7 +692,9 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
 
         // Search
         navigationItem.rightBarButtonItem = UIBarButtonItem(image: (isFiltering ? #imageLiteral(resourceName: "filterclear") : #imageLiteral(resourceName: "filter_unselected")).withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(openFilter))
-
+        
+        
+        
         //        navigationItem.titleView = defaultSearchBar
         //        defaultSearchBar.delegate = self
         //        defaultSearchBar.placeholder = "Food, User, Location"

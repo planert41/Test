@@ -13,27 +13,20 @@ import CoreLocation
 import EmptyDataSet_Swift
 
 
-class ListViewController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, ListPhotoCellDelegate, HomePostCellDelegate, ListHeaderDelegate, SortFilterHeaderDelegate, FilterControllerDelegate, EmptyDataSetSource, EmptyDataSetDelegate {
-
-
-    static let refreshListViewNotificationName = NSNotification.Name(rawValue: "RefreshListView")
-
-    let bookmarkCellId = "bookmarkCellId"
-    let homePostCellId = "homePostCellId"
-    let listHeaderId = "listHeaderId"
+class ExploreControllerbackup: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, UISearchBarDelegate, ListPhotoCellDelegate, SortFilterHeaderDelegate, FilterControllerDelegate, EmptyDataSetSource, EmptyDataSetDelegate, GridPhotoCellDelegate, RankViewHeaderDelegate, PostSearchControllerDelegate {
     
-    // Posts
+    static let refreshListViewNotificationName = NSNotification.Name(rawValue: "RefreshListView")
+    
     
     //INPUT
-    var displayListId: String? = nil
+    var fetchedPostIds: [PostId] = []
+    var displayedPosts: [Post] = []
     
-    //DISPLAY VARIABLES
-    var displayList: List? = nil
-    var fetchedPosts: [Post] = []
     
-// CollectionView Setup
+    // Navigation Bar
+    var defaultSearchBar = UISearchBar()
     
-    var isListView: Bool = true
+    // CollectionView Setup
     
     lazy var collectionView : UICollectionView = {
         let layout = UICollectionViewFlowLayout()
@@ -45,34 +38,22 @@ class ListViewController: UIViewController, UICollectionViewDelegate, UICollecti
         return cv
     }()
     
-    // Emoji description
+    var isListView: Bool = false
+    let bookmarkCellId = "bookmarkCellId"
+    let gridCellId = "gridCellId"
+    let listHeaderId = "listHeaderId"
     
-    let emojiDetailLabel: UILabel = {
-        let label = UILabel()
-        label.text = "Emojis"
-        label.font = UIFont.boldSystemFont(ofSize: 15)
-        label.textAlignment = NSTextAlignment.center
-        label.backgroundColor = UIColor.rgb(red: 255, green: 242, blue: 230)
-        label.layer.cornerRadius = 30/2
-        label.layer.borderWidth = 0.25
-        label.layer.borderColor = UIColor.black.cgColor
-        label.layer.masksToBounds = true
-        return label
-        
-    }()
-    
-    func setupEmojiDetailLabel(){
-        view.addSubview(emojiDetailLabel)
-        emojiDetailLabel.anchor(top: topLayoutGuide.bottomAnchor, left: nil, bottom: nil, right: nil, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 150, height: 25)
-        emojiDetailLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
-        emojiDetailLabel.isHidden = true
+    // Pagination Variables
+    var paginatePostsCount: Int = 0
+    var isFinishedPaging = false {
+        didSet{
+            if isFinishedPaging == true {
+                print("Finished Paging :", self.paginatePostsCount)
+            }
+        }
     }
     
-    func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        emojiDetailLabel.isHidden = true
-    }
-
-// Filtering Variables
+    // Filtering Variables
     
     var isFiltering: Bool = false
     var filterCaption: String? = nil
@@ -85,8 +66,16 @@ class ListViewController: UIViewController, UICollectionViewDelegate, UICollecti
     var filterMaxPrice: String? = nil
     
     // Header Sort Variables
-    // Default Sort is Most Recent Listed Date
-    var selectedHeaderSort:String? = defaultSort
+    
+    // Default Rank is Most Votes
+    var selectedHeaderRank:String = defaultRank
+    
+    // Default Sort is Most Recent Listed Date, But Set to Default Rank
+    var selectedHeaderSort:String? = defaultRank
+    
+    static let finishFetchingPostIdsNotificationName = NSNotification.Name(rawValue: "FinishFetchingPostIds")
+    static let searchRefreshNotificationName = NSNotification.Name(rawValue: "SearchRefresh")
+    
     
     
     override func viewDidLoad() {
@@ -94,88 +83,163 @@ class ListViewController: UIViewController, UICollectionViewDelegate, UICollecti
         view.backgroundColor = UIColor.white
         
         self.navigationController?.navigationBar.tintColor = UIColor.blue
-        self.navigationItem.title = displayList?.name
+        setupNavigationItems()
         setupCollectionView()
         
         view.addSubview(collectionView)
-        collectionView.anchor(top: view.topAnchor, left: view.leftAnchor, bottom: view.bottomAnchor, right: view.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
-
-        fetchListPosts()
+        collectionView.anchor(top: topLayoutGuide.bottomAnchor, left: view.leftAnchor, bottom: bottomLayoutGuide.topAnchor, right: view.rightAnchor, paddingTop: 50, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
         
-        NotificationCenter.default.addObserver(self, selector: #selector(handleRefresh), name: ListViewController.refreshListViewNotificationName, object: nil)
-
+        collectionView.backgroundColor = UIColor.blue
+        fetchRankedPostIds()
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(fetchPosts), name: ExploreController.finishFetchingPostIdsNotificationName, object: nil)
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(handleRefresh), name: ExploreController.searchRefreshNotificationName, object: nil)
+        
+    }
     
+    fileprivate func setupNavigationItems() {
+        
+        navigationController?.navigationBar.barTintColor = UIColor.legitColor()
+        navigationItem.titleView = defaultSearchBar
+        defaultSearchBar.delegate = self
+        defaultSearchBar.placeholder = "Food, User, Location"
+        
+        // Inbox
+        //        navigationItem.rightBarButtonItem = UIBarButtonItem(image: (isFiltering ? #imageLiteral(resourceName: "filterclear") : #imageLiteral(resourceName: "filter_unselected")).withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(openFilter))
+        navigationItem.rightBarButtonItem = UIBarButtonItem(image: (isFiltering ? #imageLiteral(resourceName: "filterclear") : #imageLiteral(resourceName: "filter_unselected")).withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(handleRefresh))
+        
     }
     
     func setupCollectionView(){
-    
-    collectionView.register(ListPhotoCell.self, forCellWithReuseIdentifier: bookmarkCellId)
-    collectionView.register(HomePostCell.self, forCellWithReuseIdentifier: homePostCellId)
-    collectionView.register(ListViewHeader.self, forSupplementaryViewOfKind: UICollectionElementKindSectionHeader, withReuseIdentifier: listHeaderId)
-    
-    collectionView.backgroundColor = .white
-    
-    let refreshControl = UIRefreshControl()
-    refreshControl.addTarget(self, action: #selector(handleRefresh), for: .valueChanged)
-    collectionView.refreshControl = refreshControl
-    collectionView.alwaysBounceVertical = true
-    collectionView.keyboardDismissMode = .onDrag
-    
-    // Adding Empty Data Set
-    collectionView.emptyDataSetSource = self
-    collectionView.emptyDataSetDelegate = self
-    
-    
+        
+        collectionView.register(ListPhotoCell.self, forCellWithReuseIdentifier: bookmarkCellId)
+        collectionView.register(GridPhotoCell.self, forCellWithReuseIdentifier: gridCellId)
+        
+        collectionView.register(RankViewHeader.self, forSupplementaryViewOfKind: UICollectionElementKindSectionHeader, withReuseIdentifier: listHeaderId)
+        
+        collectionView.backgroundColor = .white
+        //        collectionView.translatesAutoresizingMaskIntoConstraints = true
+        
+        let refreshControl = UIRefreshControl()
+        refreshControl.addTarget(self, action: #selector(handleRefresh), for: .valueChanged)
+        collectionView.refreshControl = refreshControl
+        collectionView.alwaysBounceVertical = true
+        collectionView.keyboardDismissMode = .onDrag
+        
+        
+        // Adding Empty Data Set
+        //        collectionView.emptyDataSetSource = self
+        //        collectionView.emptyDataSetDelegate = self
+        
+        //        collectionView.delegate = self
+        
+        
     }
     
-    func fetchListPosts(){
-        guard let displayListId = displayListId else {
-            print("Fetch Post for List: ERROR, No ListID")
-            return
+    // Setup for Geo Range Button, Dummy TextView and UIPicker
+    
+    func searchBarShouldBeginEditing(_ searchBar: UISearchBar) -> Bool {
+        self.openSearch(index: 0)
+        return false
+    }
+    
+    
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        if (searchText.length == 0) {
+            self.filterCaption = nil
+            self.checkFilter()
+            self.refreshPostsForFilter()
+            searchBar.endEditing(true)
+        }
+    }
+    
+    func openSearch(index: Int?){
+        
+        let postSearch = PostSearchController()
+        postSearch.delegate = self
+        
+        self.navigationController?.pushViewController(postSearch, animated: true)
+        if index != nil {
+            postSearch.selectedScope = index!
+            postSearch.searchController.searchBar.selectedScopeButtonIndex = index!
         }
         
-        if displayList == nil {
-            print("Fetch Post for List: No List, Pulling List for \(displayListId)")
-            Database.fetchListforSingleListId(listId: displayListId, completion: { (fetchedList) in
-                self.displayList = fetchedList
-                self.fetchPostFromList(list: self.displayList, completion: { (fetchedPosts) in
-                    if let fetchedPosts = fetchedPosts {
-                        self.fetchedPosts = fetchedPosts
-                    } else {
-                        self.fetchedPosts = []
-                    }
-                    self.filterSortFetchedPosts()
-                })
-            })
+    }
+    
+    // Home Post Search Delegates
+    
+    func filterCaptionSelected(searchedText: String?){
+        
+        if searchedText == nil {
+            self.handleRefresh()
+            
         } else {
-            self.fetchPostFromList(list: self.displayList, completion: { (fetchedPosts) in
-                print("Fetch Post for List: Success, Post Count: \(fetchedPosts?.count)")
-
-                if let fetchedPosts = fetchedPosts {
-                    self.fetchedPosts = fetchedPosts
-                } else {
-                    self.fetchedPosts = []
-                }
-                self.filterSortFetchedPosts()
-            })
+            print("Searching for \(searchedText)")
+            defaultSearchBar.text = searchedText!
+            self.filterCaption = searchedText
+            self.checkFilter()
+            self.refreshPostsForFilter()
+            
         }
+    }
+    
+    func userSelected(uid: String?){
+        let userProfileController = UserProfileController(collectionViewLayout: StickyHeadersCollectionViewFlowLayout())
+        userProfileController.userId = uid
+        self.navigationController?.pushViewController(userProfileController, animated: true)
+    }
+    
+    func locationSelected(googlePlaceId: String?, googlePlaceLocation: CLLocation?, googlePlaceType: [String]?){
+        let locationController = LocationController()
+        locationController.googlePlaceId = googlePlaceId
+        navigationController?.pushViewController(locationController, animated: true)
+    }
+    
+    
+    // Post Fetching
+    
+    func fetchPosts(){
+        Database.fetchAllPosts(fetchedPostIds: self.fetchedPostIds, completion: { (firebaseFetchedPosts) in
+            self.displayedPosts = firebaseFetchedPosts
+            self.filterSortFetchedPosts()
+        })
+    }
+    
+    func fetchRankedPostIds(){
+        print("Fetching Post Id By \(self.selectedHeaderRank)")
+        Database.fetchPostIDBySocialRank(firebaseRank: self.selectedHeaderRank, fetchLimit: 250) { (postIds) in
+            guard let postIds = postIds else {
+                print("Fetched Post Id By \(self.selectedHeaderRank) : Error, No Post Ids")
+                return
+            }
+            
+            print("Fetched Post Id By \(self.selectedHeaderRank) : Success, \(postIds.count) Post Ids")
+            
+            self.fetchedPostIds = postIds
+            NotificationCenter.default.post(name: ExploreController.finishFetchingPostIdsNotificationName, object: nil)
+        }
+    }
+    
+    func fetchCaptionSearchPostIds(){
         
     }
+    
     
     func filterSortFetchedPosts(){
         
         // Filter Posts
-        Database.filterPosts(inputPosts: self.fetchedPosts, filterCaption: self.filterCaption, filterRange: self.filterRange, filterLocation: self.filterLocation, filterMinRating: self.filterMinRating, filterType: self.filterType, filterMaxPrice: self.filterMaxPrice) { (filteredPosts) in
+        Database.filterPosts(inputPosts: self.displayedPosts, filterCaption: self.filterCaption, filterRange: self.filterRange, filterLocation: self.filterLocation, filterMinRating: self.filterMinRating, filterType: self.filterType, filterMaxPrice: self.filterMaxPrice) { (filteredPosts) in
             
             // Sort Posts
-            Database.sortPosts(inputPosts: filteredPosts, selectedSort: self.selectedHeaderSort, selectedLocation: self.filterLocation, completion: { (filteredPosts) in
+            Database.sortPosts(inputPosts: filteredPosts, selectedSort: self.selectedHeaderRank, selectedLocation: self.filterLocation, completion: { (filteredPosts) in
                 
-                self.fetchedPosts = []
+                self.displayedPosts = []
                 if filteredPosts != nil {
-                    self.fetchedPosts = filteredPosts!
+                    self.displayedPosts = filteredPosts!
                 }
-                print("Finish Filter and Sorting Post")
-                self.collectionView.reloadData()
+                print("Finish Filter and Sorting Post, \(self.displayedPosts.count) Posts")
+                self.paginatePosts()
             })
         }
     }
@@ -185,24 +249,25 @@ class ListViewController: UIViewController, UICollectionViewDelegate, UICollecti
     
     func handleRefresh(){
         print("Refresh List")
-        self.clearAllPost()
-        self.clearFilter()
+        //        self.clearAllPosts()
+        //        self.clearFilter()
+        //        self.fetchRankedPostIds()
         self.collectionView.reloadData()
-        self.fetchListPosts()
         self.collectionView.refreshControl?.endRefreshing()
     }
     
     func refreshPostsForFilter(){
-        self.clearAllPost()
-        self.collectionView.reloadData()
-        self.fetchListPosts()
+        self.displayedPosts = []
+        self.fetchPosts()
+        self.paginatePosts()
         self.collectionView.refreshControl?.endRefreshing()
     }
     
     
-    func clearAllPost(){
-        self.displayList = nil
-        self.fetchedPosts = []
+    func clearAllPosts(){
+        self.fetchedPostIds = []
+        self.displayedPosts = []
+        self.refreshPagination()
     }
     
     
@@ -214,8 +279,15 @@ class ListViewController: UIViewController, UICollectionViewDelegate, UICollecti
         self.filterMinRating = 0
         self.filterType = nil
         self.filterMaxPrice = nil
+        
+        self.selectedHeaderRank = defaultRank
         self.selectedHeaderSort = defaultSort
         self.isFiltering = false
+    }
+    
+    func refreshPagination(){
+        self.isFinishedPaging = false
+        self.paginatePostsCount = 0
     }
     
     func fetchPostFromList(list: List?, completion: @escaping ([Post]?) -> ()){
@@ -251,7 +323,7 @@ class ListViewController: UIViewController, UICollectionViewDelegate, UICollecti
                     Database.DeletePostForList(postId: postId, listId: list.id, postCreationDate: nil)
                     thisGroup.leave()
                 }
-            
+                
             })
         }
         
@@ -266,14 +338,12 @@ class ListViewController: UIViewController, UICollectionViewDelegate, UICollecti
         }
         
     }
-
+    
     // Search Delegates
     
     
-    
-    
-    func filterControllerFinished(selectedCaption: String?, selectedRange: String?, selectedLocation: CLLocation?, selectedLocationName: String?, selectedGooglePlaceId: String?, selectedGooglePlaceType: [String]?, selectedMinRating: Double, selectedType: String?, selectedMaxPrice: String?, selectedSort: String) {
-
+    func filterControllerFinished(selectedCaption: String?, selectedRange: String?, selectedLocation: CLLocation?, selectedLocationName: String?, selectedGooglePlaceId: String?, selectedGooglePlaceType: [String]?, selectedMinRating: Double, selectedType: String?, selectedMaxPrice: String?, selectedSort: String){
+        
         // Clears all Filters, Puts in new Filters, Refreshes all Post IDS and Posts
         
         self.clearFilter()
@@ -323,10 +393,25 @@ class ListViewController: UIViewController, UICollectionViewDelegate, UICollecti
         print("Filter Sort is ", self.selectedHeaderSort)
     }
     
+    // Pagination
+    
+    func paginatePosts(){
+        
+        let paginateFetchPostSize = 4
+        
+        self.paginatePostsCount = min(self.paginatePostsCount + paginateFetchPostSize, self.displayedPosts.count)
+        print("Home Paginate \(self.paginatePostsCount) : \(self.displayedPosts.count)")
+        
+        if self.paginatePostsCount == self.displayedPosts.count {
+            self.isFinishedPaging = true
+        } else {
+            self.isFinishedPaging = false
+        }
+        self.collectionView.reloadData()
+        
+    }
     
     
-    
-
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat {
         return 1
@@ -340,53 +425,58 @@ class ListViewController: UIViewController, UICollectionViewDelegate, UICollecti
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         
         if isListView {
+            // List View Size
             return CGSize(width: view.frame.width, height: 120)
         } else {
-            var height: CGFloat = 40 + 8 + 8 //username userprofileimageview
-            height += view.frame.width  // Picture
-            height += 50    // Location View
-            height += 60    // Action Bar
-            height += 20    // Social Counts
-            height += 20    // Caption
-            
-            return CGSize(width: view.frame.width, height: height)
+            // Grid View Size
+            let width = (view.frame.width - 2) / 3
+            return CGSize(width: width, height: width)
         }
     }
     
     
-     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         
-        return fetchedPosts.count
+        return paginatePostsCount
     }
     
-     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+    func numberOfSections(in collectionView: UICollectionView) -> Int {
+        return 1
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         
-        var displayPost = fetchedPosts[indexPath.item]
+        var displayPost = displayedPosts[indexPath.item]
+        
+        if indexPath.item == self.paginatePostsCount - 1 && !isFinishedPaging{
+            print("CollectionView Paginate")
+            paginatePosts()
+        }
         
         if isListView {
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: bookmarkCellId, for: indexPath) as! ListPhotoCell
             cell.delegate = self
-            cell.bookmarkDate = displayPost.listedDate
             cell.post = displayPost
             
             return cell
         } else {
-            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: homePostCellId, for: indexPath) as! HomePostCell
+            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: gridCellId, for: indexPath) as! GridPhotoCell
             cell.delegate = self
             cell.post = displayPost
             return cell
         }
     }
     
-     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         //print(displayedPosts[indexPath.item])
     }
     
     // SORT FILTER HEADER
     
-     func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
-        let header = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: listHeaderId, for: indexPath) as! ListViewHeader
-        header.isFiltering = self.isFiltering
+    func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
+        let header = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: listHeaderId, for: indexPath) as! RankViewHeader
+        
+        header.selectedRank = self.selectedHeaderRank
         header.isListView = self.isListView
         header.delegate = self
         return header
@@ -430,11 +520,11 @@ class ListViewController: UIViewController, UICollectionViewDelegate, UICollecti
         var font: UIFont?
         var textColor: UIColor?
         
-//        if isFiltering {
-//            text = "Try Something Further or Ramen"
-//        } else {
-//            text = "Fill Up Your List!"
-//        }
+        //        if isFiltering {
+        //            text = "Try Something Further or Ramen"
+        //        } else {
+        //            text = "Fill Up Your List!"
+        //        }
         
         
         font = UIFont.boldSystemFont(ofSize: 13.0)
@@ -494,7 +584,7 @@ class ListViewController: UIViewController, UICollectionViewDelegate, UICollecti
     
     func emptyDataSet(_ scrollView: UIScrollView, didTapButton button: UIButton) {
         if isFiltering {
-             self.openFilter()
+            self.openFilter()
         } else {
             // Returns To Home Tab
             self.tabBarController?.selectedIndex = 0
@@ -505,10 +595,10 @@ class ListViewController: UIViewController, UICollectionViewDelegate, UICollecti
         self.handleRefresh()
     }
     
-//    func verticalOffset(forEmptyDataSet scrollView: UIScrollView) -> CGFloat {
-//        let offset = (self.collectionView.frame.height) / 5
-//        return -50
-//    }
+    //    func verticalOffset(forEmptyDataSet scrollView: UIScrollView) -> CGFloat {
+    //        let offset = (self.collectionView.frame.height) / 5
+    //        return -50
+    //    }
     
     func spaceHeight(forEmptyDataSet scrollView: UIScrollView) -> CGFloat {
         return 9
@@ -519,12 +609,13 @@ class ListViewController: UIViewController, UICollectionViewDelegate, UICollecti
     
     
     // List Header Delegate
+    
     func didChangeToListView(){
         self.isListView = true
         collectionView.reloadData()
     }
     
-    func didChangeToPostView() {
+    func didChangeToGridView() {
         self.isListView = false
         collectionView.reloadData()
     }
@@ -543,7 +634,14 @@ class ListViewController: UIViewController, UICollectionViewDelegate, UICollecti
         self.navigationController?.pushViewController(filterController, animated: true)
     }
     
-
+    func headerRankSelected(rank: String) {
+        self.selectedHeaderRank = rank
+        self.clearAllPosts()
+        self.fetchRankedPostIds()
+        print("Selected Rank is \(self.selectedHeaderRank), Refreshing")
+    }
+    
+    
     // HOME POST CELL DELEGATE METHODS
     
     func didTapBookmark(post: Post) {
@@ -590,7 +688,7 @@ class ListViewController: UIViewController, UICollectionViewDelegate, UICollecti
     }
     
     func refreshPost(post: Post) {
-        let index = fetchedPosts.index { (fetchedPost) -> Bool in
+        let index = displayedPosts.index { (fetchedPost) -> Bool in
             fetchedPost.id == post.id
         }
         
@@ -661,12 +759,12 @@ class ListViewController: UIViewController, UICollectionViewDelegate, UICollecti
         deleteAlert.addAction(UIAlertAction(title: "Ok", style: .default, handler: { (action: UIAlertAction!) in
             
             // Remove from Current View
-            let index = self.fetchedPosts.index { (filteredpost) -> Bool in
+            let index = self.displayedPosts.index { (filteredpost) -> Bool in
                 filteredpost.id  == post.id
             }
             
             let filteredindexpath = IndexPath(row:index!, section: 0)
-            self.fetchedPosts.remove(at: index!)
+            self.displayedPosts.remove(at: index!)
             self.collectionView.deleteItems(at: [filteredindexpath])
             Database.deletePost(post: post)
         }))
@@ -678,18 +776,14 @@ class ListViewController: UIViewController, UICollectionViewDelegate, UICollecti
         
     }
     
-    func displaySelectedEmoji(emoji: String, emojitag: String) {
-        
-        emojiDetailLabel.text = emoji + " " + emojitag
-        emojiDetailLabel.isHidden = false
-        
-    }
     
     
     
     
     
     
-
+    
 }
+
+
 

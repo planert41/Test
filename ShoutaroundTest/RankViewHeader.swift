@@ -39,7 +39,7 @@ class RankViewHeader: UICollectionViewCell, UIGestureRecognizerDelegate, UIPicke
     var selectedRank: String = defaultRank {
         didSet{
             headerSortSegment.selectedSegmentIndex = rankSortOptions.index(of: selectedRank)!
-            rankLabel.text = "Top 250 By \(self.selectedRank)"
+            rankLabel.text = "Top By \(self.selectedRank)"
             rankLabel.adjustsFontSizeToFitWidth = true
         }
     }

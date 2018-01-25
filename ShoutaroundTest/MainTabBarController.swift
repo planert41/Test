@@ -34,6 +34,12 @@ class MainTabBarController: UITabBarController, UITabBarControllerDelegate, UIIm
             // Reselected Home Controller refresh
         }
 
+        if index == 1 && index == self.selectedTabBarIndex {
+            print("Double Click Home Tab Bar, Refreshing")
+            NotificationCenter.default.post(name: ExploreController.searchRefreshNotificationName, object: nil)
+            // Reselected Search Controller refresh
+        }
+        
         selectedTabBarIndex = index
     }
     
@@ -240,17 +246,12 @@ class MainTabBarController: UITabBarController, UITabBarControllerDelegate, UIIm
 //        let searchNavController = templateNavController(unselectedImage: #imageLiteral(resourceName: "search_unselected"), selectedImage: #imageLiteral(resourceName: "search_selected"), rootViewController: UserSearchController(collectionViewLayout: UICollectionViewFlowLayout()))
 //        let searchNavController = templateNavController(unselectedImage: #imageLiteral(resourceName: "search_unselected"), selectedImage: #imageLiteral(resourceName: "search_selected"), rootViewController: ExploreController())
         
-        let searchNavController = templateNavController(unselectedImage: #imageLiteral(resourceName: "search_unselected"), selectedImage: #imageLiteral(resourceName: "search_selected"), rootViewController: ExploreController())
+        let searchNavController = templateNavController(unselectedImage: #imageLiteral(resourceName: "search_unselected"), selectedImage: #imageLiteral(resourceName: "search_selected"), rootViewController: ExploreController(collectionViewLayout: UICollectionViewFlowLayout()))
 
+        
+        
         let plusNavController = templateNavController(unselectedImage: #imageLiteral(resourceName: "plus_unselected"), selectedImage: #imageLiteral(resourceName: "plus_unselected"))
         
-        let likeNavController = templateNavController(unselectedImage: #imageLiteral(resourceName: "like_unselected"), selectedImage: #imageLiteral(resourceName: "like_selected"), rootViewController:  BookMarkController())
-        
-        //Bookmark
-        
-//        let bookmarkLayout = UICollectionViewFlowLayout()
-//        let bookmarkController = BookMarkController()
-//        let bookmarkNavController = UINavigationController(rootViewController: bookmarkController)
         
         //Lists
         let tabListController = TabListViewController()

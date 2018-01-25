@@ -812,6 +812,39 @@ extension Database{
         }
     }
     
+    static func fetchAllPostIDWithTag(emojiTag: String, completion: @escaping ([PostId]) -> ()) {
+        
+        let myGroup = DispatchGroup()
+        var fetchedPostIds = [] as [PostId]
+        
+        
+        
+        
+        let ref = Database.database().reference().child("userposts")
+        ref.observeSingleEvent(of: .value, with: {(snapshot) in
+            
+            guard let userposts = snapshot.value as? [String: Any] else {return}
+            userposts.forEach({ (key,value) in
+                myGroup.enter()
+                //                print("Key \(key), Value: \(value)")
+                
+                let dictionary = value as? [String: Any]
+                let secondsFrom1970 = dictionary?["creationDate"] as? Double ?? 0
+                let emoji = dictionary?["emoji"] as? String ?? ""
+                
+                let tempID = PostId.init(id: key, creatorUID: nil, sort: nil)
+                fetchedPostIds.append(tempID)
+                myGroup.leave()
+            })
+            
+            myGroup.notify(queue: .main) {
+                completion(fetchedPostIds)
+            }
+        })
+    }
+    
+    
+    
     static func fetchAllPosts(fetchedPostIds: [PostId], completion: @escaping ([Post])-> ()){
         
         let thisGroup = DispatchGroup()

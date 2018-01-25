@@ -714,8 +714,8 @@ class LocationController: UIViewController, UIScrollViewDelegate, UICollectionVi
     // Search Delegates
     
     
-    func filterControllerFinished(selectedCaption: String?, selectedRange: String?, selectedLocation: CLLocation?, selectedLocationName: String?, selectedMinRating: Double, selectedType: String?, selectedMaxPrice: String?, selectedSort: String){
-        
+    func filterControllerFinished(selectedCaption: String?, selectedRange: String?, selectedLocation: CLLocation?, selectedLocationName: String?, selectedGooglePlaceId: String?, selectedGooglePlaceType: [String]?, selectedMinRating: Double, selectedType: String?, selectedMaxPrice: String?, selectedSort: String){
+
         // Clears all Filters, Puts in new Filters, Refreshes all Post IDS and Posts
         
         

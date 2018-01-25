@@ -11,7 +11,9 @@ import Firebase
 import FBSDKLoginKit
 import CoreLocation
 
-class UserProfileController: UICollectionViewController, UICollectionViewDelegateFlowLayout, UserProfileHeaderDelegate, HomePostCellDelegate,ListPhotoCellDelegate, GridPhotoCellDelegate, UISearchBarDelegate, HomePostSearchDelegate, FilterControllerDelegate, UISearchControllerDelegate, UIGestureRecognizerDelegate{
+class UserProfileController: UICollectionViewController, UICollectionViewDelegateFlowLayout, UserProfileHeaderDelegate, HomePostCellDelegate,ListPhotoCellDelegate, GridPhotoCellDelegate, UISearchBarDelegate, PostSearchControllerDelegate, FilterControllerDelegate, UISearchControllerDelegate, UIGestureRecognizerDelegate{
+
+    
     
     let cellId = "cellId"
     let homePostCellId = "homePostCellId"
@@ -146,7 +148,7 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
     
     fileprivate func setupSearchController(){
         
-        let homePostSearchResults = HomePostSearch()
+        let homePostSearchResults = PostSearchController()
         homePostSearchResults.delegate = self
         resultSearchController = UISearchController(searchResultsController: homePostSearchResults)
         resultSearchController?.searchResultsUpdater = homePostSearchResults
@@ -502,13 +504,13 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
         
     }
     
-    func locationSelected(googlePlaceId: String?){
+    func locationSelected(googlePlaceId: String?, googlePlaceLocation: CLLocation?, googlePlaceType: [String]?) {
         
     }
     
 // Filter Delegate
     
-    func filterControllerFinished(selectedCaption: String?, selectedRange: String?, selectedLocation: CLLocation?, selectedLocationName: String?, selectedMinRating: Double, selectedType: String?, selectedMaxPrice: String?, selectedSort: String) {
+    func filterControllerFinished(selectedCaption: String?, selectedRange: String?, selectedLocation: CLLocation?, selectedLocationName: String?, selectedGooglePlaceId: String?, selectedGooglePlaceType: [String]?, selectedMinRating: Double, selectedType: String?, selectedMaxPrice: String?, selectedSort: String) {
 
         self.filterCaption = selectedCaption
         self.filterRange = selectedRange!

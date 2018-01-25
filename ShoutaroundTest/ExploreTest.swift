@@ -14,9 +14,8 @@ import GeoFire
 import CoreGraphics
 import CoreLocation
 
-class ExploreControllerOLD: UIViewController, UISearchBarDelegate, HomePostSearchDelegate, UISearchControllerDelegate, FilterControllerDelegate, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, GridPhotoCellDelegate, UIPickerViewDelegate, UIPickerViewDataSource {
-    
-    
+class ExploreControllerOLD: UIViewController, UISearchBarDelegate, UISearchControllerDelegate, FilterControllerDelegate, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, GridPhotoCellDelegate, UIPickerViewDelegate, UIPickerViewDataSource {
+
     // CollectionView Variables
     
     let cellId = "cellId"
@@ -380,8 +379,8 @@ class ExploreControllerOLD: UIViewController, UISearchBarDelegate, HomePostSearc
     
     fileprivate func setupNavigationItems(){
         
-        let homePostSearchResults = HomePostSearch()
-        homePostSearchResults.delegate = self
+        let homePostSearchResults = PostSearchController()
+//        homePostSearchResults.delegate = self
         resultSearchController = UISearchController(searchResultsController: homePostSearchResults)
         resultSearchController?.searchResultsUpdater = homePostSearchResults
         resultSearchController?.delegate = self
@@ -468,8 +467,9 @@ class ExploreControllerOLD: UIViewController, UISearchBarDelegate, HomePostSearc
         
     }
     
-    func filterControllerFinished(selectedCaption: String?, selectedRange: String?, selectedLocation: CLLocation?, selectedLocationName: String?, selectedMinRating: Double, selectedType: String?, selectedMaxPrice: String?, selectedSort: String) {
-        print("Filter by Range: \(self.filterRange) at \(self.filterLocation), Group: \(self.filterGroup), Time: \(self.filterTime)")
+    
+    func filterControllerFinished(selectedCaption: String?, selectedRange: String?, selectedLocation: CLLocation?, selectedLocationName: String?, selectedGooglePlaceId: String?, selectedGooglePlaceType: [String]?, selectedMinRating: Double, selectedType: String?, selectedMaxPrice: String?, selectedSort: String) {
+       print("Filter by Range: \(self.filterRange) at \(self.filterLocation), Group: \(self.filterGroup), Time: \(self.filterTime)")
         
         self.filterCaption = selectedCaption
         self.filterLocation = selectedLocation
