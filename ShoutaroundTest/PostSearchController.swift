@@ -339,8 +339,7 @@ class PostSearchController : UITableViewController, UISearchResultsUpdating, UIS
         } else {
             self.delegate?.filterCaptionSelected(searchedText: nil)
         }
-        self.dismiss(animated: true) {
-        }
+        self.navigationController?.popViewController(animated: true)
     }
     
     func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {

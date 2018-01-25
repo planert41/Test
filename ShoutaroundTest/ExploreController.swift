@@ -35,16 +35,27 @@ class ExploreController: UICollectionViewController, UICollectionViewDelegateFlo
     var isFinishedPaging = false {
         didSet{
             if isFinishedPaging == true {
-                print("Finished Paging :", self.paginatePostsCount)
+//                print("Finished Paging :", self.paginatePostsCount)
             }
         }
     }
     
     // Filtering Variables
     
-    var isFiltering: Bool = false
+    var isFiltering: Bool = false {
+        didSet {
+            // Adjust Filter Button
+            setupNavigationItems()
+        }
+    }
     var filterCaption: String? = nil
-    var filterRange: String? = nil
+    var filterRange: String? = rankRangeDefault {
+        didSet{
+            if filterRange == nil {
+                filterRange = rankRangeDefault
+            }
+        }
+    }
     var filterLocation: CLLocation? = nil
     var filterLocationName: String? = nil
     var filterGoogleLocationID: String? = nil
@@ -136,11 +147,15 @@ class ExploreController: UICollectionViewController, UICollectionViewDelegateFlo
         }
     }
     
-   
+//    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+//        self.fetchCaptionSearchPostIds()
+//    }
+//
     func openSearch(index: Int?){
         
         let postSearch = PostSearchController()
         postSearch.delegate = self
+        postSearch.searchBar.text = self.filterCaption
         
         self.navigationController?.pushViewController(postSearch, animated: true)
         if index != nil {
@@ -162,7 +177,7 @@ class ExploreController: UICollectionViewController, UICollectionViewDelegateFlo
             defaultSearchBar.text = searchedText!
             self.filterCaption = searchedText
             self.checkFilter()
-            self.refreshPostsForFilter()
+            self.refreshPostsForSearch()
         }
     }
     
@@ -191,13 +206,18 @@ class ExploreController: UICollectionViewController, UICollectionViewDelegateFlo
     func fetchPostIds(){
         
         if filterLocation == nil && filterCaption == nil {
-            fetchRankedPostIds()
+            // If No Filter Location and Caption, Fetch Top Posts by Social
+            fetchPostIdsBySocialRank()
         } else if filterCaption != nil && filterLocation == nil {
-            fetchCaptionSearchPostIds()
+            // If has Filter Caption, Fetch All Posts with Emoji Tags
+            fetchPostIdsByTag()
+        } else if filterLocation != nil {
+            // If has Filter Location, Pull all Post Id for Location
+            fetchPostIdsByLocation()
         }
     }
     
-    func fetchRankedPostIds(){
+    func fetchPostIdsBySocialRank(){
         print("Fetching Post Id By \(self.selectedHeaderRank)")
         Database.fetchPostIDBySocialRank(firebaseRank: self.selectedHeaderRank, fetchLimit: 250) { (postIds) in
             guard let postIds = postIds else {
@@ -210,19 +230,44 @@ class ExploreController: UICollectionViewController, UICollectionViewDelegateFlo
         }
     }
     
-    func fetchCaptionSearchPostIds(){
+    func fetchPostIdsByTag(){
+        
         guard let searchText = self.filterCaption else {return}
-        // Split words up 
-        if searchText.isEmptyOrWhitespace() {
-            print("Search Post Id: ERROR, Search Text is empty")
-            return
+
+        Database.translateToEmojiArray(stringInput: searchText) { (emojiTags) in
+            guard let emojiTags = emojiTags else {
+                print("Search Post With Emoji Tags: ERROR, No Emoji Tags")
+                return
+            }
+            
+            var tempPostIds: [PostId] = []
+            let myGroup = DispatchGroup()
+
+            for emoji in emojiTags {
+                if !emoji.isEmptyOrWhitespace(){
+                    myGroup.enter()
+                    Database.fetchAllPostIDWithTag(emojiTag: emoji, completion: { (fetchedPostIds) in
+                        myGroup.leave()
+                        print("\(emoji): \((fetchedPostIds?.count)!) Posts")
+                        if let fetchedPostIds = fetchedPostIds {
+                            tempPostIds = tempPostIds + fetchedPostIds
+                        }
+                    })
+                }
+            }
+            
+            myGroup.notify(queue: .main) {
+                print("\(emojiTags) Fetched Total \(tempPostIds.count) Posts")
+                self.fetchedPostIds = tempPostIds
+                NotificationCenter.default.post(name: ExploreController.finishFetchingPostIdsNotificationName, object: nil)
+            }
         }
-        
-        var tempSearchText = searchText.components(separatedBy: " ")
-        print(tempSearchText)
-        
     }
     
+    
+    func fetchPostIdsByLocation(){
+        
+    }
     
     func filterSortFetchedPosts(){
         
@@ -236,7 +281,7 @@ class ExploreController: UICollectionViewController, UICollectionViewDelegateFlo
                 if filteredPosts != nil {
                     self.displayedPosts = filteredPosts!
                 }
-                print("Finish Filter and Sorting Post, \(self.displayedPosts.count) Posts")
+                print("Filter Sort Post: Success: \(self.displayedPosts.count) Posts")
                 self.paginatePosts()
             })
         }
@@ -247,7 +292,14 @@ class ExploreController: UICollectionViewController, UICollectionViewDelegateFlo
         print("Refresh All")
         self.clearAllPosts()
         self.clearFilter()
-        self.fetchRankedPostIds()
+        self.fetchPostIds()
+        self.collectionView?.refreshControl?.endRefreshing()
+    }
+    
+    func refreshPostsForSearch(){
+        print("Refresh Posts For New Search")
+        self.clearAllPosts()
+        self.fetchPostIds()
         self.collectionView?.refreshControl?.endRefreshing()
     }
     
@@ -268,7 +320,7 @@ class ExploreController: UICollectionViewController, UICollectionViewDelegateFlo
     func clearFilter(){
         self.filterLocation = nil
         self.filterLocationName = nil
-        self.filterRange = nil
+        self.filterRange = rankRangeDefault
         self.filterGoogleLocationID = nil
         self.filterMinRating = 0
         self.filterType = nil
@@ -287,55 +339,6 @@ class ExploreController: UICollectionViewController, UICollectionViewDelegateFlo
         self.paginatePostsCount = 0
     }
     
-    func fetchPostFromList(list: List?, completion: @escaping ([Post]?) -> ()){
-        
-        guard let list = list else {
-            print("Fetch Post from List: ERROR, No List")
-            completion(nil)
-            return
-        }
-        
-        let thisGroup = DispatchGroup()
-        var tempPosts: [Post] = []
-        
-        for (postId,postListDate) in list.postIds! {
-            thisGroup.enter()
-            
-            Database.fetchPostWithPostID(postId: postId, completion: { (fetchedPost, error) in
-                if let error = error {
-                    print("Fetch Post: ERROR, \(postId)", error)
-                    return
-                }
-                
-                // Work around to handle if listed post was deleted
-                if let fetchedPost = fetchedPost {
-                    var tempDate = postListDate as! Double
-                    var tempPost = fetchedPost
-                    let listDate = Date(timeIntervalSince1970: tempDate)
-                    tempPost.listedDate = listDate
-                    tempPosts.append(tempPost)
-                    thisGroup.leave()
-                } else {
-                    print("Fetch Post: ERROR, \(postId), No Post, Will Delete from List")
-                    Database.DeletePostForList(postId: postId, listId: list.id, postCreationDate: nil)
-                    thisGroup.leave()
-                }
-                
-            })
-        }
-        
-        thisGroup.notify(queue: .main) {
-            print("Fetched \(tempPosts.count) Post for List: \(list.id)")
-            
-            // Initial Sort by Listed Dates
-            tempPosts.sort(by: { (p1, p2) -> Bool in
-                return p1.listedDate?.compare((p2.listedDate)!) == .orderedDescending
-            })
-            completion(tempPosts)
-        }
-        
-    }
-    
     // Search Delegates
     
     
@@ -346,7 +349,7 @@ class ExploreController: UICollectionViewController, UICollectionViewDelegateFlo
         self.clearFilter()
         
         self.filterCaption = selectedCaption
-        self.filterRange = selectedRange
+        self.filterRange = selectedRange!
         self.filterLocation = selectedLocation
         self.filterLocationName = selectedLocationName
         
@@ -405,7 +408,8 @@ class ExploreController: UICollectionViewController, UICollectionViewDelegateFlo
         }
         
         print("Home Paginate \(self.paginatePostsCount) : \(self.displayedPosts.count), Finished Paging: \(self.isFinishedPaging)")
-
+        
+        // NEED TO RELOAD ON MAIN THREAD OR WILL CRASH COLLECTIONVIEW
         DispatchQueue.main.async(execute: { self.collectionView?.reloadData() })
 
     }
@@ -436,7 +440,6 @@ class ExploreController: UICollectionViewController, UICollectionViewDelegateFlo
     
     override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         
-        print("number items: \(self.paginatePostsCount)")
         return self.paginatePostsCount
     }
     
@@ -472,6 +475,7 @@ class ExploreController: UICollectionViewController, UICollectionViewDelegateFlo
     override func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
         let header = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: listHeaderId, for: indexPath) as! RankViewHeader
         
+        header.selectedRange = self.filterRange!
         header.selectedRank = self.selectedHeaderRank
         header.isListView = self.isListView
         header.delegate = self
@@ -480,7 +484,6 @@ class ExploreController: UICollectionViewController, UICollectionViewDelegateFlo
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
-        print(view.frame.width)
         return CGSize(width: 150, height: 30 + 5 + 5)
 
 //        return CGSize(width: view.frame.width, height: 30 + 5 + 5)
@@ -636,7 +639,7 @@ class ExploreController: UICollectionViewController, UICollectionViewDelegateFlo
     func headerRankSelected(rank: String) {
         self.selectedHeaderRank = rank
         self.clearAllPosts()
-        self.fetchRankedPostIds()
+        self.fetchPostIds()
         print("Selected Rank is \(self.selectedHeaderRank), Refreshing")
     }
     

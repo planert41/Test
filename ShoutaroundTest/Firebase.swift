@@ -812,15 +812,18 @@ extension Database{
         }
     }
     
-    static func fetchAllPostIDWithTag(emojiTag: String, completion: @escaping ([PostId]) -> ()) {
+    static func fetchAllPostIDWithTag(emojiTag: String, completion: @escaping ([PostId]?) -> ()) {
         
         let myGroup = DispatchGroup()
         var fetchedPostIds = [] as [PostId]
         
         let ref = Database.database().reference().child("post_tags").child(emojiTag)
+
         ref.observeSingleEvent(of: .value, with: {(snapshot) in
-            
-            guard let tag = snapshot.value as? [String: Any] else {return}
+            guard let tag = snapshot.value as? [String: Any] else {
+                print("Fetch Post for EmojiTag \(emojiTag): Nil Results")
+                completion(nil)
+                return}
             guard let taggedPosts = tag["posts"] as? [String] else {return}
             
             taggedPosts.forEach({ (key) in
@@ -833,7 +836,10 @@ extension Database{
             myGroup.notify(queue: .main) {
                 completion(fetchedPostIds)
             }
-        })
+        }){ (error) in
+            print(error)
+            completion(nil)
+        }
     }
     
     
@@ -2308,16 +2314,69 @@ extension Database{
         
         // Filter Caption
         if filterCaption != nil && filterCaption != "" {
-            guard let searchedText = filterCaption else {return}
-            tempPosts = tempPosts.filter { (post) -> Bool in
-                
-                let searchedEmoji = ReverseEmojiDictionary[searchedText.lowercased()] ?? ""
-                
-                return post.caption.lowercased().contains(searchedText.lowercased()) || post.emoji.contains(searchedText.lowercased()) || post.nonRatingEmojiTags.joined(separator: " ").lowercased().contains(searchedText.lowercased()) || post.nonRatingEmojiTags.joined(separator: " ").lowercased().contains(searchedEmoji) || post.locationName.lowercased().contains(searchedText.lowercased()) || post.locationAdress.lowercased().contains(searchedText.lowercased())
+            guard let searchedText = filterCaption?.lowercased() else {return}
+            
+            var preFilterPosts = inputPosts
+            
+            // Determine Search Terms
+            var searchTerms: [String] = [searchedText]
+            
+            // Split Search Terms into Individual Words
+            var splitSearchTerms = searchedText.components(separatedBy: " ")
+            if (splitSearchTerms.count) > 1 {
+                searchTerms += splitSearchTerms
             }
+            
+            // Find Emojis for Search Word and individual words
+            var emojiTerms: [String] = []
+            for string in searchTerms {
+                if let emoji = ReverseEmojiDictionary[string] {
+                    emojiTerms.append(emoji)
+                }
+            }
+            if emojiTerms.count > 0 {
+                searchTerms += emojiTerms
+            }
+            
+            var tempPosts: [Post] = []
+            
+            for post in preFilterPosts {
+                var allCaption = post.caption.lowercased() + " " + post.emoji + " " + post.nonRatingEmojiTags.joined(separator: " ") + " " + post.locationName
+                // Loops through all search terms until one is found in all caption
+                for searchWord in searchTerms {
+                    if allCaption.lowercased().contains(searchWord){
+                        tempPosts.append(post)
+                        // If it finds a matching word it adds it to tempPost and breaks
+                        break
+                    }
+                }
+            }
+            
             print("Filtered Post By Caption: \(searchedText): \(tempPosts.count)")
             
         }
+        
+        
+//        // Filter Caption
+//        if filterCaption != nil && filterCaption != "" {
+//            guard let searchedText = filterCaption else {return}
+//
+//            var preFilterPosts = inputPosts
+//            var searchTerms = filterCaption?.components(separatedBy: " ")
+//
+//            tempPosts = tempPosts.filter { (post) -> Bool in
+//                let searchedEmoji = ReverseEmojiDictionary[searchedText.lowercased()] ?? ""
+//
+//                return post.caption.lowercased().contains(searchedText.lowercased())
+//                    || post.emoji.contains(searchedText.lowercased())
+//                    || post.nonRatingEmojiTags.joined(separator: " ").lowercased().contains(searchedText.lowercased())
+//                    || post.nonRatingEmojiTags.joined(separator: " ").lowercased().contains(searchedEmoji)
+//                    || post.locationName.lowercased().contains(searchedText.lowercased())
+//                    || post.locationAdress.lowercased().contains(searchedText.lowercased())
+//            }
+//            print("Filtered Post By Caption: \(searchedText): \(tempPosts.count)")
+//
+//        }
         
         // Distances are updated in fetchallposts as they are filtered by distance
         
@@ -2380,7 +2439,7 @@ extension Database{
         
         var tempPosts = inputPosts
         
-        print("Sort Posts: \(selectedSort)")
+        print("Sort Posts: \(selectedSort!)")
         
         // Recent
         if selectedSort == HeaderSortOptions[0] {
@@ -2513,7 +2572,7 @@ extension Database{
         }
         
         let finalOutput = emojiString + emojiTranslate
-        print("Input String: \(stringInput) finalOutput: \(finalOutput)")
+        print("Emoji Translate: \(stringInput) TO: \(finalOutput)")
         completion(finalOutput)
     }
     
