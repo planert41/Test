@@ -79,7 +79,7 @@ class ExploreController: UICollectionViewController, UICollectionViewDelegateFlo
 //        3. Filter Sorts Post based on Criteria
 //        4. Paginates and Refreshes
         
-        fetchRankedPostIds()
+        fetchPostIds()
         
         NotificationCenter.default.addObserver(self, selector: #selector(fetchPosts), name: ExploreController.finishFetchingPostIdsNotificationName, object: nil)
         
@@ -136,6 +136,7 @@ class ExploreController: UICollectionViewController, UICollectionViewDelegateFlo
         }
     }
     
+   
     func openSearch(index: Int?){
         
         let postSearch = PostSearchController()
@@ -187,6 +188,15 @@ class ExploreController: UICollectionViewController, UICollectionViewDelegateFlo
         })
     }
     
+    func fetchPostIds(){
+        
+        if filterLocation == nil && filterCaption == nil {
+            fetchRankedPostIds()
+        } else if filterCaption != nil && filterLocation == nil {
+            fetchCaptionSearchPostIds()
+        }
+    }
+    
     func fetchRankedPostIds(){
         print("Fetching Post Id By \(self.selectedHeaderRank)")
         Database.fetchPostIDBySocialRank(firebaseRank: self.selectedHeaderRank, fetchLimit: 250) { (postIds) in
@@ -201,6 +211,15 @@ class ExploreController: UICollectionViewController, UICollectionViewDelegateFlo
     }
     
     func fetchCaptionSearchPostIds(){
+        guard let searchText = self.filterCaption else {return}
+        // Split words up 
+        if searchText.isEmptyOrWhitespace() {
+            print("Search Post Id: ERROR, Search Text is empty")
+            return
+        }
+        
+        var tempSearchText = searchText.components(separatedBy: " ")
+        print(tempSearchText)
         
     }
     

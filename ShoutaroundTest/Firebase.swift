@@ -817,21 +817,14 @@ extension Database{
         let myGroup = DispatchGroup()
         var fetchedPostIds = [] as [PostId]
         
-        
-        
-        
-        let ref = Database.database().reference().child("userposts")
+        let ref = Database.database().reference().child("post_tags").child(emojiTag)
         ref.observeSingleEvent(of: .value, with: {(snapshot) in
             
-            guard let userposts = snapshot.value as? [String: Any] else {return}
-            userposts.forEach({ (key,value) in
+            guard let tag = snapshot.value as? [String: Any] else {return}
+            guard let taggedPosts = tag["posts"] as? [String] else {return}
+            
+            taggedPosts.forEach({ (key) in
                 myGroup.enter()
-                //                print("Key \(key), Value: \(value)")
-                
-                let dictionary = value as? [String: Any]
-                let secondsFrom1970 = dictionary?["creationDate"] as? Double ?? 0
-                let emoji = dictionary?["emoji"] as? String ?? ""
-                
                 let tempID = PostId.init(id: key, creatorUID: nil, sort: nil)
                 fetchedPostIds.append(tempID)
                 myGroup.leave()
@@ -2472,9 +2465,56 @@ extension Database{
             completion(tempPosts)
         }
         
+    }
+    
+     static func translateToEmojiArray(stringInput: String?, completion: @escaping ([String]?) -> ()){
+        guard let tempSearchText = stringInput else {
+            print("Translate Emoji: ERROR, No String")
+            return
+        }
+        if tempSearchText.isEmptyOrWhitespace(){
+            print("Translate Emoji: ERROR, All Blank Spaces")
+            return
+        }
         
+        var emojiString = tempSearchText.removeDuplicates.emojis ?? []
+        var otherString = tempSearchText.emojilessString.components(separatedBy: " ")
         
+        // Check other string for single emoji translates
+        var emojiTranslateTemp: [String] = []
+        var emojiTranslate: [String] = []
         
+        for str in otherString {
+            if let foundEmoji = ReverseEmojiDictionary[str.lowercased()] {
+                emojiTranslateTemp.append(foundEmoji)
+            }
+        }
+        
+        // Check other string for 2 word combo emoji translates
+        var stringCount = otherString.count ?? 0
+        if stringCount > 1 {
+            for i in (0...(stringCount-1)-1) {
+                let doubleword = otherString[i] + " " + otherString[i+1]
+                if let foundEmoji = ReverseEmojiDictionary[doubleword.lowercased()] {
+                    emojiTranslateTemp.append(foundEmoji)
+                }
+            }
+        }
+        
+        // Remove Dups from other string translations
+        if emojiTranslateTemp.count > 0 {
+            for i in (0...emojiTranslateTemp.count-1){
+                if let _ = emojiTranslate.index(of: emojiTranslateTemp[i]){
+                    print("Contains dup emoji \(emojiTranslateTemp[i])")
+                } else {
+                    emojiTranslate.append(emojiTranslateTemp[i])
+                }
+            }
+        }
+        
+        let finalOutput = emojiString + emojiTranslate
+        print("Input String: \(stringInput) finalOutput: \(finalOutput)")
+        completion(finalOutput)
     }
     
     

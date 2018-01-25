@@ -1075,6 +1075,7 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         // Check for Complex Tags - Replaced with Auto Complete emoji input
         var tempCaptionWords = tempCaptionText.components(separatedBy: " ")
         
+        // Checks forward last 3 words as user types in textbox
         for i in (1...3).reversed() {
             // Check if last n (3 to 1) words match complex dictionary
             
