@@ -579,6 +579,7 @@ class ExploreController: UICollectionViewController, UICollectionViewDelegateFlo
 //            header.selectedRange = self.filterRange
 //        }
         header.selectedLocation = self.filterLocation
+        header.selectedLocationType = self.filterGoogleLocationType
         header.selectedRange = self.filterRange
         header.selectedRank = self.selectedHeaderSort
         header.isListView = self.isListView
@@ -793,6 +794,12 @@ class ExploreController: UICollectionViewController, UICollectionViewDelegateFlo
             self.rankLabel.animate()
         }
         
+    }
+    
+    func locationSelected(){
+        let locationController = LocationController()
+        locationController.googlePlaceId = self.filterGoogleLocationID        
+        navigationController?.pushViewController(locationController, animated: true)
     }
     
     override func scrollViewDidScroll(_ scrollView: UIScrollView) {

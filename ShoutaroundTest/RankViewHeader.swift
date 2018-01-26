@@ -25,6 +25,7 @@ protocol RankViewHeaderDelegate {
     func didChangeToGridView()
     func headerSortSelected(sort: String)
     func rangeSelected(range: String)
+    func locationSelected()
 }
 
 
@@ -50,18 +51,34 @@ class RankViewHeader: UICollectionViewCell, UIGestureRecognizerDelegate, UIPicke
     var selectedRangeOptions = rankRangeDefaultOptions
     var selectedLocation: CLLocation? = nil {
         didSet{
-            rangeButton.setImage((self.selectedLocation == nil) ? #imageLiteral(resourceName: "ranking").withRenderingMode(.alwaysOriginal) :#imageLiteral(resourceName: "GeoFence").withRenderingMode(.alwaysOriginal), for: .normal)
+            updateRangeButton()
         }
     }
+    var selectedLocationType: [String]? = []
     
     var selectedRange: String? = globalRangeDefault {
         didSet{
             if selectedRange == nil {
                 selectedRange = globalRangeDefault
             }
-            rangeButton.setImage((self.selectedRange == globalRangeDefault) ? #imageLiteral(resourceName: "ranking").withRenderingMode(.alwaysOriginal) :#imageLiteral(resourceName: "GeoFence").withRenderingMode(.alwaysOriginal), for: .normal)
+            updateRangeButton()
         }
     }
+    
+    func updateRangeButton(){
+        if (self.selectedLocationType?.contains("establishment"))!{
+        // Check is Restaurant
+            rangeButton.setImage(#imageLiteral(resourceName: "placeName").withRenderingMode(.alwaysOriginal), for: .normal)
+            rangeButton.removeTarget(nil, action: nil, for: .allEvents)
+            rangeButton.addTarget(self, action: #selector(activateLocation), for: .touchUpInside)
+        } else {
+        // Image based on Distance
+        rangeButton.setImage((self.selectedRange == globalRangeDefault) ? #imageLiteral(resourceName: "ranking").withRenderingMode(.alwaysOriginal) :#imageLiteral(resourceName: "GeoFence").withRenderingMode(.alwaysOriginal), for: .normal)
+        rangeButton.removeTarget(nil, action: nil, for: .allEvents)
+        rangeButton.addTarget(self, action: #selector(activateRange), for: .touchUpInside)
+        }
+    }
+    
     
     lazy var rangeButton: UIButton = {
         let button = UIButton(type: .system)
@@ -241,6 +258,10 @@ class RankViewHeader: UICollectionViewCell, UIGestureRecognizerDelegate, UIPicke
         let rangeIndex = selectedRangeOptions.index(of: self.selectedRange!)
         pickerView.selectRow(rangeIndex!, inComponent: 0, animated: false)
         dummyTextView.perform(#selector(becomeFirstResponder), with: nil, afterDelay: 0.1)
+    }
+    
+    func activateLocation(){
+        delegate?.locationSelected()
     }
     
     func donePicker(){
