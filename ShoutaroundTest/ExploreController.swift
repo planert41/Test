@@ -11,6 +11,7 @@ import UIKit
 import Firebase
 import CoreLocation
 import EmptyDataSet_Swift
+import Spring
 
 
 class ExploreController: UICollectionViewController, UICollectionViewDelegateFlowLayout, UISearchBarDelegate, ListPhotoCellDelegate, SortFilterHeaderDelegate, FilterControllerDelegate, EmptyDataSetSource, EmptyDataSetDelegate, GridPhotoCellDelegate, RankViewHeaderDelegate, PostSearchControllerDelegate {
@@ -249,7 +250,9 @@ class ExploreController: UICollectionViewController, UICollectionViewDelegateFlo
     func fetchPostIds(){
         self.checkFilter()
         
-        if filterRange == nil && filterCaption == nil {
+        if filterRange == nil && filterCaption == nil && selectedHeaderRank == "Recent"{
+            fetchPostIdsByDate()
+        } else if filterRange == nil && filterCaption == nil && selectedHeaderRank != "Recent" {
             // If No Filter Location and Caption, Fetch Top Posts by Social
             fetchPostIdsBySocialRank()
         } else if filterCaption != nil && filterRange == nil {
@@ -265,6 +268,16 @@ class ExploreController: UICollectionViewController, UICollectionViewDelegateFlo
                 fetchPostIdsByLocation()
             }
             
+        }
+    }
+    
+    func fetchPostIdsByDate(){
+        print("Fetching Post Id By \(self.selectedHeaderRank)")
+        Database.fetchAllPostByCreationDate(fetchLimit: 10) { (fetchedPosts, fetchedPostIds) in
+            self.fetchedPostIds = fetchedPostIds
+            self.displayedPosts = fetchedPosts
+            self.filterSortFetchedPosts()
+            print("Fetch Posts By Date: Success, Posts: \(self.displayedPosts.count)")
         }
     }
     
@@ -479,6 +492,8 @@ class ExploreController: UICollectionViewController, UICollectionViewDelegateFlo
             self.isFiltering = false
         }
     }
+    
+    
     func headerSortSelected(sort: String) {
         self.selectedHeaderSort = sort
         self.collectionView?.reloadData()
@@ -495,6 +510,7 @@ class ExploreController: UICollectionViewController, UICollectionViewDelegateFlo
         } else {
             self.refreshPostsForSort()
         }
+
         
         print("Filter Sort is ", self.selectedHeaderSort)
     }
@@ -503,7 +519,7 @@ class ExploreController: UICollectionViewController, UICollectionViewDelegateFlo
     
     func paginatePosts(){
         
-        let paginateFetchPostSize = 4
+        let paginateFetchPostSize = 9
         
         self.paginatePostsCount = min(self.paginatePostsCount + paginateFetchPostSize, self.displayedPosts.count)
         
@@ -745,6 +761,7 @@ class ExploreController: UICollectionViewController, UICollectionViewDelegateFlo
             filterController.selectedGooglePlaceType = self.filterGoogleLocationType
         }
         
+        filterController.selectedCaption = self.filterCaption
         filterController.selectedRange = self.filterRange
         filterController.selectedMinRating = self.filterMinRating
         filterController.selectedMaxPrice = self.filterMaxPrice
@@ -754,6 +771,19 @@ class ExploreController: UICollectionViewController, UICollectionViewDelegateFlo
         
         self.navigationController?.pushViewController(filterController, animated: true)
     }
+
+    lazy var rankLabel: SpringLabel = {
+        let ul = SpringLabel()
+        ul.text = "Top 250"
+        ul.isUserInteractionEnabled = true
+        ul.font = UIFont.boldSystemFont(ofSize: 12)
+        ul.numberOfLines = 0
+        ul.textAlignment = NSTextAlignment.center
+        ul.backgroundColor = UIColor.white
+        ul.layer.cornerRadius = 10
+        ul.layer.masksToBounds = true
+        return ul
+    }()
     
     func headerRankSelected(rank: String) {
         
@@ -767,6 +797,31 @@ class ExploreController: UICollectionViewController, UICollectionViewDelegateFlo
             // Filtered for something else, so just resorting posts based on social
             self.refreshPostsForSort()
         }
+        
+        
+        view.addSubview(rankLabel)
+        rankLabel.anchor(top: topLayoutGuide.bottomAnchor, left: view.leftAnchor, bottom: nil, right: nil, paddingTop: 0, paddingLeft: 3, paddingBottom: 0, paddingRight: 3, width: 50, height: 40)
+        rankLabel.text = "Most \(self.selectedHeaderRank)"
+        rankLabel.adjustsFontSizeToFitWidth = true
+        
+        rankLabel.force = 0.5
+        rankLabel.duration = 0.5
+        rankLabel.animation = "zoomIn"
+        rankLabel.curve = "spring"
+        
+        // Display only if there is caption
+        
+        rankLabel.animateNext {
+            self.rankLabel.animation = "fadeOut"
+            self.rankLabel.delay = 1
+            self.rankLabel.animate()
+        }
+        
+    }
+    
+    override func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        // Remove Rank Label is Scroll
+        rankLabel.removeFromSuperview()
     }
     
     

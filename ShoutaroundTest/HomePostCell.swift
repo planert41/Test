@@ -932,7 +932,7 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
  
     func displayCaptionBubble(){
         
-        print(self.post)
+//        print(self.post)
         
         guard let post = self.post else {return}
         
@@ -946,38 +946,15 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         
         captionBubble.attributedText = attributedString
         captionBubble.sizeToFit()
-
-//
-//        captionBubble.text = post.caption
-//        captionBubble.sizeToFit()
-//        starRatingLabel.rating = post.rating!
+        
+        if (captionBubble.attributedText?.length)! > 1 {
         
         self.addSubview(captionView)
         captionView.anchor(top: photoImageView.topAnchor, left: photoImageView.leftAnchor, bottom: nil, right: photoImageView.rightAnchor, paddingTop: 30, paddingLeft: 30, paddingBottom: 0, paddingRight: 30, width: 0, height: 0)
         
         captionView.addSubview(captionBubble)
         captionBubble.anchor(top: captionView.topAnchor, left: captionView.leftAnchor, bottom: captionView.bottomAnchor, right: captionView.rightAnchor, paddingTop: 10, paddingLeft: 10, paddingBottom: 10, paddingRight: 10, width: 0, height: 0)
-        
-//        captionView.addSubview(starRatingLabel)
-//        starRatingLabel.anchor(top: captionBubble.bottomAnchor, left: nil, bottom: captionView.bottomAnchor, right: nil, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 30, height: 0)
-//        starRatingLabel.centerXAnchor.constraint(equalTo: captionView.centerXAnchor).isActive = true
-//        starRatingLabelHeight = NSLayoutConstraint(item: starRatingLabel, attribute: NSLayoutAttribute.height, relatedBy: NSLayoutRelation.equal, toItem: nil, attribute: NSLayoutAttribute.height, multiplier: 1, constant: 30)
-//        starRatingLabelHeight?.isActive = true
-//
-//        if post.rating == 0 {
-//            starRatingLabelHeight?.constant = 0
-//        } else {
-//            starRatingLabelHeight?.constant = 30
-//        }
 
-//
-//        let attributedString = NSMutableAttributedString(string: post.caption, attributes: [NSFontAttributeName: UIFont.boldSystemFont(ofSize: 30)])
-//
-//        let test = NSAttributedString(string: String(describing: post.rating!), attributes: [NSFontAttributeName: UIFont.boldSystemFont(ofSize: 30), NSBackgroundColorAttributeName: RatingLabel.init(ratingScore: post.rating!).ratingBackgroundColor()])
-//
-//        attributedString.append(test)
-//        captionBubble.attributedText = attributedString
-        
         
         captionView.force = 0.5
         captionView.duration = 0.5
@@ -986,13 +963,36 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         
         // Display only if there is caption
         
-        if (captionBubble.attributedText?.length)! > 1 {
             captionView.animateNext {
                 self.captionView.animation = "fadeOut"
                 self.captionView.delay = 3
                 self.captionView.animate()
             }
         }
+        
+        
+        
+        //        captionView.addSubview(starRatingLabel)
+        //        starRatingLabel.anchor(top: captionBubble.bottomAnchor, left: nil, bottom: captionView.bottomAnchor, right: nil, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 30, height: 0)
+        //        starRatingLabel.centerXAnchor.constraint(equalTo: captionView.centerXAnchor).isActive = true
+        //        starRatingLabelHeight = NSLayoutConstraint(item: starRatingLabel, attribute: NSLayoutAttribute.height, relatedBy: NSLayoutRelation.equal, toItem: nil, attribute: NSLayoutAttribute.height, multiplier: 1, constant: 30)
+        //        starRatingLabelHeight?.isActive = true
+        //
+        //        if post.rating == 0 {
+        //            starRatingLabelHeight?.constant = 0
+        //        } else {
+        //            starRatingLabelHeight?.constant = 30
+        //        }
+        
+        //
+        //        let attributedString = NSMutableAttributedString(string: post.caption, attributes: [NSFontAttributeName: UIFont.boldSystemFont(ofSize: 30)])
+        //
+        //        let test = NSAttributedString(string: String(describing: post.rating!), attributes: [NSFontAttributeName: UIFont.boldSystemFont(ofSize: 30), NSBackgroundColorAttributeName: RatingLabel.init(ratingScore: post.rating!).ratingBackgroundColor()])
+        //
+        //        attributedString.append(test)
+        //        captionBubble.attributedText = attributedString
+        
+        
     }
     
     func hideCaptionBubble(){

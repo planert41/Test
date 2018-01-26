@@ -38,7 +38,7 @@ let HeaderSortDefault:String = HeaderSortOptions[0]
 var LocationSortOptions:[String] = ["Recent", "Rating", "Trending"]
 
 // Rank Defaults
-var defaultRankOptions = ["Votes", "Lists", "Messages"]
+var defaultRankOptions = ["Recent", "Votes", "Lists", "Messages"]
 var defaultRank = defaultRankOptions[0]
 
 

@@ -628,6 +628,46 @@ extension Database{
         }
     }
     
+    static func fetchAllPostByCreationDate(fetchLimit: Int, completion: @escaping ([Post], [PostId]) -> ()) {
+        
+        let myGroup = DispatchGroup()
+        var query = Database.database().reference().child("posts").queryOrdered(byChild: "creationDate").queryLimited(toLast: UInt(fetchLimit))
+        var fetchedPosts = [] as [Post]
+        var fetchedPostIds = [] as [PostId]
+        
+        query.observe(.value, with: { (snapshot) in
+            
+            guard let locationPosts = snapshot.value as? [String: Any] else {return}
+            locationPosts.forEach({ (key,value) in
+                
+                myGroup.enter()
+                guard let dictionary = value as? [String: Any] else {return}
+                let creatorUID = dictionary["creatorUID"] as? String ?? ""
+                
+                Database.fetchUserWithUID(uid: creatorUID) { (user) in
+                    
+                    var post = Post(user: user, dictionary: dictionary)
+                    var postId = PostId.init(id: key, creatorUID: nil, sort: nil)
+                    post.id = key
+                    
+                    Database.checkPostForSocial(post: post, completion: { (post) in
+                        fetchedPostIds.append(postId)
+                        fetchedPosts.append(post)
+                        fetchedPosts.sort(by: { (p1, p2) -> Bool in
+                            return p1.creationDate.compare(p2.creationDate) == .orderedDescending })
+                        myGroup.leave()
+                    })
+                }
+            })
+            myGroup.notify(queue: .main) {
+                completion(fetchedPosts, fetchedPostIds)
+            }
+        }) { (err) in
+            print("Failed to fetch post for Google Place ID", err)
+        }
+    }
+    
+    
     static func fetchPostWithPostID( postId: String, completion: @escaping (Post?, Error?) -> ()) {
         
         if let cachedPost = postCache[postId] {

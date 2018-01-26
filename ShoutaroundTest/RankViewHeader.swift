@@ -18,6 +18,7 @@ import Foundation
 import UIKit
 import Firebase
 import CoreLocation
+import Spring
 
 protocol RankViewHeaderDelegate {
     func didChangeToListView()
@@ -41,8 +42,6 @@ class RankViewHeader: UICollectionViewCell, UIGestureRecognizerDelegate, UIPicke
     var selectedRank: String = defaultRank {
         didSet{
             headerSortSegment.selectedSegmentIndex = rankSortOptions.index(of: selectedRank)!
-            rankLabel.text = "Top By \(self.selectedRank)"
-            rankLabel.adjustsFontSizeToFitWidth = true
         }
     }
     
@@ -71,12 +70,16 @@ class RankViewHeader: UICollectionViewCell, UIGestureRecognizerDelegate, UIPicke
         return button
     }()
     
-    lazy var rankLabel: UILabel = {
-        let ul = UILabel()
+    lazy var rankLabel: SpringLabel = {
+        let ul = SpringLabel()
         ul.text = "Top 250"
         ul.isUserInteractionEnabled = true
         ul.font = UIFont.boldSystemFont(ofSize: 12)
         ul.numberOfLines = 0
+        ul.textAlignment = NSTextAlignment.center
+        ul.backgroundColor = UIColor.white
+        ul.layer.cornerRadius = 10
+        ul.layer.masksToBounds = true
         return ul
     }()
     
@@ -139,25 +142,23 @@ class RankViewHeader: UICollectionViewCell, UIGestureRecognizerDelegate, UIPicke
         //        formatButton.layer.cornerRadius = formatButton.frame.width/2
         rangeButton.layer.masksToBounds = true
 
-        
-
-        
         setupRankSegmentControl()
         addSubview(rankSegmentControl)
-        rankSegmentControl.anchor(top: topAnchor, left: nil, bottom: bottomAnchor, right: formatButton.leftAnchor, paddingTop: 5, paddingLeft: 3, paddingBottom: 5, paddingRight: 5, width: self.frame.width/2, height: 0)
+        rankSegmentControl.anchor(top: topAnchor, left: rangeButton.rightAnchor, bottom: bottomAnchor, right: formatButton.leftAnchor, paddingTop: 5, paddingLeft: 5, paddingBottom: 5, paddingRight: 5, width: self.frame.width/1.5, height: 0)
         
-        addSubview(rankLabel)
-        rankLabel.anchor(top: topAnchor, left: rangeButton.rightAnchor, bottom: bottomAnchor, right: rankSegmentControl.leftAnchor, paddingTop: 1, paddingLeft: 1, paddingBottom: 1, paddingRight: 1, width: 0, height: 0)
-        rankLabel.layer.masksToBounds = true
+//        addSubview(rankLabel)
+//        rankLabel.anchor(top: topAnchor, left: rangeButton.rightAnchor, bottom: bottomAnchor, right: rankSegmentControl.leftAnchor, paddingTop: 1, paddingLeft: 1, paddingBottom: 1, paddingRight: 1, width: 0, height: 0)
+//        rankLabel.layer.masksToBounds = true
 
     }
     
     func setupRankSegmentControl(){
         self.rankSegmentControl = UISegmentedControl(items: rankSortOptions)
         
-        self.rankSegmentControl.setImage(#imageLiteral(resourceName: "cred_unfilled").withRenderingMode(.alwaysOriginal), forSegmentAt: 0)
-        self.rankSegmentControl.setImage(#imageLiteral(resourceName: "bookmark_unfilled").withRenderingMode(.alwaysOriginal), forSegmentAt: 1)
-        self.rankSegmentControl.setImage(#imageLiteral(resourceName: "send2").withRenderingMode(.alwaysOriginal), forSegmentAt: 2)
+        self.rankSegmentControl.setImage(#imageLiteral(resourceName: "recent_unfilled").withRenderingMode(.alwaysOriginal), forSegmentAt: 0)
+        self.rankSegmentControl.setImage(#imageLiteral(resourceName: "cred_unfilled").withRenderingMode(.alwaysOriginal), forSegmentAt: 1)
+        self.rankSegmentControl.setImage(#imageLiteral(resourceName: "bookmark_unfilled").withRenderingMode(.alwaysOriginal), forSegmentAt: 2)
+        self.rankSegmentControl.setImage(#imageLiteral(resourceName: "send2").withRenderingMode(.alwaysOriginal), forSegmentAt: 3)
         self.rankSegmentControl.addTarget(self, action: #selector(selectRank), for: .valueChanged)
         self.rankSegmentControl.tintColor = UIColor.legitColor()
         self.rankSegmentControl.selectedSegmentIndex = 0
@@ -169,16 +170,19 @@ class RankViewHeader: UICollectionViewCell, UIGestureRecognizerDelegate, UIPicke
         self.selectedRank = rankSortOptions[sender.selectedSegmentIndex]
         print("Selected Rank is \(self.selectedRank)")
         
-        rankSegmentControl.setImage(#imageLiteral(resourceName: "cred_unfilled").withRenderingMode(.alwaysOriginal), forSegmentAt: 0)
-        rankSegmentControl.setImage(#imageLiteral(resourceName: "bookmark_unfilled").withRenderingMode(.alwaysOriginal), forSegmentAt: 1)
-        rankSegmentControl.setImage(#imageLiteral(resourceName: "send2").withRenderingMode(.alwaysOriginal), forSegmentAt: 2)
+        self.rankSegmentControl.setImage(#imageLiteral(resourceName: "recent_unfilled").withRenderingMode(.alwaysOriginal), forSegmentAt: 0)
+        self.rankSegmentControl.setImage(#imageLiteral(resourceName: "cred_unfilled").withRenderingMode(.alwaysOriginal), forSegmentAt: 1)
+        self.rankSegmentControl.setImage(#imageLiteral(resourceName: "bookmark_unfilled").withRenderingMode(.alwaysOriginal), forSegmentAt: 2)
+        self.rankSegmentControl.setImage(#imageLiteral(resourceName: "send2").withRenderingMode(.alwaysOriginal), forSegmentAt: 3)
         
         if sender.selectedSegmentIndex == 0 {
-            rankSegmentControl.setImage(#imageLiteral(resourceName: "cred_filled").withRenderingMode(.alwaysOriginal), forSegmentAt: 0)
+            rankSegmentControl.setImage(#imageLiteral(resourceName: "recent_filled").withRenderingMode(.alwaysOriginal), forSegmentAt: 0)
         }  else if sender.selectedSegmentIndex == 1 {
-            rankSegmentControl.setImage(#imageLiteral(resourceName: "bookmark_filled").withRenderingMode(.alwaysOriginal), forSegmentAt: 1)
+            rankSegmentControl.setImage(#imageLiteral(resourceName: "cred_filled").withRenderingMode(.alwaysOriginal), forSegmentAt: 1)
         } else if sender.selectedSegmentIndex == 2 {
-            rankSegmentControl.setImage(#imageLiteral(resourceName: "send_filled").withRenderingMode(.alwaysOriginal), forSegmentAt: 2)
+            rankSegmentControl.setImage(#imageLiteral(resourceName: "bookmark_filled").withRenderingMode(.alwaysOriginal), forSegmentAt: 2)
+        } else if sender.selectedSegmentIndex == 3 {
+            rankSegmentControl.setImage(#imageLiteral(resourceName: "send_filled").withRenderingMode(.alwaysOriginal), forSegmentAt: 3)
         }
         
         delegate?.headerRankSelected(rank: self.selectedRank)
