@@ -31,6 +31,8 @@ class FilterController: UIViewController, GMSAutocompleteViewControllerDelegate,
             guard let selectedRange = selectedRange else {return}
             if let index = geoFilterRangeDefault.index(of: selectedRange){
                 self.distanceSegment.selectedSegmentIndex = index
+            } else {
+                 self.distanceSegment.selectedSegmentIndex = UISegmentedControlNoSegment
             }
         }
     }
@@ -565,6 +567,23 @@ class FilterController: UIViewController, GMSAutocompleteViewControllerDelegate,
         self.selectedGooglePlaceID = googlePlaceId
         self.selectedGooglePlaceType = googlePlaceType
         self.selectedLocationName = googlePlaceName
+        
+        var defaultRange: String? = nil
+        if (self.selectedGooglePlaceType?.contains("locality"))! {
+            // Selected City, So range is 25 Miles
+            defaultRange = "25"
+        } else if (self.selectedGooglePlaceType?.contains("neighbourhood"))! {
+            // Selected City, So range is 25 Miles
+            defaultRange = "5"
+        } else if (self.selectedGooglePlaceType?.contains("establishment"))! {
+            defaultRange = nil
+        } else {
+            defaultRange = "5"
+        }
+        if self.selectedRange == nil {
+            self.selectedRange = defaultRange
+        }
+        
     }
     
     
@@ -591,6 +610,22 @@ class FilterController: UIViewController, GMSAutocompleteViewControllerDelegate,
         
         self.sortSegment.selectedSegmentIndex = 0
         self.selectedSort = defaultSort
+        
+        var defaultRange: String? = nil
+        if (self.selectedGooglePlaceType?.contains("locality"))! {
+            // Selected City, So range is 25 Miles
+            defaultRange = "25"
+        } else if (self.selectedGooglePlaceType?.contains("neighbourhood"))! {
+            // Selected City, So range is 25 Miles
+            defaultRange = "5"
+        } else if (self.selectedGooglePlaceType?.contains("establishment"))! {
+            defaultRange = nil
+        }  else {
+            defaultRange = "5"
+        }
+        if self.selectedRange == nil {
+            self.selectedRange = defaultRange
+        }
         
         print("Selected Google Location: \(place.name), \(place.placeID), \(selectedLocation)")
         dismiss(animated: true, completion: nil)

@@ -14,10 +14,6 @@ import EmptyDataSet_Swift
 
 
 class ExploreController: UICollectionViewController, UICollectionViewDelegateFlowLayout, UISearchBarDelegate, ListPhotoCellDelegate, SortFilterHeaderDelegate, FilterControllerDelegate, EmptyDataSetSource, EmptyDataSetDelegate, GridPhotoCellDelegate, RankViewHeaderDelegate, PostSearchControllerDelegate {
-
-    
-
-
     
     //INPUT
     var fetchedPostIds: [PostId] = []
@@ -210,6 +206,36 @@ class ExploreController: UICollectionViewController, UICollectionViewDelegateFlo
 
     }
     
+    func rangeSelected(range: String) {
+        
+        let prevRange: String? = self.filterRange
+        if range == globalRangeDefault {
+            self.filterRange = nil
+            self.refreshPostsForSearch()
+        } else {
+            self.filterRange = range
+                if filterLocation == nil {
+                    // No Location, Search For current location and search range
+                    LocationSingleton.sharedInstance.determineCurrentLocation()
+                    let when = DispatchTime.now() + defaultGeoWaitTime // change 2 to desired number of seconds
+                    DispatchQueue.main.asyncAfter(deadline: when) {
+                        self.filterLocation = CurrentUser.currentLocation
+                        self.refreshPostsForSearch()
+                    }
+                } else {
+                    // Just refilter and sort post for range Has Location
+                    if prevRange == nil {
+                        self.refreshPostsForSearch()
+                    } else if Double(self.filterRange!)! < Double(prevRange!)!{
+                        self.refreshPostsForSort()
+                    } else {
+                        self.refreshPostsForSearch()
+                    }
+                }
+            }
+    }
+    
+    
     
     // Post Fetching
     
@@ -223,10 +249,10 @@ class ExploreController: UICollectionViewController, UICollectionViewDelegateFlo
     func fetchPostIds(){
         self.checkFilter()
         
-        if filterLocation == nil && filterCaption == nil {
+        if filterRange == nil && filterCaption == nil {
             // If No Filter Location and Caption, Fetch Top Posts by Social
             fetchPostIdsBySocialRank()
-        } else if filterCaption != nil && filterLocation == nil {
+        } else if filterCaption != nil && filterRange == nil {
             // If has Filter Caption, Fetch All Posts with Emoji Tags
             fetchPostIdsByTag()
         } else if filterLocation != nil {
@@ -299,25 +325,28 @@ class ExploreController: UICollectionViewController, UICollectionViewDelegateFlo
             print("Fetch Post ID By Location: ERROR, Is an Establishment")
             return}
         
-        var range: Double = 0
+        var defaultRange: String? = nil
         if (self.filterGoogleLocationType?.contains("locality"))! {
             // Selected City, So range is 25 Miles
-            range = 25
-            self.filterRange = "25"
+            defaultRange = "25"
         } else if (self.filterGoogleLocationType?.contains("neighbourhood"))! {
             // Selected City, So range is 25 Miles
-            range = 5
-            self.filterRange = "5"
+            defaultRange = "5"
+        } else if (self.filterGoogleLocationType?.contains("establishment"))! {
+            defaultRange = nil
         } else {
-            range = 5
-            self.filterRange = "5"
+            defaultRange = "5"
         }
         
-        Database.fetchAllPostWithLocation(location: location, distance: range) { (fetchedPosts, fetchedPostIds) in
+        if self.filterRange == nil {
+            self.filterRange = defaultRange
+        }
+        
+        Database.fetchAllPostWithLocation(location: location, distance: Double(self.filterRange!)! ) { (fetchedPosts, fetchedPostIds) in
             self.fetchedPostIds = fetchedPostIds
             self.displayedPosts = fetchedPosts
             self.filterSortFetchedPosts()
-            print("Fetch Posts By Location: Success, Posts: \(self.displayedPosts.count), Range: \(range), Location: \(location.coordinate.latitude),\(location.coordinate.longitude)")
+            print("Fetch Posts By Location: Success, Posts: \(self.displayedPosts.count), Range: \(self.filterRange), Location: \(location.coordinate.latitude),\(location.coordinate.longitude)")
         }
         
         
@@ -364,6 +393,7 @@ class ExploreController: UICollectionViewController, UICollectionViewDelegateFlo
         print("Refresh All")
         self.clearAllPosts()
         self.clearFilter()
+        self.checkFilter()
         self.fetchPostIds()
         self.collectionView?.refreshControl?.endRefreshing()
     }
@@ -372,12 +402,14 @@ class ExploreController: UICollectionViewController, UICollectionViewDelegateFlo
         print("Refresh Posts For New Search")
         self.clearAllPosts()
         self.fetchPostIds()
+        self.checkFilter()
         self.collectionView?.refreshControl?.endRefreshing()
     }
     
     func refreshPostsForSort(){
         print("Refresh Posts For Filter")
         // Does not repull post ids, just resorts displayed posts
+        self.checkFilter()
         self.displayedPosts = []
         self.fetchSortFilterPosts()
         self.paginatePosts()

@@ -2344,22 +2344,22 @@ extension Database{
                 searchTerms += emojiTerms
             }
             
-            var tempPosts: [Post] = []
+            var tempFilterPosts: [Post] = []
             
             for post in preFilterPosts {
                 var allCaption = post.caption.lowercased() + " " + post.emoji + " " + post.nonRatingEmojiTags.joined(separator: " ") + " " + post.locationName
                 // Loops through all search terms until one is found in all caption
                 for searchWord in searchTerms {
                     if allCaption.lowercased().contains(searchWord){
-                        tempPosts.append(post)
+                        tempFilterPosts.append(post)
                         // If it finds a matching word it adds it to tempPost and breaks
                         break
                     }
                 }
             }
             
+            tempPosts = tempFilterPosts
             print("Filtered Post By Caption: \(searchedText): \(tempPosts.count)")
-            
         }
         
         

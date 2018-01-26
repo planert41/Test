@@ -11,9 +11,9 @@ import UIKit
 
 
 var geoFilterImageDefault:[UIImage] = [#imageLiteral(resourceName: "GeoFence"),#imageLiteral(resourceName: "GeoFence"), #imageLiteral(resourceName: "City"), #imageLiteral(resourceName: "City"), #imageLiteral(resourceName: "Globe")]
-var geoFilterRangeDefault:[String] = ["1", "5", "25", "50", "100","250"]
+var geoFilterRangeDefault:[String] = ["1", "3", "5", "25", "50", "100"]
 
-var rankRangeDefaultOptions :[String] = ["1", "5", "25", "50", "100","250","Global"]
+var rankRangeDefaultOptions :[String] = ["Global","1", "3", "5", "25", "50", "100"]
 var globalRangeDefault: String = "Global"
 var defaultGeoWaitTime: Double = 0.5
 

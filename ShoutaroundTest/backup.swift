@@ -14,6 +14,10 @@ import EmptyDataSet_Swift
 
 
 class ExploreControllerbackup: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, UISearchBarDelegate, ListPhotoCellDelegate, SortFilterHeaderDelegate, FilterControllerDelegate, EmptyDataSetSource, EmptyDataSetDelegate, GridPhotoCellDelegate, RankViewHeaderDelegate, PostSearchControllerDelegate {
+    func rangeSelected(range: String) {
+        
+    }
+    
     
     static let refreshListViewNotificationName = NSNotification.Name(rawValue: "RefreshListView")
     

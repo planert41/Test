@@ -23,6 +23,7 @@ protocol RankViewHeaderDelegate {
     func didChangeToListView()
     func didChangeToGridView()
     func headerRankSelected(rank: String)
+    func rangeSelected(range: String)
 }
 
 
@@ -59,6 +60,7 @@ class RankViewHeader: UICollectionViewCell, UIGestureRecognizerDelegate, UIPicke
             if selectedRange == nil {
                 selectedRange = globalRangeDefault
             }
+            rangeButton.setImage((self.selectedRange == globalRangeDefault) ? #imageLiteral(resourceName: "ranking").withRenderingMode(.alwaysOriginal) :#imageLiteral(resourceName: "GeoFence").withRenderingMode(.alwaysOriginal), for: .normal)
         }
     }
     
@@ -241,6 +243,7 @@ class RankViewHeader: UICollectionViewCell, UIGestureRecognizerDelegate, UIPicke
         self.selectedRange = selectedRangeOptions[pickerView.selectedRow(inComponent: 0)]
         print("Filter Range Selected: \(self.selectedRange)")
         dummyTextView.resignFirstResponder()
+        delegate?.rangeSelected(range: self.selectedRange!)
     }
     
     func cancelPicker(){
