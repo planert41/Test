@@ -28,6 +28,8 @@ class MainTabBarController: UITabBarController, UITabBarControllerDelegate, UIIm
             return
         }
         
+        print("---Tab Bar Selected----\(self.selectedTabBarIndex)")
+        
         if index == 0 && index == self.selectedTabBarIndex {
             print("Double Click Home Tab Bar, Refreshing")
             NotificationCenter.default.post(name: HomeController.refreshPostsNotificationName, object: nil)
@@ -223,12 +225,12 @@ class MainTabBarController: UITabBarController, UITabBarControllerDelegate, UIIm
         
         Database.fetchUserWithUID(uid: uid) { (user) in
             CurrentUser.user = user
-            print("Current User: \(CurrentUser.user)")
+            print("Fetching Current User: \(CurrentUser.user?.username)")
             
             // Fetch Lists
             Database.fetchListForMultListIds(listUid: CurrentUser.listIds, completion: { (fetchedLists) in
                 CurrentUser.lists = fetchedLists
-                print("Current User List: \(CurrentUser.lists)")
+                print("Current User List Count: \(CurrentUser.lists.count)")
                 Database.checkUserSocialStats(user: CurrentUser.user!, socialField: "lists_created", socialCount: fetchedLists.count)
             })
         }

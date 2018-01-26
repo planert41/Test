@@ -35,7 +35,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     var isFinishedPaging = false {
         didSet{
             if isFinishedPaging == true {
-                print("Finished Paging :", self.paginatePostsCount)
+                print("Paging Finish: \(self.isFinishedPaging), \(self.paginatePostsCount) Posts")
             }
         }
     }
@@ -549,22 +549,20 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     
     func finishPaginationCheck(){
         
-        print("Finish Paging Check")
-        
         if self.paginatePostsCount == (self.fetchedPosts.count) {
             self.isFinishedPaging = true
         }
         
         if self.fetchedPosts.count == 0 && self.isFinishedPaging == true {
-            print("Finish Pagination Check: No Results")
+            print("Pagination: No Results, Paging: \(self.isFinishedPaging)")
 
         }
         else if self.fetchedPosts.count == 0 && self.isFinishedPaging != true {
-            print("Finish Pagination Check: No Results, Still Paging")
+            print("Pagination: No Results, Paging: \(self.isFinishedPaging)")
 
             self.paginatePosts()
         } else {
-            print("Finish Pagination Check: Success, Post: \(self.fetchedPosts.count)")
+            print("Pagination: Success, Post: \(self.fetchedPosts.count)")
             DispatchQueue.main.async(execute: { self.collectionView?.reloadData()
             
                 
@@ -590,7 +588,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         print("User PostIds Fetched: \(self.userPostIdFetched), Following PostIds Fetched: \(self.followingPostIdFetched)")
         
         if self.userPostIdFetched && self.followingPostIdFetched {
-            print("Finish Fetching Post Ids: \(fetchedPostIds.count)")
+            print("Fetched Post Ids: \(fetchedPostIds.count)")
             self.fetchAllPosts()
         } else {
             print("Wait for user/following user post ids to be fetched")
@@ -620,7 +618,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
                 if filteredPosts != nil {
                     self.fetchedPosts = filteredPosts!
                 }
-                    print("Finish Filter and Sorting Post")
+                print("Filter Sorted Post: \(self.fetchedPosts.count)")
                     NotificationCenter.default.post(name: HomeController.finishSortingFetchedPostsNotificationName, object: nil)
             })
         }

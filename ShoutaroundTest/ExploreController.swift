@@ -262,7 +262,19 @@ class ExploreController: UICollectionViewController, UICollectionViewDelegateFlo
     func fetchPostIds(){
         self.checkFilter()
         
-        if filterRange == nil && filterCaption == nil {
+        if filterLocation != nil {
+            // If has Filter Location, Pull all Post Id for Location
+            if (self.filterGoogleLocationType?.contains("establishment"))! {
+                // Selected Google Location is a restaurant, search posts by Restaurant
+                fetchPostIdsByRestaurant()
+            } else {
+                // Selected Google Location not a restaurant, search posts by Location with Range
+                fetchPostIdsByLocation()
+            }
+        }  else if filterCaption != nil && filterRange == nil {
+            // Fetch All Posts with Emoji Tags
+            fetchPostIdsByTag()
+        } else if filterRange == nil && filterCaption == nil {
             // No Caption or Location Filter
             if selectedHeaderSort == "Recent" {
                 // Find Most Recent Posts
@@ -272,19 +284,6 @@ class ExploreController: UICollectionViewController, UICollectionViewDelegateFlo
                 fetchPostIdsBySocialRank()
             }
         }
-        else if filterCaption != nil && filterRange == nil {
-            // Fetch All Posts with Emoji Tags
-            fetchPostIdsByTag()
-        } else if filterLocation != nil {
-            // If has Filter Location, Pull all Post Id for Location
-            if (self.filterGoogleLocationType?.contains("establishment"))! {
-                // Selected Google Location is a restaurant, search posts by Restaurant
-                fetchPostIdsByRestaurant()
-            } else {
-                // Selected Google Location not a restaurant, search posts by Location with Range
-                fetchPostIdsByLocation()
-            }
-        }
     }
     
     func fetchPostIdsByDate(){
@@ -292,8 +291,8 @@ class ExploreController: UICollectionViewController, UICollectionViewDelegateFlo
         Database.fetchAllPostByCreationDate(fetchLimit: 100) { (fetchedPosts, fetchedPostIds) in
             self.fetchedPostIds = fetchedPostIds
             self.displayedPosts = fetchedPosts
-            self.filterSortFetchedPosts()
             print("Fetch Posts By Date: Success, Posts: \(self.displayedPosts.count)")
+            self.filterSortFetchedPosts()
         }
     }
     
@@ -418,11 +417,16 @@ class ExploreController: UICollectionViewController, UICollectionViewDelegateFlo
         self.collectionView?.refreshControl?.endRefreshing()
     }
     
+    func clearDisplayedPosts(){
+        self.displayedPosts = []
+        self.refreshPagination()
+    }
+    
     func refreshPostsForSort(){
         print("Refresh Posts: Not Pulling Post Ids")
         // Does not repull post ids, just resorts displayed posts
         self.checkFilter()
-        self.displayedPosts = []
+        self.clearDisplayedPosts()
         self.fetchSortFilterPosts()
         self.paginatePosts()
         self.collectionView?.refreshControl?.endRefreshing()
