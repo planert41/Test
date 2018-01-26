@@ -15,6 +15,10 @@ import EmptyDataSet_Swift
 private let reuseIdentifier = "Cell"
 
 class TESTCollectionViewController: UICollectionViewController, UICollectionViewDelegateFlowLayout, RankViewHeaderDelegate, EmptyDataSetDelegate, EmptyDataSetSource {
+    func headerSortSelected(sort: String) {
+        
+    }
+    
     func rangeSelected(range: String) {
         
     }

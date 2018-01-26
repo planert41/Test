@@ -60,12 +60,8 @@ class ExploreController: UICollectionViewController, UICollectionViewDelegateFlo
     var filterMaxPrice: String? = nil
     
     // Header Sort Variables
-
-    // Default Rank is Most Votes
-    var selectedHeaderRank:String = defaultRank
-    
     // Default Sort is Most Recent Listed Date, But Set to Default Rank
-    var selectedHeaderSort:String? = defaultRank
+    var selectedHeaderSort:String = defaultRank
 
     static let finishFetchingPostIdsNotificationName = NSNotification.Name(rawValue: "FinishFetchingPostIds")
     static let searchRefreshNotificationName = NSNotification.Name(rawValue: "SearchRefresh")
@@ -203,6 +199,21 @@ class ExploreController: UICollectionViewController, UICollectionViewDelegateFlo
         self.filterLocation = googlePlaceLocation
         self.filterLocationName = googlePlaceName
         self.filterGoogleLocationType = googlePlaceType
+        
+        
+        var defaultRange: String? = nil
+        if (self.filterGoogleLocationType?.contains("locality"))! {
+            // Selected City, So range is 25 Miles
+            defaultRange = "25"
+        } else if (self.filterGoogleLocationType?.contains("neighbourhood"))! {
+            // Selected City, So range is 25 Miles
+            defaultRange = "5"
+        } else if (self.filterGoogleLocationType?.contains("establishment"))! {
+            defaultRange = nil
+        } else {
+            defaultRange = "5"
+        }
+        self.filterRange = defaultRange
         self.refreshPostsForSearch()
 
     }
@@ -234,6 +245,7 @@ class ExploreController: UICollectionViewController, UICollectionViewDelegateFlo
                     }
                 }
             }
+        self.checkFilter()
     }
     
     
@@ -250,13 +262,18 @@ class ExploreController: UICollectionViewController, UICollectionViewDelegateFlo
     func fetchPostIds(){
         self.checkFilter()
         
-        if filterRange == nil && filterCaption == nil && selectedHeaderRank == "Recent"{
-            fetchPostIdsByDate()
-        } else if filterRange == nil && filterCaption == nil && selectedHeaderRank != "Recent" {
-            // If No Filter Location and Caption, Fetch Top Posts by Social
-            fetchPostIdsBySocialRank()
-        } else if filterCaption != nil && filterRange == nil {
-            // If has Filter Caption, Fetch All Posts with Emoji Tags
+        if filterRange == nil && filterCaption == nil {
+            // No Caption or Location Filter
+            if selectedHeaderSort == "Recent" {
+                // Find Most Recent Posts
+                fetchPostIdsByDate()
+            } else {
+                // Find Posts Ranked by Social Stats
+                fetchPostIdsBySocialRank()
+            }
+        }
+        else if filterCaption != nil && filterRange == nil {
+            // Fetch All Posts with Emoji Tags
             fetchPostIdsByTag()
         } else if filterLocation != nil {
             // If has Filter Location, Pull all Post Id for Location
@@ -267,13 +284,12 @@ class ExploreController: UICollectionViewController, UICollectionViewDelegateFlo
                 // Selected Google Location not a restaurant, search posts by Location with Range
                 fetchPostIdsByLocation()
             }
-            
         }
     }
     
     func fetchPostIdsByDate(){
-        print("Fetching Post Id By \(self.selectedHeaderRank)")
-        Database.fetchAllPostByCreationDate(fetchLimit: 10) { (fetchedPosts, fetchedPostIds) in
+        print("Fetching Post Id By \(self.selectedHeaderSort)")
+        Database.fetchAllPostByCreationDate(fetchLimit: 100) { (fetchedPosts, fetchedPostIds) in
             self.fetchedPostIds = fetchedPostIds
             self.displayedPosts = fetchedPosts
             self.filterSortFetchedPosts()
@@ -282,13 +298,13 @@ class ExploreController: UICollectionViewController, UICollectionViewDelegateFlo
     }
     
     func fetchPostIdsBySocialRank(){
-        print("Fetching Post Id By \(self.selectedHeaderRank)")
-        Database.fetchPostIDBySocialRank(firebaseRank: self.selectedHeaderRank, fetchLimit: 250) { (postIds) in
+        print("Fetching Post Id By \(self.selectedHeaderSort)")
+        Database.fetchPostIDBySocialRank(firebaseRank: self.selectedHeaderSort, fetchLimit: 250) { (postIds) in
             guard let postIds = postIds else {
-                print("Fetched Post Id By \(self.selectedHeaderRank) : Error, No Post Ids")
+                print("Fetched Post Id By \(self.selectedHeaderSort) : Error, No Post Ids")
                 return}
             
-            print("Fetched Post Id By \(self.selectedHeaderRank) : Success, \(postIds.count) Post Ids")
+            print("Fetched Post Id By \(self.selectedHeaderSort) : Success, \(postIds.count) Post Ids")
             self.fetchedPostIds = postIds
             NotificationCenter.default.post(name: ExploreController.finishFetchingPostIdsNotificationName, object: nil)
         }
@@ -338,23 +354,6 @@ class ExploreController: UICollectionViewController, UICollectionViewDelegateFlo
             print("Fetch Post ID By Location: ERROR, Is an Establishment")
             return}
         
-        var defaultRange: String? = nil
-        if (self.filterGoogleLocationType?.contains("locality"))! {
-            // Selected City, So range is 25 Miles
-            defaultRange = "25"
-        } else if (self.filterGoogleLocationType?.contains("neighbourhood"))! {
-            // Selected City, So range is 25 Miles
-            defaultRange = "5"
-        } else if (self.filterGoogleLocationType?.contains("establishment"))! {
-            defaultRange = nil
-        } else {
-            defaultRange = "5"
-        }
-        
-        if self.filterRange == nil {
-            self.filterRange = defaultRange
-        }
-        
         Database.fetchAllPostWithLocation(location: location, distance: Double(self.filterRange!)! ) { (fetchedPosts, fetchedPostIds) in
             self.fetchedPostIds = fetchedPostIds
             self.displayedPosts = fetchedPosts
@@ -389,7 +388,7 @@ class ExploreController: UICollectionViewController, UICollectionViewDelegateFlo
         Database.filterPosts(inputPosts: self.displayedPosts, filterCaption: self.filterCaption, filterRange: self.filterRange, filterLocation: self.filterLocation, filterMinRating: self.filterMinRating, filterType: self.filterType, filterMaxPrice: self.filterMaxPrice) { (filteredPosts) in
             
             // Sort Posts
-            Database.sortPosts(inputPosts: filteredPosts, selectedSort: self.selectedHeaderRank, selectedLocation: self.filterLocation, completion: { (filteredPosts) in
+            Database.sortPosts(inputPosts: filteredPosts, selectedSort: self.selectedHeaderSort, selectedLocation: self.filterLocation, completion: { (filteredPosts) in
                 
                 self.displayedPosts = []
                 if filteredPosts != nil {
@@ -412,15 +411,15 @@ class ExploreController: UICollectionViewController, UICollectionViewDelegateFlo
     }
     
     func refreshPostsForSearch(){
-        print("Refresh Posts For New Search")
+        print("Refresh Posts: Pull New Post Ids")
+        self.checkFilter()
         self.clearAllPosts()
         self.fetchPostIds()
-        self.checkFilter()
         self.collectionView?.refreshControl?.endRefreshing()
     }
     
     func refreshPostsForSort(){
-        print("Refresh Posts For Filter")
+        print("Refresh Posts: Not Pulling Post Ids")
         // Does not repull post ids, just resorts displayed posts
         self.checkFilter()
         self.displayedPosts = []
@@ -448,8 +447,7 @@ class ExploreController: UICollectionViewController, UICollectionViewDelegateFlo
         self.filterCaption = nil
         self.defaultSearchBar.text?.removeAll()
         
-        self.selectedHeaderRank = defaultRank
-        self.selectedHeaderSort = defaultSort
+        self.selectedHeaderSort = defaultRank
         self.isFiltering = false
     }
     
@@ -468,7 +466,7 @@ class ExploreController: UICollectionViewController, UICollectionViewDelegateFlo
         self.clearFilter()
         
         self.filterCaption = selectedCaption
-        self.filterRange = selectedRange!
+        self.filterRange = selectedRange
         self.filterLocation = selectedLocation
         self.filterLocationName = selectedLocationName
         
@@ -491,28 +489,6 @@ class ExploreController: UICollectionViewController, UICollectionViewDelegateFlo
         } else {
             self.isFiltering = false
         }
-    }
-    
-    
-    func headerSortSelected(sort: String) {
-        self.selectedHeaderSort = sort
-        self.collectionView?.reloadData()
-        
-        if (self.selectedHeaderSort == HeaderSortOptions[1] && self.filterLocation == nil){
-            print("Sort by Nearest, No Location, Look up Current Location")
-            LocationSingleton.sharedInstance.determineCurrentLocation()
-            let when = DispatchTime.now() + defaultGeoWaitTime // change 2 to desired number of seconds
-            DispatchQueue.main.asyncAfter(deadline: when) {
-                //Delay for 1 second to find current location
-                self.filterLocation = CurrentUser.currentLocation
-                self.refreshPostsForSort()
-            }
-        } else {
-            self.refreshPostsForSort()
-        }
-
-        
-        print("Filter Sort is ", self.selectedHeaderSort)
     }
     
     // Pagination
@@ -604,7 +580,7 @@ class ExploreController: UICollectionViewController, UICollectionViewDelegateFlo
 //        }
         header.selectedLocation = self.filterLocation
         header.selectedRange = self.filterRange
-        header.selectedRank = self.selectedHeaderRank
+        header.selectedRank = self.selectedHeaderSort
         header.isListView = self.isListView
         header.delegate = self
         return header
@@ -759,15 +735,15 @@ class ExploreController: UICollectionViewController, UICollectionViewDelegateFlo
             filterController.selectedLocationName = self.filterLocationName
             filterController.selectedGooglePlaceID = self.filterGoogleLocationID
             filterController.selectedGooglePlaceType = self.filterGoogleLocationType
+            filterController.selectedRange = self.filterRange
         }
         
         filterController.selectedCaption = self.filterCaption
-        filterController.selectedRange = self.filterRange
         filterController.selectedMinRating = self.filterMinRating
         filterController.selectedMaxPrice = self.filterMaxPrice
         filterController.selectedType = self.filterType
         
-        filterController.selectedSort = self.selectedHeaderSort!
+        filterController.selectedSort = self.selectedHeaderSort
         
         self.navigationController?.pushViewController(filterController, animated: true)
     }
@@ -785,14 +761,14 @@ class ExploreController: UICollectionViewController, UICollectionViewDelegateFlo
         return ul
     }()
     
-    func headerRankSelected(rank: String) {
-        
+    func headerSortSelected(sort: String){
+        self.selectedHeaderSort = sort
+
         if !self.isFiltering {
-            // Not Filtering for anything, so Pull in Post Ids by top social rank
-            self.selectedHeaderRank = rank
+            // Not Filtering for anything, so Pull in Post Ids by Recent or Social
             self.clearAllPosts()
             self.fetchPostIds()
-            print("Refreshing Post Ids for Rank: \(self.selectedHeaderRank), No Location")
+            print("Refreshing Post Ids for Rank: \(self.selectedHeaderSort), No Location")
         } else {
             // Filtered for something else, so just resorting posts based on social
             self.refreshPostsForSort()
@@ -800,8 +776,8 @@ class ExploreController: UICollectionViewController, UICollectionViewDelegateFlo
         
         
         view.addSubview(rankLabel)
-        rankLabel.anchor(top: topLayoutGuide.bottomAnchor, left: view.leftAnchor, bottom: nil, right: nil, paddingTop: 0, paddingLeft: 3, paddingBottom: 0, paddingRight: 3, width: 50, height: 40)
-        rankLabel.text = "Most \(self.selectedHeaderRank)"
+        rankLabel.anchor(top: topLayoutGuide.bottomAnchor, left: view.leftAnchor, bottom: nil, right: nil, paddingTop: 0, paddingLeft: 3, paddingBottom: 0, paddingRight: 2, width: 55, height: 40)
+        rankLabel.text = "Most \(self.selectedHeaderSort)"
         rankLabel.adjustsFontSizeToFitWidth = true
         
         rankLabel.force = 0.5

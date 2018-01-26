@@ -580,9 +580,7 @@ class FilterController: UIViewController, GMSAutocompleteViewControllerDelegate,
         } else {
             defaultRange = "5"
         }
-        if self.selectedRange == nil {
-            self.selectedRange = defaultRange
-        }
+        self.selectedRange = defaultRange
         
     }
     

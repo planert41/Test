@@ -242,38 +242,18 @@ class MainTabBarController: UITabBarController, UITabBarControllerDelegate, UIIm
         
         let homeNavController = templateNavController(unselectedImage: #imageLiteral(resourceName: "home_unselected"), selectedImage: #imageLiteral(resourceName: "home_selected"), rootViewController: HomeController(collectionViewLayout: HomeSortFilterHeaderFlowLayout()))
         
-        // search
-//        let searchNavController = templateNavController(unselectedImage: #imageLiteral(resourceName: "search_unselected"), selectedImage: #imageLiteral(resourceName: "search_selected"), rootViewController: UserSearchController(collectionViewLayout: UICollectionViewFlowLayout()))
-//        let searchNavController = templateNavController(unselectedImage: #imageLiteral(resourceName: "search_unselected"), selectedImage: #imageLiteral(resourceName: "search_selected"), rootViewController: ExploreController())
-        
         let searchNavController = templateNavController(unselectedImage: #imageLiteral(resourceName: "search_unselected"), selectedImage: #imageLiteral(resourceName: "search_selected"), rootViewController: ExploreController(collectionViewLayout: UICollectionViewFlowLayout()))
 
-        
-        
         let plusNavController = templateNavController(unselectedImage: #imageLiteral(resourceName: "plus_unselected"), selectedImage: #imageLiteral(resourceName: "plus_unselected"))
         
-        
-        //Lists
         let tabListController = TabListViewController()
         tabListController.displayUser = CurrentUser.user
-        let tabListNavController = UINavigationController(rootViewController: tabListController)
-        
-
-        
-        tabListNavController.tabBarItem.image = #imageLiteral(resourceName: "list_unfilled").withRenderingMode(.alwaysOriginal)
-        tabListNavController.tabBarItem.selectedImage = #imageLiteral(resourceName: "list_filled").withRenderingMode(.alwaysOriginal)
-        
-
-        
-        //user profile
+        let tabListNavController = templateNavController(unselectedImage: #imageLiteral(resourceName: "list_unfilled"), selectedImage: #imageLiteral(resourceName: "list_unfilled"), rootViewController: tabListController)
         
         let layout = StickyHeadersCollectionViewFlowLayout()
         let userProfileController = UserProfileController(collectionViewLayout: layout)
-        let userProfileNavController = UINavigationController(rootViewController: userProfileController)        
         
-        userProfileNavController.tabBarItem.image = #imageLiteral(resourceName: "profile_unselected")
-        userProfileNavController.tabBarItem.selectedImage = #imageLiteral(resourceName: "profile_selected")
-        
+        let userProfileNavController = templateNavController(unselectedImage: #imageLiteral(resourceName: "profile_unselected"), selectedImage: #imageLiteral(resourceName: "profile_selected"), rootViewController: userProfileController)
         tabBar.tintColor = .black
 
         viewControllers = [homeNavController, searchNavController, plusNavController, tabListNavController, userProfileNavController]

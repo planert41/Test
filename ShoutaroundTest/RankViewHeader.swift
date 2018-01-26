@@ -23,7 +23,7 @@ import Spring
 protocol RankViewHeaderDelegate {
     func didChangeToListView()
     func didChangeToGridView()
-    func headerRankSelected(rank: String)
+    func headerSortSelected(sort: String)
     func rangeSelected(range: String)
 }
 
@@ -185,7 +185,7 @@ class RankViewHeader: UICollectionViewCell, UIGestureRecognizerDelegate, UIPicke
             rankSegmentControl.setImage(#imageLiteral(resourceName: "send_filled").withRenderingMode(.alwaysOriginal), forSegmentAt: 3)
         }
         
-        delegate?.headerRankSelected(rank: self.selectedRank)
+        delegate?.headerSortSelected(sort: self.selectedRank)
     }
     
     // Set Up Range Picker for Distance Filtering

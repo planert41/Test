@@ -2357,6 +2357,7 @@ extension Database{
         }
         
         var tempPosts = inputPosts
+        print("Filter Start: \(tempPosts.count) Posts")
         
         // Filter Caption
         if filterCaption != nil && filterCaption != "" {
@@ -2424,19 +2425,47 @@ extension Database{
 //
 //        }
         
-        // Distances are updated in fetchallposts as they are filtered by distance
+        // Distances are updated while being filtered
         
         // Filter Range
         if filterLocation != nil && filterRange != nil && filterRange != globalRangeDefault {
-            tempPosts = tempPosts.filter { (post) -> Bool in
-                var filterDistance:Double = 99999999
-                if post.distance != nil {
-                    filterDistance = post.distance!
+            var tempFilterPosts: [Post] = []
+            for post in tempPosts {
+                var tempPost = post
+                if tempPost.locationGPS != nil {
+                    tempPost.distance = Double((tempPost.locationGPS?.distance(from: filterLocation!))!)
+                } else {
+                    tempPost.distance = 9999999
                 }
-                return filterDistance <= (Double(filterRange!)! * 1000)
+                
+                if tempPost.distance! <= (Double(filterRange!)! * 1000) {
+                    tempFilterPosts.append(tempPost)
+                }
             }
+            tempPosts = tempFilterPosts
+
             print("Filtered Post By Range: \(filterRange) AT \(filterLocation): \(tempPosts.count)")
         }
+        
+        
+        
+        
+        
+//        if filterLocation != nil && filterRange != nil && filterRange != globalRangeDefault {
+//            tempPosts = tempPosts.filter { (post) -> Bool in
+//                var filterDistance:Double = 99999999
+//                if let distance = Double((post.locationGPS?.distance(from: filterLocation!))!) {
+//                    post.distance = distance
+//                } else {
+//                    post.distance = filterDistance
+//                }
+////                if post.distance != nil {
+////                    filterDistance = post.distance!
+////                }
+//                return post.distance <= (Double(filterRange!)! * 1000)
+//            }
+//            print("Filtered Post By Range: \(filterRange) AT \(filterLocation): \(tempPosts.count)")
+//        }
         
         // Filter Rating
         if filterMinRating != 0 && filterMinRating != nil {
