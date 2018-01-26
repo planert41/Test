@@ -10,25 +10,25 @@
 import UIKit
 import Firebase
 
-protocol ListPhotoCellDelegate {
+protocol BackupListPhotoCellDelegate {
     func didTapComment(post:Post)
     func didTapUser(post:Post)
     func didTapLocation(post:Post)
     func didTapMessage(post:Post)
     func refreshPost(post:Post)
-
+    
     func deletePost(post:Post)
     func didTapPicture(post:Post)
 }
 
-class ListPhotoCell: UICollectionViewCell {
+class ListPhotoCellBackup: UICollectionViewCell {
     
     let adressLabelSize = 8 as CGFloat
-    var delegate: ListPhotoCellDelegate?
+    var delegate: BackupListPhotoCellDelegate?
     
     var bookmarkDate: Date?{
         didSet{
-//            let timeAgoDisplay = bookmarkDate?.timeAgoDisplay()
+            //            let timeAgoDisplay = bookmarkDate?.timeAgoDisplay()
             if let bookmarkDate = bookmarkDate {
                 let formatter = DateFormatter()
                 formatter.dateFormat = "MMM d YYYY"
@@ -41,7 +41,7 @@ class ListPhotoCell: UICollectionViewCell {
         didSet {
             
             if post?.image == nil {
-            guard let imageUrl = post?.imageUrl else {return}
+                guard let imageUrl = post?.imageUrl else {return}
                 photoImageView.loadImage(urlString: imageUrl)
             } else {
                 photoImageView.image = post?.image
@@ -61,10 +61,10 @@ class ListPhotoCell: UICollectionViewCell {
             }
             locationNameLabel.sizeToFit()
             
-
+            
             nonRatingEmojiLabel.text = (post?.ratingEmoji)! + (post?.nonRatingEmoji.joined())!
             nonRatingEmojiLabel.sizeToFit()
-//            ratingEmojiLabel.text = post?.ratingEmoji
+            //            ratingEmojiLabel.text = post?.ratingEmoji
             captionLabel.text = post?.caption
             captionLabel.sizeToFit()
             
@@ -84,7 +84,7 @@ class ListPhotoCell: UICollectionViewCell {
             guard let profileImageUrl = post?.user.profileImageUrl else {return}
             userProfileImageView.loadImage(urlString: profileImageUrl)
             
-       //     setupAttributedLocationName()
+            //     setupAttributedLocationName()
             
             likeButton.setImage(post?.hasLiked == true ? #imageLiteral(resourceName: "like_selected").withRenderingMode(.alwaysOriginal) : #imageLiteral(resourceName: "like_unselected").withRenderingMode(.alwaysOriginal), for: .normal)
             
@@ -92,18 +92,18 @@ class ListPhotoCell: UICollectionViewCell {
             
             
             
-//            print("Post Distance is",post?.distance)
+            //            print("Post Distance is",post?.distance)
             if post?.distance != nil && post?.locationGPS?.coordinate.longitude != 0 && post?.locationGPS?.coordinate.latitude != 0 {
                 
                 guard let postdistance = post?.distance else {return}
                 let distanceformat = ".2"
                 
                 if postdistance < 100000 {
-                // Convert to M to KM
-                let locationDistance = postdistance/1000
-                distanceLabel.text =  " \(locationDistance.format(f: distanceformat)) Miles"
+                    // Convert to M to KM
+                    let locationDistance = postdistance/1000
+                    distanceLabel.text =  " \(locationDistance.format(f: distanceformat)) Miles"
                 }
-                
+                    
                 else if postdistance >= 500000 {
                     
                     // Convert to M to KM
@@ -111,16 +111,12 @@ class ListPhotoCell: UICollectionViewCell {
                     distanceLabel.text =  ">500 Miles"
                 }
             } else {
-                    distanceLabel.text = ""
+                distanceLabel.text = ""
             }
             
             distanceLabel.sizeToFit()
             
-            if let postRating = post?.rating {
-                if postRating > 0 {
-                    starRatingLabel.rating = postRating
-                }
-            }
+            
         }
     }
     
@@ -185,8 +181,8 @@ class ListPhotoCell: UICollectionViewCell {
     let nonRatingEmojiLabel: UILabel = {
         let label = UILabel()
         label.text = "Emojis"
-        label.font = UIFont.boldSystemFont(ofSize: 13)
-        label.textAlignment = NSTextAlignment.left
+        label.font = UIFont.boldSystemFont(ofSize: 10)
+        label.textAlignment = NSTextAlignment.right
         label.backgroundColor = UIColor.white
         return label
     }()
@@ -199,8 +195,6 @@ class ListPhotoCell: UICollectionViewCell {
         label.backgroundColor = UIColor.white
         return label
     }()
-    
-    var starRatingLabel = RatingLabel(ratingScore: 0)
     
     let locationNameLabel: UILabel = {
         let label = UILabel()
@@ -229,8 +223,8 @@ class ListPhotoCell: UICollectionViewCell {
         let label = UILabel()
         label.font = UIFont.systemFont(ofSize: 10)
         label.numberOfLines = 0
-//        label.lineBreakMode = NSLineBreakMode.byWordWrapping
-//        label.sizeToFit()
+        //        label.lineBreakMode = NSLineBreakMode.byWordWrapping
+        //        label.sizeToFit()
         return label
     }()
     
@@ -272,7 +266,7 @@ class ListPhotoCell: UICollectionViewCell {
             self.post?.hasLiked = !(self.post?.hasLiked)!
             self.delegate?.refreshPost(post: self.post!)
         }
-    
+        
         self.likeButton.transform = CGAffineTransform(scaleX: 0.1, y: 0.1)
         
         UIView.animate(withDuration: 1.0,
@@ -284,7 +278,7 @@ class ListPhotoCell: UICollectionViewCell {
                         self?.likeButton.transform = .identity
             },
                        completion: nil)
-    
+        
     }
     
     // Bookmark
@@ -388,7 +382,7 @@ class ListPhotoCell: UICollectionViewCell {
         
     }
     
-// Username/Location Tap
+    // Username/Location Tap
     
     func usernameTap() {
         print("Tap username label", post?.user.username ?? "")
@@ -401,61 +395,54 @@ class ListPhotoCell: UICollectionViewCell {
         guard let post = post else {return}
         delegate?.didTapLocation(post: post)
     }
-
+    
     func handlePictureTap() {
-    guard let post = post else {return}
-    delegate?.didTapPicture(post: post)
+        guard let post = post else {return}
+        delegate?.didTapPicture(post: post)
     }
-
-
+    
+    
     override init(frame: CGRect) {
         super.init(frame:frame)
-
-// Photo Image View
+        
+        // Photo Image View
         
         addSubview(photoImageView)
         photoImageView.anchor(top: topAnchor, left: leftAnchor, bottom: bottomAnchor, right: nil, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
         
-//        photoImageView.widthAnchor.constraint(equalTo: self.frame.height, multiplier: 1).isActive = true
+        //        photoImageView.widthAnchor.constraint(equalTo: self.frame.height, multiplier: 1).isActive = true
         
-//        photoImageView.widthAnchor.constraint(equalToConstant: self.frame.height).isActive = true
+        //        photoImageView.widthAnchor.constraint(equalToConstant: self.frame.height).isActive = true
         photoImageView.widthAnchor.constraint(equalTo: photoImageView.heightAnchor, multiplier: 1).isActive = true
         
         let TapGesture = UITapGestureRecognizer(target: self, action: #selector(ListPhotoCell.handlePictureTap))
         photoImageView.addGestureRecognizer(TapGesture)
         photoImageView.isUserInteractionEnabled = true
         
-// Setup User Profile Image View
-
+        // Setup Bookmark Stack View
+        
         addSubview(userProfileImageView)
-        userProfileImageView.anchor(top: topAnchor, left: nil, bottom: nil, right: rightAnchor, paddingTop: 5, paddingLeft: 0, paddingBottom: 0, paddingRight: 5, width: 30, height: 30)
+        userProfileImageView.anchor(top: topAnchor, left: photoImageView.rightAnchor, bottom: nil, right: nil, paddingTop: 5, paddingLeft: 10, paddingBottom: 0, paddingRight: 0, width: 30, height: 30)
         userProfileImageView.layer.cornerRadius = 30/2
         userProfileImageView.clipsToBounds = true
         userProfileImageView.layer.borderWidth = 0.25
         userProfileImageView.layer.borderColor = UIColor.lightGray.cgColor
         
-// Add Rating Label
-        
-//        addSubview(starRatingLabel)
-//        starRatingLabel.anchor(top: userProfileImageView.topAnchor, left: nil, bottom: userProfileImageView.bottomAnchor, right: userProfileImageView.leftAnchor, paddingTop: 5, paddingLeft: 0, paddingBottom: 5, paddingRight: 2, width: 0, height: 0)
-//        starRatingLabel.widthAnchor.constraint(equalTo: starRatingLabel.heightAnchor, multiplier: 1).isActive = true
-//        starRatingLabel.layer.cornerRadius = self.starRatingLabel.frame.width/2
-        
-// Tagged Emoji Data
+        // Tagged Emoji Data
         
         addSubview(nonRatingEmojiLabel)
-        nonRatingEmojiLabel.anchor(top: nil, left: photoImageView.rightAnchor, bottom: nil, right: userProfileImageView.leftAnchor, paddingTop: 5, paddingLeft: 10, paddingBottom: 0, paddingRight: 5, width: 0, height: 15)
+        nonRatingEmojiLabel.anchor(top: nil, left: nil, bottom: nil, right: rightAnchor, paddingTop: 5, paddingLeft: 10, paddingBottom: 0, paddingRight: 5, width: 60, height: 10)
         nonRatingEmojiLabel.centerYAnchor.constraint(equalTo: userProfileImageView.centerYAnchor).isActive = true
         
-//        addSubview(usernameLabel)
-//        usernameLabel.anchor(top: userProfileImageView.topAnchor, left: userProfileImageView.rightAnchor, bottom: userProfileImageView.bottomAnchor, right: nonRatingEmojiLabel.leftAnchor, paddingTop: 0, paddingLeft: 5, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
-////        usernameLabel.heightAnchor.constraint(equalTo: userProfileImageView.heightAnchor, multiplier: 0.5).isActive = true
-//
-//        usernameLabel.centerYAnchor.constraint(equalTo: userProfileImageView.centerYAnchor).isActive = true
-//
+        addSubview(usernameLabel)
+        usernameLabel.anchor(top: userProfileImageView.topAnchor, left: userProfileImageView.rightAnchor, bottom: userProfileImageView.bottomAnchor, right: nonRatingEmojiLabel.leftAnchor, paddingTop: 0, paddingLeft: 5, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
+        //        usernameLabel.heightAnchor.constraint(equalTo: userProfileImageView.heightAnchor, multiplier: 0.5).isActive = true
         
-// Location Data
-
+        usernameLabel.centerYAnchor.constraint(equalTo: userProfileImageView.centerYAnchor).isActive = true
+        
+        
+        // Location Data
+        
         addSubview(locationNameLabel)
         locationNameLabel.anchor(top: userProfileImageView.bottomAnchor, left: photoImageView.rightAnchor, bottom: nil, right: rightAnchor, paddingTop: 5, paddingLeft: 10, paddingBottom: 0, paddingRight: 20, width: 0, height: 0)
         locationNameLabel.heightAnchor.constraint(lessThanOrEqualToConstant: 20).isActive = true
@@ -468,48 +455,48 @@ class ListPhotoCell: UICollectionViewCell {
         locationAdressLabel.sizeToFit()
         
         
-// Location Distance
-
+        // Location Distance
+        
         addSubview(distanceLabel)
         distanceLabel.anchor(top: nonRatingEmojiLabel.bottomAnchor, left: nonRatingEmojiLabel.leftAnchor, bottom: locationNameLabel.topAnchor, right: nonRatingEmojiLabel.rightAnchor, paddingTop: 5, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
         
-
+        
         
         
         let detailView = UIView()
         addSubview(detailView)
         detailView.anchor(top: nil, left: photoImageView.rightAnchor, bottom: bottomAnchor, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 20)
         
-//        addSubview(captionLabel)
-//        captionLabel.anchor(top: locationAdressLabel.bottomAnchor, left: photoImageView.rightAnchor, bottom: nil, right: rightAnchor, paddingTop: 5, paddingLeft: 10, paddingBottom: 2, paddingRight: 20, width: 0, height: 0)
-//        captionLabel.bottomAnchor.constraint(lessThanOrEqualTo: detailView.topAnchor).isActive = true
-//
-//        // Sets maximum caption label size
-//        captionLabel.frame = CGRect(x: 0, y: 0, width: self.frame.width/2, height: self.frame.height)
-//        captionLabel.sizeToFit()
+        addSubview(captionLabel)
+        captionLabel.anchor(top: locationAdressLabel.bottomAnchor, left: photoImageView.rightAnchor, bottom: nil, right: rightAnchor, paddingTop: 5, paddingLeft: 10, paddingBottom: 2, paddingRight: 20, width: 0, height: 0)
+        captionLabel.bottomAnchor.constraint(lessThanOrEqualTo: detailView.topAnchor).isActive = true
+        
+        // Sets maximum caption label size
+        captionLabel.frame = CGRect(x: 0, y: 0, width: self.frame.width/2, height: self.frame.height)
+        captionLabel.sizeToFit()
         
         
         
-//        captionLabel.backgroundColor = UIColor.yellow
-
-
-
+        //        captionLabel.backgroundColor = UIColor.yellow
+        
+        
+        
         
         // Add Action Buttons
-    
-//        addSubview(bookmarkCount)
-//        addSubview(bookmarkButton)
-//        addSubview(messageCount)
-//        addSubview(sendMessageButton)
-//        
-//        bookmarkCount.anchor(top: detailView.topAnchor, left: nil, bottom: detailView.bottomAnchor, right: detailView.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 5, width: 15, height: 0)
-//        
-//        bookmarkButton.anchor(top: detailView.topAnchor, left: nil, bottom: detailView.bottomAnchor, right: bookmarkCount.leftAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 2, width: 20, height: 0)
-//        
-//        messageCount.anchor(top: detailView.topAnchor, left: nil, bottom: detailView.bottomAnchor, right: bookmarkButton.leftAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 15, height: 0)
-//        
-//        sendMessageButton.anchor(top: detailView.topAnchor, left: nil, bottom: detailView.bottomAnchor, right: messageCount.leftAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 2, width: 20, height: 0)
-
+        
+        //        addSubview(bookmarkCount)
+        //        addSubview(bookmarkButton)
+        //        addSubview(messageCount)
+        //        addSubview(sendMessageButton)
+        //
+        //        bookmarkCount.anchor(top: detailView.topAnchor, left: nil, bottom: detailView.bottomAnchor, right: detailView.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 5, width: 15, height: 0)
+        //
+        //        bookmarkButton.anchor(top: detailView.topAnchor, left: nil, bottom: detailView.bottomAnchor, right: bookmarkCount.leftAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 2, width: 20, height: 0)
+        //
+        //        messageCount.anchor(top: detailView.topAnchor, left: nil, bottom: detailView.bottomAnchor, right: bookmarkButton.leftAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 15, height: 0)
+        //
+        //        sendMessageButton.anchor(top: detailView.topAnchor, left: nil, bottom: detailView.bottomAnchor, right: messageCount.leftAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 2, width: 20, height: 0)
+        
         
         addSubview(sendMessageButton)
         sendMessageButton.anchor(top: detailView.topAnchor, left: nil, bottom: detailView.bottomAnchor, right: detailView.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 2, paddingRight: 10, width: 0, height: 0)
@@ -521,46 +508,46 @@ class ListPhotoCell: UICollectionViewCell {
         addSubview(bookmarkButton)
         bookmarkButton.anchor(top: detailView.topAnchor, left: dateLabel.rightAnchor, bottom: detailView.bottomAnchor, right: nil, paddingTop: 0, paddingLeft: 5, paddingBottom: 2, paddingRight: 5, width: 0, height: 0)
         bookmarkButton.widthAnchor.constraint(equalTo: bookmarkButton.heightAnchor, multiplier: 1).isActive = true
-
         
-//        let buttonStackView = UIStackView(arrangedSubviews: [sendMessageButton, bookmarkButton])
-//        buttonStackView.distribution = .fillEqually
-//        buttonStackView.spacing = 10
-//        addSubview(buttonStackView)
-//        buttonStackView.anchor(top: detailView.topAnchor, left: nil, bottom: detailView.bottomAnchor, right: dateLabel.leftAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 10, width: 80, height: 0)
         
-
+        //        let buttonStackView = UIStackView(arrangedSubviews: [sendMessageButton, bookmarkButton])
+        //        buttonStackView.distribution = .fillEqually
+        //        buttonStackView.spacing = 10
+        //        addSubview(buttonStackView)
+        //        buttonStackView.anchor(top: detailView.topAnchor, left: nil, bottom: detailView.bottomAnchor, right: dateLabel.leftAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 10, width: 80, height: 0)
         
-//        let buttonStackView = UIStackView(arrangedSubviews: [likeButton, commentButton, sendMessageButton, bookmarkButton])
-
+        
+        
+        //        let buttonStackView = UIStackView(arrangedSubviews: [likeButton, commentButton, sendMessageButton, bookmarkButton])
+        
         //        buttonStackView.widthAnchor.constraint(equalTo: photoImageView.heightAnchor, multiplier: 1).isActive = true
-
-//        
-//        let stackview = UIStackView()
-//        
-//        stackview.axis = .vertical
-//        stackview.distribution = .fillEqually
-//        stackview.insertArrangedSubview(usernameRow, at: 0)
-//        stackview.insertArrangedSubview(locationNameLabel, at: 1)
-//        stackview.insertArrangedSubview(locationAdressLabel, at: 2)
-//       // stackview.insertArrangedSubview(captionTextView, at: 3)
-//        
-//        addSubview(stackview)
-//        stackview.anchor(top: topAnchor, left: leftAnchor, bottom: captionLabel.topAnchor, right: photoImageView.leftAnchor, paddingTop: 2, paddingLeft: 2, paddingBottom: 2, paddingRight: 2, width: 0, height: 0)
-
-//        usernameRow.addSubview(userProfileImageView)
-//        usernameRow.addSubview(usernameLabel)
-//        userProfileImageView.anchor(top: usernameRow.topAnchor, left: usernameRow.leftAnchor, bottom: usernameRow.bottomAnchor, right: nil, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
-//        userProfileImageView.widthAnchor.constraint(equalTo: userProfileImageView.heightAnchor, multiplier: 1).isActive = true
-//        userProfileImageView.layer.cornerRadius = 25/2
-//        
-//        usernameLabel.anchor(top: usernameRow.topAnchor, left: userProfileImageView.rightAnchor, bottom: usernameRow.bottomAnchor, right: distanceLabel.leftAnchor, paddingTop: 0, paddingLeft: 3, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
-
+        
+        //
+        //        let stackview = UIStackView()
+        //
+        //        stackview.axis = .vertical
+        //        stackview.distribution = .fillEqually
+        //        stackview.insertArrangedSubview(usernameRow, at: 0)
+        //        stackview.insertArrangedSubview(locationNameLabel, at: 1)
+        //        stackview.insertArrangedSubview(locationAdressLabel, at: 2)
+        //       // stackview.insertArrangedSubview(captionTextView, at: 3)
+        //
+        //        addSubview(stackview)
+        //        stackview.anchor(top: topAnchor, left: leftAnchor, bottom: captionLabel.topAnchor, right: photoImageView.leftAnchor, paddingTop: 2, paddingLeft: 2, paddingBottom: 2, paddingRight: 2, width: 0, height: 0)
+        
+        //        usernameRow.addSubview(userProfileImageView)
+        //        usernameRow.addSubview(usernameLabel)
+        //        userProfileImageView.anchor(top: usernameRow.topAnchor, left: usernameRow.leftAnchor, bottom: usernameRow.bottomAnchor, right: nil, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
+        //        userProfileImageView.widthAnchor.constraint(equalTo: userProfileImageView.heightAnchor, multiplier: 1).isActive = true
+        //        userProfileImageView.layer.cornerRadius = 25/2
+        //
+        //        usernameLabel.anchor(top: usernameRow.topAnchor, left: userProfileImageView.rightAnchor, bottom: usernameRow.bottomAnchor, right: distanceLabel.leftAnchor, paddingTop: 0, paddingLeft: 3, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
         
         
         
         
-// Adding Gesture Recognizers
+        
+        // Adding Gesture Recognizers
         
         userProfileImageView.isUserInteractionEnabled = true
         let usernameTap = UITapGestureRecognizer(target: self, action: #selector(ListPhotoCell.usernameTap))
@@ -576,7 +563,7 @@ class ListPhotoCell: UICollectionViewCell {
         locationAdressLabel.addGestureRecognizer(locationTapGesture2)
         locationAdressLabel.isUserInteractionEnabled = true
         
-// Setup Dividers
+        // Setup Dividers
         
         let topDividerView = UIView()
         topDividerView.backgroundColor = UIColor.lightGray
@@ -601,3 +588,4 @@ class ListPhotoCell: UICollectionViewCell {
     
     
 }
+

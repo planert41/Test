@@ -127,6 +127,7 @@ class ExploreController: UICollectionViewController, UICollectionViewDelegateFlo
         collectionView?.keyboardDismissMode = .onDrag
         collectionView?.delegate = self
         collectionView?.dataSource = self
+        collectionView?.contentInset = UIEdgeInsets(top: 0, left: 5, bottom: 0, right: 5)
 
         // Adding Empty Data Set
         collectionView?.emptyDataSetSource = self
@@ -523,7 +524,7 @@ class ExploreController: UICollectionViewController, UICollectionViewDelegateFlo
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumInteritemSpacingForSectionAt section: Int) -> CGFloat {
-        return 1
+        return 5
     }
     
     
@@ -534,7 +535,8 @@ class ExploreController: UICollectionViewController, UICollectionViewDelegateFlo
             return CGSize(width: view.frame.width, height: 120)
         } else {
             // Grid View Size
-            let width = (view.frame.width - 2) / 3
+//            let width = (view.frame.width - 2) / 3
+            let width = (view.frame.width - 5 - 10) / 2
             return CGSize(width: width, height: width)
         }
     }
