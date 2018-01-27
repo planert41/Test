@@ -395,6 +395,95 @@ class ListPhotoCell: UICollectionViewCell {
     
     var starRatingLabel = RatingLabel(ratingScore: 0, frame: CGRect.zero)
     
+    // Extra Tag Labels
+    
+    lazy var extraTagLabel1: UIButton = {
+        let label = UIButton()
+        label.tag = 0
+        label.addTarget(self, action: #selector(extraTagselected(_:)), for: .touchUpInside)
+        
+        label.backgroundColor = UIColor.white
+        label.layer.cornerRadius = 5
+        label.layer.masksToBounds = true
+        label.layer.borderWidth = 0
+        label.layer.borderColor = UIColor.gray.cgColor
+        
+        label.contentEdgeInsets = UIEdgeInsets(top: 0, left: 5, bottom: 0, right: 5)
+        
+        label.titleLabel?.font = UIFont.boldSystemFont(ofSize: 12)
+        label.titleLabel?.textAlignment = NSTextAlignment.center
+        
+        return label
+    }()
+    
+    lazy var extraTagLabel2: UIButton = {
+        let label = UIButton()
+        label.tag = 1
+        label.addTarget(self, action: #selector(extraTagselected(_:)), for: .touchUpInside)
+        
+        label.backgroundColor = UIColor.white
+        label.layer.cornerRadius = 5
+        label.layer.masksToBounds = true
+        label.layer.borderWidth = 0
+        label.layer.borderColor = UIColor.gray.cgColor
+        label.contentEdgeInsets = UIEdgeInsets(top: 0, left: 5, bottom: 0, right: 5)
+        
+        label.titleLabel?.font = UIFont.boldSystemFont(ofSize: 12)
+        label.titleLabel?.textAlignment = NSTextAlignment.center
+        
+        return label
+    }()
+    
+    lazy var extraTagLabel3: UIButton = {
+        let label = UIButton()
+        label.tag = 2
+        label.addTarget(self, action: #selector(extraTagselected(_:)), for: .touchUpInside)
+        
+        label.backgroundColor = UIColor.white
+        label.layer.cornerRadius = 5
+        label.layer.masksToBounds = true
+        label.layer.borderWidth = 0
+        label.layer.borderColor = UIColor.gray.cgColor
+        label.contentEdgeInsets = UIEdgeInsets(top: 0, left: 5, bottom: 0, right: 5)
+        
+        label.titleLabel?.font = UIFont.boldSystemFont(ofSize: 12)
+        label.titleLabel?.textAlignment = NSTextAlignment.center
+        
+        return label
+    }()
+    
+    lazy var extraTagLabel4: UIButton = {
+        let label = UIButton()
+        label.tag = 3
+        label.addTarget(self, action: #selector(extraTagselected(_:)), for: .touchUpInside)
+        
+        label.backgroundColor = UIColor.white
+        label.layer.cornerRadius = 5
+        label.layer.masksToBounds = true
+        label.layer.borderWidth = 1
+        label.layer.borderColor = UIColor.gray.cgColor
+        label.contentEdgeInsets = UIEdgeInsets(top: 0, left: 5, bottom: 0, right: 5)
+        
+        label.titleLabel?.font = UIFont.boldSystemFont(ofSize: 12)
+        label.titleLabel?.textAlignment = NSTextAlignment.center
+        
+        return label
+    }()
+    
+    func extraTagselected(_ sender: UIButton){
+//        guard let post = post else {return}
+//        let listTag = sender.tag
+//
+//        var selectedListName = self.extraTagsNameArray[listTag]
+//        var selectedListId = self.extraTagsIdArray[listTag]
+//
+//        print("Selected Creator Tag: \(selectedListName), \(selectedListId)")
+//        delegate?.didTapExtraTag(tagName: selectedListName, tagId: selectedListId, post: post)
+    }
+    
+    
+    
+    
     override init(frame: CGRect) {
         super.init(frame:frame)
         
@@ -436,7 +525,7 @@ class ListPhotoCell: UICollectionViewCell {
         nonRatingEmojiLabel.anchor(top: nil, left: photoImageView.rightAnchor, bottom: nil, right: nil, paddingTop: 0, paddingLeft: 10, paddingBottom: 0, paddingRight: 5, width: 0, height: 0)
         nonRatingEmojiLabel.rightAnchor.constraint(lessThanOrEqualTo: starRatingLabel.leftAnchor).isActive = true
         nonRatingEmojiLabel.centerYAnchor.constraint(equalTo: userProfileImageView.centerYAnchor).isActive = true
-        nonRatingEmojiLabel.heightAnchor.constraint(equalTo: userProfileImageView.heightAnchor, multiplier: 0.8)
+        nonRatingEmojiLabel.heightAnchor.constraint(lessThanOrEqualTo: userProfileImageView.heightAnchor, multiplier: 0.8).isActive = true
         nonRatingEmojiLabel.sizeToFit()
         
         // Location Data
@@ -455,7 +544,6 @@ class ListPhotoCell: UICollectionViewCell {
 
         
 
-        
         let detailView = UIView()
         addSubview(detailView)
         detailView.anchor(top: nil, left: photoImageView.rightAnchor, bottom: bottomAnchor, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 20)
@@ -488,57 +576,6 @@ class ListPhotoCell: UICollectionViewCell {
         
         addSubview(messageCount)
         messageCount.anchor(top: messageView.topAnchor, left: messageView.leftAnchor, bottom: messageView.bottomAnchor, right: messageView.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
-        
-        
-//        addSubview(sendMessageButton)
-//        sendMessageButton.anchor(top: detailView.topAnchor, left: nil, bottom: detailView.bottomAnchor, right: detailView.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 2, paddingRight: 10, width: 0, height: 0)
-//        sendMessageButton.widthAnchor.constraint(equalTo: sendMessageButton.heightAnchor, multiplier: 1).isActive = true
-        
-
-        
-//        addSubview(bookmarkButton)
-//        bookmarkButton.anchor(top: detailView.topAnchor, left: dateLabel.rightAnchor, bottom: detailView.bottomAnchor, right: nil, paddingTop: 0, paddingLeft: 5, paddingBottom: 2, paddingRight: 5, width: 0, height: 0)
-//        bookmarkButton.widthAnchor.constraint(equalTo: bookmarkButton.heightAnchor, multiplier: 1).isActive = true
-        
-        
-        
-        
-        
-        //        let buttonStackView = UIStackView(arrangedSubviews: [sendMessageButton, bookmarkButton])
-        //        buttonStackView.distribution = .fillEqually
-        //        buttonStackView.spacing = 10
-        //        addSubview(buttonStackView)
-        //        buttonStackView.anchor(top: detailView.topAnchor, left: nil, bottom: detailView.bottomAnchor, right: dateLabel.leftAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 10, width: 80, height: 0)
-        
-        
-        
-        //        let buttonStackView = UIStackView(arrangedSubviews: [likeButton, commentButton, sendMessageButton, bookmarkButton])
-        
-        //        buttonStackView.widthAnchor.constraint(equalTo: photoImageView.heightAnchor, multiplier: 1).isActive = true
-        
-        //
-        //        let stackview = UIStackView()
-        //
-        //        stackview.axis = .vertical
-        //        stackview.distribution = .fillEqually
-        //        stackview.insertArrangedSubview(usernameRow, at: 0)
-        //        stackview.insertArrangedSubview(locationNameLabel, at: 1)
-        //        stackview.insertArrangedSubview(locationAdressLabel, at: 2)
-        //       // stackview.insertArrangedSubview(captionTextView, at: 3)
-        //
-        //        addSubview(stackview)
-        //        stackview.anchor(top: topAnchor, left: leftAnchor, bottom: captionLabel.topAnchor, right: photoImageView.leftAnchor, paddingTop: 2, paddingLeft: 2, paddingBottom: 2, paddingRight: 2, width: 0, height: 0)
-        
-        //        usernameRow.addSubview(userProfileImageView)
-        //        usernameRow.addSubview(usernameLabel)
-        //        userProfileImageView.anchor(top: usernameRow.topAnchor, left: usernameRow.leftAnchor, bottom: usernameRow.bottomAnchor, right: nil, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
-        //        userProfileImageView.widthAnchor.constraint(equalTo: userProfileImageView.heightAnchor, multiplier: 1).isActive = true
-        //        userProfileImageView.layer.cornerRadius = 25/2
-        //
-        //        usernameLabel.anchor(top: usernameRow.topAnchor, left: userProfileImageView.rightAnchor, bottom: usernameRow.bottomAnchor, right: distanceLabel.leftAnchor, paddingTop: 0, paddingLeft: 3, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
-        
-        
-        
         
         
         // Adding Gesture Recognizers

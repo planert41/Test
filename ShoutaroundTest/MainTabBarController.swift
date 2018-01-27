@@ -195,6 +195,8 @@ class MainTabBarController: UITabBarController, UITabBarControllerDelegate, UIIm
         super.viewDidLoad()
 
         self.delegate = self
+        self.tabBar.barTintColor = UIColor.legitColor()
+//        self.tabBar.tintColor = UIColor.white
         
         if Auth.auth().currentUser == nil {
         

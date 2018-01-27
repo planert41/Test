@@ -55,38 +55,21 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
             let usernameTap = UITapGestureRecognizer(target: self, action: #selector(HomePostCell.usernameTap))
             usernameLabel.addGestureRecognizer(usernameTap)
             
-//            self.starRatingLabel.rating = (post?.rating)!
-//            if (post?.rating)! == 0 {
-//                starRatingLabelWidth?.constant = 0
-//            } else {
-////                starRatingLabelWidth?.constant = 25
-//
-//                starRatingLabelWidth?.constant = 0
-//            }
-//            self.starRatingLabel.layoutIfNeeded()
-            
             setupEmojiLabels()
-
-            
+ 
             guard let profileImageUrl = post?.user.profileImageUrl else {return}
             
             userProfileImageView.loadImage(urlString: profileImageUrl)
             setupExtraTags()
             setupLegitIcon()
-            
-            
-            
+
             captionLabel.text = post?.caption
             setupAttributedLocationName()
             setupAttributedCaption()
             setupAttributedSocialCount()
             
-//            locationLabel.text = post?.locationName.truncate(length: 30)
-//            adressLabel.text = post?.locationAdress.truncate(length: 60)
-            
             captionBubble.text = post?.caption
             captionBubble.sizeToFit()
-            
             
             // Distance
             if post?.distance != nil && post?.locationGPS?.coordinate.longitude != 0 && post?.locationGPS?.coordinate.latitude != 0 {
@@ -115,8 +98,6 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
             } else {
                 optionsButton.isHidden = true
             }
-            
-           // setupAttributedLocationName()
         }
     }
     
@@ -166,32 +147,27 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         
     }
     
-    
-    
     fileprivate func setupAttributedCaption(){
         
         guard let post = self.post else {return}
+        
+        let formatter = DateFormatter()
+        formatter.dateFormat = "MMM d YYYY, h:mm a"
+        let timeAgoDisplay = formatter.string(from: post.creationDate)
+        
+        let attributedText = NSAttributedString(string: timeAgoDisplay, attributes: [NSFontAttributeName: UIFont.systemFont(ofSize: 12),NSForegroundColorAttributeName: UIColor.gray])
+        
+        self.postDateLabel.attributedText = attributedText
+
         
 //        let attributedText = NSMutableAttributedString(string: post.user.username, attributes: [NSFontAttributeName: UIFont.boldSystemFont(ofSize: 14)])
 //
 //        attributedText.append(NSAttributedString(string: " \(post.caption)", attributes: [NSFontAttributeName: UIFont.systemFont(ofSize: 14)]))
 //
 //        attributedText.append(NSAttributedString(string: "\n\n", attributes: [NSFontAttributeName: UIFont.systemFont(ofSize: 4)]))
-        
-        
 //        let timeAgoDisplay = post.creationDate.timeAgoDisplay()
-        let formatter = DateFormatter()
-        formatter.dateFormat = "MMM d YYYY, h:mm a"
-        let timeAgoDisplay = formatter.string(from: post.creationDate)
-        
 //        attributedText.append(NSAttributedString(string: timeAgoDisplay, attributes: [NSFontAttributeName: UIFont.systemFont(ofSize: 12),NSForegroundColorAttributeName: UIColor.gray]))
-        
-        let attributedText = NSAttributedString(string: timeAgoDisplay, attributes: [NSFontAttributeName: UIFont.systemFont(ofSize: 12),NSForegroundColorAttributeName: UIColor.gray])
-
 //        self.captionLabel.attributedText = attributedText
-        self.postDateLabel.attributedText = attributedText
-        
-        
     }
     
     fileprivate func setupAttributedLocationName(){
@@ -210,21 +186,6 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         }
         
         self.locationLabel.text = displayLocationName
-//
-//
-//        let attributedText = NSMutableAttributedString(string: post.locationName.truncate(length: 20), attributes: [NSFontAttributeName: UIFont.boldSystemFont(ofSize: 12)])
-//
-//        if post.distance != nil && post.locationGPS?.coordinate.longitude != 0 && post.locationGPS?.coordinate.latitude != 0 {
-//
-//            let distanceformat = ".2"
-//
-//            // Convert to M to KM
-//            let locationDistance = post.distance!/1000
-//
-//            attributedText.append(NSAttributedString(string: " \(locationDistance.format(f: distanceformat)) KM", attributes: [NSFontAttributeName: UIFont.systemFont(ofSize: 10),NSForegroundColorAttributeName: UIColor.gray]))
-//        }
-//        self.locationLabel.attributedText = attributedText
-        
     }
     
     let userProfileImageView: CustomImageView = {
@@ -375,15 +336,6 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
                        completion: nil)
         
         self.delegate?.displaySelectedEmoji(emoji: displayEmoji!, emojitag: displayEmojiTag!)
-        
-//        var origin: CGPoint = selectedLabel.center;
-//        var topleft = CGPoint(x: selectedLabel.center.x - selectedLabel.bounds.size.width/2, y: selectedLabel.center.y - (selectedLabel.bounds.size.height / 2) - 200 )
-//        popView.backgroundColor = UIColor.blue
-//        popView = UIView(frame: CGRect(x: topleft.x, y: topleft.y, width: 200, height: 200))
-//        popView.frame.origin.x = topleft.x
-//        popView.frame.origin.y = topleft.y
-//        self.addSubview(popView)
-        
     }
     
     func ratingEmojiSelected(_ sender: UIGestureRecognizer){
@@ -531,127 +483,37 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
     
     
     func handleOptions() {
-        
         guard let post = post else {return}
         print("Options Button Pressed")
         delegate?.userOptionPost(post: post)
     }
     
-    lazy var extraTagLabel1: UIButton = {
-        let label = UIButton()
-        label.tag = 0
-        label.addTarget(self, action: #selector(extraTagselected(_:)), for: .touchUpInside)
-        
-        label.backgroundColor = UIColor.white
-        label.layer.cornerRadius = 5
-        label.layer.masksToBounds = true
-        label.layer.borderWidth = 0
-        label.layer.borderColor = UIColor.gray.cgColor
-
-        label.contentEdgeInsets = UIEdgeInsets(top: 0, left: 5, bottom: 0, right: 5)
-
-        label.titleLabel?.font = UIFont.boldSystemFont(ofSize: 12)
-        label.titleLabel?.textAlignment = NSTextAlignment.center
-
-        return label
+    // Extra Tags
+    
+    let extraTagView: UIView = {
+        let uv = UIView()
+        uv.backgroundColor = UIColor.clear
+        return uv
     }()
     
-    lazy var extraTagLabel2: UIButton = {
-        let label = UIButton()
-        label.tag = 1
-        label.addTarget(self, action: #selector(extraTagselected(_:)), for: .touchUpInside)
-        
-        label.backgroundColor = UIColor.white
-        label.layer.cornerRadius = 5
-        label.layer.masksToBounds = true
-        label.layer.borderWidth = 0
-        label.layer.borderColor = UIColor.gray.cgColor
-
-        label.contentEdgeInsets = UIEdgeInsets(top: 0, left: 5, bottom: 0, right: 5)
-
-        
-        label.titleLabel?.font = UIFont.boldSystemFont(ofSize: 12)
-        label.titleLabel?.textAlignment = NSTextAlignment.center
-
-        return label
-    }()
+    let extraTagFontSize: CGFloat = 13
+    let extraTagViewHeightSize: CGFloat = 25
+    var extraTagViewHeight:NSLayoutConstraint?
+    var extraTagsArray:[UIButton] = []
     
-    lazy var extraTagLabel3: UIButton = {
-        let label = UIButton()
-        label.tag = 2
-        label.addTarget(self, action: #selector(extraTagselected(_:)), for: .touchUpInside)
-        
-        label.backgroundColor = UIColor.white
-        label.layer.cornerRadius = 5
-        label.layer.masksToBounds = true
-        label.layer.borderWidth = 0
-        label.layer.borderColor = UIColor.gray.cgColor
-        label.contentEdgeInsets = UIEdgeInsets(top: 0, left: 5, bottom: 0, right: 5)
-
-        
-        label.titleLabel?.font = UIFont.boldSystemFont(ofSize: 12)
-        label.titleLabel?.textAlignment = NSTextAlignment.center
-
-        return label
-    }()
+    var extraTagsNameArray: [String] = []
+    var extraTagsIdArray: [String] = []
+    var userTagsNameArray: [String] = []
+    var userTagsIdArray: [String] = []
+    var creatorTagsNameArray: [String] = []
+    var creatorTagsIdArray: [String] = []
     
-    lazy var extraTagLabel4: UIButton = {
-        let label = UIButton()
-        label.tag = 3
-        label.addTarget(self, action: #selector(extraTagselected(_:)), for: .touchUpInside)
-        
-        label.backgroundColor = UIColor.white
-        label.layer.cornerRadius = 5
-        label.layer.masksToBounds = true
-        label.layer.borderWidth = 1
-        label.layer.borderColor = UIColor.gray.cgColor
-        label.contentEdgeInsets = UIEdgeInsets(top: 0, left: 5, bottom: 0, right: 5)
-
-        
-        label.titleLabel?.font = UIFont.boldSystemFont(ofSize: 12)
-        label.titleLabel?.textAlignment = NSTextAlignment.center
-
-        return label
-    }()
-    
-    lazy var extraTagLabel5: UIButton = {
-        let label = UIButton()
-        label.tag = 4
-        label.addTarget(self, action: #selector(extraTagselected(_:)), for: .touchUpInside)
-        
-        label.backgroundColor = UIColor.white
-        label.layer.cornerRadius = 5
-        label.layer.masksToBounds = true
-        label.layer.borderWidth = 1
-        label.layer.borderColor = UIColor.gray.cgColor
-        label.contentEdgeInsets = UIEdgeInsets(top: 0, left: 5, bottom: 0, right: 5)
-        
-        
-        label.titleLabel?.font = UIFont.boldSystemFont(ofSize: 12)
-        label.titleLabel?.textAlignment = NSTextAlignment.center
-        
-        return label
-    }()
-    
-    lazy var extraTagLabel6: UIButton = {
-        let label = UIButton()
-        label.tag = 5
-        label.addTarget(self, action: #selector(extraTagselected(_:)), for: .touchUpInside)
-        
-        label.backgroundColor = UIColor.white
-        label.layer.cornerRadius = 5
-        label.layer.masksToBounds = true
-        label.layer.borderWidth = 1
-        label.layer.borderColor = UIColor.gray.cgColor
-        label.contentEdgeInsets = UIEdgeInsets(top: 0, left: 5, bottom: 0, right: 5)
-        
-        
-        label.titleLabel?.font = UIFont.boldSystemFont(ofSize: 12)
-        label.titleLabel?.textAlignment = NSTextAlignment.center
-        
-        return label
-    }()
-
+    lazy var extraTagLabel1 = UIButton()
+    lazy var extraTagLabel2 = UIButton()
+    lazy var extraTagLabel3 = UIButton()
+    lazy var extraTagLabel4 = UIButton()
+    lazy var extraTagLabel5 = UIButton()
+    lazy var extraTagLabel6 = UIButton()
     
     func extraTagselected(_ sender: UIButton){
         guard let post = post else {return}
@@ -663,37 +525,6 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         print("Selected Creator Tag: \(selectedListName), \(selectedListId)")
         delegate?.didTapExtraTag(tagName: selectedListName, tagId: selectedListId, post: post)
     }
-    
-    
-    let extraTagView: UIView = {
-        let uv = UIView()
-        uv.backgroundColor = UIColor.clear
-        return uv
-    }()
-    
-    var extraTagViewHeight:NSLayoutConstraint?
-    
-    let creatorTagView: UIView = {
-        let uv = UIView()
-        uv.backgroundColor = UIColor.clear
-        return uv
-    }()
-
-    // Extra Tags
-    
-    let extraTagFontSize: CGFloat = 13
-    let extraTagViewHeightSize: CGFloat = 25
-    var extraTagsArray:[UIButton] = []
-    
-    var extraTagsNameArray: [String] = []
-    var extraTagsIdArray: [String] = []
-    var userTagsNameArray: [String] = []
-    var userTagsIdArray: [String] = []
-    var creatorTagsNameArray: [String] = []
-    var creatorTagsIdArray: [String] = []
-    
-
-
     
     
     func setupExtraTags() {
@@ -708,7 +539,7 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         
     // Reset Extra Tags
         extraTagsArray = [extraTagLabel1, extraTagLabel2, extraTagLabel3, extraTagLabel4,extraTagLabel5,extraTagLabel6]
-
+        
         for label in self.extraTagsArray {
             label.setTitle(nil, for: .normal)
             label.setImage(nil, for: .normal)
@@ -807,78 +638,50 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
                 
                 extraTagsArray[index].setTitle(extraTagsNameArray[index], for: .normal)
                 extraTagsArray[index].titleLabel?.font = UIFont.boldSystemFont(ofSize: extraTagFontSize)
+                extraTagsArray[index].titleLabel?.textAlignment = NSTextAlignment.center
                 extraTagsArray[index].layer.borderWidth = 1
                 extraTagsArray[index].layer.backgroundColor = UIColor.white.cgColor
                 extraTagsArray[index].layer.borderColor = UIColor.white.cgColor
+                extraTagsArray[index].layer.cornerRadius = 5
+                extraTagsArray[index].layer.masksToBounds = true
+                extraTagsArray[index].contentEdgeInsets = UIEdgeInsets(top: 0, left: 5, bottom: 0, right: 5)
+                extraTagsArray[index].addTarget(self, action: #selector(extraTagselected(_:)), for: .touchUpInside)
 
-
+                
                 if extraTagsNameArray[index] == bookmarkListName {
-                    //                    extraTagsArray[index].setTitleColor(UIColor.rgb(red: 255, green: 0, blue: 0), for: .normal)
                     extraTagsArray[index].setImage(#imageLiteral(resourceName: "bookmark_filled").withRenderingMode(.alwaysOriginal), for: .normal)
                     extraTagsArray[index].setTitle(nil, for: .normal)
                     extraTagsArray[index].setTitleColor(UIColor.white, for: .normal)
-                    //                    extraTagsArray[index].layer.backgroundColor = UIColor(hexColor: "FE5F55").cgColor
                     extraTagsArray[index].layer.backgroundColor = UIColor.white.cgColor
                 }
                     
                 else if extraTagsNameArray[index] == legitListName {
                     extraTagsArray[index].setTitleColor(UIColor.white, for: .normal)
                     extraTagsArray[index].setImage(#imageLiteral(resourceName: "legit").withRenderingMode(.alwaysOriginal), for: .normal)
-//                    extraTagsArray[index].imageView?.contentMode = UIViewContentMode.scaleAspectFit
-//                    extraTagsArray[index].layer.backgroundColor = UIColor(hexColor: "0B4F6C").cgColor
-                    extraTagsArray[index].layer.backgroundColor = UIColor(hexColor: "107896").cgColor
-
+                    extraTagsArray[index].layer.backgroundColor = UIColor.legitColor().cgColor
                 }
 
                 else if extraTagsIdArray[index] == "price" {
                     extraTagsArray[index].setTitleColor(UIColor.white, for: .normal)
-                    extraTagsArray[index].layer.backgroundColor = UIColor(hexColor: "107896").cgColor
+                    extraTagsArray[index].layer.backgroundColor = UIColor.legitColor().cgColor
                 }
+                    
                 else {
                     if index < userTagsNameArray.count {
                         // User Tags
                         extraTagsArray[index].setTitle(extraTagsNameArray[index].truncate(length: 10) + "!", for: .normal)
                         extraTagsArray[index].setTitleColor(UIColor.white, for: .normal)
-//                        extraTagsArray[index].layer.backgroundColor = UIColor(hexColor: "C02F1D").cgColor
                         extraTagsArray[index].layer.backgroundColor = UIColor(hexColor: "FE5F55").cgColor
-
-
-                    
                     } else {
                         // Creator Tags
                         extraTagsArray[index].setTitle(extraTagsNameArray[index].truncate(length: 10) + "!", for: .normal)
                         extraTagsArray[index].setTitleColor(UIColor.white, for: .normal)
-//                        extraTagsArray[index].layer.backgroundColor = UIColor(hexColor: "1496BB").cgColor
-                        extraTagsArray[index].layer.backgroundColor = UIColor(hexColor: "107896").cgColor
-
-
+                        extraTagsArray[index].layer.backgroundColor = UIColor.legitColor().cgColor
                     }
                 }
                 
                 extraTagsArray[index].layer.borderWidth = 1
 
-//                // Extra Tag Background Color (Different Fill Color for Creator Vs User
-//                if index < extraTagsNameArray.count - userTagsNameArray.count {
-//                    // Creator Tags
-//                    extraTagsArray[index].backgroundColor = UIColor.white
-//                    extraTagsArray[index].layer.borderColor = UIColor.lightGray.cgColor
-//                } else {
-//                    // User Tags
-//                    extraTagsArray[index].backgroundColor = UIColor.rgb(red: 215, green: 38, blue: 61).withAlphaComponent(0.1)
-//                    extraTagsArray[index].layer.borderColor = UIColor.rgb(red: 215, green: 38, blue: 61).cgColor
-//                }
-//
-//                // Green Border For Price
-//                if extraTagsIdArray[index] == "price" {
-//                    extraTagsArray[index].layer.borderColor = UIColor.lightGray.cgColor
-//                }
-                
-//                extraTagsArray[index].layer.borderColor = extraTagsArray[index].currentTitleColor.cgColor
-
-                
-                
-                
-                
         // Add Tags to View
                 let displayButton = extraTagsArray[index]
                 self.addSubview(displayButton)
@@ -896,7 +699,6 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         } else {
             extraTagViewHeight?.constant = extraTagViewHeightSize
         }
-    
     }
     
     func setupLegitIcon(){
@@ -970,30 +772,6 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
                 self.captionView.animate()
             }
         }
-        
-        
-        
-        //        captionView.addSubview(starRatingLabel)
-        //        starRatingLabel.anchor(top: captionBubble.bottomAnchor, left: nil, bottom: captionView.bottomAnchor, right: nil, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 30, height: 0)
-        //        starRatingLabel.centerXAnchor.constraint(equalTo: captionView.centerXAnchor).isActive = true
-        //        starRatingLabelHeight = NSLayoutConstraint(item: starRatingLabel, attribute: NSLayoutAttribute.height, relatedBy: NSLayoutRelation.equal, toItem: nil, attribute: NSLayoutAttribute.height, multiplier: 1, constant: 30)
-        //        starRatingLabelHeight?.isActive = true
-        //
-        //        if post.rating == 0 {
-        //            starRatingLabelHeight?.constant = 0
-        //        } else {
-        //            starRatingLabelHeight?.constant = 30
-        //        }
-        
-        //
-        //        let attributedString = NSMutableAttributedString(string: post.caption, attributes: [NSFontAttributeName: UIFont.boldSystemFont(ofSize: 30)])
-        //
-        //        let test = NSAttributedString(string: String(describing: post.rating!), attributes: [NSFontAttributeName: UIFont.boldSystemFont(ofSize: 30), NSBackgroundColorAttributeName: RatingLabel.init(ratingScore: post.rating!).ratingBackgroundColor()])
-        //
-        //        attributedString.append(test)
-        //        captionBubble.attributedText = attributedString
-        
-        
     }
     
     func hideCaptionBubble(){
@@ -1008,18 +786,6 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         inputView.transform = CGAffineTransform(scaleX: 0.1, y: 0.1)
 
         let animationDuration = 0.0
-        
-//        UIView.animate(withDuration: 1.0,
-//                       delay: 0,
-//                       usingSpringWithDamping: 0.2,
-//                       initialSpringVelocity: 6.0,
-//                       options: .allowUserInteraction,
-//                       animations: { [weak self] in
-//                        self?.likeButton.transform = .identity
-//                        self?.likeButton.layoutIfNeeded()
-//
-//            },
-//                       completion: nil)
         
         // Fade in the view
         UIView.animate(withDuration: animationDuration,delay: 0,
@@ -1097,11 +863,7 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         legitIcon.centerYAnchor.constraint(equalTo: usernameLabel.centerYAnchor).isActive = true
         legitIcon.isHidden = true
         
-        
 
-        
-        
-        
 // Photo Image View and Complex User Interactions
         
         photoImageView.anchor(top: headerView.bottomAnchor, left: leftAnchor, bottom: nil, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
@@ -1128,30 +890,11 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         pan.delegate = self
         self.photoImageView.addGestureRecognizer(pan)
 
-        
-
-        
-
-//        extraTagView.layer.borderWidth = 0.5
-//        extraTagView.layer.borderColor = UIColor.lightGray.cgColor
-        //        extraTagView.backgroundColor = UIColor.blue
-        
-
-        
         addSubview(actionBar)
         actionBar.anchor(top: photoImageView.bottomAnchor, left: leftAnchor, bottom: nil, right: rightAnchor, paddingTop: 5, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 40)
 
-        
-//        actionBar.layer.borderColor = UIColor.lightGray.cgColor
-//        actionBar.layer.borderWidth = 0.5
         setupActionButtons()
 
-//        let bottomDividerView = UIView()
-//        bottomDividerView.backgroundColor = UIColor.lightGray
-//        addSubview(bottomDividerView)
-//
-//        bottomDividerView.anchor(top: nil, left: leftAnchor, bottom: actionBar.bottomAnchor, right: rightAnchor, paddingTop: 1, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0.5)
-//
 
         // Location View
         
@@ -1173,8 +916,7 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         extraTagView.anchor(top: locationView.bottomAnchor, left: leftAnchor, bottom: nil, right: rightAnchor, paddingTop: 5, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
         extraTagViewHeight = NSLayoutConstraint(item: extraTagView, attribute: NSLayoutAttribute.height, relatedBy: NSLayoutRelation.equal, toItem: nil, attribute: NSLayoutAttribute.width, multiplier: 1, constant: extraTagViewHeightSize)
         extraTagViewHeight?.isActive = true
-
-        
+        extraTagsArray = [extraTagLabel1, extraTagLabel2, extraTagLabel3, extraTagLabel4,extraTagLabel5,extraTagLabel6]
         
         addSubview(postDateLabel)
         postDateLabel.anchor(top: extraTagView.bottomAnchor, left: leftAnchor, bottom: nil, right: rightAnchor, paddingTop: 0, paddingLeft: 10, paddingBottom: 0, paddingRight: 0, width: 0, height: 20)
