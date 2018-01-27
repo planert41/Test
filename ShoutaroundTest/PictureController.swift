@@ -125,7 +125,42 @@ class PictureController: UICollectionViewController, HomePostCellDelegate, UICol
     }
     
     func didTapExtraTag(tagName: String, tagId: String, post: Post) {
+        
+        // Check to see if its a list, price or something else
+        if tagId == "price"{
+            // Price Tag Selected
+            print("Price Selected")
+            // No Display
         }
+        else if tagId == "creatorLists"{
+            // Additional Tags
+            let listController  = ListController()
+            listController.displayedPost = post
+            listController.displayedListNameDictionary = post.creatorListId
+            self.navigationController?.pushViewController(listController, animated: true)
+        }
+        else if tagId == "userLists"{
+            // Additional Tags
+            let listController  = ListController()
+            listController.displayedPost = post
+            listController.displayedListNameDictionary = post.selectedListId
+            self.navigationController?.pushViewController(listController, animated: true)
+        }
+        else {
+            // List Tag Selected
+            Database.checkUpdateListDetailsWithPost(listName: tagName, listId: tagId, post: post, completion: { (fetchedList) in
+                if fetchedList == nil {
+                    // List Does not Exist
+                    self.alert(title: "List Error", message: "List Does Not Exist Anymore")
+                } else {
+                    let listViewController = ListViewController()
+                    listViewController.displayListId = tagId
+                    listViewController.displayList = fetchedList
+                    self.navigationController?.pushViewController(listViewController, animated: true)
+                }
+            })
+        }
+    }
     
     func refreshPost(post: Post) {
         

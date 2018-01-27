@@ -19,9 +19,11 @@ protocol ListPhotoCellDelegate {
     
     func deletePost(post:Post)
     func didTapPicture(post:Post)
+    func didTapExtraTag(tagName: String, tagId: String, post: Post)
+
 }
 
-class ListPhotoCell: UICollectionViewCell {
+class ListPhotoCell: UICollectionViewCell, UIGestureRecognizerDelegate {
     
     let adressLabelSize = 8 as CGFloat
     var delegate: ListPhotoCellDelegate?
@@ -102,6 +104,7 @@ class ListPhotoCell: UICollectionViewCell {
             distanceLabel.adjustsFontSizeToFitWidth = true
             distanceLabel.sizeToFit()
             
+//            setupExtraTags()
             setupAttributedSocialCount()
         }
     }
@@ -369,6 +372,7 @@ class ListPhotoCell: UICollectionViewCell {
     }
     
     // Social Counts
+    let detailView = UIView()
     var socialCounts = UIStackView()
     let socialCountFontSize: CGFloat = 10
     
@@ -395,90 +399,151 @@ class ListPhotoCell: UICollectionViewCell {
     
     var starRatingLabel = RatingLabel(ratingScore: 0, frame: CGRect.zero)
     
-    // Extra Tag Labels
+// Setup Extra Tags
     
-    lazy var extraTagLabel1: UIButton = {
-        let label = UIButton()
-        label.tag = 0
-        label.addTarget(self, action: #selector(extraTagselected(_:)), for: .touchUpInside)
-        
-        label.backgroundColor = UIColor.white
-        label.layer.cornerRadius = 5
-        label.layer.masksToBounds = true
-        label.layer.borderWidth = 0
-        label.layer.borderColor = UIColor.gray.cgColor
-        
-        label.contentEdgeInsets = UIEdgeInsets(top: 0, left: 5, bottom: 0, right: 5)
-        
-        label.titleLabel?.font = UIFont.boldSystemFont(ofSize: 12)
-        label.titleLabel?.textAlignment = NSTextAlignment.center
-        
-        return label
+    let extraTagView: UIView = {
+        let uv = UIView()
+        uv.backgroundColor = UIColor.clear
+        return uv
     }()
     
-    lazy var extraTagLabel2: UIButton = {
-        let label = UIButton()
-        label.tag = 1
-        label.addTarget(self, action: #selector(extraTagselected(_:)), for: .touchUpInside)
-        
-        label.backgroundColor = UIColor.white
-        label.layer.cornerRadius = 5
-        label.layer.masksToBounds = true
-        label.layer.borderWidth = 0
-        label.layer.borderColor = UIColor.gray.cgColor
-        label.contentEdgeInsets = UIEdgeInsets(top: 0, left: 5, bottom: 0, right: 5)
-        
-        label.titleLabel?.font = UIFont.boldSystemFont(ofSize: 12)
-        label.titleLabel?.textAlignment = NSTextAlignment.center
-        
-        return label
-    }()
+    let extraTagFontSize: CGFloat = 10
+    let extraTagViewHeightSize: CGFloat = 20
+    var extraTagViewHeight:NSLayoutConstraint?
     
-    lazy var extraTagLabel3: UIButton = {
-        let label = UIButton()
-        label.tag = 2
-        label.addTarget(self, action: #selector(extraTagselected(_:)), for: .touchUpInside)
-        
-        label.backgroundColor = UIColor.white
-        label.layer.cornerRadius = 5
-        label.layer.masksToBounds = true
-        label.layer.borderWidth = 0
-        label.layer.borderColor = UIColor.gray.cgColor
-        label.contentEdgeInsets = UIEdgeInsets(top: 0, left: 5, bottom: 0, right: 5)
-        
-        label.titleLabel?.font = UIFont.boldSystemFont(ofSize: 12)
-        label.titleLabel?.textAlignment = NSTextAlignment.center
-        
-        return label
-    }()
+    var extraTagsNameArray: [String] = []
+    var extraTagsIdArray: [String] = []
     
-    lazy var extraTagLabel4: UIButton = {
-        let label = UIButton()
-        label.tag = 3
-        label.addTarget(self, action: #selector(extraTagselected(_:)), for: .touchUpInside)
-        
-        label.backgroundColor = UIColor.white
-        label.layer.cornerRadius = 5
-        label.layer.masksToBounds = true
-        label.layer.borderWidth = 1
-        label.layer.borderColor = UIColor.gray.cgColor
-        label.contentEdgeInsets = UIEdgeInsets(top: 0, left: 5, bottom: 0, right: 5)
-        
-        label.titleLabel?.font = UIFont.boldSystemFont(ofSize: 12)
-        label.titleLabel?.textAlignment = NSTextAlignment.center
-        
-        return label
-    }()
+    var extraTagsArray:[UIButton] = []
+    lazy var extraTagLabel1 = UIButton()
+    lazy var extraTagLabel2 = UIButton()
+    lazy var extraTagLabel3 = UIButton()
+    lazy var extraTagLabel4 = UIButton()
     
     func extraTagselected(_ sender: UIButton){
-//        guard let post = post else {return}
-//        let listTag = sender.tag
-//
-//        var selectedListName = self.extraTagsNameArray[listTag]
-//        var selectedListId = self.extraTagsIdArray[listTag]
-//
-//        print("Selected Creator Tag: \(selectedListName), \(selectedListId)")
-//        delegate?.didTapExtraTag(tagName: selectedListName, tagId: selectedListId, post: post)
+        guard let post = post else {return}
+        let listTag = sender.tag
+
+        var selectedListName = self.extraTagsNameArray[listTag]
+        var selectedListId = self.extraTagsIdArray[listTag]
+
+        print("Selected Creator Tag: \(selectedListName), \(selectedListId)")
+        delegate?.didTapExtraTag(tagName: selectedListName, tagId: selectedListId, post: post)
+    }
+    
+    func setupExtraTags(){
+     
+        // Refresh Tags - Only Creator Tags
+        extraTagsNameArray.removeAll()
+        extraTagsIdArray.removeAll()
+
+        // Reset Extra Tags
+        extraTagsArray = [extraTagLabel1, extraTagLabel2, extraTagLabel3, extraTagLabel4]
+        
+        for label in self.extraTagsArray {
+            label.setTitle(nil, for: .normal)
+            label.setImage(nil, for: .normal)
+            label.layer.borderWidth = 0
+            label.removeFromSuperview()
+        }
+        
+        // Creator Created Tags
+        if post?.creatorListId != nil {
+            var listCount = post?.creatorListId?.count
+            
+            // Add Legit List
+            for list in (post?.creatorListId)! {
+                if list.value == legitListName {
+                    extraTagsNameArray.append(list.value)
+                    extraTagsIdArray.append(list.key)
+                }
+            }
+            
+            // Add Other List
+            for list in (post?.creatorListId)! {
+                if list.value != legitListName && list.value != bookmarkListName {
+                    if extraTagsNameArray.count < 2 {
+                        extraTagsNameArray.append(list.value)
+                        extraTagsIdArray.append(list.key)
+                    } else if extraTagsNameArray.count == 2 && listCount! == 3 {
+                        extraTagsNameArray.append(list.value)
+                        extraTagsIdArray.append(list.key)
+                    } else if extraTagsNameArray.count == 2 && listCount! > 3 {
+                        extraTagsNameArray.append("\(listCount! - 2)")
+                        extraTagsIdArray.append("creatorLists")
+                    }
+                }
+            }
+        }
+        
+        // Creator Price Tag
+        if post?.price != nil {
+            extraTagsNameArray.append((post?.price)!)
+            extraTagsIdArray.append("price")
+        }
+        
+        // Extra Tag Button Label
+        if extraTagsNameArray.count > 0 {
+            for (index, listName) in (self.extraTagsNameArray.enumerated()) {
+                
+                extraTagsArray[index].tag = index
+                extraTagsArray[index].setTitle(extraTagsNameArray[index], for: .normal)
+                extraTagsArray[index].titleLabel?.font = UIFont.boldSystemFont(ofSize: extraTagFontSize)
+                extraTagsArray[index].titleLabel?.textAlignment = NSTextAlignment.center
+                extraTagsArray[index].layer.borderWidth = 1
+                extraTagsArray[index].layer.backgroundColor = UIColor.white.cgColor
+                extraTagsArray[index].layer.borderColor = UIColor.white.cgColor
+                extraTagsArray[index].layer.cornerRadius = 5
+                extraTagsArray[index].layer.masksToBounds = true
+                extraTagsArray[index].contentEdgeInsets = UIEdgeInsets(top: 0, left: 5, bottom: 0, right: 5)
+                extraTagsArray[index].addTarget(self, action: #selector(extraTagselected(_:)), for: .touchUpInside)
+                
+                
+                if extraTagsNameArray[index] == bookmarkListName {
+                    extraTagsArray[index].setImage(#imageLiteral(resourceName: "bookmark_filled").withRenderingMode(.alwaysOriginal), for: .normal)
+                    extraTagsArray[index].setTitle(nil, for: .normal)
+                    extraTagsArray[index].setTitleColor(UIColor.white, for: .normal)
+                    extraTagsArray[index].layer.backgroundColor = UIColor.white.cgColor
+                }
+                    
+                else if extraTagsNameArray[index] == legitListName {
+                    extraTagsArray[index].setTitleColor(UIColor.white, for: .normal)
+                    extraTagsArray[index].setImage(#imageLiteral(resourceName: "legit").withRenderingMode(.alwaysOriginal), for: .normal)
+                    extraTagsArray[index].layer.backgroundColor = UIColor.legitColor().cgColor.copy(alpha: 0.5)
+                }
+                    
+                else if extraTagsIdArray[index] == "price" {
+                    extraTagsArray[index].setTitleColor(UIColor.white, for: .normal)
+                    extraTagsArray[index].layer.backgroundColor = UIColor.legitColor().cgColor
+                }
+                    
+                else {
+                        // Creator Tags
+                        extraTagsArray[index].setTitle(extraTagsNameArray[index].truncate(length: 10) + "!", for: .normal)
+                        extraTagsArray[index].setTitleColor(UIColor.white, for: .normal)
+                        extraTagsArray[index].layer.backgroundColor = UIColor.legitColor().cgColor
+                }
+                
+                extraTagsArray[index].layer.borderWidth = 1
+                
+                // Add Tags to View
+                let displayButton = extraTagsArray[index]
+                self.addSubview(displayButton)
+                
+                if index == 0{
+                    displayButton.anchor(top: extraTagView.topAnchor, left: extraTagView.leftAnchor, bottom: extraTagView.bottomAnchor, right: nil, paddingTop: 1, paddingLeft: 10, paddingBottom: 1, paddingRight: 0, width: 0, height: 0)
+                } else {
+                    displayButton.anchor(top: extraTagView.topAnchor, left: extraTagsArray[index - 1].rightAnchor, bottom: extraTagView.bottomAnchor, right: nil, paddingTop: 1, paddingLeft: 6, paddingBottom: 1, paddingRight: 0, width: 0, height: 0)
+                }
+            }
+        }
+        
+        if extraTagsNameArray.count == 0 {
+            extraTagViewHeight?.constant = 0
+        } else {
+            extraTagViewHeight?.constant = extraTagViewHeightSize
+        }
+        
     }
     
     
@@ -543,40 +608,23 @@ class ListPhotoCell: UICollectionViewCell {
         distanceLabel.sizeToFit()
 
         
-
-        let detailView = UIView()
         addSubview(detailView)
         detailView.anchor(top: nil, left: photoImageView.rightAnchor, bottom: bottomAnchor, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 20)
+        setupSocialAndDateViews()
         
+//        addSubview(extraTagView)
+//        extraTagView.anchor(top: nil, left: photoImageView.rightAnchor, bottom: detailView.topAnchor, right: rightAnchor, paddingTop: 5, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
+//        extraTagViewHeight = NSLayoutConstraint(item: extraTagView, attribute: NSLayoutAttribute.height, relatedBy: NSLayoutRelation.equal, toItem: nil, attribute: NSLayoutAttribute.width, multiplier: 1, constant: extraTagViewHeightSize)
+//        extraTagViewHeight?.isActive = true
+//
         addSubview(captionLabel)
         captionLabel.anchor(top: locationNameLabel.bottomAnchor, left: photoImageView.rightAnchor, bottom: nil, right: rightAnchor, paddingTop: 5, paddingLeft: 10, paddingBottom: 2, paddingRight: 20, width: 0, height: 0)
         captionLabel.bottomAnchor.constraint(lessThanOrEqualTo: detailView.topAnchor).isActive = true
         
         // Sets maximum caption label size
-        captionLabel.frame = CGRect(x: 0, y: 0, width: self.frame.width/2, height: self.frame.height)
+//        captionLabel.frame = CGRect(x: 0, y: 0, width: self.frame.width/2, height: self.frame.height)
         captionLabel.sizeToFit()
-        
-        addSubview(dateLabel)
-        dateLabel.textAlignment = NSTextAlignment.right
-        dateLabel.anchor(top: detailView.topAnchor, left: nil, bottom: detailView.bottomAnchor, right: detailView.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 5, width: 0, height: 0)
-        dateLabel.sizeToFit()
-        
-        
-        
-        let socialCounts = UIStackView(arrangedSubviews: [voteView, listView, messageView])
-        socialCounts.distribution = .fillEqually
-        addSubview(socialCounts)
-        socialCounts.anchor(top: detailView.topAnchor, left: detailView.leftAnchor, bottom: detailView.bottomAnchor, right: dateLabel.leftAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
-        
-        addSubview(voteCount)
-        voteCount.anchor(top: voteView.topAnchor, left: voteView.leftAnchor, bottom: voteView.bottomAnchor, right: voteView.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
-        
-        addSubview(listCount)
-        listCount.anchor(top: listView.topAnchor, left: listView.leftAnchor, bottom: listView.bottomAnchor, right: listView.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
-        
-        addSubview(messageCount)
-        messageCount.anchor(top: messageView.topAnchor, left: messageView.leftAnchor, bottom: messageView.bottomAnchor, right: messageView.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
-        
+
         
         // Adding Gesture Recognizers
         
@@ -609,6 +657,31 @@ class ListPhotoCell: UICollectionViewCell {
         
         bottomDividerView.anchor(top: bottomAnchor, left: leftAnchor, bottom: nil, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0.5)
         
+        
+    }
+    
+    func setupSocialAndDateViews(){
+        
+        addSubview(dateLabel)
+        dateLabel.textAlignment = NSTextAlignment.right
+        dateLabel.anchor(top: detailView.topAnchor, left: nil, bottom: detailView.bottomAnchor, right: detailView.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 5, width: 0, height: 0)
+        dateLabel.sizeToFit()
+        
+        
+        
+        let socialCounts = UIStackView(arrangedSubviews: [voteView, listView, messageView])
+        socialCounts.distribution = .fillEqually
+        addSubview(socialCounts)
+        socialCounts.anchor(top: detailView.topAnchor, left: detailView.leftAnchor, bottom: detailView.bottomAnchor, right: dateLabel.leftAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
+        
+        addSubview(voteCount)
+        voteCount.anchor(top: voteView.topAnchor, left: voteView.leftAnchor, bottom: voteView.bottomAnchor, right: voteView.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
+        
+        addSubview(listCount)
+        listCount.anchor(top: listView.topAnchor, left: listView.leftAnchor, bottom: listView.bottomAnchor, right: listView.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
+        
+        addSubview(messageCount)
+        messageCount.anchor(top: messageView.topAnchor, left: messageView.leftAnchor, bottom: messageView.bottomAnchor, right: messageView.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
         
     }
     

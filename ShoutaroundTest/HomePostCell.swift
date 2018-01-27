@@ -219,83 +219,19 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
     func openLegitList(){
         print("Open Legit List")
     }
-
-    lazy var ratingEmojiLabel: UILabel = {
-        let label = UILabel()
-        label.text = "Emojis"
-        label.font = UIFont.boldSystemFont(ofSize: 25)
-        label.textAlignment = NSTextAlignment.right
-        label.backgroundColor = UIColor.clear
-        let tap = UITapGestureRecognizer(target: self, action: #selector(ratingEmojiSelected(_:)))
-        label.addGestureRecognizer(tap)
-        label.isUserInteractionEnabled = true
-        return label
-        
-    }()
     
-    
-    lazy var nonRatingEmojiLabel1: UILabel = {
-        let label = UILabel()
-        let tap = UITapGestureRecognizer(target: self, action: #selector(nonRatingEmojiSelected(_:)))
-        label.addGestureRecognizer(tap)
-        label.isUserInteractionEnabled = true
-        label.backgroundColor = UIColor.clear
-        label.font = UIFont.boldSystemFont(ofSize: 20)
-        label.tag = 0
-        return label
-    }()
-    
-    lazy var nonRatingEmojiLabel2: UILabel = {
-        let label = UILabel()
-        let tap = UITapGestureRecognizer(target: self, action: #selector(nonRatingEmojiSelected(_:)))
-        label.addGestureRecognizer(tap)
-        label.isUserInteractionEnabled = true
-        label.backgroundColor = UIColor.clear
-        label.font = UIFont.boldSystemFont(ofSize: 20)
-        label.tag = 1
-        return label
-    }()
-    
-    lazy var nonRatingEmojiLabel3: UILabel = {
-        let label = UILabel()
-        let tap = UITapGestureRecognizer(target: self, action: #selector(nonRatingEmojiSelected(_:)))
-        label.addGestureRecognizer(tap)
-        label.isUserInteractionEnabled = true
-        label.backgroundColor = UIColor.clear
-        label.font = UIFont.boldSystemFont(ofSize: 20)
-        label.tag = 2
-        return label
-    }()
-    
-    lazy var nonRatingEmojiLabel4: UILabel = {
-        let label = UILabel()
-        let tap = UITapGestureRecognizer(target: self, action: #selector(nonRatingEmojiSelected(_:)))
-        label.addGestureRecognizer(tap)
-        label.isUserInteractionEnabled = true
-        label.backgroundColor = UIColor.clear
-        label.font = UIFont.boldSystemFont(ofSize: 20)
-        label.tag = 3
-        return label
-    }()
-    
-    lazy var nonRatingEmojiLabel5: UILabel = {
-        let label = UILabel()
-        let tap = UITapGestureRecognizer(target: self, action: #selector(nonRatingEmojiSelected(_:)))
-        label.addGestureRecognizer(tap)
-        label.isUserInteractionEnabled = true
-        label.backgroundColor = UIColor.clear
-        label.font = UIFont.boldSystemFont(ofSize: 20)
-        label.tag = 4
-        return label
-    }()
-
+    // Non Rating Emoji Labels
     var nonRatingEmojiLabelArray:[UILabel] = []
+    lazy var nonRatingEmojiLabel1 = UILabel()
+    lazy var nonRatingEmojiLabel2 = UILabel()
+    lazy var nonRatingEmojiLabel3 = UILabel()
+    lazy var nonRatingEmojiLabel4 = UILabel()
+    lazy var nonRatingEmojiLabel5 = UILabel()
+
     
     func setupEmojiLabels(){
         
         guard let post = post else {return}
-        
-        self.ratingEmojiLabel.text = self.post?.ratingEmoji
         
         for label in self.nonRatingEmojiLabelArray {
             label.text = ""
@@ -332,34 +268,6 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
                        options: .allowUserInteraction,
                        animations: { [weak self] in
                         selectedLabel.transform = .identity
-            },
-                       completion: nil)
-        
-        self.delegate?.displaySelectedEmoji(emoji: displayEmoji!, emojitag: displayEmojiTag!)
-    }
-    
-    func ratingEmojiSelected(_ sender: UIGestureRecognizer){
-        print("Rating Emoji Selected")
-        
-        guard let post = post else {return}
-        
-        var displayEmoji = self.post?.ratingEmoji
-        var displayEmojiTag = displayEmoji
-        
-        if let emojiTagLookup = ReverseEmojiDictionary.key(forValue: displayEmoji!) {
-            displayEmojiTag = emojiTagLookup
-        } else {
-        }
-        
-        self.ratingEmojiLabel.transform = CGAffineTransform(scaleX: 0.5, y: 0.5)
-        
-        UIView.animate(withDuration: 1.0,
-                       delay: 0,
-                       usingSpringWithDamping: 0.2,
-                       initialSpringVelocity: 6.0,
-                       options: .allowUserInteraction,
-                       animations: { [weak self] in
-                        self?.ratingEmojiLabel.transform = .identity
             },
                        completion: nil)
         
@@ -499,7 +407,6 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
     let extraTagFontSize: CGFloat = 13
     let extraTagViewHeightSize: CGFloat = 25
     var extraTagViewHeight:NSLayoutConstraint?
-    var extraTagsArray:[UIButton] = []
     
     var extraTagsNameArray: [String] = []
     var extraTagsIdArray: [String] = []
@@ -508,6 +415,7 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
     var creatorTagsNameArray: [String] = []
     var creatorTagsIdArray: [String] = []
     
+    var extraTagsArray:[UIButton] = []
     lazy var extraTagLabel1 = UIButton()
     lazy var extraTagLabel2 = UIButton()
     lazy var extraTagLabel3 = UIButton()
@@ -636,6 +544,7 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         if extraTagsNameArray.count > 0 {
             for (index, listName) in (self.extraTagsNameArray.enumerated()) {
                 
+                extraTagsArray[index].tag = index
                 extraTagsArray[index].setTitle(extraTagsNameArray[index], for: .normal)
                 extraTagsArray[index].titleLabel?.font = UIFont.boldSystemFont(ofSize: extraTagFontSize)
                 extraTagsArray[index].titleLabel?.textAlignment = NSTextAlignment.center
@@ -818,7 +727,6 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         addSubview(userProfileImageView)
         addSubview(usernameLabel)
         addSubview(emojiDetailLabel)
-        addSubview(ratingEmojiLabel)
         addSubview(bookmarkButton)
 //        addSubview(starRatingLabel)
         addSubview(legitIcon)
@@ -830,6 +738,15 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         nonRatingEmojiLabelArray = [nonRatingEmojiLabel1, nonRatingEmojiLabel2, nonRatingEmojiLabel3, nonRatingEmojiLabel4, nonRatingEmojiLabel5]
         
         for (index,label) in nonRatingEmojiLabelArray.enumerated(){
+            
+            label.tag = index
+            label.text = "Emojis"
+            label.font = UIFont.boldSystemFont(ofSize: 25)
+            label.textAlignment = NSTextAlignment.right
+            label.backgroundColor = UIColor.clear
+            label.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(nonRatingEmojiSelected(_:))))
+            label.isUserInteractionEnabled = true
+            
             addSubview(label)
             
             if index == 0{
@@ -1406,4 +1323,5 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
     
     
 }
+
 

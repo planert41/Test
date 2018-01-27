@@ -31,6 +31,7 @@ pod 'IQKeyboardManagerSwift'
 pod 'UIFontComplete'
 pod 'Spring', :git => 'https://github.com/MengTo/Spring.git'
 pod 'EmptyDataSet-Swift', '~> 4.0.2'
+pod 'MaterialComponents'
 
 
 

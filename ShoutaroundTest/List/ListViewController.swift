@@ -194,14 +194,14 @@ class ListViewController: UIViewController, UICollectionViewDelegate, UICollecti
         print("Refresh List")
         self.clearAllPost()
         self.clearFilter()
-        self.collectionView.reloadData()
+//        self.collectionView.reloadData()
         self.fetchListPosts()
         self.collectionView.refreshControl?.endRefreshing()
     }
     
     func refreshPostsForFilter(){
         self.clearAllPost()
-        self.collectionView.reloadData()
+//        self.collectionView.reloadData()
         self.fetchListPosts()
         self.collectionView.refreshControl?.endRefreshing()
     }
@@ -404,6 +404,40 @@ class ListViewController: UIViewController, UICollectionViewDelegate, UICollecti
         return CGSize(width: view.frame.width, height: 30 + 5 + 5)
     }
     
+    // Enable swipe-to-dismiss items.
+    func collectionViewAllowsSwipeToDismissItem(collectionView: UICollectionView) -> Bool {
+        return true
+    }
+    
+    // Override permissions at specific index paths.
+    func collectionView(collectionView: UICollectionView,
+                                 canSwipeToDismissItemAtIndexPath indexPath: NSIndexPath) -> Bool {
+        // In this example we are allowing all items to be dismissed except this first item.
+        return true
+    }
+    
+    // Remove swiped index paths from our data.
+    func collectionView(collectionView: UICollectionView,
+                                 willDeleteItemsAtIndexPaths indexPaths: [NSIndexPath]) {
+        let deleteAlert = UIAlertController(title: "Delete", message: "Remove Post From List?", preferredStyle: UIAlertControllerStyle.alert)
+        
+        deleteAlert.addAction(UIAlertAction(title: "OK", style: .default, handler: { (action: UIAlertAction!) in
+            for indexPath in indexPaths {
+                // Remove from Current View
+                let deletePost = self.fetchedPosts[indexPath.row]
+                self.fetchedPosts.remove(at: indexPath.row)
+                self.collectionView.deleteItems(at: [indexPath as IndexPath])
+                Database.DeletePostForList(postId: deletePost.id!, listId: self.displayListId, postCreationDate: nil)
+            }
+        }))
+        
+        deleteAlert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: { (action: UIAlertAction!) in
+            print("Handle Cancel Logic here")
+        }))
+        present(deleteAlert, animated: true, completion: nil)
+        
+    }
+    
     // Empty Data Set Delegates
     
     // EMPTY DATA SET DELEGATES
@@ -594,6 +628,41 @@ class ListViewController: UIViewController, UICollectionViewDelegate, UICollecti
     
     func didTapExtraTag(tagName: String, tagId: String, post: Post) {
         
+        // Check to see if its a list, price or something else
+        if tagId == "price"{
+            // Price Tag Selected
+            print("Price Selected")
+            self.filterMaxPrice = tagName
+            self.refreshPostsForFilter()
+        }
+        else if tagId == "creatorLists"{
+            // Additional Tags
+            let listController  = ListController()
+            listController.displayedPost = post
+            listController.displayedListNameDictionary = post.creatorListId
+            self.navigationController?.pushViewController(listController, animated: true)
+        }
+        else if tagId == "userLists"{
+            // Additional Tags
+            let listController  = ListController()
+            listController.displayedPost = post
+            listController.displayedListNameDictionary = post.selectedListId
+            self.navigationController?.pushViewController(listController, animated: true)
+        }
+        else {
+            // List Tag Selected
+            Database.checkUpdateListDetailsWithPost(listName: tagName, listId: tagId, post: post, completion: { (fetchedList) in
+                if fetchedList == nil {
+                    // List Does not Exist
+                    self.alert(title: "List Error", message: "List Does Not Exist Anymore")
+                } else {
+                    let listViewController = ListViewController()
+                    listViewController.displayListId = tagId
+                    listViewController.displayList = fetchedList
+                    self.navigationController?.pushViewController(listViewController, animated: true)
+                }
+            })
+        }
     }
     
     func refreshPost(post: Post) {
