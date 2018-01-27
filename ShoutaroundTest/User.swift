@@ -25,7 +25,7 @@ struct User {
     var followersCount: Int = 0
     var votes_received: Int = 0
     var lists_created: Int = 0
-    
+
 
     init(uid: String, dictionary: [String:Any]) {
         self.username = dictionary["username"] as? String ?? ""
@@ -66,6 +66,10 @@ struct CurrentUser {
     static var listIds: [String] = []
     static var lists: [List] = []
     //static var currentLocation: CLLocation? = CLLocation(latitude: 41.9735039, longitude: -87.66775139999999)
+    
+    // Inbox
+    static var inboxThreads: [MessageThread] = []
+    
     
     static var user: User? {
         didSet{

@@ -77,9 +77,9 @@ struct Post {
     
 
     var creatorUID: String?
-    var creatorListId: [String:String]?
+    var creatorListId: [String:String]? = [:]
     
-    var selectedListId: [String:String]?
+    var selectedListId: [String:String]? = [:]
     var listedDate: Date? = nil
 
     var ratingEmoji: String?
@@ -127,14 +127,13 @@ struct Post {
         self.locationGooglePlaceID = dictionary["googlePlaceID"] as? String ?? ""
         self.creatorUID = dictionary["creatorUID"] as? String ?? ""
         
-        self.creatorListId = dictionary["lists"] as? [String:String]? ?? nil
+        self.creatorListId = dictionary["lists"] as? [String:String]? ?? [:]
         
         if self.creatorUID == Auth.auth().currentUser?.uid {
             self.selectedListId = self.creatorListId
         }
         
-        self.likeCount = dictionary["likeCount"] as? Int ?? 0
-        self.listCount = dictionary["bookmarkCount"] as? Int ?? 0
+        self.listCount = dictionary["listCount"] as? Int ?? 0
         self.messageCount = dictionary["messageCount"] as? Int ?? 0
         self.voteCount = dictionary["voteCount"] as? Int ?? 0
         

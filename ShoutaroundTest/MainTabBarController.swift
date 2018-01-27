@@ -224,14 +224,33 @@ class MainTabBarController: UITabBarController, UITabBarControllerDelegate, UIIm
         //        3. Pull Social Stat Details (Voted Post Ids, Following, Followers)
         
         Database.fetchUserWithUID(uid: uid) { (user) in
+            // Fetch User
             CurrentUser.user = user
-            print("Fetching Current User: \(CurrentUser.user?.username)")
+            print("Fetch Current User: \(CurrentUser.user?.username), ListIds: \(CurrentUser.listIds.count)")
             
+            if CurrentUser.listIds.count == 0 {
+            // No list id, so create default list
+                print("Current User \(uid) no list ids, create default Lists")
+                        Database.createDefaultList(uid: uid, completion: { (defaultList, defaultListId) in
+                            CurrentUser.lists = defaultList
+                            CurrentUser.listIds = defaultListId
+                            CurrentUser.user?.listIds = defaultListId
+                            print("Current User \(uid) has \(CurrentUser.lists.count) lists")
+                        })
+            } else {
             // Fetch Lists
-            Database.fetchListForMultListIds(listUid: CurrentUser.listIds, completion: { (fetchedLists) in
-                CurrentUser.lists = fetchedLists
-                print("Current User List Count: \(CurrentUser.lists.count)")
-                Database.checkUserSocialStats(user: CurrentUser.user!, socialField: "lists_created", socialCount: fetchedLists.count)
+                Database.fetchListForMultListIds(listUid: CurrentUser.listIds, completion: { (fetchedLists) in
+                    
+                    CurrentUser.lists = fetchedLists
+                    print("Current User List Count: \(CurrentUser.lists.count)")
+                    Database.checkUserSocialStats(user: CurrentUser.user!, socialField: "lists_created", socialCount: fetchedLists.count)
+                })
+            }
+            
+            // Fetch Inbox
+            Database.fetchMessageThreadsForUID(userUID: uid, completion: { (messageThreads) in
+                CurrentUser.inboxThreads = messageThreads
+                print("Current User Inbox Thread: \(CurrentUser.inboxThreads.count)")
             })
         }
     }

@@ -6,6 +6,40 @@
 //  Created by Wei Zou Ang on 10/29/17.
 //  Copyright © 2017 Wei Zou Ang. All rights reserved.
 //
+
+//
+//static func checkPostForLikes(post: Post, completion: @escaping (Post) -> ()){
+//    
+//    guard let uid = Auth.auth().currentUser?.uid else {return}
+//    var tempPost = post
+//    
+//    Database.database().reference().child("likes").child(post.id!).observeSingleEvent(of: .value, with: { (snapshot) in
+//        
+//        let post = snapshot.value as? [String: Any] ?? [:]
+//        var likes: Dictionary<String, Int>
+//        likes = post["likes"] as? [String : Int] ?? [:]
+//        var likeCount = post["likeCount"] as? Int ?? 0
+//        
+//        
+//        if likes[uid] == 1 {
+//            tempPost.hasLiked = true
+//        } else {
+//            tempPost.hasLiked = false
+//        }
+//        
+//        if tempPost.likeCount != likeCount {
+//            // Calculated Bookmark Count Different from Database
+//            tempPost.likeCount = likeCount
+//            updateSocialCountsForPost(postId: tempPost.id, socialVariable: "likeCount", newCount: likeCount)
+//        }
+//        
+//        
+//        completion(tempPost)
+//    }, withCancel: { (err) in
+//        print("Failed to fetch bookmark info for post:", err)
+//    })
+//}
+
 // OLD FILTERING
 //        self.filterFetchedPosts {
 //            self.sortFetchedPosts {

@@ -131,6 +131,7 @@ class ListViewController: UIViewController, UICollectionViewDelegate, UICollecti
     func fetchListPosts(){
         guard let displayListId = displayListId else {
             print("Fetch Post for List: ERROR, No ListID")
+            
             return
         }
         

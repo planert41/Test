@@ -145,9 +145,9 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
 //        self.messageCount.sizeToFit()
         
         if post.listCount > 0 {
-            self.bookmarkCount.text = String( post.listCount)
+            self.listCount.text = String( post.listCount)
         } else {
-            self.bookmarkCount.text = ""
+            self.listCount.text = ""
         }
         
         if post.voteCount != 0 {
@@ -157,8 +157,7 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         }
         
         // Resizes bookmark label to fit new count
-//        self.bookmarkCount.sizeToFit()
-        bookmarkLabelConstraint?.constant = self.bookmarkCount.frame.size.width
+        bookmarkLabelConstraint?.constant = self.listCount.frame.size.width
 //        self.layoutIfNeeded()
         
     }
@@ -1263,43 +1262,6 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
 
     }
     
-//    func handleBookmark() {
-//
-//        //    delegate?.didBookmark(for: self)
-//
-//        guard let postId = self.post?.id else {return}
-//        guard let creatorId = self.post?.creatorUID else {return}
-//        guard let uid = Auth.auth().currentUser?.uid else {return}
-//
-//        Database.handleBookmark(postId: postId, creatorUid: creatorId){
-//        }
-//
-//        // Animates before database function is complete
-//
-//        if (self.post?.hasBookmarked)! {
-//            self.post?.bookmarkCount -= 1
-//        } else {
-//            self.post?.bookmarkCount += 1
-//        }
-//        self.post?.hasBookmarked = !(self.post?.hasBookmarked)!
-//        self.setupAttributedSocialCount()
-//        self.delegate?.refreshPost(post: self.post!)
-//
-//        bookmarkButton.transform = CGAffineTransform(scaleX: 0.1, y: 0.1)
-//
-//        UIView.animate(withDuration: 1.0,
-//                       delay: 0,
-//                       usingSpringWithDamping: 0.2,
-//                       initialSpringVelocity: 6.0,
-//                       options: .allowUserInteraction,
-//                       animations: { [weak self] in
-//                        self?.bookmarkButton.transform = .identity
-//            },
-//                       completion: nil)
-//
-//    }
-//
-    
     // Comments
     
     lazy var commentButton: UIButton = {
@@ -1334,7 +1296,7 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
     }
 
     
-    let bookmarkCount: UILabel = {
+    let listCount: UILabel = {
         let label = UILabel()
         label.text = ""
         label.font = UIFont.boldSystemFont(ofSize:12)
@@ -1537,15 +1499,15 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
     // Bookmarks
         
         bookmarkContainer.addSubview(bookmarkButton)
-        bookmarkContainer.addSubview(bookmarkCount)
+        bookmarkContainer.addSubview(listCount)
         
         bookmarkButton.anchor(top: bookmarkContainer.topAnchor, left: bookmarkContainer.leftAnchor, bottom: bookmarkContainer.bottomAnchor, right: nil, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
         bookmarkButton.widthAnchor.constraint(equalTo: bookmarkButton.heightAnchor, multiplier: 1).isActive = true
         
-        bookmarkCount.anchor(top: bookmarkContainer.topAnchor, left: bookmarkButton.rightAnchor, bottom: bookmarkContainer.bottomAnchor, right: bookmarkContainer.rightAnchor, paddingTop: 0, paddingLeft: 5, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
-        bookmarkCount.centerYAnchor.constraint(equalTo: bookmarkButton.centerYAnchor).isActive = true
+        listCount.anchor(top: bookmarkContainer.topAnchor, left: bookmarkButton.rightAnchor, bottom: bookmarkContainer.bottomAnchor, right: bookmarkContainer.rightAnchor, paddingTop: 0, paddingLeft: 5, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
+        listCount.centerYAnchor.constraint(equalTo: bookmarkButton.centerYAnchor).isActive = true
         
-        bookmarkCount.sizeToFit()
+        listCount.sizeToFit()
         
         addSubview(bookmarkContainer)
         bookmarkContainer.anchor(top: bookmarkView.topAnchor, left: nil, bottom: bookmarkView.bottomAnchor, right: nil, paddingTop: 5, paddingLeft: 0, paddingBottom: 5, paddingRight: 0, width: 0, height: 0)

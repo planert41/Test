@@ -69,6 +69,7 @@ extension Database{
         }) {(err) in
             print("Failed to fetch user for posts:",err)
         }
+        Database.database().reference().child("users").child(uid).keepSynced(true)
     }
     
     static func fetchUsers(completion: @escaping ([User]) -> ()) {
@@ -500,20 +501,19 @@ extension Database{
 
     static func fetchPostWithUIDAndPostID(creatoruid: String, postId: String, completion: @escaping (Post) -> ()) {
         Database.fetchUserWithUID(uid: creatoruid) { (user) in
-            
+
             let ref = Database.database().reference().child("posts").child(postId)
             ref.observeSingleEvent(of: .value, with: {(snapshot) in
-                
+
             guard let dictionary = snapshot.value as? [String: Any] else {return}
                 var post = Post(user: user, dictionary: dictionary)
                 post.id = postId
                 post.creatorUID = user.uid
                 
-                Database.checkPostForLikes(post: post, completion: { (post) in
-                    Database.checkPostForBookmarks(post: post, completion: { (post) in
-                        completion(post)
-                    })
+                Database.checkPostForSocial(post: post, completion: { (post) in
+                    completion(post)
                 })
+                
         }) { (err) in print("Failed to fetchposts:", err) }
         }
     }
@@ -953,128 +953,113 @@ extension Database{
             print("Failed to fetch bookmark info for post:", err)
         })
     }
-    
-    static func checkPostForLikes(post: Post, completion: @escaping (Post) -> ()){
-        
-        guard let uid = Auth.auth().currentUser?.uid else {return}
-        var tempPost = post
-        
-        Database.database().reference().child("likes").child(post.id!).observeSingleEvent(of: .value, with: { (snapshot) in
-            
-            let post = snapshot.value as? [String: Any] ?? [:]
-            var likes: Dictionary<String, Int>
-            likes = post["likes"] as? [String : Int] ?? [:]
-            var likeCount = post["likeCount"] as? Int ?? 0
-            
-            
-            if likes[uid] == 1 {
-                tempPost.hasLiked = true
-            } else {
-                tempPost.hasLiked = false
-            }
-            
-            if tempPost.likeCount != likeCount {
-                // Calculated Bookmark Count Different from Database
-                tempPost.likeCount = likeCount
-                updateSocialCountsForPost(postId: tempPost.id, socialVariable: "likeCount", newCount: likeCount)
-            }
-            
-            
-            completion(tempPost)
-        }, withCancel: { (err) in
-            print("Failed to fetch bookmark info for post:", err)
-        })
-    }
+
     
     static func checkPostForLists(post: Post, completion: @escaping (Post) -> ()){
-        var tempSelectedListIds: [String:String] = [:]
-        var tempPost = post
+        
+        guard let uid = Auth.auth().currentUser?.uid else {return}
         guard let postId = post.id else {
             print("Check Post for Lists: ERROR, No Post Ids")
-            return
-        }
+            return}
+        var tempPost = post
         
-        if CurrentUser.lists.count > 0 {
+        Database.database().reference().child("post_lists").child(postId).observeSingleEvent(of: .value, with: { (snapshot) in
+        
+            let fetch = snapshot.value as? [String: Any] ?? [:]
+            
+            var lists: Dictionary<String, Int>
+            lists = fetch["lists"] as? [String : Int] ?? [:]
+            var listCount = fetch["listCount"] as? Int ?? 0
+            
+            if tempPost.listCount != listCount {
+                // Calculated Bookmark Count Different from Database
+                tempPost.listCount = listCount
+                updateSocialCountsForPost(postId: tempPost.id, socialVariable: "listCount", newCount: listCount)
+            }
+            
+            var tempSelectedListIds: [String:String] = [:]
+
             for list in CurrentUser.lists {
                 if list.postIds![postId] != nil {
                     tempSelectedListIds[list.id!] = list.name
                 }
             }
+            
             tempPost.selectedListId = tempSelectedListIds
-        }
-        
-        if tempSelectedListIds.count > 0 {
-            tempPost.hasBookmarked = true
-        } else {
-            tempPost.hasBookmarked = false
-        }
-
-        completion(tempPost)
-    }
-    
-    static func checkPostForBookmarks(post: Post, completion: @escaping (Post) -> ()){
-        
-        guard let uid = Auth.auth().currentUser?.uid else {return}
-        var tempPost = post
-        Database.database().reference().child("bookmarks").child(post.id!).observeSingleEvent(of: .value, with: { (snapshot) in
             
-            let post = snapshot.value as? [String: Any] ?? [:]
-            var bookmarks: Dictionary<String, Int>
-            bookmarks = post["bookmarks"] as? [String : Int] ?? [:]
-            var bookmarkCount = post["bookmarkCount"] as? Int ?? 0
+            if post.creatorUID == uid {
+                // Current User is post creator, Update Creator List in Post id different
+                if tempPost.creatorListId == nil {
+                    tempPost.creatorListId = [:]
+                }
+                if tempPost.selectedListId! != tempPost.creatorListId! {
+                    // Update Post if the list are different
+                    
+                    if tempPost.selectedListId!.count == 0 {
+                        Database.database().reference().child("posts").child(postId).child("lists").removeValue()
+                        print("Delete All Creator List for \(postId)")
+                    } else {
+                        Database.database().reference().child("posts").child(postId).child("lists").updateChildValues(tempSelectedListIds, withCompletionBlock: { (err, ref) in
+                        if let err = err {
+                            print("Update Creator List for Post \(postId): Fail, \(err)")
+                            return
+                        }
+                        print("Update Creator List for Post \(postId): Success with \(tempSelectedListIds)")
+                    })
+                    }
+                    
+                tempPost.creatorListId! = tempPost.selectedListId!
+                }
+            }
             
-            
-            if bookmarks[uid] == 1 {
+            if tempSelectedListIds.count > 0 {
                 tempPost.hasBookmarked = true
             } else {
                 tempPost.hasBookmarked = false
             }
             
-            if tempPost.listCount != bookmarkCount {
-                // Calculated Bookmark Count Different from Database
-                tempPost.listCount = bookmarkCount
-                updateSocialCountsForPost(postId: tempPost.id, socialVariable: "bookmarkCount", newCount: bookmarkCount)
-            }
-            
             completion(tempPost)
-            
         }, withCancel: { (err) in
             print("Failed to fetch bookmark info for post:", err)
         })
+        
     }
     
     static func checkPostForMessages(post: Post, completion: @escaping (Post) -> ()){
         
         guard let uid = Auth.auth().currentUser?.uid else {return}
+        guard let postid = post.id else {return}
         var tempPost = post
+        
         Database.database().reference().child("post_messages").child(post.id!).observeSingleEvent(of: .value, with: { (snapshot) in
             
             let post = snapshot.value as? [String: Any] ?? [:]
             var messages: Dictionary<String, Int>
-            messages = post["bookmarks"] as? [String : Int] ?? [:]
+            messages = post["threads"] as? [String : Int] ?? [:]
             var messageCount = post["messageCount"] as? Int ?? 0
-
+            
+            if CurrentUser.inboxThreads.count > 0 {
+                for threads in CurrentUser.inboxThreads {
+                    if threads.postId == postid {
+                        tempPost.hasMessaged = true
+                        break
+                    }
+                }
+            }
+            
             if tempPost.messageCount != messageCount {
                 // Calculated Bookmark Count Different from Database
                 tempPost.messageCount = messageCount
                 updateSocialCountsForPost(postId: tempPost.id, socialVariable: "messageCount", newCount: messageCount)
             }
             
-            completion(tempPost)
             
+            completion(tempPost)
         }, withCancel: { (err) in
             print("Failed to fetch bookmark info for post:", err)
         })
     }
-    
-    static func checkPostForLikesAndBookmarks(post: Post, completion: @escaping (Post) -> ()){
-        
-        Database.checkPostForLikes(post: post) { (post) in
-            Database.checkPostForBookmarks(post: post, completion: { (post) in
-                completion(post)
-            })
-        }
-    }
+
     
     static func checkPostForSocial(post: Post, completion: @escaping (Post) -> ()){
         
@@ -1102,103 +1087,105 @@ extension Database{
         })
     }
     
-    static func updateSocialCounts(uid: String!){
-        
-        let myGroup = DispatchGroup()
-        let innerLoop = DispatchGroup()
-        
-        //Social Data
-        var postCount: Int = 0
-        var followingCount: Int = 0
-        var followerCount: Int = 0
-        var bookmarkCount: Int = 0
-        var bookmarkedCount: Int = 0
-        var likedCount: Int = 0
-        
-        let likeRef = Database.database().reference().child("likes")
-        let bookmarkRef = Database.database().reference().child("bookmarks")
-        let followingRef = Database.database().reference().child("following")
-        let followerRef = Database.database().reference().child("follower")
-        let userPostRef = Database.database().reference().child("userposts")
-        let userRef = Database.database().reference().child("users")
-        
-        myGroup.enter()
-        fetchAllPostIDWithCreatorUID(creatoruid: uid) { (postIds) in
-            // Fetch All Created Post Ids and loop through to collect social data
-            for postId in postIds {
-
-                innerLoop.enter()
-                // Check for received likes
-                likeRef.child(postId.id).child("likeCount").observeSingleEvent(of: .value, with: { (snapshot) in
-                    var postLikeCount = snapshot.value as? Int ?? 0
-                    likedCount += postLikeCount
-//                    print("Current Post \(postId.id), likeCount: \(postLikeCount), CumLikeCount: \(likedCount)")
-                    innerLoop.leave()
-                })
-                
-                innerLoop.enter()
-                // Check for received bookmarks
-                bookmarkRef.child(postId.id).child("bookmarkCount").observeSingleEvent(of: .value, with: { (snapshot) in
-                    var postBookmarkCount = snapshot.value as? Int ?? 0
-                    bookmarkedCount += postBookmarkCount
-//                    print("Current Post \(postId.id), bookmarkCount: \(postBookmarkCount), CumBookmarkCount: \(bookmarkedCount)")
-                    
-                    innerLoop.leave()
-                })
-            }
-            innerLoop.notify(queue: .main) {
-                myGroup.leave()
-            }
-        }
-        
-        // Check for following count
-        myGroup.enter()
-        followingRef.child(uid).child("followingCount").observeSingleEvent(of: .value, with: { (snapshot) in
-            var userFollowingCount = snapshot.value as? Int ?? 0
-            followingCount += max(0,userFollowingCount)
-            myGroup.leave()
-            
-        })
-        
-        // Check for follower count
-        myGroup.enter()
-        followerRef.child(uid).child("followingCount").observeSingleEvent(of: .value, with: { (snapshot) in
-            var userFollowerCount = snapshot.value as? Int ?? 0
-            followerCount += max(0,userFollowerCount)
-            myGroup.leave()
-        })
-        
-        // Check for post count
-        myGroup.enter()
-        userPostRef.child(uid).observeSingleEvent(of: .value, with: { (snapshot) in
-            var userPosts = snapshot.value as? [String:Any]
-            var userPostCount = userPosts?.count ?? 0
-            postCount += max(0,userPostCount)
-            myGroup.leave()
-        })
-        
-        // Check for bookmarks count
-        myGroup.enter()
-        userRef.child(uid).child("bookmarks").child("bookmarkCount").observeSingleEvent(of: .value, with: { (snapshot) in
-            var userBookmarkCount = snapshot.value as? Int ?? 0
-            bookmarkCount += max(0,userBookmarkCount)
-            myGroup.leave()
-        })
-        
-        myGroup.notify(queue: .main) {
+//    static func updateSocialCounts(uid: String!){
+//
+    // NEEDS UPDATING IF WANT TO USE
     
-            
-            let values = ["postCount": postCount, "followingCount": followingCount, "followerCount": followerCount, "bookmarkCount": bookmarkCount, "bookmarkedCount": bookmarkedCount, "likedCount": likedCount] as [String:Any]
-            
-            userRef.child(uid).child("social").updateChildValues(values, withCompletionBlock: { (err, ref) in
-                if let err = err {
-                    print("Failed to save user social data for :",uid, err)
-                    return}
-                
-                    print("Successfully save user social data for : \(uid)", values)
-                })
-            }
-    }
+//        let myGroup = DispatchGroup()
+//        let innerLoop = DispatchGroup()
+//
+//        //Social Data
+//        var postCount: Int = 0
+//        var followingCount: Int = 0
+//        var followerCount: Int = 0
+//        var listCount: Int = 0
+//        var listedCount: Int = 0
+//        var likedCount: Int = 0
+//
+//        let likeRef = Database.database().reference().child("likes")
+//        let listRef = Database.database().reference().child("lists")
+//        let followingRef = Database.database().reference().child("following")
+//        let followerRef = Database.database().reference().child("follower")
+//        let userPostRef = Database.database().reference().child("userposts")
+//        let userRef = Database.database().reference().child("users")
+//
+//        myGroup.enter()
+//        fetchAllPostIDWithCreatorUID(creatoruid: uid) { (postIds) in
+//            // Fetch All Created Post Ids and loop through to collect social data
+//            for postId in postIds {
+//
+//                innerLoop.enter()
+//                // Check for received likes
+//                likeRef.child(postId.id).child("likeCount").observeSingleEvent(of: .value, with: { (snapshot) in
+//                    var postLikeCount = snapshot.value as? Int ?? 0
+//                    likedCount += postLikeCount
+////                    print("Current Post \(postId.id), likeCount: \(postLikeCount), CumLikeCount: \(likedCount)")
+//                    innerLoop.leave()
+//                })
+//
+//                innerLoop.enter()
+//                // Check for received bookmarks
+//                listRef.child(postId.id).child("listCount").observeSingleEvent(of: .value, with: { (snapshot) in
+//                    var postBookmarkCount = snapshot.value as? Int ?? 0
+//                    bookmarkedCount += postBookmarkCount
+////                    print("Current Post \(postId.id), bookmarkCount: \(postBookmarkCount), CumBookmarkCount: \(bookmarkedCount)")
+//
+//                    innerLoop.leave()
+//                })
+//            }
+//            innerLoop.notify(queue: .main) {
+//                myGroup.leave()
+//            }
+//        }
+//
+//        // Check for following count
+//        myGroup.enter()
+//        followingRef.child(uid).child("followingCount").observeSingleEvent(of: .value, with: { (snapshot) in
+//            var userFollowingCount = snapshot.value as? Int ?? 0
+//            followingCount += max(0,userFollowingCount)
+//            myGroup.leave()
+//
+//        })
+//
+//        // Check for follower count
+//        myGroup.enter()
+//        followerRef.child(uid).child("followingCount").observeSingleEvent(of: .value, with: { (snapshot) in
+//            var userFollowerCount = snapshot.value as? Int ?? 0
+//            followerCount += max(0,userFollowerCount)
+//            myGroup.leave()
+//        })
+//
+//        // Check for post count
+//        myGroup.enter()
+//        userPostRef.child(uid).observeSingleEvent(of: .value, with: { (snapshot) in
+//            var userPosts = snapshot.value as? [String:Any]
+//            var userPostCount = userPosts?.count ?? 0
+//            postCount += max(0,userPostCount)
+//            myGroup.leave()
+//        })
+//
+//        // Check for bookmarks count
+//        myGroup.enter()
+//        userRef.child(uid).child("lists").child("bookmarkCount").observeSingleEvent(of: .value, with: { (snapshot) in
+//            var userBookmarkCount = snapshot.value as? Int ?? 0
+//            bookmarkCount += max(0,userBookmarkCount)
+//            myGroup.leave()
+//        })
+//
+//        myGroup.notify(queue: .main) {
+//
+//
+//            let values = ["postCount": postCount, "followingCount": followingCount, "followerCount": followerCount, "listCount": bookmarkCount, "listedCount": bookmarkedCount, "likedCount": likedCount] as [String:Any]
+//
+//            userRef.child(uid).child("social").updateChildValues(values, withCompletionBlock: { (err, ref) in
+//                if let err = err {
+//                    print("Failed to save user social data for :",uid, err)
+//                    return}
+//
+//                    print("Successfully save user social data for : \(uid)", values)
+//                })
+//            }
+//    }
     
 // Upload/Update Post
     
@@ -1458,6 +1445,54 @@ extension Database{
     
     // List
     
+    static var defaultListCount = 0
+    
+    static func createDefaultList(uid: String, completion: @escaping ([List], [String]) -> ()){
+        // Check for Default Lists
+        
+        var createdList: [List] = []
+        var createdListIds: [String] = []
+        
+            Database.fetchUserWithUID(uid: uid) { (user) in
+                // Fetch User
+                
+                // Fetch Lists
+                Database.fetchListForMultListIds(listUid: user.listIds, completion: { (fetchedLists) in
+                    // Check if has bookmarked List
+                    
+                    if defaultListCount == 0 {
+                        defaultListCount += 1
+                    } else {
+                        return
+                    }
+                    
+                    if !fetchedLists.contains(where: { $0.name == legitListName })
+                    {
+                            print("Missing Legit List. Create Legit List")
+                            var defaultLegitList = emptyLegitList
+                            defaultLegitList.id = NSUUID().uuidString
+                            Database.createList(uploadList: defaultLegitList)
+                            createdList.append(defaultLegitList)
+                            createdListIds.append(defaultLegitList.id!)
+                    }
+                    
+                    if !fetchedLists.contains(where: { $0.name == bookmarkListName })
+                    {
+                            print("Missing Bookmark List. Create Bookmark List")
+                            var defaultBookmarkList = emptyBookmarkList
+                            defaultBookmarkList.id = NSUUID().uuidString
+                            Database.createList(uploadList: defaultBookmarkList)
+                            createdList.append(defaultBookmarkList)
+                            createdListIds.append(defaultBookmarkList.id!)
+                    }
+                    
+                    completion(createdList, createdListIds)
+                    
+                })
+            }
+            
+    }
+    
     static func createList(uploadList: List){
         guard let uid = Auth.auth().currentUser?.uid else {return}
         
@@ -1526,7 +1561,6 @@ extension Database{
         
         Database.spotUpdateSocialCount(creatorUid: uid, socialField: "lists_created", change: -1)
 
-        
     }
     
     static func addPostForList(postId: String, listId: String?, postCreationDate: Double?){
@@ -1684,6 +1718,7 @@ extension Database{
         
         guard let listUid = listUid else {
             print("Fetch Lists: ERROR, No List Ids")
+            completion([])
             return
         }
         
@@ -1716,7 +1751,9 @@ extension Database{
     static func fetchListforSingleListId(listId: String, completion: @escaping(List?) -> ()){
         let ref = Database.database().reference().child("lists").child(listId)
         ref.observeSingleEvent(of: .value, with: {(snapshot) in
-            guard let listDictionary = snapshot.value as? [String: Any] else {return}
+            guard let listDictionary = snapshot.value as? [String: Any] else {
+                completion(nil)
+                return}
             
             let fetchedList = List.init(id: listId, dictionary: listDictionary)
             completion(fetchedList)

@@ -24,7 +24,7 @@ class GridPhotoCell: UICollectionViewCell, UIGestureRecognizerDelegate {
             photoImageView.loadImage(urlString: imageUrl)
             
             self.likeCount = post?.likeCount ?? 0
-            self.bookmarkCount = post?.listCount ?? 0
+            self.listCount = post?.listCount ?? 0
             self.messageCount = post?.messageCount ?? 0
             
             self.ratingEmojiLabel.text = post?.ratingEmoji
@@ -46,7 +46,7 @@ class GridPhotoCell: UICollectionViewCell, UIGestureRecognizerDelegate {
     }
     
     var likeCount: Int = 0
-    var bookmarkCount: Int = 0
+    var listCount: Int = 0
     var messageCount: Int = 0
     
     var photoImageView: CustomImageView = {
@@ -114,7 +114,7 @@ class GridPhotoCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         attributedText.append(likeImageString)
         
         // Bookmarks
-        let bookmarkText = NSMutableAttributedString(string: String(self.bookmarkCount), attributes: [NSFontAttributeName: UIFont.boldSystemFont(ofSize: labelFontSize), NSForegroundColorAttributeName: UIColor.lightGray])
+        let bookmarkText = NSMutableAttributedString(string: String(self.listCount), attributes: [NSFontAttributeName: UIFont.boldSystemFont(ofSize: labelFontSize), NSForegroundColorAttributeName: UIColor.lightGray])
         attributedText.append(bookmarkText)
         let bookmarkImage = NSTextAttachment()
         bookmarkImage.image = #imageLiteral(resourceName: "bookmark_ribbon_filled").withRenderingMode(.alwaysOriginal).resizeImageWith(newSize: imageSize)

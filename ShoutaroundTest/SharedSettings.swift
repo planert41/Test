@@ -10,6 +10,8 @@ import Foundation
 import UIKit
 
 
+var DefaultListNonRepeat = 0
+
 var geoFilterImageDefault:[UIImage] = [#imageLiteral(resourceName: "GeoFence"),#imageLiteral(resourceName: "GeoFence"), #imageLiteral(resourceName: "City"), #imageLiteral(resourceName: "City"), #imageLiteral(resourceName: "Globe")]
 var geoFilterRangeDefault:[String] = ["1", "3", "5", "25", "50", "100"]
 
@@ -64,7 +66,7 @@ var searchScopeButtons = ["Emojis","Users","Places"]
 
 
 
-var firebaseCountVariable:[String:String] = ["likes":"likeCount", "bookmarks":"bookmarkCount", "Messages":"messageCount", "Lists": "listCount", "Votes": "voteCount"]
+var firebaseCountVariable:[String:String] = ["likes":"likeCount", "Messages":"messageCount", "Lists": "listCount", "Votes": "voteCount"]
 var firebaseFieldVariable:[String:String] = [ "Votes": "post_votes", "Messages":"post_messages", "Lists": "post_lists", ]
 
 

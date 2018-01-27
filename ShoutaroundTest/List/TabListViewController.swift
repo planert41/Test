@@ -139,6 +139,12 @@ class TabListViewController: UIViewController, UICollectionViewDelegate, UIColle
 //        }
 //    }
     
+    override func viewWillAppear(_ animated: Bool) {
+        // Refreshes List when view appears
+        checkUsers {
+            self.fetchList()
+        }
+    }
     
     func checkUsers(completion: @escaping() ->()){
         
@@ -153,12 +159,18 @@ class TabListViewController: UIViewController, UICollectionViewDelegate, UIColle
                     completion()
                 }
             } else {
-                print("Tab List View: No Display User, Fetching Current User from Cache")
+                print("Tab List View: No Display User, Fetching Current User from Cache with \(CurrentUser.user?.listIds.count) Lists")
                 self.displayUser = CurrentUser.user
                 completion()
             }
         } else {
             print("Tab List View: Has Display User")
+            
+            if displayUser?.uid == Auth.auth().currentUser?.uid{
+                print("Refresh Current User List")
+                self.userListIds = CurrentUser.listIds
+            }
+            
             completion()
         }
     }
@@ -167,18 +179,31 @@ class TabListViewController: UIViewController, UICollectionViewDelegate, UIColle
     func fetchList(){
         
         guard let userListIds = userListIds else {
-            print("Fetch User Lists: ERROR, No List Ids")
+            print("Fetch User Lists: ERROR, No List Ids, Refetching User")
+            
+            Database.fetchUserWithUID(uid: (displayUser?.uid)!, completion: { (user) in
+                print("Refetched User \(self.displayUser?.uid)! with \(user.listIds.count) Lists")
+                self.userListIds = user.listIds
+                self.fetchList()
+            })
+        
             return
         }
         
+        guard let uid = Auth.auth().currentUser?.uid else {return}
+        
+        
+        
         Database.fetchListForMultListIds(listUid: userListIds) { (fetchedLists) in
-            
-
-            self.displayedLists = fetchedLists
-            if fetchedLists.count > 0 {
-                // Set Display List
+            if fetchedLists.count == 0 {
+                print("Fetch List Error, No Lists, Displaying Default Empty Lists")
+                self.displayedLists = [emptyLegitList, emptyBookmarkList]
+                self.currentDisplayListIndex = 0
+            } else {
+                self.displayedLists = fetchedLists
                 self.currentDisplayListIndex = 0
             }
+            
             print("Fetched Lists: Post Numbers: \(self.displayedLists?.count)")
             self.listCollectionView.reloadData()
             NotificationCenter.default.post(name: ListViewController.refreshListViewNotificationName, object: nil)
