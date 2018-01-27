@@ -908,6 +908,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         sharePhotoListController.uploadPost = post
         sharePhotoListController.isBookmarkingPost = true
         sharePhotoListController.delegate = self
+
         navigationController?.pushViewController(sharePhotoListController, animated: true)
     }
     

@@ -34,6 +34,10 @@ class SharePhotoListController: UIViewController, UICollectionViewDelegate, UICo
             self.uploadPostDictionary = (self.uploadPost?.dictionary())!
             self.editPrevList = uploadPost?.selectedListId
             
+            if uploadPost?.creatorUID == Auth.auth().currentUser?.uid {
+                self.preEditPost = uploadPost
+            }
+            
             // Refreshes Current User Lists
             userList = CurrentUser.lists
             collectionView.reloadData()
@@ -322,6 +326,10 @@ class SharePhotoListController: UIViewController, UICollectionViewDelegate, UICo
             var tempPost = self.uploadPost
             tempPost?.selectedListId = listIds
             tempPost?.creatorListId = listIds
+            
+            if (tempPost?.selectedListId?.count)! > 0 {
+                tempPost?.hasBookmarked = true
+            }
 
             postCache[(self.uploadPost?.id)!] = tempPost
             
@@ -342,6 +350,7 @@ class SharePhotoListController: UIViewController, UICollectionViewDelegate, UICo
         if uploadPost?.creatorUID == Auth.auth().currentUser?.uid {
             // Same Creator So Edit Post instead of Adding Post to List
             self.handleEditPost()
+            
         } else {
             var tempNewList: [String:String] = [:]
             for list in self.selectedList! {
