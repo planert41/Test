@@ -90,20 +90,24 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
             
             // Distance
             if post?.distance != nil && post?.locationGPS?.coordinate.longitude != 0 && post?.locationGPS?.coordinate.latitude != 0 {
-                let distanceformat = ".2"
                 
-                // Convert to M to KM (Temp Miles just for display)
-                let locationDistance = (post?.distance)!/1000
-                if locationDistance < 1000 {
-                    locationDistanceLabel.text = String(locationDistance.format(f: distanceformat)) + " mi"
-                } else {
-                    locationDistanceLabel.text = ""
+                guard let postdistance = post?.distance else {return}
+                let distanceInKM = postdistance/1000
+                let locationDistance = Measurement.init(value: distanceInKM, unit: UnitLength.kilometers)
+                
+                if distanceInKM < 100 {
+                    locationDistanceLabel.text =  CurrentUser.distanceFormatter.string(from: locationDistance)
+                }  else if distanceInKM < 300 {
+                    locationDistanceLabel.text =  "🚗"+CurrentUser.distanceFormatter.string(from: locationDistance)
+                }  else if distanceInKM >= 300 {
+                    locationDistanceLabel.text =  "✈️"+CurrentUser.distanceFormatter.string(from: locationDistance)
                 }
             } else {
                 locationDistanceLabel.text = ""
             }
+            locationDistanceLabel.adjustsFontSizeToFitWidth = true
             locationDistanceLabel.sizeToFit()
-
+            
             // Options Button
             
             if post?.creatorUID == Auth.auth().currentUser?.uid {
@@ -460,10 +464,8 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
     
     let locationDistanceLabel: UILabel = {
         let label = UILabel()
-        label.text = ""
         label.font = UIFont.boldSystemFont(ofSize: 12)
-        
-        label.textColor = UIColor.darkGray
+        label.textColor = UIColor.mainBlue()
         label.textAlignment = NSTextAlignment.right
         return label
     }()
@@ -507,7 +509,7 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         return label
     }()
 
-    var starRatingLabel = RatingLabel(ratingScore: 0)
+    var starRatingLabel: RatingLabel?
     var starRatingLabelHeight: NSLayoutConstraint?
     
     let postDateLabel: UILabel = {
@@ -1083,23 +1085,22 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         userProfileImageView.layer.borderWidth = 0.25
         userProfileImageView.layer.borderColor = UIColor.lightGray.cgColor
         
-        usernameLabel.anchor(top: userProfileImageView.topAnchor, left: nil, bottom: userProfileImageView.bottomAnchor, right: userProfileImageView.leftAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 8, width: 0, height: 0)
+        addSubview(locationDistanceLabel)
+        locationDistanceLabel.anchor(top: nil, left: nil, bottom: userProfileImageView.bottomAnchor, right: userProfileImageView.leftAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 2, paddingRight: 8, width: 0, height: 0)
+        locationDistanceLabel.sizeToFit()
+        
+        usernameLabel.anchor(top: userProfileImageView.topAnchor, left: nil, bottom: locationDistanceLabel.topAnchor, right: userProfileImageView.leftAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 8, width: 0, height: 0)
         
         usernameLabel.textAlignment = .right
-//        usernameLabel.backgroundColor = UIColor.yellow
 
-//        starRatingLabel.anchor(top: nil, left: nil, bottom: nil, right: usernameLabel.leftAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 2, width: 0, height: 25)
-//        starRatingLabel.centerYAnchor.constraint(equalTo: usernameLabel.centerYAnchor).isActive = true
-//        starRatingLabelWidth = NSLayoutConstraint(item: starRatingLabel, attribute: NSLayoutAttribute.width, relatedBy: NSLayoutRelation.equal, toItem: nil, attribute: NSLayoutAttribute.width, multiplier: 1, constant: 25)
-//
-//        starRatingLabelWidth?.isActive = true
-//
-        
         legitIcon.anchor(top: nil, left: nil, bottom: nil, right: usernameLabel.leftAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 2, width: 25, height: 25)
         legitIcon.centerYAnchor.constraint(equalTo: usernameLabel.centerYAnchor).isActive = true
         legitIcon.isHidden = true
         
-//        ratingEmojiLabel.anchor(top: topAnchor, left: nil, bottom: photoImageView.topAnchor, right: usernameLabel.leftAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 2, width: 0, height: 0)
+        
+
+        
+        
         
 // Photo Image View and Complex User Interactions
         
@@ -1159,11 +1160,7 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         //        locationView.backgroundColor = UIColor.yellow
         
         addSubview(locationLabel)
-        addSubview(locationDistanceLabel)
-        
-        locationDistanceLabel.anchor(top: locationView.topAnchor, left: nil, bottom: locationView.bottomAnchor, right: locationView.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 5, width: 50, height: 0)
-        
-        locationLabel.anchor(top: locationView.topAnchor, left: leftAnchor, bottom: locationView.bottomAnchor, right: locationDistanceLabel.leftAnchor, paddingTop: 3, paddingLeft: 10, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
+        locationLabel.anchor(top: locationView.topAnchor, left: leftAnchor, bottom: locationView.bottomAnchor, right: nil, paddingTop: 3, paddingLeft: 10, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
         
         let locationTapGesture = UITapGestureRecognizer(target: self, action: #selector(locationTap))
         locationLabel.addGestureRecognizer(locationTapGesture)

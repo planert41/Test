@@ -415,7 +415,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         self.clearSort()
         self.clearPostIds()
         self.refreshPagination()
-        self.collectionView?.reloadData()
+//        self.collectionView?.reloadData()
     }
     
     func refreshPosts(){
@@ -424,7 +424,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     
     func refreshPostsForFilter(){
         self.clearAllPosts()
-        self.collectionView?.reloadData()
+//        self.collectionView?.reloadData()
         self.scrolltoFirst = true
         self.fetchAllPostIds()
     }

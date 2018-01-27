@@ -16,8 +16,8 @@ class RatingLabel: UILabel {
         }
     }
     
-    init(ratingScore: Double) {
-        super.init(frame: CGRect(x: 0, y: 0, width: 25, height: 25))
+    init(ratingScore: Double, frame: CGRect) {
+        super.init(frame: frame)
         self.layer.cornerRadius = self.frame.width/2
         self.layer.masksToBounds = true
         self.layer.borderWidth = 0.5

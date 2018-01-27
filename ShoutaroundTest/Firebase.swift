@@ -2462,7 +2462,7 @@ extension Database{
 //
 //        }
         
-        // Distances are updated while being filtered
+        // All Post Distances are updated In Sort Function
         
         // Filter Range
         if filterLocation != nil && filterRange != nil && filterRange != globalRangeDefault {
@@ -2557,6 +2557,14 @@ extension Database{
         if selectedSort == HeaderSortOptions[0] {
             tempPosts.sort(by: { (p1, p2) -> Bool in
                 return p1.creationDate.compare(p2.creationDate) == .orderedDescending
+            })
+            completion(tempPosts)
+        }
+            
+        // Recent Listed Date
+        else if selectedSort == "Listed" {
+            tempPosts.sort(by: { (p1, p2) -> Bool in
+                return p1.listedDate!.compare(p2.listedDate!) == .orderedDescending
             })
             completion(tempPosts)
         }

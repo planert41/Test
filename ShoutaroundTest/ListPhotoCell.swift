@@ -39,86 +39,70 @@ class ListPhotoCell: UICollectionViewCell {
     }
     var post: Post? {
         didSet {
-            
+        
+        // Post Image
             if post?.image == nil {
                 guard let imageUrl = post?.imageUrl else {return}
                 photoImageView.loadImage(urlString: imageUrl)
             } else {
                 photoImageView.image = post?.image
             }
-            usernameLabel.text = post?.user.username
+        
+        // User Profile Image View
+            guard let profileImageUrl = post?.user.profileImageUrl else {return}
+            userProfileImageView.loadImage(urlString: profileImageUrl)
             
+        // Emojis
+            nonRatingEmojiLabel.text = (post?.nonRatingEmoji.joined())!
+            nonRatingEmojiLabel.sizeToFit()
+            
+        // Location Name
             if let locationNameDisplay = post?.locationName {
                 // If no location  name and showing GPS, show the adress instead
                 if locationNameDisplay.hasPrefix("GPS"){
                     locationNameLabel.text = post?.locationAdress
-                    locationAdressLabel.text = ""
                 } else {
                     locationNameLabel.text = locationNameDisplay
-                    locationAdressLabel.text = post?.locationAdress
-                    
                 }
             }
             locationNameLabel.sizeToFit()
             
+        // Star Rating
+
+            if (post?.rating)! > 0 {
+                starRatingLabel.isHidden = false
+                starRatingLabel.rating = (post?.rating)!
+            } else{
+                starRatingLabel.isHidden = true
+            }
+            // Always keep star rating label there even if hidden to keep white space
+//            starRatingLabel.sizeToFit()
             
-            nonRatingEmojiLabel.text = (post?.ratingEmoji)! + (post?.nonRatingEmoji.joined())!
-            nonRatingEmojiLabel.sizeToFit()
-            //            ratingEmojiLabel.text = post?.ratingEmoji
+        // Caption
             captionLabel.text = post?.caption
             captionLabel.sizeToFit()
             
-            if (post?.listCount)! > 0 {
-                listCount.text = String(describing: (post?.listCount)!)
-            } else {
-                listCount.text = ""
-            }
-            
-            if (post?.messageCount)! > 0 {
-                messageCount.text = String(describing: (post?.messageCount)!)
-            } else {
-                messageCount.text = ""
-            }
-            
-            
-            guard let profileImageUrl = post?.user.profileImageUrl else {return}
-            userProfileImageView.loadImage(urlString: profileImageUrl)
-            
-            //     setupAttributedLocationName()
-            
-            likeButton.setImage(post?.hasLiked == true ? #imageLiteral(resourceName: "like_selected").withRenderingMode(.alwaysOriginal) : #imageLiteral(resourceName: "like_unselected").withRenderingMode(.alwaysOriginal), for: .normal)
-            
-            bookmarkButton.setImage(post?.hasBookmarked == true ? #imageLiteral(resourceName: "bookmark_ribbon_filled").withRenderingMode(.alwaysOriginal) : #imageLiteral(resourceName: "bookmark_ribbon_unfilled").withRenderingMode(.alwaysOriginal), for: .normal)
-            
-            
-            
-            //            print("Post Distance is",post?.distance)
+        // Distance
             if post?.distance != nil && post?.locationGPS?.coordinate.longitude != 0 && post?.locationGPS?.coordinate.latitude != 0 {
                 
                 guard let postdistance = post?.distance else {return}
-                let distanceformat = ".2"
-                
-                if postdistance < 100000 {
-                    // Convert to M to KM
-                    let locationDistance = postdistance/1000
-                    distanceLabel.text =  " \(locationDistance.format(f: distanceformat)) Miles"
-                }
-                    
-                else if postdistance >= 500000 {
-                    
-                    // Convert to M to KM
-                    let locationDistance = postdistance/100000
-                    distanceLabel.text =  ">500 Miles"
+                let distanceInKM = postdistance/1000
+                let locationDistance = Measurement.init(value: distanceInKM, unit: UnitLength.kilometers)
+
+                if distanceInKM < 100 {
+                    distanceLabel.text =  CurrentUser.distanceFormatter.string(from: locationDistance)
+                }  else if distanceInKM < 300 {
+                    distanceLabel.text =  "🚗"+CurrentUser.distanceFormatter.string(from: locationDistance)
+                }  else if distanceInKM >= 300 {
+                    distanceLabel.text =  "✈️"+CurrentUser.distanceFormatter.string(from: locationDistance)
                 }
             } else {
                 distanceLabel.text = ""
             }
-            
+            distanceLabel.adjustsFontSizeToFitWidth = true
             distanceLabel.sizeToFit()
             
             setupAttributedSocialCount()
-            
-            
         }
     }
     
@@ -153,10 +137,9 @@ class ListPhotoCell: UICollectionViewCell {
     
     let distanceLabel: UILabel = {
         let label = UILabel()
-        label.text = ""
         label.font = UIFont.boldSystemFont(ofSize: 9)
         label.textColor = UIColor.mainBlue()
-        label.textAlignment = NSTextAlignment.left
+        label.textAlignment = NSTextAlignment.right
         return label
     }()
     
@@ -183,7 +166,7 @@ class ListPhotoCell: UICollectionViewCell {
     let nonRatingEmojiLabel: UILabel = {
         let label = UILabel()
         label.text = "Emojis"
-        label.font = UIFont.boldSystemFont(ofSize: 12)
+        label.font = UIFont.boldSystemFont(ofSize: 13)
         label.textAlignment = NSTextAlignment.left
         label.backgroundColor = UIColor.white
         return label
@@ -410,13 +393,12 @@ class ListPhotoCell: UICollectionViewCell {
         return label
     }()
     
-    
+    var starRatingLabel = RatingLabel(ratingScore: 0, frame: CGRect.zero)
     
     override init(frame: CGRect) {
         super.init(frame:frame)
         
-        // Photo Image View
-        
+    // Photo Image View
         addSubview(photoImageView)
         photoImageView.anchor(top: topAnchor, left: leftAnchor, bottom: bottomAnchor, right: nil, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
         
@@ -429,49 +411,48 @@ class ListPhotoCell: UICollectionViewCell {
         photoImageView.addGestureRecognizer(TapGesture)
         photoImageView.isUserInteractionEnabled = true
         
-        // Setup Bookmark Stack View
-        
+    // Add User Profile Image
+        let userProfileImageHeight: CGFloat = 25
         addSubview(userProfileImageView)
-        userProfileImageView.anchor(top: topAnchor, left: photoImageView.rightAnchor, bottom: nil, right: nil, paddingTop: 5, paddingLeft: 10, paddingBottom: 0, paddingRight: 0, width: 30, height: 30)
-        userProfileImageView.layer.cornerRadius = 30/2
+        userProfileImageView.anchor(top: topAnchor, left: nil, bottom: nil, right: rightAnchor, paddingTop: 5, paddingLeft: 10, paddingBottom: 0, paddingRight: 5, width: userProfileImageHeight, height: userProfileImageHeight)
+        userProfileImageView.layer.cornerRadius = userProfileImageHeight/2
         userProfileImageView.clipsToBounds = true
         userProfileImageView.layer.borderWidth = 0.25
         userProfileImageView.layer.borderColor = UIColor.lightGray.cgColor
         
-        addSubview(distanceLabel)
-        distanceLabel.anchor(top: nil, left: nil, bottom: nil, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 5, width: 50, height: 0)
-        distanceLabel.centerYAnchor.constraint(equalTo: userProfileImageView.centerYAnchor).isActive = true
-        distanceLabel.sizeToFit()
         
+    // Add Star Rating
+        
+        starRatingLabel = RatingLabel.init(ratingScore: 0, frame: CGRect(x: 0, y: 0, width: userProfileImageHeight * 0.7, height: userProfileImageHeight * 0.7))
+        addSubview(starRatingLabel)
+        starRatingLabel.anchor(top: nil, left: nil, bottom: nil, right: userProfileImageView.leftAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 3, width: starRatingLabel.frame.width, height: starRatingLabel.frame.height)
+        starRatingLabel.centerYAnchor.constraint(equalTo: userProfileImageView.centerYAnchor).isActive = true
+        
+
         
         // Tagged Emoji Data
         
         addSubview(nonRatingEmojiLabel)
-        nonRatingEmojiLabel.anchor(top: nil, left: userProfileImageView.rightAnchor, bottom: nil, right: distanceLabel.leftAnchor, paddingTop: 5, paddingLeft: 10, paddingBottom: 0, paddingRight: 5, width: 0, height: 10)
+        nonRatingEmojiLabel.anchor(top: nil, left: photoImageView.rightAnchor, bottom: nil, right: nil, paddingTop: 0, paddingLeft: 10, paddingBottom: 0, paddingRight: 5, width: 0, height: 0)
+        nonRatingEmojiLabel.rightAnchor.constraint(lessThanOrEqualTo: starRatingLabel.leftAnchor).isActive = true
         nonRatingEmojiLabel.centerYAnchor.constraint(equalTo: userProfileImageView.centerYAnchor).isActive = true
-        
-//        addSubview(usernameLabel)
-//        usernameLabel.anchor(top: userProfileImageView.topAnchor, left: userProfileImageView.rightAnchor, bottom: userProfileImageView.bottomAnchor, right: nonRatingEmojiLabel.leftAnchor, paddingTop: 0, paddingLeft: 5, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
-//        //        usernameLabel.heightAnchor.constraint(equalTo: userProfileImageView.heightAnchor, multiplier: 0.5).isActive = true
-//
-//        usernameLabel.centerYAnchor.constraint(equalTo: userProfileImageView.centerYAnchor).isActive = true
-        
+        nonRatingEmojiLabel.heightAnchor.constraint(equalTo: userProfileImageView.heightAnchor, multiplier: 0.8)
+        nonRatingEmojiLabel.sizeToFit()
         
         // Location Data
         
         addSubview(locationNameLabel)
-        locationNameLabel.anchor(top: userProfileImageView.bottomAnchor, left: photoImageView.rightAnchor, bottom: nil, right: rightAnchor, paddingTop: 5, paddingLeft: 10, paddingBottom: 0, paddingRight: 20, width: 0, height: 0)
+        locationNameLabel.anchor(top: nonRatingEmojiLabel.bottomAnchor, left: photoImageView.rightAnchor, bottom: nil, right: starRatingLabel.leftAnchor, paddingTop: 5, paddingLeft: 10, paddingBottom: 0, paddingRight: 20, width: 0, height: 0)
+        locationNameLabel.rightAnchor.constraint(lessThanOrEqualTo: starRatingLabel.leftAnchor).isActive = true
         locationNameLabel.heightAnchor.constraint(lessThanOrEqualToConstant: 20).isActive = true
         locationNameLabel.sizeToFit()
         
-//
-//        addSubview(locationAdressLabel)
-//        locationAdressLabel.anchor(top: locationNameLabel.bottomAnchor, left: photoImageView.rightAnchor, bottom: nil, right: rightAnchor, paddingTop: 0, paddingLeft: 10, paddingBottom: 0, paddingRight: 20, width: 0, height: 0)
-//        locationAdressLabel.heightAnchor.constraint(lessThanOrEqualToConstant: 10).isActive = true
-//        locationAdressLabel.sizeToFit()
-        
         
         // Location Distance
+        addSubview(distanceLabel)
+        distanceLabel.anchor(top: userProfileImageView.bottomAnchor, left: starRatingLabel.leftAnchor, bottom: nil, right: userProfileImageView.rightAnchor, paddingTop: 3, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
+        distanceLabel.sizeToFit()
+
         
 
         

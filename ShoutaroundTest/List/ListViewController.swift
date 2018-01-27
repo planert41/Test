@@ -131,7 +131,6 @@ class ListViewController: UIViewController, UICollectionViewDelegate, UICollecti
     func fetchListPosts(){
         guard let displayListId = displayListId else {
             print("Fetch Post for List: ERROR, No ListID")
-            
             return
         }
         
@@ -168,8 +167,15 @@ class ListViewController: UIViewController, UICollectionViewDelegate, UICollecti
         // Filter Posts
         Database.filterPosts(inputPosts: self.fetchedPosts, filterCaption: self.filterCaption, filterRange: self.filterRange, filterLocation: self.filterLocation, filterMinRating: self.filterMinRating, filterType: self.filterType, filterMaxPrice: self.filterMaxPrice) { (filteredPosts) in
             
-            // Sort Posts
-            Database.sortPosts(inputPosts: filteredPosts, selectedSort: self.selectedHeaderSort, selectedLocation: self.filterLocation, completion: { (filteredPosts) in
+            // Sort Recent Post By Listed Date
+            var listSort: String = "Listed"
+            if self.selectedHeaderSort == defaultSort {
+                listSort = "Listed"
+            } else {
+                listSort = self.selectedHeaderSort!
+            }
+            
+            Database.sortPosts(inputPosts: filteredPosts, selectedSort: listSort, selectedLocation: self.filterLocation, completion: { (filteredPosts) in
                 
                 self.fetchedPosts = []
                 if filteredPosts != nil {

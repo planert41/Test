@@ -57,8 +57,21 @@ struct CurrentUser {
     static var uid : String?
     static var status: String?
 
+    static var distanceFormatter: MeasurementFormatter {
+        let format = MeasurementFormatter()
+        format.unitStyle = .short
+        format.numberFormatter.usesSignificantDigits = true
+        format.numberFormatter.maximumSignificantDigits = 2
+        format.numberFormatter.maximumFractionDigits = 2
+
+        return format
+    }
+    
+    
     // From Other Database Sources
-    static var currentLocation: CLLocation?
+    static var currentLocation: CLLocation? {
+        didSet{distanceFormatter.locale = NSLocale.current}}
+
     static var followingUids: [String] = []
     static var followerUids: [String] = []
     static var groupUids: [String] = []

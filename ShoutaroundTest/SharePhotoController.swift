@@ -212,7 +212,7 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         return iv
     }()
     
-    var starRatingLabel = RatingLabel(ratingScore: 0)
+    var starRatingLabel = RatingLabel(ratingScore: 0, frame: CGRect.zero)
     
     let starRatingCancelButton: UIButton = {
         let button = UIButton(type: .system)
@@ -849,6 +849,7 @@ class SharePhotoController: UIViewController, UICollectionViewDelegateFlowLayout
         
         // Star Rating Label
         
+        starRatingLabel = RatingLabel.init(ratingScore: 0, frame: CGRect(x: 0, y: 0, width: DefaultEmojiLabelSize, height: DefaultEmojiLabelSize))
         view.addSubview(starRatingLabel)
         starRatingLabel.anchor(top: emojiLabelContainer.topAnchor, left: nil, bottom: emojiLabelContainer.bottomAnchor, right:emojiLabelContainer.rightAnchor, paddingTop: 5, paddingLeft: 5, paddingBottom: 5, paddingRight: 10, width: DefaultEmojiLabelSize, height: DefaultEmojiLabelSize)
         starRatingLabel.layer.cornerRadius = self.starRatingLabel.frame.width/2
