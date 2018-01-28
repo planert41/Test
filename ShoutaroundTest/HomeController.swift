@@ -20,6 +20,7 @@ import UIFontComplete
 class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLayout, HomePostCellDelegate, UIGestureRecognizerDelegate, FilterControllerDelegate, UISearchBarDelegate, SortFilterHeaderDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate, SharePhotoListControllerDelegate, PostSearchControllerDelegate, EmptyDataSetSource, EmptyDataSetDelegate {
     
 
+    
     let cellId = "cellId"
     var scrolltoFirst: Bool = false
     
@@ -146,9 +147,13 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     
     override func viewWillAppear(_ animated: Bool) {
         navigationController?.navigationBar.barTintColor = UIColor.legitColor()
+        collectionView?.collectionViewLayout.invalidateLayout()
+        collectionView?.layoutIfNeeded()
     }
     
-
+    override func viewWillDisappear(_ animated: Bool) {
+        collectionView?.collectionViewLayout.invalidateLayout()
+    }
 
     
     func setupCollectionView(){
@@ -424,6 +429,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     
     func refreshPostsForFilter(){
         self.clearAllPosts()
+        self.checkFilter()
 //        self.collectionView?.reloadData()
         self.scrolltoFirst = true
         self.fetchAllPostIds()
@@ -965,8 +971,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
                     self.alert(title: "List Error", message: "List Does Not Exist Anymore")
                 } else {
                     let listViewController = ListViewController()
-                    listViewController.displayListId = tagId
-                    listViewController.displayList = fetchedList
+                    listViewController.currentDisplayList = fetchedList
                     self.navigationController?.pushViewController(listViewController, animated: true)
                 }
             })

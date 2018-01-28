@@ -19,6 +19,11 @@ class ExploreController: UICollectionViewController, UICollectionViewDelegateFlo
         
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        collectionView?.collectionViewLayout.invalidateLayout()
+        collectionView?.layoutIfNeeded()
+    }
+    
     
     //INPUT
     var fetchedPostIds: [PostId] = []

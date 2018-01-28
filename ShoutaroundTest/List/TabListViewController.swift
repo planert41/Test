@@ -8,6 +8,7 @@
 
 import UIKit
 import Firebase
+import BTNavigationDropdownMenu
 
 class TabListViewController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource {
 
@@ -27,23 +28,40 @@ class TabListViewController: UIViewController, UICollectionViewDelegate, UIColle
     var displayedLists: [List]? = [] {
         didSet{
             guard let uid = Auth.auth().currentUser?.uid else {return}
+            guard let displayedLists = displayedLists else {
+                // If Displayed list is null, set to default
+                self.displayedLists = [emptyLegitList,emptyBookmarkList]
+                displayedListNames = [legitListName, bookmarkListName]
+                return
+            }
+            
             if displayUser?.uid != uid {
-                // Filter bookmark list if not current user
-                if let bookmarkIndex = displayedLists?.index(where: { (list) -> Bool in
+                // Exclude bookmark list if not current user
+                if let bookmarkIndex = self.displayedLists?.index(where: { (list) -> Bool in
                     return list.name == bookmarkListName
                 }) {
-                    displayedLists?.remove(at: bookmarkIndex)
+                    self.displayedLists?.remove(at: bookmarkIndex)
                 }
             }
+            
+            // Populate Displayed List Names
+            var tempListNames: [String] = []
+            for list in displayedLists {
+                tempListNames.append(list.name)
+            }
+            self.displayedListNames = tempListNames
             self.listCollectionView.reloadData()
         }
     }
-    
-    var currentDisplayListIndex: Int? = nil {
+    var displayedListNames: [String] = [legitListName, bookmarkListName] {
         didSet{
-            guard let currentDisplayListIndex = currentDisplayListIndex else {return}
-            self.listViewController?.displayListId = displayedLists![currentDisplayListIndex].id
-            self.listViewController?.displayList = displayedLists?[currentDisplayListIndex]
+            setupDropDownNavigationItem()
+        }
+    }
+    
+    var currentDisplayListIndex: Int = 0 {
+        didSet{
+            self.listViewController?.currentDisplayList = displayedLists?[currentDisplayListIndex]
             print("Loading List \(displayedLists![currentDisplayListIndex].id) : \(displayedLists?[currentDisplayListIndex].name)")
             NotificationCenter.default.post(name: ListViewController.refreshListViewNotificationName, object: nil)
         }
@@ -81,12 +99,15 @@ class TabListViewController: UIViewController, UICollectionViewDelegate, UIColle
     let listHeaderView = UIView()
     let topDivider = UIView()
     let bottomDivider = UIView()
-    
+
+    var menuView: BTNavigationDropdownMenu!
+
     
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = UIColor.white
         
+        setupDropDownNavigationItem()
         navigationItem.title = "Lists"
         
         listHeaderView.backgroundColor = UIColor(white: 0, alpha: 0.05)
@@ -117,7 +138,6 @@ class TabListViewController: UIViewController, UICollectionViewDelegate, UIColle
         listCollectionView.anchor(top: listHeaderView.topAnchor, left: listHeaderView.leftAnchor, bottom: listHeaderView.bottomAnchor, right: expandList.leftAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
         
 
-        
         listViewController = ListViewController()
         addChildViewController(listViewController!)
         view.addSubview((listViewController?.view)!)
@@ -138,6 +158,33 @@ class TabListViewController: UIViewController, UICollectionViewDelegate, UIColle
 //            // self.fetchList()
 //        }
 //    }
+    
+    func setupDropDownNavigationItem(){
+        self.navigationController?.navigationBar.isTranslucent = false
+        self.navigationController?.navigationBar.titleTextAttributes = [NSForegroundColorAttributeName: UIColor.white]
+        menuView = BTNavigationDropdownMenu(navigationController: self.navigationController, containerView: self.navigationController!.view, title: self.displayedListNames[currentDisplayListIndex], items: self.displayedListNames)
+        
+        menuView.cellHeight = 50
+        menuView.cellBackgroundColor = self.navigationController?.navigationBar.barTintColor
+        menuView.cellSelectionColor = UIColor(red: 0.0/255.0, green:160.0/255.0, blue:195.0/255.0, alpha: 1.0)
+        menuView.shouldKeepSelectedCellColor = true
+        menuView.cellTextLabelColor = UIColor.white
+        menuView.cellTextLabelFont = UIFont(font: .noteworthyBold, size: 20)
+        menuView.cellTextLabelAlignment = .left // .Center // .Right // .Left
+        menuView.arrowPadding = 15
+        menuView.animationDuration = 0.5
+        menuView.maskBackgroundColor = UIColor.black
+        menuView.maskBackgroundOpacity = 0.3
+        
+        
+        menuView.didSelectItemAtIndexHandler = {(indexPath: Int) -> Void in
+            print("Did select item at index: \(indexPath)")
+            self.currentDisplayListIndex = indexPath
+        }
+        
+        self.navigationItem.titleView = menuView
+    }
+    
     
     override func viewWillAppear(_ animated: Bool) {
         // Refreshes List when view appears
@@ -186,13 +233,10 @@ class TabListViewController: UIViewController, UICollectionViewDelegate, UIColle
                 self.userListIds = user.listIds
                 self.fetchList()
             })
-        
             return
         }
         
         guard let uid = Auth.auth().currentUser?.uid else {return}
-        
-        
         
         Database.fetchListForMultListIds(listUid: userListIds) { (fetchedLists) in
             if fetchedLists.count == 0 {
@@ -207,7 +251,6 @@ class TabListViewController: UIViewController, UICollectionViewDelegate, UIColle
             print("Fetched Lists: Post Numbers: \(self.displayedLists?.count)")
             self.listCollectionView.reloadData()
             NotificationCenter.default.post(name: ListViewController.refreshListViewNotificationName, object: nil)
-
         }
     }
 

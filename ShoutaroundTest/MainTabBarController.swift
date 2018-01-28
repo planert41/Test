@@ -42,6 +42,19 @@ class MainTabBarController: UITabBarController, UITabBarControllerDelegate, UIIm
             // Reselected Search Controller refresh
         }
         
+        if index == 3 {
+            print("List View Selected")
+            
+            print(viewController)
+            let listNavController = viewController as! UINavigationController
+            let listView = listNavController.visibleViewController as! ListViewController
+            if listView.displayUser == nil {
+                print("Default Setup For List: \(CurrentUser.lists[0].name) for \(CurrentUser.user?.username)")
+                listView.currentDisplayList = CurrentUser.lists[0]
+                listView.displayUser = CurrentUser.user
+            }
+        }
+        
         selectedTabBarIndex = index
     }
     
@@ -257,8 +270,6 @@ class MainTabBarController: UITabBarController, UITabBarControllerDelegate, UIIm
         }
     }
     
-
-    
     func setupViewControllers() {
         
         // home
@@ -269,8 +280,11 @@ class MainTabBarController: UITabBarController, UITabBarControllerDelegate, UIIm
 
         let plusNavController = templateNavController(unselectedImage: #imageLiteral(resourceName: "plus_unselected"), selectedImage: #imageLiteral(resourceName: "plus_unselected"))
         
-        let tabListController = TabListViewController()
-        tabListController.displayUser = CurrentUser.user
+//        let tabListController = TabListViewController()
+//        tabListController.displayUser = CurrentUser.user
+//        let tabListNavController = templateNavController(unselectedImage: #imageLiteral(resourceName: "list_unfilled"), selectedImage: #imageLiteral(resourceName: "list_unfilled"), rootViewController: tabListController)
+        
+        let tabListController = ListViewController()
         let tabListNavController = templateNavController(unselectedImage: #imageLiteral(resourceName: "list_unfilled"), selectedImage: #imageLiteral(resourceName: "list_unfilled"), rootViewController: tabListController)
         
         let layout = StickyHeadersCollectionViewFlowLayout()

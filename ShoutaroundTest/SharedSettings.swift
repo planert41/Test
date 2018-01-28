@@ -24,8 +24,8 @@ var defaultEmptyGPSName: String = "No Location"
 
 var legitListName: String = "Legit"
 var bookmarkListName: String = "Bookmarks"
-var emptyBookmarkList = List.init(id: nil, name: "Bookmarks")
-var emptyLegitList = List.init(id: nil, name: "Legit")
+var emptyBookmarkList = List.init(id: nil, name: "Bookmarks", publicList: 0)
+var emptyLegitList = List.init(id: nil, name: "Legit", publicList: 1)
 var defaultListNames:[String] = ["Bookmarks", "Legit"]
 
 // Upload Defaults

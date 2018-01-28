@@ -11,6 +11,7 @@ import UIKit
 import Firebase
 import CoreLocation
 import EmptyDataSet_Swift
+import BTNavigationDropdownMenu
 
 
 class ListViewController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, ListPhotoCellDelegate, HomePostCellDelegate, ListHeaderDelegate, SortFilterHeaderDelegate, FilterControllerDelegate, EmptyDataSetSource, EmptyDataSetDelegate {
@@ -21,13 +22,63 @@ class ListViewController: UIViewController, UICollectionViewDelegate, UICollecti
     let homePostCellId = "homePostCellId"
     let listHeaderId = "listHeaderId"
     
-    // Posts
     
-    //INPUT
-    var displayListId: String? = nil
+    override func viewWillAppear(_ animated: Bool) {
     
+    }
+
+    // INPUT
+    var currentDisplayList: List? = emptyLegitList {
+        didSet{
+            fetchPostsForList()
+            if displayUser?.uid != currentDisplayList?.creatorUID{
+                print("Fetching \(currentDisplayList?.creatorUID) for List \(currentDisplayList?.name): \(currentDisplayList?.id)")
+                fetchUserForList()
+            }
+        }
+    }
+    
+    // Used to fetch lists
+    var displayUser: User? = nil
+    var displayListIds: [String]? = []
+    var displayedLists: [List]? = [] {
+        didSet{
+            guard let uid = Auth.auth().currentUser?.uid else {return}
+            guard let displayedLists = self.displayedLists else {
+                // If Displayed list is null, set to default
+                self.displayedLists = [emptyLegitList,emptyBookmarkList]
+                self.displayedListNames = [legitListName, bookmarkListName]
+                return
+            }
+            
+            if displayUser?.uid != uid {
+                // Exclude Private list if not current user
+                self.displayedLists?.filter({ (list) -> Bool in
+                    return list.publicList == 1
+                })
+            }
+            
+            // Populate Displayed List Names
+            var tempListNames: [String] = []
+            for list in displayedLists {
+                // Add List Name and List Count
+                var listName = "\(list.name) (\(list.postIds?.count))"
+                tempListNames.append(listName)
+            }
+            self.displayedListNames = tempListNames
+            self.collectionView.reloadData()
+        }
+    }
+    
+    var displayedListNames: [String] = [legitListName, bookmarkListName] {
+        didSet{
+            setupNavigationItems()
+        }
+    }
+
+    var menuView: BTNavigationDropdownMenu!
+
     //DISPLAY VARIABLES
-    var displayList: List? = nil
     var fetchedPosts: [Post] = []
     
 // CollectionView Setup
@@ -36,7 +87,7 @@ class ListViewController: UIViewController, UICollectionViewDelegate, UICollecti
     
     lazy var collectionView : UICollectionView = {
         let layout = UICollectionViewFlowLayout()
-        let cv = UICollectionView(frame: CGRect.zero, collectionViewLayout: layout)
+        let cv = UICollectionView(frame: CGRect.zero, collectionViewLayout: HomeSortFilterHeaderFlowLayout())
         cv.translatesAutoresizingMaskIntoConstraints = false
         cv.delegate = self
         cv.dataSource = self
@@ -87,79 +138,158 @@ class ListViewController: UIViewController, UICollectionViewDelegate, UICollecti
     // Default Sort is Most Recent Listed Date
     var selectedHeaderSort:String? = defaultSort
     
+    func fetchPostsForList(){
+        guard let displayListId = currentDisplayList?.id else {
+            print("Fetch Post for List: ERROR, No List or ListId")
+            return
+        }
+        
+        self.fetchPostFromList(list: self.currentDisplayList, completion: { (fetchedPosts) in
+            print("Fetch Post for List : Success, \(displayListId):\(self.currentDisplayList?.name), Count: \(fetchedPosts?.count) Posts")
+            
+            if let fetchedPosts = fetchedPosts {
+                self.fetchedPosts = fetchedPosts
+            } else {
+                self.fetchedPosts = []
+            }
+            self.filterSortFetchedPosts()
+        })
+    }
+    
+    func fetchUserForList(){
+        guard let currentDisplayList = self.currentDisplayList else {
+            print("Fetch User For List: Error, No Display List")
+            return
+        }
+        
+        Database.fetchUserWithUID(uid: (currentDisplayList.creatorUID)!) { (fetchedUser) in
+            self.displayUser = fetchedUser
+            self.displayListIds = fetchedUser.listIds
+            self.fetchListsForUser()
+        }
+    }
+    
+    func fetchListsForUser(){
+        guard let displayListIds = self.displayListIds else {
+            print("Fetch Lists for User: Error, No List Ids, Default List, \(self.displayUser?.uid)")
+            self.displayedLists = [emptyLegitList, emptyBookmarkList]
+            return
+        }
+        
+        Database.fetchListForMultListIds(listUid: displayListIds) { (fetchedLists) in
+            if fetchedLists.count == 0 {
+                print("Fetch List Error, No Lists, Displaying Default Empty Lists")
+                self.displayedLists = [emptyLegitList, emptyBookmarkList]
+            } else {
+                self.displayedLists = fetchedLists
+            }
+            
+            print("Fetched Lists: \(self.displayedLists?.count) Lists for \(self.displayUser?.uid)")
+//            NotificationCenter.default.post(name: ListViewController.refreshListViewNotificationName, object: nil)
+        }
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = UIColor.white
         
         self.navigationController?.navigationBar.tintColor = UIColor.blue
-        self.navigationItem.title = displayList?.name
-        setupCollectionView()
-        
-        view.addSubview(collectionView)
-        collectionView.anchor(top: view.topAnchor, left: view.leftAnchor, bottom: view.bottomAnchor, right: view.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
+        self.navigationItem.title = currentDisplayList?.name
 
-        fetchListPosts()
+        setupCollectionView()
+        view.addSubview(collectionView)
+        collectionView.anchor(top: topLayoutGuide.bottomAnchor, left: view.leftAnchor, bottom: bottomLayoutGuide.topAnchor, right: view.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
         
         NotificationCenter.default.addObserver(self, selector: #selector(handleRefresh), name: ListViewController.refreshListViewNotificationName, object: nil)
-
+    }
     
+    func setupNavigationItems(){
+        
+        guard let uid = Auth.auth().currentUser?.uid else {return}
+    // Setup List Drop Down Bar
+        self.navigationController?.navigationBar.isTranslucent = false
+        self.navigationController?.navigationBar.titleTextAttributes = [NSForegroundColorAttributeName: UIColor.white]
+       
+        menuView = BTNavigationDropdownMenu(navigationController: self.navigationController, containerView: self.navigationController!.view, title: (self.currentDisplayList?.name)!, items: self.displayedListNames)
+        menuView.navigationBarTitleFont = UIFont(font: .noteworthyBold, size: 18)
+        
+        menuView.cellHeight = 50
+        menuView.cellBackgroundColor = self.navigationController?.navigationBar.barTintColor
+        menuView.cellSelectionColor = UIColor(red: 0.0/255.0, green:160.0/255.0, blue:195.0/255.0, alpha: 1.0)
+        menuView.shouldKeepSelectedCellColor = true
+        menuView.cellTextLabelColor = UIColor.white
+        menuView.cellTextLabelFont = UIFont(font: .noteworthyBold, size: 18)
+        menuView.cellTextLabelAlignment = .left // .Center // .Right // .Left
+        menuView.arrowPadding = 15
+        menuView.animationDuration = 0.5
+        menuView.maskBackgroundColor = UIColor.black
+        menuView.maskBackgroundOpacity = 0.3
+        
+        
+        menuView.didSelectItemAtIndexHandler = {(indexPath: Int) -> Void in
+            print("Did select item at index: \(indexPath)")
+            self.currentDisplayList = self.displayedLists![indexPath]
+        }
+        
+        self.navigationItem.titleView = menuView
+        
+    // Setup Right Bar Button
+        if self.currentDisplayList?.creatorUID != uid {
+            //Current User isn't List Creator
+            let userImage = CustomImageView()
+            userImage.frame = CGRect(x: 0, y: 0, width: 30, height: 30)
+            userImage.contentMode = .scaleAspectFill
+            userImage.clipsToBounds = true
+            userImage.loadImage(urlString: (displayUser?.profileImageUrl)!)
+            
+            let newImage = userImage.image?.resizeImageWith(newSize: CGSize(width: userImage.frame.width, height: userImage.frame.width))
+            userImage.image = newImage
+            userImage.isUserInteractionEnabled = true
+            userImage.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(userSelected)))
+            userImage.layer.cornerRadius = userImage.frame.width/2
+            
+            let barButton = UIBarButtonItem(customView: userImage)
+            navigationItem.rightBarButtonItem = barButton
+            
+        } else {
+            // Current User is List Creator
+            navigationItem.rightBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "add").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(manageList))
+        }
+        
+    }
+    
+    func manageList(){
+        let sharePhotoListController = SharePhotoListController()
+        navigationController?.pushViewController(sharePhotoListController, animated: true)
+    }
+    
+    func userSelected(){
+        let userProfileController = UserProfileController(collectionViewLayout: StickyHeadersCollectionViewFlowLayout())
+        userProfileController.userId = displayUser?.uid
+        navigationController?.pushViewController(userProfileController, animated: true)
     }
     
     func setupCollectionView(){
-    
-    collectionView.register(ListPhotoCell.self, forCellWithReuseIdentifier: bookmarkCellId)
-    collectionView.register(HomePostCell.self, forCellWithReuseIdentifier: homePostCellId)
-    collectionView.register(ListViewHeader.self, forSupplementaryViewOfKind: UICollectionElementKindSectionHeader, withReuseIdentifier: listHeaderId)
-    
-    collectionView.backgroundColor = .white
-    
-    let refreshControl = UIRefreshControl()
-    refreshControl.addTarget(self, action: #selector(handleRefresh), for: .valueChanged)
-    collectionView.refreshControl = refreshControl
-    collectionView.alwaysBounceVertical = true
-    collectionView.keyboardDismissMode = .onDrag
-    
-    // Adding Empty Data Set
-    collectionView.emptyDataSetSource = self
-    collectionView.emptyDataSetDelegate = self
-    
-    
+        collectionView.register(ListPhotoCell.self, forCellWithReuseIdentifier: bookmarkCellId)
+        collectionView.register(HomePostCell.self, forCellWithReuseIdentifier: homePostCellId)
+        collectionView.register(ListViewHeader.self, forSupplementaryViewOfKind: UICollectionElementKindSectionHeader, withReuseIdentifier: listHeaderId)
+        
+        collectionView.backgroundColor = .white
+        collectionView.collectionViewLayout.invalidateLayout()
+        collectionView.layoutIfNeeded()
+        
+        let refreshControl = UIRefreshControl()
+        refreshControl.addTarget(self, action: #selector(handleRefresh), for: .valueChanged)
+        collectionView.refreshControl = refreshControl
+        collectionView.alwaysBounceVertical = true
+        collectionView.keyboardDismissMode = .onDrag
+        
+        // Adding Empty Data Set
+        collectionView.emptyDataSetSource = self
+        collectionView.emptyDataSetDelegate = self
     }
     
-    func fetchListPosts(){
-        guard let displayListId = displayListId else {
-            print("Fetch Post for List: ERROR, No ListID")
-            return
-        }
-        
-        if displayList == nil {
-            print("Fetch Post for List: No List, Pulling List for \(displayListId)")
-            Database.fetchListforSingleListId(listId: displayListId, completion: { (fetchedList) in
-                self.displayList = fetchedList
-                self.fetchPostFromList(list: self.displayList, completion: { (fetchedPosts) in
-                    if let fetchedPosts = fetchedPosts {
-                        self.fetchedPosts = fetchedPosts
-                    } else {
-                        self.fetchedPosts = []
-                    }
-                    self.filterSortFetchedPosts()
-                })
-            })
-        } else {
-            self.fetchPostFromList(list: self.displayList, completion: { (fetchedPosts) in
-                print("Fetch Post for List: Success, Post Count: \(fetchedPosts?.count)")
 
-                if let fetchedPosts = fetchedPosts {
-                    self.fetchedPosts = fetchedPosts
-                } else {
-                    self.fetchedPosts = []
-                }
-                self.filterSortFetchedPosts()
-            })
-        }
-        
-    }
     
     func filterSortFetchedPosts(){
         
@@ -194,20 +324,19 @@ class ListViewController: UIViewController, UICollectionViewDelegate, UICollecti
         self.clearAllPost()
         self.clearFilter()
 //        self.collectionView.reloadData()
-        self.fetchListPosts()
+        self.fetchPostsForList()
         self.collectionView.refreshControl?.endRefreshing()
     }
     
     func refreshPostsForFilter(){
         self.clearAllPost()
 //        self.collectionView.reloadData()
-        self.fetchListPosts()
+        self.fetchPostsForList()
         self.collectionView.refreshControl?.endRefreshing()
     }
     
     
     func clearAllPost(){
-        self.displayList = nil
         self.fetchedPosts = []
     }
     
@@ -598,6 +727,8 @@ class ListViewController: UIViewController, UICollectionViewDelegate, UICollecti
     
     func didTapExtraTag(tagName: String, tagId: String, post: Post) {
         
+        guard let uid = Auth.auth().currentUser?.uid else {return}
+        
         // Check to see if its a list, price or something else
         if tagId == "price"{
             // Price Tag Selected
@@ -624,12 +755,15 @@ class ListViewController: UIViewController, UICollectionViewDelegate, UICollecti
             Database.checkUpdateListDetailsWithPost(listName: tagName, listId: tagId, post: post, completion: { (fetchedList) in
                 if fetchedList == nil {
                     // List Does not Exist
-                    self.alert(title: "List Error", message: "List Does Not Exist Anymore")
+                    self.alert(title: "List Display Error", message: "List Does Not Exist Anymore")
                 } else {
-                    let listViewController = ListViewController()
-                    listViewController.displayListId = tagId
-                    listViewController.displayList = fetchedList
-                    self.navigationController?.pushViewController(listViewController, animated: true)
+                    if fetchedList?.publicList == 0 && fetchedList?.creatorUID != uid {
+                        self.alert(title: "List Display Error", message: "List Is Private")
+                    } else {
+                        let listViewController = ListViewController()
+                        listViewController.currentDisplayList = fetchedList
+                        self.navigationController?.pushViewController(listViewController, animated: true)
+                    }
                 }
             })
         }
@@ -736,7 +870,7 @@ class ListViewController: UIViewController, UICollectionViewDelegate, UICollecti
                 let deleteindexpath = IndexPath(row:index!, section: 0)
                 self.fetchedPosts.remove(at: index!)
                 self.collectionView.deleteItems(at: [deleteindexpath])
-                Database.DeletePostForList(postId: post.id!, listId: self.displayListId, postCreationDate: nil)
+                Database.DeletePostForList(postId: post.id!, listId: self.currentDisplayList?.id, postCreationDate: nil)
         }))
         
         deleteAlert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: { (action: UIAlertAction!) in

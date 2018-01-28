@@ -662,8 +662,7 @@ class TESTListViewController: UIViewController, UICollectionViewDelegate, UIColl
                     self.alert(title: "List Error", message: "List Does Not Exist Anymore")
                 } else {
                     let listViewController = ListViewController()
-                    listViewController.displayListId = tagId
-                    listViewController.displayList = fetchedList
+                    listViewController.currentDisplayList = fetchedList
                     self.navigationController?.pushViewController(listViewController, animated: true)
                 }
             })

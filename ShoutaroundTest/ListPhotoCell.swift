@@ -672,15 +672,15 @@ class ListPhotoCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         if pan.state == UIGestureRecognizerState.began {
             
         } else if pan.state == UIGestureRecognizerState.changed {
-//            self.setNeedsLayout()
+            self.setNeedsLayout()
         } else {
             if abs(pan.velocity(in: self).x) > 500 {
                 delegate?.deletePostFromList(post: post!)
             } else {
-//                UIView.animate(withDuration: 0.2, animations: {
-//                    self.setNeedsLayout()
-//                    self.layoutIfNeeded()
-//                })
+                UIView.animate(withDuration: 0.2, animations: {
+                    self.setNeedsLayout()
+                    self.layoutIfNeeded()
+                })
             }
         }
     }
@@ -688,6 +688,8 @@ class ListPhotoCell: UICollectionViewCell, UIGestureRecognizerDelegate {
     override func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
         return abs((pan.velocity(in: pan.view)).x) > abs((pan.velocity(in: pan.view)).y)
     }
+    
+
     
     
     func setupSocialAndDateViews(){

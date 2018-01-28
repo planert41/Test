@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		A51055F6201E7CD8000B279A /* ManageListController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A51055F5201E7CD8000B279A /* ManageListController.swift */; };
 		A51C13C31F4FBF2F00CEB740 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = A51C13C21F4FBF2F00CEB740 /* Extensions.swift */; };
 		A51C13C51F51136B00CEB740 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = A51C13C41F51136B00CEB740 /* GoogleService-Info.plist */; };
 		A51C13C71F51B59900CEB740 /* MainTabBarController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A51C13C61F51B59900CEB740 /* MainTabBarController.swift */; };
@@ -119,6 +120,7 @@
 
 /* Begin PBXFileReference section */
 		5E3F9302145FD8B5B7D6E87A /* Pods-InstagramFirebase.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-InstagramFirebase.debug.xcconfig"; path = "Pods/Target Support Files/Pods-InstagramFirebase/Pods-InstagramFirebase.debug.xcconfig"; sourceTree = "<group>"; };
+		A51055F5201E7CD8000B279A /* ManageListController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ManageListController.swift; sourceTree = "<group>"; };
 		A51C13C21F4FBF2F00CEB740 /* Extensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
 		A51C13C41F51136B00CEB740 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		A51C13C61F51B59900CEB740 /* MainTabBarController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MainTabBarController.swift; sourceTree = "<group>"; };
@@ -445,6 +447,7 @@
 				A5A2E5D42002E6F800D7E8F5 /* ListController.swift */,
 				A5A2E5D82005CB9000D7E8F5 /* TabListViewController.swift */,
 				A5A2E5DA20067B1900D7E8F5 /* ListNameFlowLayout.swift */,
+				A51055F5201E7CD8000B279A /* ManageListController.swift */,
 			);
 			path = List;
 			sourceTree = "<group>";
@@ -635,6 +638,7 @@
 				"${SRCROOT}/Pods/Target Support Files/Pods-ShoutaroundTest/Pods-ShoutaroundTest-frameworks.sh",
 				"${BUILT_PRODUCTS_DIR}/AFNetworking/AFNetworking.framework",
 				"${BUILT_PRODUCTS_DIR}/Alamofire/Alamofire.framework",
+				"${BUILT_PRODUCTS_DIR}/BTNavigationDropdownMenu/BTNavigationDropdownMenu.framework",
 				"${BUILT_PRODUCTS_DIR}/Bolts/Bolts.framework",
 				"${BUILT_PRODUCTS_DIR}/Cosmos/Cosmos.framework",
 				"${BUILT_PRODUCTS_DIR}/EmptyDataSet-Swift/EmptyDataSet_Swift.framework",
@@ -648,6 +652,12 @@
 				"${BUILT_PRODUCTS_DIR}/GoogleAPIClientForREST/GoogleAPIClientForREST.framework",
 				"${BUILT_PRODUCTS_DIR}/GoogleToolboxForMac/GoogleToolboxForMac.framework",
 				"${BUILT_PRODUCTS_DIR}/IQKeyboardManagerSwift/IQKeyboardManagerSwift.framework",
+				"${BUILT_PRODUCTS_DIR}/MDFInternationalization/MDFInternationalization.framework",
+				"${BUILT_PRODUCTS_DIR}/MDFTextAccessibility/MDFTextAccessibility.framework",
+				"${BUILT_PRODUCTS_DIR}/MaterialComponents/MaterialComponents.framework",
+				"${BUILT_PRODUCTS_DIR}/MotionAnimator/MotionAnimator.framework",
+				"${BUILT_PRODUCTS_DIR}/MotionInterchange/MotionInterchange.framework",
+				"${BUILT_PRODUCTS_DIR}/MotionTransitioning/MotionTransitioning.framework",
 				"${BUILT_PRODUCTS_DIR}/SMSegmentView/SMSegmentView.framework",
 				"${BUILT_PRODUCTS_DIR}/SearchTextField/SearchTextField.framework",
 				"${BUILT_PRODUCTS_DIR}/Spring/Spring.framework",
@@ -662,6 +672,7 @@
 			outputPaths = (
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/AFNetworking.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Alamofire.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/BTNavigationDropdownMenu.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Bolts.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Cosmos.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/EmptyDataSet_Swift.framework",
@@ -675,6 +686,12 @@
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/GoogleAPIClientForREST.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/GoogleToolboxForMac.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/IQKeyboardManagerSwift.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/MDFInternationalization.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/MDFTextAccessibility.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/MaterialComponents.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/MotionAnimator.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/MotionInterchange.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/MotionTransitioning.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SMSegmentView.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SearchTextField.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Spring.framework",
@@ -790,6 +807,7 @@
 				A5CC6EE01FCC81050074AB78 /* ThreadCell.swift in Sources */,
 				A57941C91F6A27A6004EC40D /* EmojiDictionary.swift in Sources */,
 				A52912451FAA62620063901B /* Bookmark.swift in Sources */,
+				A51055F6201E7CD8000B279A /* ManageListController.swift in Sources */,
 				A562E51D1F53C67B0095C7C1 /* PhotoSelectorHeader.swift in Sources */,
 				A58477A61F6DBFDA007DE06C /* Emoji.swift in Sources */,
 				A5BBD28A1FB26401004367E7 /* EmojiDictionary_2.swift in Sources */,

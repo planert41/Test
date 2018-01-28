@@ -105,16 +105,35 @@ class SharePhotoListController: UIViewController, UICollectionViewDelegate, UICo
         let listId = NSUUID().uuidString
         guard let uid = Auth.auth().currentUser?.uid else {return}
         checkListName(listName: addListTextField.text) { (listName) in
-            let newList = List.init(id: listId, name: listName)
             
-            // Create New List in Database
-            Database.createList(uploadList: newList)
+            let optionsAlert = UIAlertController(title: "Create New List", message: "", preferredStyle: UIAlertControllerStyle.alert)
+
+            optionsAlert.addAction(UIAlertAction(title: "Public", style: .default, handler: { (action: UIAlertAction!) in
+                // Create Public List
+                let newList = List.init(id: listId, name: listName, publicList: 1)
+                self.createList(newList: newList)
+            }))
             
-            self.displayList.append(newList)
-            self.tableView.reloadData()
-            self.addListTextField.text?.removeAll()
+            optionsAlert.addAction(UIAlertAction(title: "Private", style: .default, handler: { (action: UIAlertAction!) in
+                // Create Private List
+                let newList = List.init(id: listId, name: listName, publicList: 0)
+                self.createList(newList: newList)
+            }))
+            
+            optionsAlert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: { (action: UIAlertAction!) in
+                print("Handle Cancel Logic here")
+            }))
         }
         self.addListTextField.resignFirstResponder()
+    }
+    
+    func createList(newList: List){
+        // Create New List in Database
+        Database.createList(uploadList: newList)
+        
+        self.displayList.append(newList)
+        self.tableView.reloadData()
+        self.addListTextField.text?.removeAll()
     }
     
     func checkListName(listName: String?, completion: @escaping (String) -> ()){
