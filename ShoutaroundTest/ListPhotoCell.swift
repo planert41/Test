@@ -17,7 +17,7 @@ protocol ListPhotoCellDelegate {
     func didTapMessage(post:Post)
     func refreshPost(post:Post)
     
-    func deletePost(post:Post)
+    func deletePostFromList(post:Post)
     func didTapPicture(post:Post)
     func didTapExtraTag(tagName: String, tagId: String, post: Post)
 
@@ -552,6 +552,10 @@ class ListPhotoCell: UICollectionViewCell, UIGestureRecognizerDelegate {
     override init(frame: CGRect) {
         super.init(frame:frame)
         
+        pan = UIPanGestureRecognizer(target: self, action: #selector(onPan(_:)))
+        pan.delegate = self
+        self.addGestureRecognizer(pan)
+        
     // Photo Image View
         addSubview(photoImageView)
         photoImageView.anchor(top: topAnchor, left: leftAnchor, bottom: bottomAnchor, right: nil, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
@@ -627,6 +631,7 @@ class ListPhotoCell: UICollectionViewCell, UIGestureRecognizerDelegate {
 
         
         // Adding Gesture Recognizers
+
         
         userProfileImageView.isUserInteractionEnabled = true
         let usernameTap = UITapGestureRecognizer(target: self, action: #selector(ListPhotoCell.usernameTap))
@@ -657,8 +662,33 @@ class ListPhotoCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         
         bottomDividerView.anchor(top: bottomAnchor, left: leftAnchor, bottom: nil, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0.5)
         
-        
     }
+    
+
+    var pan: UIPanGestureRecognizer!
+    
+    
+    func onPan(_ pan: UIPanGestureRecognizer){
+        if pan.state == UIGestureRecognizerState.began {
+            
+        } else if pan.state == UIGestureRecognizerState.changed {
+//            self.setNeedsLayout()
+        } else {
+            if abs(pan.velocity(in: self).x) > 500 {
+                delegate?.deletePostFromList(post: post!)
+            } else {
+//                UIView.animate(withDuration: 0.2, animations: {
+//                    self.setNeedsLayout()
+//                    self.layoutIfNeeded()
+//                })
+            }
+        }
+    }
+    
+    override func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
+        return abs((pan.velocity(in: pan.view)).x) > abs((pan.velocity(in: pan.view)).y)
+    }
+    
     
     func setupSocialAndDateViews(){
         

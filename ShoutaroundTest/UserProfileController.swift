@@ -11,10 +11,8 @@ import Firebase
 import FBSDKLoginKit
 import CoreLocation
 
-class UserProfileController: UICollectionViewController, UICollectionViewDelegateFlowLayout, UserProfileHeaderDelegate, HomePostCellDelegate,ListPhotoCellDelegate, GridPhotoCellDelegate, UISearchBarDelegate, PostSearchControllerDelegate, FilterControllerDelegate, UISearchControllerDelegate, UIGestureRecognizerDelegate{
+class UserProfileController: UICollectionViewController, UICollectionViewDelegateFlowLayout, UserProfileHeaderDelegate, HomePostCellDelegate, GridPhotoCellDelegate, UISearchBarDelegate, PostSearchControllerDelegate, FilterControllerDelegate, UISearchControllerDelegate, UIGestureRecognizerDelegate{
 
-    
-    
     let cellId = "cellId"
     let homePostCellId = "homePostCellId"
     

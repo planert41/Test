@@ -11,12 +11,18 @@ import UIKit
 import Firebase
 import CoreLocation
 import EmptyDataSet_Swift
+import MaterialComponents.MaterialCollections
 
 
-class ListViewController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, ListPhotoCellDelegate, HomePostCellDelegate, ListHeaderDelegate, SortFilterHeaderDelegate, FilterControllerDelegate, EmptyDataSetSource, EmptyDataSetDelegate {
-
+class TESTListViewController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, ListPhotoCellDelegate, HomePostCellDelegate, ListHeaderDelegate, SortFilterHeaderDelegate, FilterControllerDelegate, EmptyDataSetSource, EmptyDataSetDelegate {
+    func deletePostFromList(post: Post) {
+        
+    }
+    
+    
+    
     static let refreshListViewNotificationName = NSNotification.Name(rawValue: "RefreshListView")
-
+    
     let bookmarkCellId = "bookmarkCellId"
     let homePostCellId = "homePostCellId"
     let listHeaderId = "listHeaderId"
@@ -30,7 +36,7 @@ class ListViewController: UIViewController, UICollectionViewDelegate, UICollecti
     var displayList: List? = nil
     var fetchedPosts: [Post] = []
     
-// CollectionView Setup
+    // CollectionView Setup
     
     var isListView: Bool = true
     
@@ -70,8 +76,8 @@ class ListViewController: UIViewController, UICollectionViewDelegate, UICollecti
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         emojiDetailLabel.isHidden = true
     }
-
-// Filtering Variables
+    
+    // Filtering Variables
     
     var isFiltering: Bool = false
     var filterCaption: String? = nil
@@ -98,33 +104,33 @@ class ListViewController: UIViewController, UICollectionViewDelegate, UICollecti
         
         view.addSubview(collectionView)
         collectionView.anchor(top: view.topAnchor, left: view.leftAnchor, bottom: view.bottomAnchor, right: view.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
-
+        
         fetchListPosts()
         
         NotificationCenter.default.addObserver(self, selector: #selector(handleRefresh), name: ListViewController.refreshListViewNotificationName, object: nil)
-
-    
+        
+        
     }
     
     func setupCollectionView(){
-    
-    collectionView.register(ListPhotoCell.self, forCellWithReuseIdentifier: bookmarkCellId)
-    collectionView.register(HomePostCell.self, forCellWithReuseIdentifier: homePostCellId)
-    collectionView.register(ListViewHeader.self, forSupplementaryViewOfKind: UICollectionElementKindSectionHeader, withReuseIdentifier: listHeaderId)
-    
-    collectionView.backgroundColor = .white
-    
-    let refreshControl = UIRefreshControl()
-    refreshControl.addTarget(self, action: #selector(handleRefresh), for: .valueChanged)
-    collectionView.refreshControl = refreshControl
-    collectionView.alwaysBounceVertical = true
-    collectionView.keyboardDismissMode = .onDrag
-    
-    // Adding Empty Data Set
-    collectionView.emptyDataSetSource = self
-    collectionView.emptyDataSetDelegate = self
-    
-    
+        
+        collectionView.register(ListPhotoCell.self, forCellWithReuseIdentifier: bookmarkCellId)
+        collectionView.register(HomePostCell.self, forCellWithReuseIdentifier: homePostCellId)
+        collectionView.register(ListViewHeader.self, forSupplementaryViewOfKind: UICollectionElementKindSectionHeader, withReuseIdentifier: listHeaderId)
+        
+        collectionView.backgroundColor = .white
+        
+        let refreshControl = UIRefreshControl()
+        refreshControl.addTarget(self, action: #selector(handleRefresh), for: .valueChanged)
+        collectionView.refreshControl = refreshControl
+        collectionView.alwaysBounceVertical = true
+        collectionView.keyboardDismissMode = .onDrag
+        
+        // Adding Empty Data Set
+        collectionView.emptyDataSetSource = self
+        collectionView.emptyDataSetDelegate = self
+        
+        
     }
     
     func fetchListPosts(){
@@ -149,7 +155,7 @@ class ListViewController: UIViewController, UICollectionViewDelegate, UICollecti
         } else {
             self.fetchPostFromList(list: self.displayList, completion: { (fetchedPosts) in
                 print("Fetch Post for List: Success, Post Count: \(fetchedPosts?.count)")
-
+                
                 if let fetchedPosts = fetchedPosts {
                     self.fetchedPosts = fetchedPosts
                 } else {
@@ -193,14 +199,14 @@ class ListViewController: UIViewController, UICollectionViewDelegate, UICollecti
         print("Refresh List")
         self.clearAllPost()
         self.clearFilter()
-//        self.collectionView.reloadData()
+        //        self.collectionView.reloadData()
         self.fetchListPosts()
         self.collectionView.refreshControl?.endRefreshing()
     }
     
     func refreshPostsForFilter(){
         self.clearAllPost()
-//        self.collectionView.reloadData()
+        //        self.collectionView.reloadData()
         self.fetchListPosts()
         self.collectionView.refreshControl?.endRefreshing()
     }
@@ -257,7 +263,7 @@ class ListViewController: UIViewController, UICollectionViewDelegate, UICollecti
                     Database.DeletePostForList(postId: postId, listId: list.id, postCreationDate: nil)
                     thisGroup.leave()
                 }
-            
+                
             })
         }
         
@@ -272,14 +278,14 @@ class ListViewController: UIViewController, UICollectionViewDelegate, UICollecti
         }
         
     }
-
+    
     // Search Delegates
     
     
     
     
     func filterControllerFinished(selectedCaption: String?, selectedRange: String?, selectedLocation: CLLocation?, selectedLocationName: String?, selectedGooglePlaceId: String?, selectedGooglePlaceType: [String]?, selectedMinRating: Double, selectedType: String?, selectedMaxPrice: String?, selectedSort: String) {
-
+        
         // Clears all Filters, Puts in new Filters, Refreshes all Post IDS and Posts
         
         self.clearFilter()
@@ -332,7 +338,7 @@ class ListViewController: UIViewController, UICollectionViewDelegate, UICollecti
     
     
     
-
+    
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat {
         return 1
@@ -360,12 +366,12 @@ class ListViewController: UIViewController, UICollectionViewDelegate, UICollecti
     }
     
     
-     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         
         return fetchedPosts.count
     }
     
-     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         
         var displayPost = fetchedPosts[indexPath.item]
         
@@ -384,13 +390,13 @@ class ListViewController: UIViewController, UICollectionViewDelegate, UICollecti
         }
     }
     
-     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         //print(displayedPosts[indexPath.item])
     }
     
     // SORT FILTER HEADER
     
-     func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
+    func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
         let header = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: listHeaderId, for: indexPath) as! ListViewHeader
         header.isFiltering = self.isFiltering
         header.isListView = self.isListView
@@ -403,10 +409,39 @@ class ListViewController: UIViewController, UICollectionViewDelegate, UICollecti
         return CGSize(width: view.frame.width, height: 30 + 5 + 5)
     }
     
-
+    // Enable swipe-to-dismiss items.
+    func collectionViewAllowsSwipeToDismissItem(collectionView: UICollectionView) -> Bool {
+        return true
+    }
     
-
+    // Override permissions at specific index paths.
+    func collectionView(collectionView: UICollectionView,
+                        canSwipeToDismissItemAtIndexPath indexPath: NSIndexPath) -> Bool {
+        // In this example we are allowing all items to be dismissed except this first item.
+        return true
+    }
     
+    // Remove swiped index paths from our data.
+    func collectionView(collectionView: UICollectionView,
+                        willDeleteItemsAtIndexPaths indexPaths: [NSIndexPath]) {
+        let deleteAlert = UIAlertController(title: "Delete", message: "Remove Post From List?", preferredStyle: UIAlertControllerStyle.alert)
+        
+        deleteAlert.addAction(UIAlertAction(title: "OK", style: .default, handler: { (action: UIAlertAction!) in
+            for indexPath in indexPaths {
+                // Remove from Current View
+                let deletePost = self.fetchedPosts[indexPath.row]
+                self.fetchedPosts.remove(at: indexPath.row)
+                self.collectionView.deleteItems(at: [indexPath as IndexPath])
+                Database.DeletePostForList(postId: deletePost.id!, listId: self.displayListId, postCreationDate: nil)
+            }
+        }))
+        
+        deleteAlert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: { (action: UIAlertAction!) in
+            print("Handle Cancel Logic here")
+        }))
+        present(deleteAlert, animated: true, completion: nil)
+        
+    }
     
     // Empty Data Set Delegates
     
@@ -441,11 +476,11 @@ class ListViewController: UIViewController, UICollectionViewDelegate, UICollecti
         var font: UIFont?
         var textColor: UIColor?
         
-//        if isFiltering {
-//            text = "Try Something Further or Ramen"
-//        } else {
-//            text = "Fill Up Your List!"
-//        }
+        //        if isFiltering {
+        //            text = "Try Something Further or Ramen"
+        //        } else {
+        //            text = "Fill Up Your List!"
+        //        }
         
         
         font = UIFont.boldSystemFont(ofSize: 13.0)
@@ -505,7 +540,7 @@ class ListViewController: UIViewController, UICollectionViewDelegate, UICollecti
     
     func emptyDataSet(_ scrollView: UIScrollView, didTapButton button: UIButton) {
         if isFiltering {
-             self.openFilter()
+            self.openFilter()
         } else {
             // Returns To Home Tab
             self.tabBarController?.selectedIndex = 0
@@ -516,10 +551,10 @@ class ListViewController: UIViewController, UICollectionViewDelegate, UICollecti
         self.handleRefresh()
     }
     
-//    func verticalOffset(forEmptyDataSet scrollView: UIScrollView) -> CGFloat {
-//        let offset = (self.collectionView.frame.height) / 5
-//        return -50
-//    }
+    //    func verticalOffset(forEmptyDataSet scrollView: UIScrollView) -> CGFloat {
+    //        let offset = (self.collectionView.frame.height) / 5
+    //        return -50
+    //    }
     
     func spaceHeight(forEmptyDataSet scrollView: UIScrollView) -> CGFloat {
         return 9
@@ -554,7 +589,7 @@ class ListViewController: UIViewController, UICollectionViewDelegate, UICollecti
         self.navigationController?.pushViewController(filterController, animated: true)
     }
     
-
+    
     // HOME POST CELL DELEGATE METHODS
     
     func didTapBookmark(post: Post) {
@@ -724,27 +759,6 @@ class ListViewController: UIViewController, UICollectionViewDelegate, UICollecti
         
     }
     
-    func deletePostFromList(post: Post) {
-        let deleteAlert = UIAlertController(title: "Delete", message: "Remove Post From List?", preferredStyle: UIAlertControllerStyle.alert)
-        
-        deleteAlert.addAction(UIAlertAction(title: "OK", style: .default, handler: { (action: UIAlertAction!) in
-                // Remove from Current View
-                let index = self.fetchedPosts.index { (filteredpost) -> Bool in
-                    filteredpost.id  == post.id
-                }
-            
-                let deleteindexpath = IndexPath(row:index!, section: 0)
-                self.fetchedPosts.remove(at: index!)
-                self.collectionView.deleteItems(at: [deleteindexpath])
-                Database.DeletePostForList(postId: post.id!, listId: self.displayListId, postCreationDate: nil)
-        }))
-        
-        deleteAlert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: { (action: UIAlertAction!) in
-            print("Handle Cancel Logic here")
-        }))
-        present(deleteAlert, animated: true, completion: nil)
-    }
-    
     func displaySelectedEmoji(emoji: String, emojitag: String) {
         
         emojiDetailLabel.text = emoji + " " + emojitag
@@ -757,6 +771,7 @@ class ListViewController: UIViewController, UICollectionViewDelegate, UICollecti
     
     
     
-
+    
 }
+
 

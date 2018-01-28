@@ -15,6 +15,10 @@ import Spring
 
 
 class ExploreController: UICollectionViewController, UICollectionViewDelegateFlowLayout, UISearchBarDelegate, ListPhotoCellDelegate, SortFilterHeaderDelegate, FilterControllerDelegate, EmptyDataSetSource, EmptyDataSetDelegate, GridPhotoCellDelegate, RankViewHeaderDelegate, PostSearchControllerDelegate {
+    func deletePostFromList(post: Post) {
+        
+    }
+    
     
     //INPUT
     var fetchedPostIds: [PostId] = []
