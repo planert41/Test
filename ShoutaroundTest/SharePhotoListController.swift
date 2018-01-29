@@ -123,15 +123,19 @@ class SharePhotoListController: UIViewController, UICollectionViewDelegate, UICo
             optionsAlert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: { (action: UIAlertAction!) in
                 print("Handle Cancel Logic here")
             }))
+        
+            self.present(optionsAlert, animated: true, completion: {
+                self.addListTextField.resignFirstResponder()
+            })
         }
-        self.addListTextField.resignFirstResponder()
     }
     
     func createList(newList: List){
         // Create New List in Database
         Database.createList(uploadList: newList)
         
-        self.displayList.append(newList)
+        self.displayList.insert(newList, at: 1)
+        
         self.tableView.reloadData()
         self.addListTextField.text?.removeAll()
     }
@@ -232,32 +236,23 @@ class SharePhotoListController: UIViewController, UICollectionViewDelegate, UICo
         guard let uid = Auth.auth().currentUser?.uid else {return}
         
         if uploadPost?.creatorUID != uid {
-         
-            // Check for Bookmark List first. add Bookmark List if not post creator UID
+            // Post Creator Not User, Only Bookmarking
             if let tempBookmarkList = userList?.first(where:{$0.name == bookmarkListName}) {
                 bookmarkList = tempBookmarkList
             } else {
-                // Create Bookmark List
-                let listId = NSUUID().uuidString
-                print("No Bookmark List, Creating Bookmark List: \(listId), User: \(uid)")
-                bookmarkList.id = listId
-                Database.createList(uploadList: bookmarkList)
+                print("List Setup: ERROR,  No Legit List, default empty Bookmark List")
             }
-            displayList.append(bookmarkList)
+            self.displayList.append(bookmarkList)
         } else {
-           
-            // Check for Legit List. add Legit List if is post creator UID
+            // Post Creator is Current User, Only Legit List
             if let tempLegitList = userList?.first(where:{$0.name == legitListName}) {
                 legitList = tempLegitList
             } else {
-                // Create Legit List
-                let listId = NSUUID().uuidString
-                print("No Legit List, Creating Legit List: \(listId), User: \(uid)")
-                legitList.id = listId
-                Database.createList(uploadList: legitList)
+                print("List Setup: ERROR,  No Legit List, default empty Legit List")
             }
-            displayList.append(legitList)
+            self.displayList.append(legitList)
         }
+        
         // Add remaining list to Display List. List is sorted by creation date when pulling
         
         if userList?.count != 0 {
@@ -268,6 +263,11 @@ class SharePhotoListController: UIViewController, UICollectionViewDelegate, UICo
             if let legitIndex = (userList?.index(where:{$0.name == legitListName})) {
                 userList?.remove(at: legitIndex)
             }
+            
+            userList?.sort(by: { (p1, p2) -> Bool in
+                // Sort by most Recent List
+                return p1.creationDate.compare(p2.creationDate) == .orderedDescending
+            })
             
             displayList = displayList + userList!
         }
@@ -422,6 +422,8 @@ class SharePhotoListController: UIViewController, UICollectionViewDelegate, UICo
         let cell = tableView.dequeueReusableCell(withIdentifier: listCellId, for: indexPath) as! UploadListCell
         
         cell.list = displayList[indexPath.row]
+        cell.isListManage = false
+
         
         
         // select/deselect the cell

@@ -45,6 +45,14 @@ class CommentsController: UICollectionViewController, UICollectionViewDelegateFl
     var comments = [Comment]()
     
     fileprivate func fetchComments() {
+        
+        // Insert Caption as First Comment
+        var captionComment = Comment(user: (post?.user)!, dictionary: [:])
+        captionComment.text = (post?.caption)!
+        captionComment.uid = "postCaption"
+        self.comments.append(captionComment)
+
+        
         guard let postId = self.post?.id else {return}
         let ref = Database.database().reference().child("comments").child(postId)
 

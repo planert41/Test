@@ -24,7 +24,8 @@ class ListViewController: UIViewController, UICollectionViewDelegate, UICollecti
     
     
     override func viewWillAppear(_ animated: Bool) {
-    
+        collectionView.collectionViewLayout.invalidateLayout()
+        collectionView.layoutIfNeeded()
     }
 
     // INPUT
@@ -44,7 +45,7 @@ class ListViewController: UIViewController, UICollectionViewDelegate, UICollecti
     var displayedLists: [List]? = [] {
         didSet{
             guard let uid = Auth.auth().currentUser?.uid else {return}
-            guard let displayedLists = self.displayedLists else {
+            guard var displayedLists = self.displayedLists else {
                 // If Displayed list is null, set to default
                 self.displayedLists = [emptyLegitList,emptyBookmarkList]
                 self.displayedListNames = [legitListName, bookmarkListName]
@@ -53,16 +54,25 @@ class ListViewController: UIViewController, UICollectionViewDelegate, UICollecti
             
             if displayUser?.uid != uid {
                 // Exclude Private list if not current user
-                self.displayedLists?.filter({ (list) -> Bool in
+                if let filteredList = self.displayedLists?.filter({ (list) -> Bool in
                     return list.publicList == 1
-                })
+                }){
+                    displayedLists = filteredList
+                } else {
+                    displayedLists = []
+                }
             }
+            
+            // Sort Display List
+            displayedLists.sort(by: { (p1, p2) -> Bool in
+                return p1.creationDate.compare(p2.creationDate) == .orderedDescending
+            })
             
             // Populate Displayed List Names
             var tempListNames: [String] = []
-            for list in displayedLists {
+            for list in displayedLists.reversed() {
                 // Add List Name and List Count
-                var listName = "\(list.name) (\(list.postIds?.count))"
+                var listName = "\(list.name) (\((list.postIds?.count)!))"
                 tempListNames.append(listName)
             }
             self.displayedListNames = tempListNames
@@ -259,7 +269,7 @@ class ListViewController: UIViewController, UICollectionViewDelegate, UICollecti
     }
     
     func manageList(){
-        let sharePhotoListController = SharePhotoListController()
+        let sharePhotoListController = ManageListViewController()
         navigationController?.pushViewController(sharePhotoListController, animated: true)
     }
     

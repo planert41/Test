@@ -1511,8 +1511,9 @@ extension Database{
         let listRef = Database.database().reference().child("lists").child(listId)
         let createdDate = Date().timeIntervalSince1970
         let listName = uploadList.name
+        let publicListInd = uploadList.publicList
         
-        let values = ["name": listName, "createdDate": createdDate, "creatorUID": uid] as [String:Any]
+        let values = ["name": listName, "createdDate": createdDate, "creatorUID": uid, "publicList": publicListInd] as [String:Any]
         
         listRef.updateChildValues(values) { (err, ref) in
             if let err = err {

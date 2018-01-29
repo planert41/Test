@@ -20,6 +20,7 @@ class MainTabBarController: UITabBarController, UITabBarControllerDelegate, UIIm
     var selectedTime: Date? = nil
     var assets = [PHAsset]()
     var selectedTabBarIndex: Int? = nil
+
     
 
     func tabBarController(_ tabBarController: UITabBarController, didSelect viewController: UIViewController) {
@@ -43,12 +44,13 @@ class MainTabBarController: UITabBarController, UITabBarControllerDelegate, UIIm
         }
         
         if index == 3 {
+            guard let uid = Auth.auth().currentUser?.uid else {return}
             print("List View Selected")
             
             print(viewController)
             let listNavController = viewController as! UINavigationController
-            let listView = listNavController.visibleViewController as! ListViewController
-            if listView.displayUser == nil {
+            let listView = listNavController.viewControllers[0] as! ListViewController
+            if listView.displayUser?.uid != uid {
                 print("Default Setup For List: \(CurrentUser.lists[0].name) for \(CurrentUser.user?.username)")
                 listView.currentDisplayList = CurrentUser.lists[0]
                 listView.displayUser = CurrentUser.user

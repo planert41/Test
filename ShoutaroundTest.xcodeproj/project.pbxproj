@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		A51055F6201E7CD8000B279A /* ManageListController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A51055F5201E7CD8000B279A /* ManageListController.swift */; };
+		A51055F6201E7CD8000B279A /* ManageListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A51055F5201E7CD8000B279A /* ManageListViewController.swift */; };
 		A51C13C31F4FBF2F00CEB740 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = A51C13C21F4FBF2F00CEB740 /* Extensions.swift */; };
 		A51C13C51F51136B00CEB740 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = A51C13C41F51136B00CEB740 /* GoogleService-Info.plist */; };
 		A51C13C71F51B59900CEB740 /* MainTabBarController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A51C13C61F51B59900CEB740 /* MainTabBarController.swift */; };
@@ -120,7 +120,7 @@
 
 /* Begin PBXFileReference section */
 		5E3F9302145FD8B5B7D6E87A /* Pods-InstagramFirebase.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-InstagramFirebase.debug.xcconfig"; path = "Pods/Target Support Files/Pods-InstagramFirebase/Pods-InstagramFirebase.debug.xcconfig"; sourceTree = "<group>"; };
-		A51055F5201E7CD8000B279A /* ManageListController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ManageListController.swift; sourceTree = "<group>"; };
+		A51055F5201E7CD8000B279A /* ManageListViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ManageListViewController.swift; sourceTree = "<group>"; };
 		A51C13C21F4FBF2F00CEB740 /* Extensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
 		A51C13C41F51136B00CEB740 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		A51C13C61F51B59900CEB740 /* MainTabBarController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MainTabBarController.swift; sourceTree = "<group>"; };
@@ -400,7 +400,6 @@
 				A58477A91F6EFFD7007DE06C /* LocationLabels.swift */,
 				A552EA601F99BE76005A0977 /* PhotoSelectorControllerDummy.swift */,
 				A5F9FE231FEE044B00AF9542 /* UploadPhotoListController.swift */,
-				A5F9FE2B1FF069D000AF9542 /* UploadListCell.swift */,
 			);
 			name = AddPhoto;
 			sourceTree = "<group>";
@@ -447,7 +446,8 @@
 				A5A2E5D42002E6F800D7E8F5 /* ListController.swift */,
 				A5A2E5D82005CB9000D7E8F5 /* TabListViewController.swift */,
 				A5A2E5DA20067B1900D7E8F5 /* ListNameFlowLayout.swift */,
-				A51055F5201E7CD8000B279A /* ManageListController.swift */,
+				A51055F5201E7CD8000B279A /* ManageListViewController.swift */,
+				A5F9FE2B1FF069D000AF9542 /* UploadListCell.swift */,
 			);
 			path = List;
 			sourceTree = "<group>";
@@ -807,7 +807,7 @@
 				A5CC6EE01FCC81050074AB78 /* ThreadCell.swift in Sources */,
 				A57941C91F6A27A6004EC40D /* EmojiDictionary.swift in Sources */,
 				A52912451FAA62620063901B /* Bookmark.swift in Sources */,
-				A51055F6201E7CD8000B279A /* ManageListController.swift in Sources */,
+				A51055F6201E7CD8000B279A /* ManageListViewController.swift in Sources */,
 				A562E51D1F53C67B0095C7C1 /* PhotoSelectorHeader.swift in Sources */,
 				A58477A61F6DBFDA007DE06C /* Emoji.swift in Sources */,
 				A5BBD28A1FB26401004367E7 /* EmojiDictionary_2.swift in Sources */,

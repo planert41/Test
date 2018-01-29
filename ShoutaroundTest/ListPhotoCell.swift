@@ -187,7 +187,7 @@ class ListPhotoCell: UICollectionViewCell, UIGestureRecognizerDelegate {
     let locationNameLabel: UILabel = {
         let label = UILabel()
         label.text = "Location"
-        label.font = UIFont.boldSystemFont(ofSize: 10)
+        label.font = UIFont.boldSystemFont(ofSize: 12)
         label.numberOfLines = 0
         label.textColor = UIColor.black
         label.lineBreakMode = NSLineBreakMode.byWordWrapping
@@ -209,7 +209,7 @@ class ListPhotoCell: UICollectionViewCell, UIGestureRecognizerDelegate {
     
     let captionLabel: UILabel = {
         let label = UILabel()
-        label.font = UIFont.systemFont(ofSize: 10)
+        label.font = UIFont.systemFont(ofSize: 11)
         label.numberOfLines = 0
         //        label.lineBreakMode = NSLineBreakMode.byWordWrapping
         //        label.sizeToFit()
@@ -600,7 +600,7 @@ class ListPhotoCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         // Location Data
         
         addSubview(locationNameLabel)
-        locationNameLabel.anchor(top: nonRatingEmojiLabel.bottomAnchor, left: photoImageView.rightAnchor, bottom: nil, right: starRatingLabel.leftAnchor, paddingTop: 5, paddingLeft: 10, paddingBottom: 0, paddingRight: 20, width: 0, height: 0)
+        locationNameLabel.anchor(top: nonRatingEmojiLabel.bottomAnchor, left: photoImageView.rightAnchor, bottom: nil, right: starRatingLabel.leftAnchor, paddingTop: 6, paddingLeft: 10, paddingBottom: 0, paddingRight: 20, width: 0, height: 0)
         locationNameLabel.rightAnchor.constraint(lessThanOrEqualTo: starRatingLabel.leftAnchor).isActive = true
         locationNameLabel.heightAnchor.constraint(lessThanOrEqualToConstant: 20).isActive = true
         locationNameLabel.sizeToFit()

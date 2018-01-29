@@ -77,6 +77,7 @@ class ListViewHeader: UICollectionViewCell, UIGestureRecognizerDelegate {
     override init(frame: CGRect) {
         super.init(frame: frame)
         
+        backgroundColor = UIColor.white
         addSubview(filterButton)
         filterButton.anchor(top: topAnchor, left: nil, bottom: bottomAnchor, right: rightAnchor, paddingTop: 1, paddingLeft: 1, paddingBottom: 1, paddingRight: 3, width: 0, height: 0)
         filterButton.widthAnchor.constraint(equalTo: filterButton.heightAnchor, multiplier: 1).isActive = true

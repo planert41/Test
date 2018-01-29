@@ -10,8 +10,8 @@ import Foundation
 
 struct Comment {
     
-    let text: String
-    let uid: String
+    var text: String
+    var uid: String
     var user: User
     
     init(user:User, dictionary: [String:Any]) {

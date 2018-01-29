@@ -970,6 +970,8 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
                     // List Does not Exist
                     self.alert(title: "List Error", message: "List Does Not Exist Anymore")
                 } else {
+                    
+                    
                     let listViewController = ListViewController()
                     listViewController.currentDisplayList = fetchedList
                     self.navigationController?.pushViewController(listViewController, animated: true)
