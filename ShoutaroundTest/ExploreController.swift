@@ -136,7 +136,7 @@ class ExploreController: UICollectionViewController, UICollectionViewDelegateFlo
         collectionView?.keyboardDismissMode = .onDrag
         collectionView?.delegate = self
         collectionView?.dataSource = self
-        collectionView?.contentInset = UIEdgeInsets(top: 0, left: 5, bottom: 0, right: 5)
+        collectionView?.contentInset = UIEdgeInsets(top: 0, left: 2, bottom: 0, right: 2)
 
         // Adding Empty Data Set
         collectionView?.emptyDataSetSource = self
@@ -535,7 +535,7 @@ class ExploreController: UICollectionViewController, UICollectionViewDelegateFlo
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumInteritemSpacingForSectionAt section: Int) -> CGFloat {
-        return 5
+        return 2
     }
     
     
@@ -547,7 +547,7 @@ class ExploreController: UICollectionViewController, UICollectionViewDelegateFlo
         } else {
             // Grid View Size
 //            let width = (view.frame.width - 2) / 3
-            let width = (view.frame.width - 5 - 10) / 2
+            let width = (view.frame.width - 2 - 4) / 2
             return CGSize(width: width, height: width + 40)
         }
     }
@@ -571,6 +571,7 @@ class ExploreController: UICollectionViewController, UICollectionViewDelegateFlo
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: bookmarkCellId, for: indexPath) as! ListPhotoCell
             cell.delegate = self
             cell.post = displayPost
+            cell.bookmarkDate = displayPost.creationDate
             
             return cell
         } else {

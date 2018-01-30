@@ -64,6 +64,7 @@
 		A5A2E5DB20067B1900D7E8F5 /* ListNameFlowLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5A2E5DA20067B1900D7E8F5 /* ListNameFlowLayout.swift */; };
 		A5A2E5DD2006885100D7E8F5 /* ListNameCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5A2E5DC2006885100D7E8F5 /* ListNameCell.swift */; };
 		A5A9D9E9201F677900304DB4 /* ExplorePhotoCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5A9D9E8201F677900304DB4 /* ExplorePhotoCell.swift */; };
+		A5A9D9EB202021C600304DB4 /* MapViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5A9D9EA202021C600304DB4 /* MapViewController.swift */; };
 		A5AEB9741F96B00500E88CAC /* EmojiCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5AEB9731F96B00500E88CAC /* EmojiCell.swift */; };
 		A5AEB9761F986F8200E88CAC /* PictureController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5AEB9751F986F8200E88CAC /* PictureController.swift */; };
 		A5AEB9781F9956B500E88CAC /* InboxController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5AEB9771F9956B500E88CAC /* InboxController.swift */; };
@@ -180,6 +181,7 @@
 		A5A2E5DA20067B1900D7E8F5 /* ListNameFlowLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListNameFlowLayout.swift; sourceTree = "<group>"; };
 		A5A2E5DC2006885100D7E8F5 /* ListNameCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListNameCell.swift; sourceTree = "<group>"; };
 		A5A9D9E8201F677900304DB4 /* ExplorePhotoCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExplorePhotoCell.swift; sourceTree = "<group>"; };
+		A5A9D9EA202021C600304DB4 /* MapViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapViewController.swift; sourceTree = "<group>"; };
 		A5AEB9731F96B00500E88CAC /* EmojiCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EmojiCell.swift; sourceTree = "<group>"; };
 		A5AEB9751F986F8200E88CAC /* PictureController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PictureController.swift; sourceTree = "<group>"; };
 		A5AEB9771F9956B500E88CAC /* InboxController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InboxController.swift; sourceTree = "<group>"; };
@@ -444,6 +446,7 @@
 			isa = PBXGroup;
 			children = (
 				A5A2E5D020028F0C00D7E8F5 /* ListViewController.swift */,
+				A5A9D9EA202021C600304DB4 /* MapViewController.swift */,
 				A522BF51201D3E3C0010C43A /* Backup.swift */,
 				A5A2E5D22002B00000D7E8F5 /* ListViewHeader.swift */,
 				A5A2E5D42002E6F800D7E8F5 /* ListController.swift */,
@@ -460,11 +463,11 @@
 			children = (
 				A5C6450C1F564A4C00C78244 /* Post.swift */,
 				A5C645171F57A4BF00C78244 /* User.swift */,
+				A5A2E5CB200032BF00D7E8F5 /* List.swift */,
 				A5C6452D1F5C481300C78244 /* Comment.swift */,
 				A58477A51F6DBFDA007DE06C /* Emoji.swift */,
 				A552EA5E1F997973005A0977 /* Message.swift */,
 				A52912441FAA62620063901B /* Bookmark.swift */,
-				A5A2E5CB200032BF00D7E8F5 /* List.swift */,
 			);
 			name = Models;
 			sourceTree = "<group>";
@@ -518,10 +521,10 @@
 			isa = PBXGroup;
 			children = (
 				A5C645151F56604200C78244 /* HomePostCell.swift */,
+				A5A9D9E8201F677900304DB4 /* ExplorePhotoCell.swift */,
 				A5C6450E1F564C7700C78244 /* GridPhotoCell.swift */,
 				A57C060B1F76037C00A0568F /* ListPhotoCell.swift */,
 				A5A2E5DC2006885100D7E8F5 /* ListNameCell.swift */,
-				A5A9D9E8201F677900304DB4 /* ExplorePhotoCell.swift */,
 			);
 			name = PhotoCells;
 			sourceTree = "<group>";
@@ -769,6 +772,7 @@
 				A54E1D6D1F4E736B00C2AA77 /* SignUpController.swift in Sources */,
 				A5F3E32E1FBD486D00A3E3A0 /* UserCell.swift in Sources */,
 				A5C6452A1F5BB84200C78244 /* CommentsController.swift in Sources */,
+				A5A9D9EB202021C600304DB4 /* MapViewController.swift in Sources */,
 				A58477A81F6EB720007DE06C /* EmojiExtensions.swift in Sources */,
 				A5A17BB01FA6497F001F227D /* UIPicker.swift in Sources */,
 				A5C6451A1F57AB0000C78244 /* Firebase.swift in Sources */,

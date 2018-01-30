@@ -22,6 +22,7 @@ class ExplorePhotoCell: UICollectionViewCell, UIGestureRecognizerDelegate {
             //            guard let url = URL(string: imageUrl) else {return}
             //            photoImageView.setImageWith(url)
             photoImageView.loadImage(urlString: imageUrl)
+            userProfileImageView.loadImage(urlString: (post?.user.profileImageUrl)!)
             
             self.voteCount = post?.voteCount ?? 0
             self.listCount = post?.listCount ?? 0
@@ -85,7 +86,7 @@ class ExplorePhotoCell: UICollectionViewCell, UIGestureRecognizerDelegate {
     let locationLabel: UILabel = {
         let label = UILabel()
         label.text = "Location"
-        label.font = UIFont.boldSystemFont(ofSize: 10)
+        label.font = UIFont.systemFont(ofSize: 10)
         label.textColor = UIColor.black
         label.isUserInteractionEnabled = true
         label.textAlignment = NSTextAlignment.left
@@ -116,6 +117,15 @@ class ExplorePhotoCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         return label
     }()
     
+    let userProfileImageView: CustomImageView = {
+        
+        let iv = CustomImageView()
+        iv.contentMode = .scaleAspectFill
+        iv.clipsToBounds = true
+        iv.image = #imageLiteral(resourceName: "profile_outline").withRenderingMode(.alwaysOriginal)
+        return iv
+        
+    }()
     
     var photoDetailView = UIView()
     
@@ -125,24 +135,32 @@ class ExplorePhotoCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         self.layer.cornerRadius = 10
         self.layer.masksToBounds = true
         self.layer.borderColor = UIColor.gray.cgColor
-        self.layer.borderWidth = 1
+        self.layer.borderWidth = 0
         
 
         
     // Photo Detail View - Emoji and Metrics
+        
         addSubview(photoDetailView)
-        photoDetailView.anchor(top: nil, left: leftAnchor, bottom: bottomAnchor, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 2, paddingRight: 0, width: 0, height: 20)
+        photoDetailView.anchor(top: nil, left: leftAnchor, bottom: bottomAnchor, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 2, paddingRight: 0, width: 0, height: 40)
+        
+        addSubview(userProfileImageView)
+        userProfileImageView.anchor(top: photoDetailView.topAnchor, left: photoDetailView.leftAnchor, bottom: photoDetailView.bottomAnchor, right: nil, paddingTop: 5, paddingLeft: 2, paddingBottom: 5, paddingRight: 2, width: 0, height: 30)
+        userProfileImageView.widthAnchor.constraint(equalTo: userProfileImageView.heightAnchor, multiplier: 1).isActive = true
+        userProfileImageView.layer.cornerRadius = 30/2
+        userProfileImageView.layer.borderWidth = 0.25
+        userProfileImageView.layer.borderColor = UIColor.lightGray.cgColor
         
         addSubview(metricLabel)
-        metricLabel.anchor(top: photoDetailView.topAnchor, left: nil, bottom: photoDetailView.bottomAnchor, right: photoDetailView.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 5, width: 50, height: 0)
+        metricLabel.anchor(top: nil, left: nil, bottom: photoDetailView.bottomAnchor, right: photoDetailView.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 5, width: 0, height: 20)
         
         addSubview(emojiLabel)
-        emojiLabel.anchor(top: photoDetailView.topAnchor, left: photoDetailView.leftAnchor, bottom: photoDetailView.bottomAnchor, right: metricLabel.leftAnchor, paddingTop: 0, paddingLeft: 5, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
+        emojiLabel.anchor(top: nil, left: userProfileImageView.rightAnchor, bottom: photoDetailView.bottomAnchor, right: metricLabel.leftAnchor, paddingTop: 0, paddingLeft: 5, paddingBottom: 0, paddingRight: 0, width: 0, height: 20)
         
         
         // Location Name
         addSubview(locationLabel)
-        locationLabel.anchor(top: nil, left: leftAnchor, bottom: photoDetailView.topAnchor, right: rightAnchor, paddingTop: 0, paddingLeft: 5, paddingBottom: 0, paddingRight: 5, width: 0, height: 20)
+        locationLabel.anchor(top: nil, left: userProfileImageView.rightAnchor, bottom: emojiLabel.topAnchor, right: rightAnchor, paddingTop: 0, paddingLeft: 5, paddingBottom: 0, paddingRight: 5, width: 0, height: 20)
         locationLabel.sizeToFit()
         locationLabel.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(tapLocation)))
 
@@ -221,6 +239,7 @@ class ExplorePhotoCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         }
 
         metricLabel.attributedText = attributedText
+        metricLabel.sizeToFit()
     }
     
     func setupAttributedSocialCount(){

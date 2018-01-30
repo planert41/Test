@@ -151,11 +151,16 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         collectionView?.layoutIfNeeded()
     }
     
+    override func viewWillDisappear(_ animated: Bool) {
+        navigationController?.navigationBar.barTintColor = UIColor.legitColor()
+        collectionView?.collectionViewLayout.invalidateLayout()
+        collectionView?.layoutIfNeeded()
+    }
+    
 
     
     func setupCollectionView(){
         collectionView?.backgroundColor = .white
-        collectionView?.collectionViewLayout = HomeSortFilterHeaderFlowLayout()
         collectionView?.register(HomePostCell.self, forCellWithReuseIdentifier: cellId)
         collectionView?.register(SortFilterHeader.self, forSupplementaryViewOfKind: UICollectionElementKindSectionHeader, withReuseIdentifier: "headerId")
         
@@ -972,6 +977,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
                     
                     
                     let listViewController = ListViewController()
+                    listViewController.collectionView.collectionViewLayout = HomeSortFilterHeaderFlowLayout()
                     listViewController.currentDisplayList = fetchedList
                     self.navigationController?.pushViewController(listViewController, animated: true)
                 }

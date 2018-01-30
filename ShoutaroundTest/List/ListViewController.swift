@@ -14,13 +14,15 @@ import EmptyDataSet_Swift
 import BTNavigationDropdownMenu
 
 
-class ListViewController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, ListPhotoCellDelegate, HomePostCellDelegate, ListHeaderDelegate, SortFilterHeaderDelegate, FilterControllerDelegate, EmptyDataSetSource, EmptyDataSetDelegate {
+class ListViewController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, ListPhotoCellDelegate, HomePostCellDelegate, ListHeaderDelegate, SortFilterHeaderDelegate, FilterControllerDelegate, EmptyDataSetSource, EmptyDataSetDelegate, GridPhotoCellDelegate {
 
     static let refreshListViewNotificationName = NSNotification.Name(rawValue: "RefreshListView")
 
     let bookmarkCellId = "bookmarkCellId"
-    let homePostCellId = "homePostCellId"
+    let gridCellId = "gridCellId"
     let listHeaderId = "listHeaderId"
+    
+    var enableMapView: Bool = false
     
     
     override func viewWillAppear(_ animated: Bool) {
@@ -28,8 +30,10 @@ class ListViewController: UIViewController, UICollectionViewDelegate, UICollecti
         collectionView.layoutIfNeeded()
     }
 
+    
+    
     // INPUT
-    var currentDisplayList: List? = emptyLegitList {
+    var currentDisplayList: List? = nil {
         didSet{
             fetchPostsForList()
             if displayUser?.uid != currentDisplayList?.creatorUID{
@@ -132,6 +136,8 @@ class ListViewController: UIViewController, UICollectionViewDelegate, UICollecti
     }
     
     override func viewWillDisappear(_ animated: Bool) {
+        collectionView.collectionViewLayout.invalidateLayout()
+        collectionView.layoutIfNeeded()
         menuView.hide()
     }
     
@@ -265,9 +271,19 @@ class ListViewController: UIViewController, UICollectionViewDelegate, UICollecti
             
         } else {
             // Current User is List Creator
-            navigationItem.rightBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "add").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(manageList))
+            navigationItem.rightBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "add_white").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(manageList))
         }
         
+        
+    // Setup Map Button
+        if self.enableMapView{
+//            let newImage = #imageLiteral(resourceName: "googlemap").resizeImageWith(newSize: CGSize(width: 30, height: 30))
+            navigationItem.leftBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "googlemap").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(openMap))
+        }
+    }
+    
+    func openMap(){
+        print("Open Map")
     }
     
     func manageList(){
@@ -283,7 +299,7 @@ class ListViewController: UIViewController, UICollectionViewDelegate, UICollecti
     
     func setupCollectionView(){
         collectionView.register(ListPhotoCell.self, forCellWithReuseIdentifier: bookmarkCellId)
-        collectionView.register(HomePostCell.self, forCellWithReuseIdentifier: homePostCellId)
+        collectionView.register(GridPhotoCell.self, forCellWithReuseIdentifier: gridCellId)
         collectionView.register(ListViewHeader.self, forSupplementaryViewOfKind: UICollectionElementKindSectionHeader, withReuseIdentifier: listHeaderId)
         
         collectionView.collectionViewLayout = HomeSortFilterHeaderFlowLayout()
@@ -490,14 +506,18 @@ class ListViewController: UIViewController, UICollectionViewDelegate, UICollecti
         if isListView {
             return CGSize(width: view.frame.width, height: 120)
         } else {
-            var height: CGFloat = 40 + 8 + 8 //username userprofileimageview
-            height += view.frame.width  // Picture
-            height += 50    // Location View
-            height += 60    // Action Bar
-            height += 20    // Social Counts
-            height += 20    // Caption
+            let width = (view.frame.width - 2) / 3
+            return CGSize(width: width, height: width)
             
-            return CGSize(width: view.frame.width, height: height)
+            // Home Post Cell Size
+//            var height: CGFloat = 40 + 8 + 8 //username userprofileimageview
+//            height += view.frame.width  // Picture
+//            height += 50    // Location View
+//            height += 60    // Action Bar
+//            height += 20    // Social Counts
+//            height += 20    // Caption
+//
+//            return CGSize(width: view.frame.width, height: height)
         }
     }
     
@@ -519,7 +539,7 @@ class ListViewController: UIViewController, UICollectionViewDelegate, UICollecti
             
             return cell
         } else {
-            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: homePostCellId, for: indexPath) as! HomePostCell
+            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: gridCellId, for: indexPath) as! GridPhotoCell
             cell.delegate = self
             cell.post = displayPost
             return cell

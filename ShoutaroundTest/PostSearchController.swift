@@ -143,6 +143,7 @@ class PostSearchController : UITableViewController, UISearchResultsUpdating, UIS
             navigationItem.hidesSearchBarWhenScrolling  = false
         } else {
             self.tableView.tableHeaderView = searchBar
+            searchBar.backgroundColor = UIColor.legitColor()
         }
         
     }

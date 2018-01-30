@@ -19,16 +19,28 @@ class LoginController: UIViewController, UITextFieldDelegate, FBSDKLoginButtonDe
         
         let view = UIView()
         
-        let logoImageView = UIImageView(image: #imageLiteral(resourceName: "Instagram_logo_white"))
-        logoImageView.contentMode = .scaleAspectFill
+//        let logoImageView = UIImageView(image: #imageLiteral(resourceName: "Instagram_logo_white"))
+//        logoImageView.contentMode = .scaleAspectFill
+//
+//        view.addSubview(logoImageView)
+//        logoImageView.anchor(top: nil, left: nil, bottom: nil, right: nil, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 200, height: 50)
+//        logoImageView.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
+//        logoImageView.centerYAnchor.constraint(equalTo: view.centerYAnchor).isActive = true
+//        view.backgroundColor = UIColor.rgb(red: 0, green: 120, blue: 175)
+
         
-        view.addSubview(logoImageView)
-        logoImageView.anchor(top: nil, left: nil, bottom: nil, right: nil, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 200, height: 50)
-        logoImageView.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
-        logoImageView.centerYAnchor.constraint(equalTo: view.centerYAnchor).isActive = true
+        let legitListTitle = UILabel()
+        legitListTitle.text = "LegitList"
+        legitListTitle.font = UIFont(font: .noteworthyBold, size: 50)
+        legitListTitle.textColor = UIColor.white
+        view.addSubview(legitListTitle)
+        legitListTitle.anchor(top: nil, left: nil, bottom: nil, right: nil, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
+        legitListTitle.sizeToFit()
         
-        
-        view.backgroundColor = UIColor.rgb(red: 0, green: 120, blue: 175)
+        legitListTitle.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
+        legitListTitle.centerYAnchor.constraint(equalTo: view.centerYAnchor).isActive = true
+        view.backgroundColor = UIColor.legitColor()
+
         return view
         
     }()
@@ -63,11 +75,9 @@ class LoginController: UIViewController, UITextFieldDelegate, FBSDKLoginButtonDe
     
     let loginButton: UIButton = {
         
-        
         let button = UIButton(type: .system)
         button.setTitle("Login", for: .normal)
-        button.backgroundColor = UIColor.rgb(red: 149, green: 204, blue: 244)
-        
+        button.backgroundColor = UIColor.legitColor().withAlphaComponent(0.5)
         
         button.layer.cornerRadius = 5
         button.titleLabel?.font = UIFont.boldSystemFont(ofSize: 14)

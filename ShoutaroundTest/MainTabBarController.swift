@@ -50,12 +50,18 @@ class MainTabBarController: UITabBarController, UITabBarControllerDelegate, UIIm
             print(viewController)
             let listNavController = viewController as! UINavigationController
             let listView = listNavController.viewControllers[0] as! ListViewController
-                print("Default Setup For List: \(CurrentUser.lists[0].name) for \(CurrentUser.user?.username)")
             if listView.currentDisplayList == nil {
+               if let firstPopulatedList = CurrentUser.lists.index(where: { (list) -> Bool in
+                    (list.postIds?.count)! > 0
+               }){
+                listView.currentDisplayList = CurrentUser.lists[firstPopulatedList]
+               } else {
                 listView.currentDisplayList = CurrentUser.lists[0]
+                }
             }
                 listView.displayUser = CurrentUser.user
                 listView.displayedLists = CurrentUser.lists
+                listView.enableMapView = true
         }
         
         selectedTabBarIndex = index

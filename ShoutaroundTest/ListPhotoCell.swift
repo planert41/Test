@@ -37,9 +37,9 @@ class ListPhotoCell: UICollectionViewCell, UIGestureRecognizerDelegate {
                 
                 let yearsAgo = calendar.dateComponents([.year], from: bookmarkDate, to: Date())
                 if (yearsAgo.year)! > 0 {
-                    formatter.dateFormat = "MMM d yy, h:mm a"
+                    formatter.dateFormat = "MMM d yy"
                 } else {
-                    formatter.dateFormat = "MMM d, h:mm a"
+                    formatter.dateFormat = "MMM d"
                 }
                 
                 let daysAgo =  calendar.dateComponents([.day], from: bookmarkDate, to: Date())
@@ -120,6 +120,11 @@ class ListPhotoCell: UICollectionViewCell, UIGestureRecognizerDelegate {
             
 //            setupExtraTags()
             setupAttributedSocialCount()
+            
+            if !(self.post?.isLegit)!{
+                self.legitEmojiLabel.removeFromSuperview()
+            }
+            
         }
     }
     
@@ -189,11 +194,11 @@ class ListPhotoCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         return label
     }()
     
-    let ratingEmojiLabel: UILabel = {
+    let legitEmojiLabel: UILabel = {
         let label = UILabel()
-        label.text = "Emojis"
-        label.font = UIFont.boldSystemFont(ofSize: 15)
-        label.textAlignment = NSTextAlignment.right
+        label.text = "👌"
+        label.font = UIFont.boldSystemFont(ofSize: 13)
+        label.textAlignment = NSTextAlignment.center
         label.backgroundColor = UIColor.white
         return label
     }()
@@ -594,11 +599,15 @@ class ListPhotoCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         
         
     // Add Star Rating
-        
         starRatingLabel = RatingLabel.init(ratingScore: 0, frame: CGRect(x: 0, y: 0, width: userProfileImageHeight * 0.7, height: userProfileImageHeight * 0.7))
         addSubview(starRatingLabel)
         starRatingLabel.anchor(top: nil, left: nil, bottom: nil, right: userProfileImageView.leftAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 3, width: starRatingLabel.frame.width, height: starRatingLabel.frame.height)
         starRatingLabel.centerYAnchor.constraint(equalTo: userProfileImageView.centerYAnchor).isActive = true
+        
+//        addSubview(legitEmojiLabel)
+//        legitEmojiLabel.anchor(top: starRatingLabel.topAnchor, left: starRatingLabel.leftAnchor, bottom: starRatingLabel.bottomAnchor, right: starRatingLabel.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
+
+
         
 
         
