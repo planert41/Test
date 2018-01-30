@@ -14,7 +14,8 @@ import EmptyDataSet_Swift
 import BTNavigationDropdownMenu
 
 
-class ListViewController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, ListPhotoCellDelegate, HomePostCellDelegate, ListHeaderDelegate, SortFilterHeaderDelegate, FilterControllerDelegate, EmptyDataSetSource, EmptyDataSetDelegate, GridPhotoCellDelegate {
+class ListViewController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, ListPhotoCellDelegate, HomePostCellDelegate, ListHeaderDelegate, SortFilterHeaderDelegate, FilterControllerDelegate, EmptyDataSetSource, EmptyDataSetDelegate, GridPhotoCellDelegate, PostSearchControllerDelegate {
+    
 
     static let refreshListViewNotificationName = NSNotification.Name(rawValue: "RefreshListView")
 
@@ -228,7 +229,15 @@ class ListViewController: UIViewController, UICollectionViewDelegate, UICollecti
         self.navigationController?.navigationBar.isTranslucent = false
         self.navigationController?.navigationBar.titleTextAttributes = [NSForegroundColorAttributeName: UIColor.white]
        
-        menuView = BTNavigationDropdownMenu(navigationController: self.navigationController, containerView: self.navigationController!.view, title: (self.currentDisplayList?.name)!, items: self.displayedListNames)
+        var menuOptions = self.displayedListNames
+        var manageListString = "Manage Lists"
+        if self.currentDisplayList?.creatorUID == uid {
+            
+            menuOptions.append(manageListString)
+            
+        }
+
+        menuView = BTNavigationDropdownMenu(navigationController: self.navigationController, containerView: self.navigationController!.view, title: (self.currentDisplayList?.name)!, items: menuOptions)
         menuView.navigationBarTitleFont = UIFont(font: .noteworthyBold, size: 18)
         
         menuView.cellHeight = 50
@@ -246,40 +255,44 @@ class ListViewController: UIViewController, UICollectionViewDelegate, UICollecti
         
         menuView.didSelectItemAtIndexHandler = {(indexPath: Int) -> Void in
             print("Did select item at index: \(indexPath)")
-            self.currentDisplayList = self.displayedLists![indexPath]
+            if menuOptions[indexPath] == manageListString {
+                print("Selected Manage Lists")
+                self.menuView.shouldChangeTitleText = false
+                self.manageList()
+            } else {
+                self.menuView.shouldChangeTitleText = true
+                self.currentDisplayList = self.displayedLists![indexPath]
+            }
         }
         
         self.navigationItem.titleView = menuView
         
-    // Setup Right Bar Button
-        if self.currentDisplayList?.creatorUID != uid {
-            //Current User isn't List Creator
-            let userImage = CustomImageView()
-            userImage.frame = CGRect(x: 0, y: 0, width: 30, height: 30)
-            userImage.contentMode = .scaleAspectFill
-            userImage.clipsToBounds = true
-            userImage.loadImage(urlString: (displayUser?.profileImageUrl)!)
-            
-            let newImage = userImage.image?.resizeImageWith(newSize: CGSize(width: userImage.frame.width, height: userImage.frame.width))
-            userImage.image = newImage
-            userImage.isUserInteractionEnabled = true
-            userImage.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(userSelected)))
-            userImage.layer.cornerRadius = userImage.frame.width/2
-            
-            let barButton = UIBarButtonItem(customView: userImage)
-            navigationItem.rightBarButtonItem = barButton
-            
-        } else {
-            // Current User is List Creator
-            navigationItem.rightBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "add_white").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(manageList))
-        }
+    // Setup Map Button (Right Bar)
         
+        let mapButton = UIBarButtonItem(image: #imageLiteral(resourceName: "googlemap").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(openMap))
+        navigationItem.rightBarButtonItem = mapButton
         
-    // Setup Map Button
-        if self.enableMapView{
-//            let newImage = #imageLiteral(resourceName: "googlemap").resizeImageWith(newSize: CGSize(width: 30, height: 30))
-            navigationItem.leftBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "googlemap").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(openMap))
-        }
+        // Setup User Profile Button (Left Bar)
+//        let userImage = CustomImageView()
+//        userImage.frame = CGRect(x: 0, y: 0, width: 30, height: 30)
+//        userImage.contentMode = .scaleAspectFill
+//        userImage.clipsToBounds = true
+//        userImage.loadImage(urlString: (displayUser?.profileImageUrl)!)
+//
+//        let newImage = userImage.image?.resizeImageWith(newSize: CGSize(width: userImage.frame.width, height: userImage.frame.width))
+//        userImage.image = newImage
+//        userImage.isUserInteractionEnabled = true
+//        userImage.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(userSelected)))
+//        userImage.layer.cornerRadius = userImage.frame.width/2
+//
+//        let userProfileButton = UIBarButtonItem(customView: userImage)
+//
+//        if navigationItem.leftBarButtonItems?.count == 0 {
+//            navigationItem.leftBarButtonItem = userProfileButton
+//        } else {
+//            navigationItem.leftBarButtonItems?.append(userProfileButton)
+//        }
+        
     }
     
     func openMap(){
@@ -322,6 +335,7 @@ class ListViewController: UIViewController, UICollectionViewDelegate, UICollecti
     
     func filterSortFetchedPosts(){
         
+        self.checkFilter()
         // Filter Posts
         Database.filterPosts(inputPosts: self.fetchedPosts, filterCaption: self.filterCaption, filterRange: self.filterRange, filterLocation: self.filterLocation, filterMinRating: self.filterMinRating, filterType: self.filterType, filterMaxPrice: self.filterMaxPrice) { (filteredPosts) in
             
@@ -358,8 +372,9 @@ class ListViewController: UIViewController, UICollectionViewDelegate, UICollecti
     }
     
     func refreshPostsForFilter(){
+        self.checkFilter()
         self.clearAllPost()
-//        self.collectionView.reloadData()
+        self.collectionView.reloadData()
         self.fetchPostsForList()
         self.collectionView.refreshControl?.endRefreshing()
     }
@@ -380,6 +395,7 @@ class ListViewController: UIViewController, UICollectionViewDelegate, UICollecti
         self.filterMaxPrice = nil
         self.selectedHeaderSort = defaultSort
         self.isFiltering = false
+        self.filterCaption = nil
     }
     
     func fetchPostFromList(list: List?, completion: @escaping ([Post]?) -> ()){
@@ -433,7 +449,25 @@ class ListViewController: UIViewController, UICollectionViewDelegate, UICollecti
 
     // Search Delegates
     
+    func clearCaptionSearch(){
+        self.filterCaption = nil
+        self.checkFilter()
+        self.refreshPostsForFilter()
+    }
     
+    func filterCaptionSelected(searchedText: String?){
+        print("Filter Caption Selected: \(searchedText)")
+        self.filterCaption = searchedText
+        self.refreshPostsForFilter()
+    }
+    
+//    func userSelected(uid: String?){
+//
+//    }
+    
+//    func locationSelected(googlePlaceId: String?, googlePlaceName: String?, googlePlaceLocation: CLLocation?, googlePlaceType: [String]?){
+//
+//    }
     
     
     func filterControllerFinished(selectedCaption: String?, selectedRange: String?, selectedLocation: CLLocation?, selectedLocationName: String?, selectedGooglePlaceId: String?, selectedGooglePlaceType: [String]?, selectedMinRating: Double, selectedType: String?, selectedMaxPrice: String?, selectedSort: String) {
@@ -556,13 +590,16 @@ class ListViewController: UIViewController, UICollectionViewDelegate, UICollecti
         let header = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: listHeaderId, for: indexPath) as! ListViewHeader
         header.isFiltering = self.isFiltering
         header.isListView = self.isListView
+        header.selectedCaption  = self.filterCaption
         header.delegate = self
         return header
         
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
-        return CGSize(width: view.frame.width, height: 30 + 5 + 5)
+        var height = 30 + 5 + 5 // Header Sort with 5 Spacing
+        height += 25 + 5 // Search bar + 5 Spacing
+        return CGSize(width: view.frame.width, height: 30 + 5 + 5 + (35))
     }
     
 
@@ -714,6 +751,22 @@ class ListViewController: UIViewController, UICollectionViewDelegate, UICollecti
         filterController.selectedSort = self.selectedHeaderSort!
         
         self.navigationController?.pushViewController(filterController, animated: true)
+    }
+    
+    func openSearch(index: Int?){
+        
+        let postSearch = PostSearchController()
+        postSearch.delegate = self
+        
+        // Disbale Scope Options, only allow filter by emoji or caption
+        postSearch.enableScopeOptions = false
+        
+        self.navigationController?.pushViewController(postSearch, animated: true)
+        if index != nil {
+            postSearch.selectedScope = index!
+            postSearch.searchController.searchBar.selectedScopeButtonIndex = index!
+        }
+        
     }
     
 

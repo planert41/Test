@@ -15,6 +15,14 @@ import MaterialComponents.MaterialCollections
 
 
 class TESTListViewController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, ListPhotoCellDelegate, HomePostCellDelegate, ListHeaderDelegate, SortFilterHeaderDelegate, FilterControllerDelegate, EmptyDataSetSource, EmptyDataSetDelegate {
+    func clearCaptionSearch() {
+        
+    }
+    
+    func openSearch(index: Int?) {
+        
+    }
+    
     func deletePostFromList(post: Post) {
         
     }

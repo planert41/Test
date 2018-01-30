@@ -20,10 +20,10 @@ import UIKit
 import Firebase
 import GooglePlaces
 
-protocol PostSearchControllerDelegate {
+@objc protocol PostSearchControllerDelegate {
     func filterCaptionSelected(searchedText: String?)
-    func userSelected(uid: String?)
-    func locationSelected(googlePlaceId: String?, googlePlaceName: String?, googlePlaceLocation: CLLocation?, googlePlaceType: [String]?)
+    @objc optional func userSelected(uid: String?)
+    @objc optional func locationSelected(googlePlaceId: String?, googlePlaceName: String?, googlePlaceLocation: CLLocation?, googlePlaceType: [String]?)
 }
 
 class testSearchBar: UISearchBar {
@@ -47,6 +47,7 @@ class PostSearchController : UITableViewController, UISearchResultsUpdating, UIS
         }
     }
     var searchTerm: String? = nil
+    var enableScopeOptions: Bool = true
     
     // Emojis - Pulls in Default Emojis and Emojis filtered by searchText
     let EmojiCellId = "EmojiCellId"
@@ -118,8 +119,12 @@ class PostSearchController : UITableViewController, UISearchResultsUpdating, UIS
         searchController.hidesNavigationBarDuringPresentation = false
         
         searchBar = searchController.searchBar
-        searchBar.scopeButtonTitles = searchScopeButtons
-        searchBar.showsScopeBar = true
+        
+        if self.enableScopeOptions {
+            searchBar.scopeButtonTitles = searchScopeButtons
+            searchBar.showsScopeBar = self.enableScopeOptions
+        }
+        
         searchBar.sizeToFit()
         searchBar.delegate = self
         searchBar.placeholder =  searchBarPlaceholderText
@@ -242,7 +247,7 @@ class PostSearchController : UITableViewController, UISearchResultsUpdating, UIS
             } else {
                 userSelected = allUsers[indexPath.row]
             }
-            delegate?.userSelected(uid: userSelected?.uid)
+            delegate?.userSelected!(uid: userSelected?.uid)
 //            self.navigationController?.popViewController(animated: true)
         }
         
@@ -397,7 +402,7 @@ class PostSearchController : UITableViewController, UISearchResultsUpdating, UIS
         self.selectedGoogleLocationType = place.types
         
         print("Selected Google Location is: ", place.placeID, " name: ", place.name, "type: ", self.selectedGoogleLocationType, "GPS: ",self.selectedGoogleLocation)
-        delegate?.locationSelected(googlePlaceId: self.selectedGoogleId, googlePlaceName: self.selectedGoogleLocationName,  googlePlaceLocation: self.selectedGoogleLocation, googlePlaceType: self.selectedGoogleLocationType)
+        delegate?.locationSelected!(googlePlaceId: self.selectedGoogleId, googlePlaceName: self.selectedGoogleLocationName,  googlePlaceLocation: self.selectedGoogleLocation, googlePlaceType: self.selectedGoogleLocationType)
         self.navigationController?.popViewController(animated: true)
 
         
