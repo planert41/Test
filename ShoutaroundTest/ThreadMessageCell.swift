@@ -56,7 +56,7 @@ class ThreadMessageCell: UICollectionViewCell {
         let iv = CustomImageView()
         iv.clipsToBounds = true
         iv.contentMode = .scaleAspectFill
-        iv.backgroundColor = .blue
+        iv.image = #imageLiteral(resourceName: "profile_outline").withRenderingMode(.alwaysOriginal)
         return iv
     }()
     

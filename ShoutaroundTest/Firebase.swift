@@ -2393,9 +2393,23 @@ extension Database{
             completion(nil)
             return
         }
+//        print("Filter Start: \(inputPosts.count) Posts")
+
         
-        var tempPosts = inputPosts
-        print("Filter Start: \(tempPosts.count) Posts")
+        // Filter For Duplicates
+        var tempPosts: [Post] = []
+
+        for post in inputPosts {
+            if !tempPosts.contains(where: { (tempPost) -> Bool in
+                tempPost.id == post.id
+            }){
+                tempPosts.append(post)
+            }
+        }
+        let dupCount = inputPosts.count - tempPosts.count
+        if dupCount > 0 {
+            print("Filter Dup: Removed \(dupCount) Dups")
+        }
         
         // Filter Caption
         if filterCaption != nil && filterCaption != "" {
@@ -2436,9 +2450,8 @@ extension Database{
                     }
                 }
             }
-            
+            print("Filtered Post By Caption: \(searchedText), Pre: \(tempPosts.count), Post: \(tempFilterPosts.count)")
             tempPosts = tempFilterPosts
-            print("Filtered Post By Caption: \(searchedText): \(tempPosts.count)")
         }
         
         
@@ -2480,9 +2493,8 @@ extension Database{
                     tempFilterPosts.append(tempPost)
                 }
             }
+            print("Filtered Post By Range: \(filterRange) AT \(filterLocation), Pre: \(tempPosts.count), Post: \(tempFilterPosts.count)")
             tempPosts = tempFilterPosts
-
-            print("Filtered Post By Range: \(filterRange) AT \(filterLocation): \(tempPosts.count)")
         }
         
         
@@ -2507,39 +2519,46 @@ extension Database{
         
         // Filter Rating
         if filterMinRating != 0 && filterMinRating != nil {
-            tempPosts = tempPosts.filter { (post) -> Bool in
+            var tempFilterPosts: [Post] = []
+            tempFilterPosts = tempPosts.filter { (post) -> Bool in
                 var filterRating:Double = 0
                 if post.rating != nil {
                     filterRating = post.rating!
                 }
                 return filterRating >= filterMinRating!
             }
-            print("Filtered Post By Min Rating: \(filterMinRating): \(tempPosts.count)")
+            print("Filtered Post By Min Rating: \(filterMinRating), Pre: \(tempPosts.count), Post: \(tempFilterPosts.count)")
+            tempPosts = tempFilterPosts
         }
         
         // Filter Type
         if filterType != nil {
-            tempPosts = tempPosts.filter { (post) -> Bool in
+            var tempFilterPosts: [Post] = []
+            tempFilterPosts = tempPosts.filter { (post) -> Bool in
                 return post.type == filterType
             }
-            print("Filtered Post By Post Type: \(filterType): \(tempPosts.count)")
+            print("Filtered Post By Post Type: \(filterType), Pre: \(tempPosts.count), Post: \(tempFilterPosts.count)")
+            tempPosts = tempFilterPosts
         }
         
         // Filter Max Price
         if filterMaxPrice != nil {
             let maxPriceIndex = UploadPostPriceDefault.index(of: filterMaxPrice!)
             let filterMaxPrice = UploadPostPriceDefault[0...maxPriceIndex!]
-            
-            tempPosts = tempPosts.filter { (post) -> Bool in
+            var tempFilterPosts: [Post] = []
+
+            tempFilterPosts = tempPosts.filter { (post) -> Bool in
                 var filterPrice:String = "0"
                 if post.price != nil {
                     filterPrice = post.price!
                 }
                 return filterMaxPrice.contains(filterPrice)
             }
-            print("Filtered Post By Max Price: \(filterMaxPrice): \(tempPosts.count)")
+            print("Filtered Post By Max Price: \(filterMaxPrice), Pre: \(tempPosts.count), Post: \(tempFilterPosts.count)")
+            tempPosts = tempFilterPosts
         }
         
+        print("Filter Completed, Pre: \(inputPosts.count), Post: \(tempPosts.count)")
         completion(tempPosts)
     }
     
@@ -2615,7 +2634,7 @@ extension Database{
         }
             
             // Votes
-        else if selectedSort == defaultRankOptions[0] {
+        else if selectedSort == defaultRankOptions[1] {
             tempPosts.sort(by: { (p1, p2) -> Bool in
                 return (p1.voteCount > p2.voteCount)
             })
@@ -2623,7 +2642,7 @@ extension Database{
         }
             
             // Bookmarks
-        else if selectedSort == defaultRankOptions[1] {
+        else if selectedSort == defaultRankOptions[2] {
             tempPosts.sort(by: { (p1, p2) -> Bool in
                 return (p1.listCount > p2.listCount)
             })
@@ -2631,7 +2650,7 @@ extension Database{
         }
             
             // Message
-        else if selectedSort == defaultRankOptions[1] {
+        else if selectedSort == defaultRankOptions[3] {
             tempPosts.sort(by: { (p1, p2) -> Bool in
                 return (p1.messageCount > p2.messageCount)
             })

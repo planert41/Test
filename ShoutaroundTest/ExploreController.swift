@@ -14,7 +14,7 @@ import EmptyDataSet_Swift
 import Spring
 
 
-class ExploreController: UICollectionViewController, UICollectionViewDelegateFlowLayout, UISearchBarDelegate, ListPhotoCellDelegate, SortFilterHeaderDelegate, FilterControllerDelegate, EmptyDataSetSource, EmptyDataSetDelegate, GridPhotoCellDelegate, RankViewHeaderDelegate, PostSearchControllerDelegate {
+class ExploreController: UICollectionViewController, UICollectionViewDelegateFlowLayout, UISearchBarDelegate, ListPhotoCellDelegate, SortFilterHeaderDelegate, FilterControllerDelegate, EmptyDataSetSource, EmptyDataSetDelegate, ExplorePhotoCellDelegate, RankViewHeaderDelegate, PostSearchControllerDelegate {
     func deletePostFromList(post: Post) {
         
     }
@@ -35,7 +35,7 @@ class ExploreController: UICollectionViewController, UICollectionViewDelegateFlo
     
     var isListView: Bool = false
     let bookmarkCellId = "bookmarkCellId"
-    let gridCellId = "gridCellId"
+    let exploreCellId = "exploreCellId"
     let listHeaderId = "listHeaderId"
     
     // Pagination Variables
@@ -82,7 +82,7 @@ class ExploreController: UICollectionViewController, UICollectionViewDelegateFlo
         super.viewDidLoad()
         view.backgroundColor = UIColor.white
         
-        self.navigationController?.navigationBar.tintColor = UIColor.blue
+        self.navigationController?.navigationBar.tintColor = UIColor.white
         setupNavigationItems()
         setupCollectionView()
         
@@ -124,7 +124,7 @@ class ExploreController: UICollectionViewController, UICollectionViewDelegateFlo
     func setupCollectionView(){
         
         collectionView?.register(ListPhotoCell.self, forCellWithReuseIdentifier: bookmarkCellId)
-        collectionView?.register(GridPhotoCell.self, forCellWithReuseIdentifier: gridCellId)
+        collectionView?.register(ExplorePhotoCell.self, forCellWithReuseIdentifier: exploreCellId)
         collectionView?.register(RankViewHeader.self, forSupplementaryViewOfKind: UICollectionElementKindSectionHeader, withReuseIdentifier: listHeaderId)
         
         collectionView?.backgroundColor = .white
@@ -272,7 +272,7 @@ class ExploreController: UICollectionViewController, UICollectionViewDelegateFlo
     func fetchPostIds(){
         self.checkFilter()
         
-        if filterLocation != nil {
+        if filterLocation != nil && filterRange != nil {
             // If has Filter Location, Pull all Post Id for Location
             if (self.filterGoogleLocationType?.contains("establishment"))! {
                 // Selected Google Location is a restaurant, search posts by Restaurant
@@ -430,6 +430,7 @@ class ExploreController: UICollectionViewController, UICollectionViewDelegateFlo
     func clearDisplayedPosts(){
         self.displayedPosts = []
         self.refreshPagination()
+        self.collectionView?.reloadData()
     }
     
     func refreshPostsForSort(){
@@ -468,6 +469,7 @@ class ExploreController: UICollectionViewController, UICollectionViewDelegateFlo
     func refreshPagination(){
         self.isFinishedPaging = false
         self.paginatePostsCount = 0
+        self.collectionView?.reloadData()
     }
     
     // Search Delegates
@@ -498,7 +500,7 @@ class ExploreController: UICollectionViewController, UICollectionViewDelegateFlo
     }
     
     func checkFilter(){
-        if self.filterCaption != nil || (self.filterRange != nil) || (self.filterMinRating != 0) || (self.filterType != nil) || (self.filterMaxPrice != nil) || (self.filterLocation != nil) {
+        if self.filterCaption != nil || (self.filterRange != nil) || (self.filterMinRating != 0) || (self.filterType != nil) || (self.filterMaxPrice != nil) || ((self.filterLocation != nil) && (self.filterRange != nil)) {
             self.isFiltering = true
         } else {
             self.isFiltering = false
@@ -546,7 +548,7 @@ class ExploreController: UICollectionViewController, UICollectionViewDelegateFlo
             // Grid View Size
 //            let width = (view.frame.width - 2) / 3
             let width = (view.frame.width - 5 - 10) / 2
-            return CGSize(width: width, height: width)
+            return CGSize(width: width, height: width + 40)
         }
     }
     
@@ -572,9 +574,10 @@ class ExploreController: UICollectionViewController, UICollectionViewDelegateFlo
             
             return cell
         } else {
-            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: gridCellId, for: indexPath) as! GridPhotoCell
+            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: exploreCellId, for: indexPath) as! ExplorePhotoCell
             cell.delegate = self
             cell.post = displayPost
+            cell.selectedHeaderSort = self.selectedHeaderSort
             return cell
         }
     }

@@ -24,7 +24,7 @@ class listNameCell: UICollectionViewCell {
             if listName == legitListName {
                 
                 let listImage = NSTextAttachment()
-                listImage.image = #imageLiteral(resourceName: "starfilled").withRenderingMode(.alwaysOriginal).resizeImageWith(newSize: imageSize)
+                listImage.image = #imageLiteral(resourceName: "legit").withRenderingMode(.alwaysOriginal).resizeImageWith(newSize: imageSize)
                 let listImageString = NSAttributedString(attachment: listImage)
                 attributedText.append(listImageString)
                 

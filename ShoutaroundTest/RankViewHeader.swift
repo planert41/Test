@@ -42,7 +42,10 @@ class RankViewHeader: UICollectionViewCell, UIGestureRecognizerDelegate, UIPicke
     var headerSortSegment = UISegmentedControl()
     var selectedRank: String = defaultRank {
         didSet{
-            headerSortSegment.selectedSegmentIndex = rankSortOptions.index(of: selectedRank)!
+            if selectedRank != rankSortOptions[self.rankSegmentControl.selectedSegmentIndex] {
+                self.rankSegmentControl.selectedSegmentIndex = rankSortOptions.index(of: selectedRank)!
+                refreshRankSegmentControl()
+            }
         }
     }
     
@@ -174,7 +177,7 @@ class RankViewHeader: UICollectionViewCell, UIGestureRecognizerDelegate, UIPicke
         
         self.rankSegmentControl.setImage(#imageLiteral(resourceName: "recent_unfilled").withRenderingMode(.alwaysOriginal), forSegmentAt: 0)
         self.rankSegmentControl.setImage(#imageLiteral(resourceName: "cred_unfilled").withRenderingMode(.alwaysOriginal), forSegmentAt: 1)
-        self.rankSegmentControl.setImage(#imageLiteral(resourceName: "bookmark_unfilled").withRenderingMode(.alwaysOriginal), forSegmentAt: 2)
+        self.rankSegmentControl.setImage(#imageLiteral(resourceName: "bookmark_unselected").withRenderingMode(.alwaysOriginal), forSegmentAt: 2)
         self.rankSegmentControl.setImage(#imageLiteral(resourceName: "send2").withRenderingMode(.alwaysOriginal), forSegmentAt: 3)
         self.rankSegmentControl.addTarget(self, action: #selector(selectRank), for: .valueChanged)
         self.rankSegmentControl.tintColor = UIColor.legitColor()
@@ -185,24 +188,27 @@ class RankViewHeader: UICollectionViewCell, UIGestureRecognizerDelegate, UIPicke
     
     func selectRank(sender: UISegmentedControl) {
         self.selectedRank = rankSortOptions[sender.selectedSegmentIndex]
-        print("Selected Rank is \(self.selectedRank)")
+        print("Rank Header Selection: \(self.selectedRank)")
         
+        refreshRankSegmentControl()
+        delegate?.headerSortSelected(sort: self.selectedRank)
+    }
+    
+    func refreshRankSegmentControl(){
         self.rankSegmentControl.setImage(#imageLiteral(resourceName: "recent_unfilled").withRenderingMode(.alwaysOriginal), forSegmentAt: 0)
         self.rankSegmentControl.setImage(#imageLiteral(resourceName: "cred_unfilled").withRenderingMode(.alwaysOriginal), forSegmentAt: 1)
-        self.rankSegmentControl.setImage(#imageLiteral(resourceName: "bookmark_unfilled").withRenderingMode(.alwaysOriginal), forSegmentAt: 2)
+        self.rankSegmentControl.setImage(#imageLiteral(resourceName: "bookmark_unselected").withRenderingMode(.alwaysOriginal), forSegmentAt: 2)
         self.rankSegmentControl.setImage(#imageLiteral(resourceName: "send2").withRenderingMode(.alwaysOriginal), forSegmentAt: 3)
         
-        if sender.selectedSegmentIndex == 0 {
+        if self.rankSegmentControl.selectedSegmentIndex == 0 {
             rankSegmentControl.setImage(#imageLiteral(resourceName: "recent_filled").withRenderingMode(.alwaysOriginal), forSegmentAt: 0)
-        }  else if sender.selectedSegmentIndex == 1 {
+        }  else if self.rankSegmentControl.selectedSegmentIndex == 1 {
             rankSegmentControl.setImage(#imageLiteral(resourceName: "cred_filled").withRenderingMode(.alwaysOriginal), forSegmentAt: 1)
-        } else if sender.selectedSegmentIndex == 2 {
-            rankSegmentControl.setImage(#imageLiteral(resourceName: "bookmark_filled").withRenderingMode(.alwaysOriginal), forSegmentAt: 2)
-        } else if sender.selectedSegmentIndex == 3 {
+        } else if self.rankSegmentControl.selectedSegmentIndex == 2 {
+            rankSegmentControl.setImage(#imageLiteral(resourceName: "bookmark_selected").withRenderingMode(.alwaysOriginal), forSegmentAt: 2)
+        } else if self.rankSegmentControl.selectedSegmentIndex == 3 {
             rankSegmentControl.setImage(#imageLiteral(resourceName: "send_filled").withRenderingMode(.alwaysOriginal), forSegmentAt: 3)
         }
-        
-        delegate?.headerSortSelected(sort: self.selectedRank)
     }
     
     // Set Up Range Picker for Distance Filtering

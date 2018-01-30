@@ -40,16 +40,19 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
                 
             guard let imageUrl = post?.imageUrl else {return}
             
-            bookmarkButton.setImage(post?.hasBookmarked == true ? #imageLiteral(resourceName: "bookmark_filled").withRenderingMode(.alwaysOriginal) : #imageLiteral(resourceName: "bookmark_unfilled").withRenderingMode(.alwaysOriginal), for: .normal)
+            listButton.setImage(post?.hasBookmarked == true ? #imageLiteral(resourceName: "bookmark_selected").withRenderingMode(.alwaysOriginal) : #imageLiteral(resourceName: "bookmark_unselected").withRenderingMode(.alwaysOriginal), for: .normal)
             
             upVoteButton.setImage(post?.hasVoted == 1 ? #imageLiteral(resourceName: "upvote_selected").withRenderingMode(.alwaysOriginal) : #imageLiteral(resourceName: "upvote").withRenderingMode(.alwaysOriginal), for: .normal)
             
             downVoteButton.setImage(post?.hasVoted == -1 ? #imageLiteral(resourceName: "downvote_selected").withRenderingMode(.alwaysOriginal) : #imageLiteral(resourceName: "downvote").withRenderingMode(.alwaysOriginal), for: .normal)
             
+            sendMessageButton.setImage(post?.hasMessaged == true ? #imageLiteral(resourceName: "send_fill").withRenderingMode(.alwaysOriginal) : #imageLiteral(resourceName: "send_unfill").withRenderingMode(.alwaysOriginal), for: .normal)
+            
             photoImageView.loadImage(urlString: imageUrl)
             
             usernameLabel.text = post?.user.username
             usernameLabel.sizeToFit()
+            usernameLabel.adjustsFontSizeToFitWidth = true
             
             usernameLabel.isUserInteractionEnabled = true
             let usernameTap = UITapGestureRecognizer(target: self, action: #selector(HomePostCell.usernameTap))
@@ -150,15 +153,35 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
     fileprivate func setupAttributedCaption(){
         
         guard let post = self.post else {return}
-        
+
+    // Setup Post Date
         let formatter = DateFormatter()
-        formatter.dateFormat = "MMM d YYYY, h:mm a"
-        let timeAgoDisplay = formatter.string(from: post.creationDate)
+        let calendar = NSCalendar.current
+
+        let yearsAgo = calendar.dateComponents([.year], from: post.creationDate, to: Date())
+        if (yearsAgo.year)! > 0 {
+            formatter.dateFormat = "MMM d yy, h:mm a"
+        } else {
+            formatter.dateFormat = "MMM d, h:mm a"
+        }
         
-        let attributedText = NSAttributedString(string: timeAgoDisplay, attributes: [NSFontAttributeName: UIFont.systemFont(ofSize: 12),NSForegroundColorAttributeName: UIColor.gray])
+        let daysAgo =  calendar.dateComponents([.day], from: post.creationDate, to: Date())
+        var postDateString: String?
+    
+        // If Post Date < 7 days ago, show < 7 days, else show date
+        if (daysAgo.day)! <= 7 {
+            postDateString = post.creationDate.timeAgoDisplay()
+        } else {
+            let dateDisplay = formatter.string(from: post.creationDate)
+            postDateString = dateDisplay
+        }
+        
+        let attributedText = NSAttributedString(string: postDateString!, attributes: [NSFontAttributeName: UIFont.systemFont(ofSize: 12),NSForegroundColorAttributeName: UIColor.gray])
         
         self.postDateLabel.attributedText = attributedText
-
+        
+        
+        
         
 //        let attributedText = NSMutableAttributedString(string: post.user.username, attributes: [NSFontAttributeName: UIFont.boldSystemFont(ofSize: 14)])
 //
@@ -193,7 +216,7 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         let iv = CustomImageView()
         iv.contentMode = .scaleAspectFill
         iv.clipsToBounds = true
-        iv.backgroundColor = .blue
+        iv.image = #imageLiteral(resourceName: "profile_outline").withRenderingMode(.alwaysOriginal)
         return iv
         
     }()
@@ -209,15 +232,26 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         
     }()
     
-    lazy var legitIcon: UIButton = {
-        let button = UIButton(type: .system)
-        button.setImage(#imageLiteral(resourceName: "legit").withRenderingMode(.alwaysOriginal), for: .normal)
-        button.addTarget(self, action: #selector(openLegitList), for: .touchUpInside)
-        return button
+    var extraIndView = UIView()
+    
+    lazy var legitIcon: UILabel = {
+        let label = UILabel()
+        label.text = "👌"
+        label.font = UIFont.boldSystemFont(ofSize: 12)
+        label.textAlignment = NSTextAlignment.right
+        label.backgroundColor = UIColor.clear
+        label.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(openLegitList)))
+        label.isUserInteractionEnabled = true
+        return label
     }()
     
     func openLegitList(){
         print("Open Legit List")
+        if let legitIndex = self.extraTagsNameArray.index(of: legitListName){
+            var selectedListName = self.extraTagsNameArray[legitIndex]
+            var selectedListId = self.extraTagsIdArray[legitIndex]
+            delegate?.didTapExtraTag(tagName: selectedListName, tagId: selectedListId, post: post!)
+        }
     }
     
     // Non Rating Emoji Labels
@@ -227,6 +261,8 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
     lazy var nonRatingEmojiLabel3 = UILabel()
     lazy var nonRatingEmojiLabel4 = UILabel()
     lazy var nonRatingEmojiLabel5 = UILabel()
+    lazy var nonRatingEmojiLabel6 = UILabel()
+
 
     
     func setupEmojiLabels(){
@@ -236,8 +272,20 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         for label in self.nonRatingEmojiLabelArray {
             label.text = ""
         }
+        
+        var displayEmojis: [String] = []
+        
         if self.post?.nonRatingEmoji != nil {
-            for (index, emoji) in (self.post?.nonRatingEmoji.enumerated())! {
+            displayEmojis = (self.post?.nonRatingEmoji)!
+        }
+        
+        // Add Legit To Displayed Emojis
+        if (self.post?.isLegit)!{
+            displayEmojis.append("👌")
+        }
+        
+        if displayEmojis.count > 0 {
+            for (index, emoji) in (displayEmojis.enumerated()) {
                 self.nonRatingEmojiLabelArray[index].text = emoji
                 self.nonRatingEmojiLabelArray[index].sizeToFit()
             }
@@ -251,6 +299,12 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         guard let post = post else {return}
         guard let labelTag = sender.view?.tag else {return}
         
+        if labelTag == self.post?.nonRatingEmoji.count {
+            print("Selected Legit Emoji")
+            self.openLegitList()
+            return
+        }
+
         var displayEmoji = self.post?.nonRatingEmoji[labelTag]
         var displayEmojiTag = self.post?.nonRatingEmojiTags[labelTag]
         
@@ -612,33 +666,34 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
     
     func setupLegitIcon(){
         
-        self.legitIcon.isHidden = false
+        self.legitIcon.isHidden = !(self.post?.isLegit)!
 
-        if extraTagsNameArray.contains(legitListName){
-            // Check for Legit
-            self.legitIcon.setImage(#imageLiteral(resourceName: "legit_icon").withRenderingMode(.alwaysOriginal), for: .normal)
-            self.legitIcon.contentMode = .scaleAspectFit
-        }
-        
-        else if extraTagsNameArray.contains(bookmarkListName){
-            // Check for Legit
-//            self.legitIcon.setImage(#imageLiteral(resourceName: "bookmark_filled").withRenderingMode(.alwaysOriginal), for: .normal)
-        }
-    
-        else if (post?.rating) != nil && post?.rating != 0 {
-            guard let postRating = self.post?.rating else {return}
-            if postRating >= 6.0 {
-                self.legitIcon.setImage(#imageLiteral(resourceName: "starfilled").withRenderingMode(.alwaysOriginal), for: .normal)
-            }
-            else if postRating <= 2.0 {
-                self.legitIcon.setImage(#imageLiteral(resourceName: "lowrating").withRenderingMode(.alwaysOriginal), for: .normal)
-            }
-        } else {
-            self.legitIcon.isHidden = true
-        }
-       
-        //Override
-        self.legitIcon.isHidden = true
+//
+//        if extraTagsNameArray.contains(legitListName){
+//            // Check for Legit
+//            self.legitIcon.setImage(#imageLiteral(resourceName: "legit_icon").withRenderingMode(.alwaysOriginal), for: .normal)
+//            self.legitIcon.contentMode = .scaleAspectFit
+//        }
+//
+//        else if extraTagsNameArray.contains(bookmarkListName){
+//            // Check for Legit
+////            self.legitIcon.setImage(#imageLiteral(resourceName: "bookmark_filled").withRenderingMode(.alwaysOriginal), for: .normal)
+//        }
+//
+//        else if (post?.rating) != nil && post?.rating != 0 {
+//            guard let postRating = self.post?.rating else {return}
+//            if postRating >= 6.0 {
+//                self.legitIcon.setImage(#imageLiteral(resourceName: "starfilled").withRenderingMode(.alwaysOriginal), for: .normal)
+//            }
+//            else if postRating <= 2.0 {
+//                self.legitIcon.setImage(#imageLiteral(resourceName: "lowrating").withRenderingMode(.alwaysOriginal), for: .normal)
+//            }
+//        } else {
+//            self.legitIcon.isHidden = true
+//        }
+//
+//        //Override
+//        self.legitIcon.isHidden = true
 
     }
  
@@ -727,7 +782,7 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         addSubview(userProfileImageView)
         addSubview(usernameLabel)
         addSubview(emojiDetailLabel)
-        addSubview(bookmarkButton)
+        addSubview(listButton)
 //        addSubview(starRatingLabel)
         addSubview(legitIcon)
         
@@ -735,7 +790,7 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
 
 // Setup Non Rating Emojis
         
-        nonRatingEmojiLabelArray = [nonRatingEmojiLabel1, nonRatingEmojiLabel2, nonRatingEmojiLabel3, nonRatingEmojiLabel4, nonRatingEmojiLabel5]
+        nonRatingEmojiLabelArray = [nonRatingEmojiLabel1, nonRatingEmojiLabel2, nonRatingEmojiLabel3, nonRatingEmojiLabel4, nonRatingEmojiLabel5, nonRatingEmojiLabel6]
         
         for (index,label) in nonRatingEmojiLabelArray.enumerated(){
             
@@ -773,12 +828,11 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         locationDistanceLabel.sizeToFit()
         
         usernameLabel.anchor(top: userProfileImageView.topAnchor, left: nil, bottom: locationDistanceLabel.topAnchor, right: userProfileImageView.leftAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 8, width: 0, height: 0)
+        usernameLabel.widthAnchor.constraint(lessThanOrEqualToConstant: self.frame.width * 0.25).isActive = true
         
         usernameLabel.textAlignment = .right
 
-        legitIcon.anchor(top: nil, left: nil, bottom: nil, right: usernameLabel.leftAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 2, width: 25, height: 25)
-        legitIcon.centerYAnchor.constraint(equalTo: usernameLabel.centerYAnchor).isActive = true
-        legitIcon.isHidden = true
+
         
 
 // Photo Image View and Complex User Interactions
@@ -904,7 +958,7 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
     
     // Bookmark
     
-    lazy var bookmarkButton: UIButton = {
+    lazy var listButton: UIButton = {
         let button = UIButton(type: .system)
         button.setImage(#imageLiteral(resourceName: "bookmark_unselected").withRenderingMode(.alwaysOriginal), for: .normal)
         button.addTarget(self, action: #selector(handleBookmark), for: .touchUpInside)
@@ -938,7 +992,7 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
     lazy var sendMessageButton: UIButton = {
         let button = UIButton(type: .system)
 //        button.setImage(#imageLiteral(resourceName: "message").withRenderingMode(.alwaysOriginal), for: .normal)
-        button.setImage(#imageLiteral(resourceName: "send2").withRenderingMode(.alwaysOriginal), for: .normal)
+        button.setImage(#imageLiteral(resourceName: "send_unfill").withRenderingMode(.alwaysOriginal), for: .normal)
 
         button.addTarget(self, action: #selector(handleMessage), for: .touchUpInside)
         return button
@@ -1114,7 +1168,7 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         
         let voteContainer = UIView()
         let commentContainer = UIView()
-        let bookmarkContainer = UIView()
+        let listContainer = UIView()
         let messageContainer = UIView()
         let actionStackView = UIStackView(arrangedSubviews: [voteView, commentView, bookmarkView, messageView])
         actionStackView.distribution = .fillEqually
@@ -1141,10 +1195,10 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         commentContainer.addSubview(commentButton)
         commentContainer.addSubview(commentCount)
         
-        commentButton.anchor(top: commentContainer.topAnchor, left: commentContainer.leftAnchor, bottom: commentContainer.bottomAnchor, right: nil, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
+        commentButton.anchor(top: commentContainer.topAnchor, left: nil, bottom: commentContainer.bottomAnchor, right: commentContainer.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
         commentButton.widthAnchor.constraint(equalTo: commentButton.heightAnchor, multiplier: 1).isActive = true
 
-        commentCount.anchor(top: commentContainer.topAnchor, left: commentButton.rightAnchor, bottom: commentContainer.bottomAnchor, right: commentContainer.rightAnchor, paddingTop: 0, paddingLeft: 5, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
+        commentCount.anchor(top: commentContainer.topAnchor, left: commentContainer.leftAnchor, bottom: commentContainer.bottomAnchor, right: commentButton.leftAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 5, width: 0, height: 0)
         commentCount.centerYAnchor.constraint(equalTo: commentButton.centerYAnchor).isActive = true
         commentCount.sizeToFit()
         
@@ -1154,20 +1208,20 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         
     // Bookmarks
         
-        bookmarkContainer.addSubview(bookmarkButton)
-        bookmarkContainer.addSubview(listCount)
+        listContainer.addSubview(listButton)
+        listContainer.addSubview(listCount)
         
-        bookmarkButton.anchor(top: bookmarkContainer.topAnchor, left: bookmarkContainer.leftAnchor, bottom: bookmarkContainer.bottomAnchor, right: nil, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
-        bookmarkButton.widthAnchor.constraint(equalTo: bookmarkButton.heightAnchor, multiplier: 1).isActive = true
+        listButton.anchor(top: listContainer.topAnchor, left: nil, bottom: listContainer.bottomAnchor, right: listContainer.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
+        listButton.widthAnchor.constraint(equalTo: listButton.heightAnchor, multiplier: 1).isActive = true
         
-        listCount.anchor(top: bookmarkContainer.topAnchor, left: bookmarkButton.rightAnchor, bottom: bookmarkContainer.bottomAnchor, right: bookmarkContainer.rightAnchor, paddingTop: 0, paddingLeft: 5, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
-        listCount.centerYAnchor.constraint(equalTo: bookmarkButton.centerYAnchor).isActive = true
+        listCount.anchor(top: listContainer.topAnchor, left: listContainer.leftAnchor, bottom: listContainer.bottomAnchor, right: listButton.leftAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 5, width: 0, height: 0)
+        listCount.centerYAnchor.constraint(equalTo: listButton.centerYAnchor).isActive = true
         
         listCount.sizeToFit()
         
-        addSubview(bookmarkContainer)
-        bookmarkContainer.anchor(top: bookmarkView.topAnchor, left: nil, bottom: bookmarkView.bottomAnchor, right: nil, paddingTop: 5, paddingLeft: 0, paddingBottom: 5, paddingRight: 0, width: 0, height: 0)
-        bookmarkContainer.centerXAnchor.constraint(equalTo: bookmarkView.centerXAnchor).isActive = true
+        addSubview(listContainer)
+        listContainer.anchor(top: bookmarkView.topAnchor, left: nil, bottom: bookmarkView.bottomAnchor, right: nil, paddingTop: 5, paddingLeft: 0, paddingBottom: 5, paddingRight: 0, width: 0, height: 0)
+        listContainer.centerXAnchor.constraint(equalTo: bookmarkView.centerXAnchor).isActive = true
 
         
     // Message
@@ -1175,10 +1229,10 @@ class HomePostCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         messageContainer.addSubview(sendMessageButton)
         messageContainer.addSubview(messageCount)
         
-        sendMessageButton.anchor(top: messageContainer.topAnchor, left: messageContainer.leftAnchor, bottom: messageContainer.bottomAnchor, right: nil, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
+        sendMessageButton.anchor(top: messageContainer.topAnchor, left: nil, bottom: messageContainer.bottomAnchor, right: messageContainer.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
         sendMessageButton.widthAnchor.constraint(equalTo: sendMessageButton.heightAnchor, multiplier: 1).isActive = true
         
-        messageCount.anchor(top: messageContainer.topAnchor, left: sendMessageButton.rightAnchor, bottom: messageContainer.bottomAnchor, right: messageContainer.rightAnchor, paddingTop: 0, paddingLeft: 5, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
+        messageCount.anchor(top: messageContainer.topAnchor, left: messageContainer.leftAnchor, bottom: messageContainer.bottomAnchor, right: sendMessageButton.leftAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 5, width: 0, height: 0)
         messageCount.centerYAnchor.constraint(equalTo: sendMessageButton.centerYAnchor).isActive = true
         
         messageCount.text = "10"

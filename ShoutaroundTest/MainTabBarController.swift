@@ -50,11 +50,12 @@ class MainTabBarController: UITabBarController, UITabBarControllerDelegate, UIIm
             print(viewController)
             let listNavController = viewController as! UINavigationController
             let listView = listNavController.viewControllers[0] as! ListViewController
-            if listView.displayUser?.uid != uid {
                 print("Default Setup For List: \(CurrentUser.lists[0].name) for \(CurrentUser.user?.username)")
+            if listView.currentDisplayList == nil {
                 listView.currentDisplayList = CurrentUser.lists[0]
-                listView.displayUser = CurrentUser.user
             }
+                listView.displayUser = CurrentUser.user
+                listView.displayedLists = CurrentUser.lists
         }
         
         selectedTabBarIndex = index

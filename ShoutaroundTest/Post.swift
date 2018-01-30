@@ -101,6 +101,8 @@ struct Post {
     var voteCount:Int = 0
     var hasVoted:Int = 0
     
+    var isLegit: Bool = false
+    
     
     init(user: User, dictionary: [String: Any]) {
         
@@ -128,6 +130,12 @@ struct Post {
         self.creatorUID = dictionary["creatorUID"] as? String ?? ""
         
         self.creatorListId = dictionary["lists"] as? [String:String]? ?? [:]
+        
+        if let creatorLists = self.creatorListId {
+            self.isLegit = (creatorLists.contains(where: { (listId,listName) -> Bool in
+                return listName == legitListName
+            }))
+        }
         
         if self.creatorUID == Auth.auth().currentUser?.uid {
             self.selectedListId = self.creatorListId

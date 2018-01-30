@@ -41,7 +41,6 @@ class ListViewController: UIViewController, UICollectionViewDelegate, UICollecti
     
     // Used to fetch lists
     var displayUser: User? = nil
-    var displayListIds: [String]? = []
     var displayedLists: [List]? = [] {
         didSet{
             guard let uid = Auth.auth().currentUser?.uid else {return}
@@ -131,7 +130,11 @@ class ListViewController: UIViewController, UICollectionViewDelegate, UICollecti
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         emojiDetailLabel.isHidden = true
     }
-
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        menuView.hide()
+    }
+    
 // Filtering Variables
     
     var isFiltering: Bool = false
@@ -174,13 +177,12 @@ class ListViewController: UIViewController, UICollectionViewDelegate, UICollecti
         
         Database.fetchUserWithUID(uid: (currentDisplayList.creatorUID)!) { (fetchedUser) in
             self.displayUser = fetchedUser
-            self.displayListIds = fetchedUser.listIds
             self.fetchListsForUser()
         }
     }
     
     func fetchListsForUser(){
-        guard let displayListIds = self.displayListIds else {
+        guard let displayListIds = self.displayUser?.listIds else {
             print("Fetch Lists for User: Error, No List Ids, Default List, \(self.displayUser?.uid)")
             self.displayedLists = [emptyLegitList, emptyBookmarkList]
             return
@@ -284,6 +286,7 @@ class ListViewController: UIViewController, UICollectionViewDelegate, UICollecti
         collectionView.register(HomePostCell.self, forCellWithReuseIdentifier: homePostCellId)
         collectionView.register(ListViewHeader.self, forSupplementaryViewOfKind: UICollectionElementKindSectionHeader, withReuseIdentifier: listHeaderId)
         
+        collectionView.collectionViewLayout = HomeSortFilterHeaderFlowLayout()
         collectionView.backgroundColor = .white
         collectionView.collectionViewLayout.invalidateLayout()
         collectionView.layoutIfNeeded()

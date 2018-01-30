@@ -18,7 +18,16 @@ class UploadListCell: UITableViewCell {
     
     var list: List? {
         didSet{
-            self.listNameLabel.text = list?.name
+//            self.listNameLabel.text = "\((list?.name)!) (\((list?.postIds?.count)!))"
+            
+            let attributedText = NSMutableAttributedString(string: (list?.name)!, attributes: [NSFontAttributeName: UIFont.boldSystemFont(ofSize: 14)])
+            
+            if (list?.postIds?.count)! > 0 {
+                attributedText.append(NSAttributedString(string: " (\((list?.postIds?.count)!))", attributes: [NSFontAttributeName: UIFont.systemFont(ofSize: 14)]))
+            }
+
+            self.listNameLabel.attributedText = attributedText
+            
             
             if self.list?.name == legitListName{
                 self.isLegit = true
@@ -85,7 +94,7 @@ class UploadListCell: UITableViewCell {
             if isLegit {
                 var imageView : UIImageView
                 imageView  = UIImageView(frame:CGRect(x: 0, y: 0, width: 20, height: 20))
-                imageView.image = #imageLiteral(resourceName: "bookmark_selected")
+                imageView.image = #imageLiteral(resourceName: "legit")
                 accessoryView = imageView
             }
                 
@@ -114,14 +123,15 @@ class UploadListCell: UITableViewCell {
             if isLegit {
                 var imageView : UIImageView
                 imageView  = UIImageView(frame:CGRect(x: 0, y: 0, width: 20, height: 20))
-                imageView.image = selected ? #imageLiteral(resourceName: "bookmark_selected") : #imageLiteral(resourceName: "bookmark_unselected")
+                imageView.image = selected ? #imageLiteral(resourceName: "legit") : #imageLiteral(resourceName: "legit")
+//                imageView.image = selected ? #imageLiteral(resourceName: "bookmark_selected") : #imageLiteral(resourceName: "bookmark_unselected")
                 accessoryView = imageView
             }
             
             else if isBookmark {
                 var imageView : UIImageView
                 imageView  = UIImageView(frame:CGRect(x: 0, y: 0, width: 20, height: 20))
-                imageView.image = selected ? #imageLiteral(resourceName: "bookmark_filled") : #imageLiteral(resourceName: "bookmark_unfilled")
+                imageView.image = selected ? #imageLiteral(resourceName: "bookmark_filled") : #imageLiteral(resourceName: "bookmark_filled")
                 accessoryView = imageView
             }
             else if !isPublic {
@@ -137,7 +147,7 @@ class UploadListCell: UITableViewCell {
                 imageView.image = selected ? #imageLiteral(resourceName: "checkmark") : nil
                 accessoryView = imageView
             }
-            backgroundColor = selected ? UIColor.mainBlue() : UIColor.white
+            backgroundColor = selected ? UIColor.legitColor().withAlphaComponent(0.5) : UIColor.white
         }
     }
 

@@ -33,9 +33,23 @@ class ListPhotoCell: UICollectionViewCell, UIGestureRecognizerDelegate {
             //            let timeAgoDisplay = bookmarkDate?.timeAgoDisplay()
             if let bookmarkDate = bookmarkDate {
                 let formatter = DateFormatter()
-                formatter.dateFormat = "MMM d YYYY"
-                let timeAgoDisplay = formatter.string(from: bookmarkDate)
-                dateLabel.text = timeAgoDisplay
+                let calendar = NSCalendar.current
+                
+                let yearsAgo = calendar.dateComponents([.year], from: bookmarkDate, to: Date())
+                if (yearsAgo.year)! > 0 {
+                    formatter.dateFormat = "MMM d yy, h:mm a"
+                } else {
+                    formatter.dateFormat = "MMM d, h:mm a"
+                }
+                
+                let daysAgo =  calendar.dateComponents([.day], from: bookmarkDate, to: Date())
+                
+                if (daysAgo.day)! <= 7 {
+                    dateLabel.text = bookmarkDate.timeAgoDisplay()
+                } else {
+                    let dateDisplay = formatter.string(from: bookmarkDate)
+                    dateLabel.text = dateDisplay
+                }
             }
         }
     }
@@ -151,8 +165,8 @@ class ListPhotoCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         let iv = CustomImageView()
         iv.contentMode = .scaleAspectFill
         iv.clipsToBounds = true
-        iv.backgroundColor = .blue
-        
+        iv.image = #imageLiteral(resourceName: "profile_outline").withRenderingMode(.alwaysOriginal)
+
         return iv
         
     }()
@@ -374,7 +388,7 @@ class ListPhotoCell: UICollectionViewCell, UIGestureRecognizerDelegate {
     // Social Counts
     let detailView = UIView()
     var socialCounts = UIStackView()
-    let socialCountFontSize: CGFloat = 10
+    let socialCountFontSize: CGFloat = 12
     
     let voteView = UIView()
     var voteCount: UILabel = {
@@ -703,8 +717,9 @@ class ListPhotoCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         
         let socialCounts = UIStackView(arrangedSubviews: [voteView, listView, messageView])
         socialCounts.distribution = .fillEqually
+        socialCounts.spacing = 5
         addSubview(socialCounts)
-        socialCounts.anchor(top: detailView.topAnchor, left: detailView.leftAnchor, bottom: detailView.bottomAnchor, right: dateLabel.leftAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
+        socialCounts.anchor(top: detailView.topAnchor, left: detailView.leftAnchor, bottom: detailView.bottomAnchor, right: dateLabel.leftAnchor, paddingTop: 0, paddingLeft: 10, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
         
         addSubview(voteCount)
         voteCount.anchor(top: voteView.topAnchor, left: voteView.leftAnchor, bottom: voteView.bottomAnchor, right: voteView.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
@@ -743,7 +758,7 @@ class ListPhotoCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         }
         attributedText = NSMutableAttributedString(string: listCountString, attributes: [NSFontAttributeName: UIFont.boldSystemFont(ofSize: socialCountFontSize), NSForegroundColorAttributeName: UIColor.lightGray])
         let listImage = NSTextAttachment()
-        listImage.image = #imageLiteral(resourceName: "bookmark_filled").withRenderingMode(.alwaysOriginal).resizeImageWith(newSize: imageSize)
+        listImage.image = #imageLiteral(resourceName: "starfilled").withRenderingMode(.alwaysOriginal).resizeImageWith(newSize: imageSize)
         let listImageString = NSAttributedString(attachment: listImage)
         attributedText.append(listImageString)
         listCount.attributedText = attributedText

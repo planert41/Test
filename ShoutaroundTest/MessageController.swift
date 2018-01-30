@@ -13,10 +13,13 @@ import Firebase
 import mailgun
 import SearchTextField
 
-
+protocol MessageControllerDelegate {
+    func refreshPost(post:Post)
+}
 
 class MessageController: UIViewController, UICollectionViewDataSource, UICollectionViewDelegate, UICollectionViewDelegateFlowLayout, UITextFieldDelegate, UITextViewDelegate , UITableViewDelegate, UITableViewDataSource{
     
+    var delegate: MessageControllerDelegate?
     let bookmarkCellId = "bookmarkCellId2"
     let postDisplayHeight = 150 as CGFloat
     
@@ -519,6 +522,10 @@ class MessageController: UIViewController, UICollectionViewDataSource, UICollect
                 if receiveUserUid.count > 0 {
                     Database.updateMessageThread(threadKey: threadKey, creatorUid: creatorUID, creatorUsername: creatorUsername, receiveUid: receiveUserUid, message: message)
                 }
+                
+                self.post?.hasMessaged = true
+                self.post?.messageCount += 1
+                self.delegate?.refreshPost(post: self.post!)
                 
                 self.navigationController?.popViewController(animated: true)
             })

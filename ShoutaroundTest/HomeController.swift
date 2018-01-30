@@ -17,7 +17,7 @@ import UIFontComplete
 
 
 
-class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLayout, HomePostCellDelegate, UIGestureRecognizerDelegate, FilterControllerDelegate, UISearchBarDelegate, SortFilterHeaderDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate, SharePhotoListControllerDelegate, PostSearchControllerDelegate, EmptyDataSetSource, EmptyDataSetDelegate {
+class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLayout, HomePostCellDelegate, UIGestureRecognizerDelegate, FilterControllerDelegate, UISearchBarDelegate, SortFilterHeaderDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate, MessageControllerDelegate, SharePhotoListControllerDelegate, PostSearchControllerDelegate, EmptyDataSetSource, EmptyDataSetDelegate {
     
 
     
@@ -151,14 +151,11 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         collectionView?.layoutIfNeeded()
     }
     
-    override func viewWillDisappear(_ animated: Bool) {
-        collectionView?.collectionViewLayout.invalidateLayout()
-    }
 
     
     func setupCollectionView(){
         collectionView?.backgroundColor = .white
-        
+        collectionView?.collectionViewLayout = HomeSortFilterHeaderFlowLayout()
         collectionView?.register(HomePostCell.self, forCellWithReuseIdentifier: cellId)
         collectionView?.register(SortFilterHeader.self, forSupplementaryViewOfKind: UICollectionElementKindSectionHeader, withReuseIdentifier: "headerId")
         
@@ -669,6 +666,8 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         legitListTitle.font = UIFont(font: .noteworthyBold, size: 20)
 //        legitListTitle.font = UIFont(name: "TitilliumWeb-SemiBold", size: 20)
         legitListTitle.textAlignment = NSTextAlignment.center
+        navigationItem.titleView  = legitListTitle
+
         
         var searchTerm: String = ""
             if filterCaption != nil {searchTerm += " \(filterCaption!)"}
@@ -996,12 +995,10 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     }
     
     func didTapMessage(post: Post) {
-        
         let messageController = MessageController()
         messageController.post = post
-        
+        messageController.delegate = self
         navigationController?.pushViewController(messageController, animated: true)
-        
     }
     
     func userOptionPost(post:Post){
