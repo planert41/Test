@@ -41,8 +41,8 @@ let HeaderSortDefault:String = HeaderSortOptions[0]
 var LocationSortOptions:[String] = ["Recent", "Rating", "Trending"]
 
 // Rank Defaults
-var defaultRankOptions = ["Recent", "Votes", "Lists", "Messages"]
-var defaultRank = defaultRankOptions[0]
+var defaultRankOptions = ["Votes", "Lists", "Messages", "Recent"]
+var defaultRank = defaultRecentSort
 
 
 // Filter Defaults
@@ -55,8 +55,8 @@ var FilterSortDefault:[String] = ["Nearest", "Oldest", "Recent"]
 
 let defaultRange = geoFilterRangeDefault[geoFilterRangeDefault.endIndex - 1]
 let defaultGroup = "All"
-let defaultRecentSort = HeaderSortOptions[0]
-let defaultNearestSort = HeaderSortOptions[1]
+let defaultRecentSort = "Recent"
+let defaultNearestSort = "Nearest"
 let defaultTime =  FilterSortTimeDefault[FilterSortTimeDefault.endIndex - 1]
 
 

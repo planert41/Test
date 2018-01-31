@@ -211,7 +211,7 @@ class ListViewController: UIViewController, UICollectionViewDelegate, UICollecti
         super.viewDidLoad()
         view.backgroundColor = UIColor.white
         
-        self.navigationController?.navigationBar.tintColor = UIColor.blue
+        self.navigationController?.navigationBar.tintColor = UIColor.white
         self.navigationItem.title = currentDisplayList?.name
 
         setupCollectionView()
@@ -225,7 +225,7 @@ class ListViewController: UIViewController, UICollectionViewDelegate, UICollecti
         
         guard let uid = Auth.auth().currentUser?.uid else {return}
     // Setup List Drop Down Bar
-        self.navigationController?.navigationBar.isTranslucent = false
+        self.navigationController?.navigationBar.isTranslucent = true
         self.navigationController?.navigationBar.titleTextAttributes = [NSForegroundColorAttributeName: UIColor.white]
        
         var menuOptions = self.displayedListNames

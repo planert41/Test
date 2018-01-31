@@ -137,7 +137,7 @@ class PostSearchController : UITableViewController, UISearchResultsUpdating, UIS
             if s is UITextField {
                 s.layer.borderWidth = 0.5
                 s.layer.borderColor = UIColor.gray.cgColor
-                s.layer.cornerRadius = 10
+//                s.layer.cornerRadius = 10
                 s.layer.backgroundColor = UIColor.white.cgColor
             }
         }
@@ -149,6 +149,7 @@ class PostSearchController : UITableViewController, UISearchResultsUpdating, UIS
         } else {
             self.tableView.tableHeaderView = searchBar
             searchBar.backgroundColor = UIColor.legitColor()
+            searchBar.barTintColor = UIColor.legitColor()
         }
         
     }

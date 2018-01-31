@@ -40,8 +40,7 @@ class MapViewController: UIViewController, UICollectionViewDelegate, UICollectio
     let listHeaderId = "listHeaderId"
     
     lazy var collectionView : UICollectionView = {
-        let layout = UICollectionViewFlowLayout()
-        let cv = UICollectionView(frame: CGRect.zero, collectionViewLayout: HomeSortFilterHeaderFlowLayout())
+        let cv = UICollectionView(frame: CGRect.zero, collectionViewLayout: FixedHeadersCollectionViewFlowLayout())
         cv.translatesAutoresizingMaskIntoConstraints = false
         cv.delegate = self
         cv.dataSource = self
@@ -58,14 +57,14 @@ class MapViewController: UIViewController, UICollectionViewDelegate, UICollectio
     
     
     func updateCollectionViewHeight(){
-        if expandCollectionView {
-            UIView.animate(withDuration: 0.5, delay: 0.1, options: UIViewAnimationOptions.curveLinear, animations: {
+        if expandCollectionView && self.collectionViewHeight?.constant != 400{
+            UIView.animate(withDuration: 0.5, delay: 0, options: UIViewAnimationOptions.curveLinear, animations: {
                 self.collectionViewHeight?.constant = 400
                 self.collectionView.layoutIfNeeded()
             })
 //            collectionViewHeight?.constant = 400
-        } else {
-            UIView.animate(withDuration: 0.5, delay: 0.1, options: UIViewAnimationOptions.curveLinear, animations: {
+        } else if !expandCollectionView && self.collectionViewHeight?.constant == 400  {
+            UIView.animate(withDuration: 0.5, delay: 0, options: UIViewAnimationOptions.curveLinear, animations: {
                 self.collectionViewHeight?.constant = 160
                 self.collectionView.layoutIfNeeded()
             })
@@ -164,10 +163,8 @@ class MapViewController: UIViewController, UICollectionViewDelegate, UICollectio
         collectionView.register(GridPhotoCell.self, forCellWithReuseIdentifier: gridCellId)
         collectionView.register(ListViewHeader.self, forSupplementaryViewOfKind: UICollectionElementKindSectionHeader, withReuseIdentifier: listHeaderId)
         
-//        collectionView.collectionViewLayout = HomeSortFilterHeaderFlowLayout()
         collectionView.backgroundColor = .white
-        collectionView.collectionViewLayout.invalidateLayout()
-        collectionView.layoutIfNeeded()
+
         
         let refreshControl = UIRefreshControl()
         refreshControl.addTarget(self, action: #selector(handleRefresh), for: .valueChanged)
@@ -444,6 +441,7 @@ class MapViewController: UIViewController, UICollectionViewDelegate, UICollectio
         header.isListView = self.isListView
         header.selectedCaption  = self.filterCaption
         header.enableSearchBar = false
+        header.selectedSort = self.selectedHeaderSort!
         header.delegate = self
         return header
         

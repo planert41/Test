@@ -432,7 +432,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     func refreshPostsForFilter(){
         self.clearAllPosts()
         self.checkFilter()
-//        self.collectionView?.reloadData()
+        self.collectionView?.reloadData()
         self.scrolltoFirst = true
         self.fetchAllPostIds()
     }
@@ -496,7 +496,8 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
             print("Current User Posts: ", self.fetchedPostIds.count)
             self.userPostIdFetched = true
             NotificationCenter.default.post(name: HomeController.finishFetchingUserPostIdsNotificationName, object: nil)
-            Database.checkUserSocialStats(user: CurrentUser.user!, socialField: "posts_created", socialCount: self.fetchedPostIds.count)
+//            print(CurrentUser.user)
+//            Database.checkUserSocialStats(user: CurrentUser.user!, socialField: "posts_created", socialCount: self.fetchedPostIds.count)
         }
     }
     
@@ -666,32 +667,46 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     
     fileprivate func setupNavigationItems() {
 
-        let legitListTitle = UILabel()
-        legitListTitle.text = "LegitList"
-        legitListTitle.font = UIFont(font: .noteworthyBold, size: 20)
-//        legitListTitle.font = UIFont(name: "TitilliumWeb-SemiBold", size: 20)
-        legitListTitle.textAlignment = NSTextAlignment.center
-        navigationItem.titleView  = legitListTitle
-
+        self.navigationController?.navigationBar.isTranslucent = true
+//        self.navigationController?.navigationBar.tintColor = UIColor.white
+        self.navigationController?.navigationBar.titleTextAttributes = [NSForegroundColorAttributeName: UIColor.white, NSFontAttributeName: UIFont(font: .noteworthyBold, size: 20)]
+        self.navigationItem.title = "LegitList"
         
+//        let legitListTitle = UILabel()
+//        legitListTitle.text = "LegitList"
+//        legitListTitle.font = UIFont(font: .noteworthyBold, size: 20)
+//        legitListTitle.textColor = UIColor.white
+////        legitListTitle.font = UIFont(name: "TitilliumWeb-SemiBold", size: 20)
+//        legitListTitle.textAlignment = NSTextAlignment.center
+////        navigationItem.titleView  = legitListTitle
+//
+//
         var searchTerm: String = ""
             if filterCaption != nil {searchTerm += " \(filterCaption!)"}
         if filterLocationName != nil {searchTerm += " @\(filterLocationName!)"}
             if filterRange != nil {searchTerm += " Within \(filterRange!) Mi"}
             if filterMaxPrice != nil {searchTerm += " \(filterMaxPrice!)"}
             if filterType != nil {searchTerm += " \(filterType!)"}
-        
-        let searchTermLabel = UILabel()
-            searchTermLabel.text = searchTerm
-            searchTermLabel.font = UIFont(name: "TitilliumWeb-SemiBold", size: 15)
-            searchTermLabel.textAlignment = NSTextAlignment.center
-            searchTermLabel.adjustsFontSizeToFitWidth = true
-        
+//
+//        let searchTermLabel = UILabel()
+//            searchTermLabel.text = searchTerm
+//            searchTermLabel.font = UIFont(name: "TitilliumWeb-SemiBold", size: 15)
+//            searchTermLabel.textAlignment = NSTextAlignment.center
+//            searchTermLabel.adjustsFontSizeToFitWidth = true
+//            searchTermLabel.textColor = UIColor.white
+//
         if isFiltering {
-            navigationItem.titleView  = searchTermLabel
+            self.navigationItem.title = searchTerm
         } else {
-            navigationItem.titleView  = legitListTitle
+            self.navigationItem.title = "LegitList"
         }
+//
+        
+//        if isFiltering {
+//            navigationItem.titleView  = searchTermLabel
+//        } else {
+//            navigationItem.titleView  = legitListTitle
+//        }
         
         // Camera
         navigationItem.leftBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "camera3").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(openCamera))

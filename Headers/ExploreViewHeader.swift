@@ -76,7 +76,7 @@ class RankViewHeader: UICollectionViewCell, UIGestureRecognizerDelegate, UIPicke
             rangeButton.addTarget(self, action: #selector(activateLocation), for: .touchUpInside)
         } else {
         // Image based on Distance
-        rangeButton.setImage((self.selectedRange == globalRangeDefault) ? #imageLiteral(resourceName: "ranking").withRenderingMode(.alwaysOriginal) :#imageLiteral(resourceName: "GeoFence").withRenderingMode(.alwaysOriginal), for: .normal)
+        rangeButton.setImage((self.selectedRange == globalRangeDefault) ? #imageLiteral(resourceName: "globe_color").withRenderingMode(.alwaysOriginal) :#imageLiteral(resourceName: "GeoFence").withRenderingMode(.alwaysOriginal), for: .normal)
         rangeButton.removeTarget(nil, action: nil, for: .allEvents)
         rangeButton.addTarget(self, action: #selector(activateRange), for: .touchUpInside)
         }
@@ -85,7 +85,7 @@ class RankViewHeader: UICollectionViewCell, UIGestureRecognizerDelegate, UIPicke
     
     lazy var rangeButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setImage((self.selectedRange == globalRangeDefault) ? #imageLiteral(resourceName: "ranking").withRenderingMode(.alwaysOriginal) :#imageLiteral(resourceName: "GeoFence").withRenderingMode(.alwaysOriginal), for: .normal)
+        button.setImage((self.selectedRange == globalRangeDefault) ? #imageLiteral(resourceName: "globe_color").withRenderingMode(.alwaysOriginal) :#imageLiteral(resourceName: "GeoFence").withRenderingMode(.alwaysOriginal), for: .normal)
         button.addTarget(self, action: #selector(activateRange), for: .touchUpInside)
         return button
     }()
@@ -195,20 +195,21 @@ class RankViewHeader: UICollectionViewCell, UIGestureRecognizerDelegate, UIPicke
     }
     
     func refreshRankSegmentControl(){
-        self.rankSegmentControl.setImage(#imageLiteral(resourceName: "recent_unfilled").withRenderingMode(.alwaysOriginal), forSegmentAt: 0)
-        self.rankSegmentControl.setImage(#imageLiteral(resourceName: "cred_unfilled").withRenderingMode(.alwaysOriginal), forSegmentAt: 1)
-        self.rankSegmentControl.setImage(#imageLiteral(resourceName: "bookmark_unselected").withRenderingMode(.alwaysOriginal), forSegmentAt: 2)
-        self.rankSegmentControl.setImage(#imageLiteral(resourceName: "send2").withRenderingMode(.alwaysOriginal), forSegmentAt: 3)
+        self.rankSegmentControl.setImage(#imageLiteral(resourceName: "cred_unfilled").withRenderingMode(.alwaysOriginal), forSegmentAt: 0)
+        self.rankSegmentControl.setImage(#imageLiteral(resourceName: "bookmark_unselected").withRenderingMode(.alwaysOriginal), forSegmentAt: 1)
+        self.rankSegmentControl.setImage(#imageLiteral(resourceName: "send2").withRenderingMode(.alwaysOriginal), forSegmentAt: 2)
+        self.rankSegmentControl.setImage(#imageLiteral(resourceName: "recent_unfilled").withRenderingMode(.alwaysOriginal), forSegmentAt: 3)
         
-        if self.rankSegmentControl.selectedSegmentIndex == 0 {
-            rankSegmentControl.setImage(#imageLiteral(resourceName: "recent_filled").withRenderingMode(.alwaysOriginal), forSegmentAt: 0)
-        }  else if self.rankSegmentControl.selectedSegmentIndex == 1 {
-            rankSegmentControl.setImage(#imageLiteral(resourceName: "cred_filled").withRenderingMode(.alwaysOriginal), forSegmentAt: 1)
+        if self.rankSegmentControl.selectedSegmentIndex == 1 {
+            rankSegmentControl.setImage(#imageLiteral(resourceName: "cred_filled").withRenderingMode(.alwaysOriginal), forSegmentAt: 0)
         } else if self.rankSegmentControl.selectedSegmentIndex == 2 {
-            rankSegmentControl.setImage(#imageLiteral(resourceName: "bookmark_selected").withRenderingMode(.alwaysOriginal), forSegmentAt: 2)
+            rankSegmentControl.setImage(#imageLiteral(resourceName: "bookmark_selected").withRenderingMode(.alwaysOriginal), forSegmentAt: 1)
         } else if self.rankSegmentControl.selectedSegmentIndex == 3 {
-            rankSegmentControl.setImage(#imageLiteral(resourceName: "send_filled").withRenderingMode(.alwaysOriginal), forSegmentAt: 3)
+            rankSegmentControl.setImage(#imageLiteral(resourceName: "send_filled").withRenderingMode(.alwaysOriginal), forSegmentAt: 2)
+        } else if self.rankSegmentControl.selectedSegmentIndex == 0 {
+            rankSegmentControl.setImage(#imageLiteral(resourceName: "recent_filled").withRenderingMode(.alwaysOriginal), forSegmentAt: 3)
         }
+        
     }
     
     // Set Up Range Picker for Distance Filtering

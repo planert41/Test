@@ -2622,7 +2622,7 @@ extension Database{
         print("Sort Posts: \(selectedSort!)")
         
         // Recent
-        if selectedSort == HeaderSortOptions[0] {
+        if selectedSort == defaultRecentSort {
             tempPosts.sort(by: { (p1, p2) -> Bool in
                 return p1.creationDate.compare(p2.creationDate) == .orderedDescending
             })
@@ -2638,7 +2638,7 @@ extension Database{
         }
             
             // Nearest
-        else if selectedSort == HeaderSortOptions[1] {
+        else if selectedSort == defaultNearestSort {
                 // Distances are updated in fetchallposts as they are filtered by distance
             
             guard let selectedLocation = selectedLocation else {
@@ -2682,7 +2682,7 @@ extension Database{
         }
             
             // Votes
-        else if selectedSort == defaultRankOptions[1] {
+        else if selectedSort == defaultRankOptions[0] {
             tempPosts.sort(by: { (p1, p2) -> Bool in
                 return (p1.voteCount > p2.voteCount)
             })
@@ -2690,7 +2690,7 @@ extension Database{
         }
             
             // Bookmarks
-        else if selectedSort == defaultRankOptions[2] {
+        else if selectedSort == defaultRankOptions[1] {
             tempPosts.sort(by: { (p1, p2) -> Bool in
                 return (p1.listCount > p2.listCount)
             })
@@ -2698,7 +2698,7 @@ extension Database{
         }
             
             // Message
-        else if selectedSort == defaultRankOptions[3] {
+        else if selectedSort == defaultRankOptions[2] {
             tempPosts.sort(by: { (p1, p2) -> Bool in
                 return (p1.messageCount > p2.messageCount)
             })

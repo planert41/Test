@@ -24,7 +24,15 @@ class ListViewHeader: UICollectionViewCell, UIGestureRecognizerDelegate, UISearc
     
     var delegate: ListHeaderDelegate?
     var headerSortSegment = UISegmentedControl()
-    var selectedSort: String = defaultRecentSort
+    var selectedSort: String = defaultRecentSort {
+        didSet{
+            if let index = HeaderSortOptions.index(of: self.selectedSort){
+                if headerSortSegment.selectedSegmentIndex != index {
+                    headerSortSegment.selectedSegmentIndex = index
+                }
+            }
+        }
+    }
     var selectedCaption: String? = nil {
         didSet{
             guard let selectedCaption = selectedCaption else {return}
