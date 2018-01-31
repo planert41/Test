@@ -213,10 +213,11 @@ class ListViewController: UIViewController, UICollectionViewDelegate, UICollecti
         
         self.navigationController?.navigationBar.tintColor = UIColor.white
         self.navigationItem.title = currentDisplayList?.name
+        
 
         setupCollectionView()
         view.addSubview(collectionView)
-        collectionView.anchor(top: topLayoutGuide.bottomAnchor, left: view.leftAnchor, bottom: bottomLayoutGuide.topAnchor, right: view.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
+        collectionView.anchor(top: view.topAnchor, left: view.leftAnchor, bottom: bottomLayoutGuide.topAnchor, right: view.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
         
         NotificationCenter.default.addObserver(self, selector: #selector(handleRefresh), name: ListViewController.refreshListViewNotificationName, object: nil)
     }
@@ -319,6 +320,7 @@ class ListViewController: UIViewController, UICollectionViewDelegate, UICollecti
         
         collectionView.collectionViewLayout = HomeSortFilterHeaderFlowLayout()
         collectionView.backgroundColor = .white
+        collectionView.translatesAutoresizingMaskIntoConstraints = true
         collectionView.collectionViewLayout.invalidateLayout()
         collectionView.layoutIfNeeded()
         

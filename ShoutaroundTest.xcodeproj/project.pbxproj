@@ -284,11 +284,10 @@
 		A50D454F20215F010039667F /* Headers */ = {
 			isa = PBXGroup;
 			children = (
+				A5AF93372022193400D7B910 /* Layouts */,
 				A54413511FF55BDF0015F615 /* SortFilterHeader.swift */,
 				A5A2E5D22002B00000D7E8F5 /* ListViewHeader.swift */,
 				A5F32BC120125A0E00DDF199 /* ExploreViewHeader.swift */,
-				A50D455020215F5C0039667F /* FixedHeaderLayout.swift */,
-				A542FF27200BDA1F005F925A /* HomeSortFilterHeaderLayout.swift */,
 			);
 			path = Headers;
 			sourceTree = "<group>";
@@ -318,7 +317,6 @@
 			children = (
 				A51C13C81F51B6FD00CEB740 /* UserProfileController.swift */,
 				A51C13CC1F51C03100CEB740 /* UserProfileHeader.swift */,
-				A546D6081FC0834900C89736 /* StickyHeaders.swift */,
 			);
 			name = UserProfile;
 			sourceTree = "<group>";
@@ -335,7 +333,6 @@
 		A54E1D5E1F4E736B00C2AA77 = {
 			isa = PBXGroup;
 			children = (
-				A50D454F20215F010039667F /* Headers */,
 				A5C645201F5B5F1600C78244 /* Camera */,
 				A54E1D691F4E736B00C2AA77 /* ShoutaroundTest */,
 				A54E1D681F4E736B00C2AA77 /* Products */,
@@ -355,17 +352,17 @@
 		A54E1D691F4E736B00C2AA77 /* ShoutaroundTest */ = {
 			isa = PBXGroup;
 			children = (
+				A50D454F20215F010039667F /* Headers */,
 				A54E1D6A1F4E736B00C2AA77 /* AppDelegate.swift */,
 				A57A674A1F5E62F30063D400 /* Credentials.swift */,
 				A51C13C61F51B59900CEB740 /* MainTabBarController.swift */,
-				A5DCE4F32018030B001DBD3E /* PhotoCells */,
+				A5C645121F565E7E00C78244 /* Home */,
 				A5D942E71FC5144100A189DD /* Explore */,
-				A5A17BAE1FA6496B001F227D /* OLD */,
+				A5DCE4F32018030B001DBD3E /* PhotoCells */,
+				A5A2E5CF20028E5B00D7E8F5 /* List */,
 				A5516BC01F8ED0B9003C3E22 /* Location */,
 				A56868BB1F78A0E50050C406 /* Message */,
-				A5A2E5CF20028E5B00D7E8F5 /* List */,
 				A542FF29200BDA40005F925A /* Comment */,
-				A5C645121F565E7E00C78244 /* Home */,
 				A5C6451B1F57AE4800C78244 /* Search */,
 				A57941C71F6A2799004EC40D /* Shared */,
 				A5C6450B1F564A4000C78244 /* Models */,
@@ -380,6 +377,7 @@
 				A54E1D791F4E736B00C2AA77 /* Info.plist */,
 				A54E1D711F4E736B00C2AA77 /* InstagramFirebase.xcdatamodeld */,
 				A5BFBB651F6F647100F36AF8 /* ShoutaroundTest-CBridgingHeader.h */,
+				A5A17BAE1FA6496B001F227D /* OLD */,
 			);
 			path = ShoutaroundTest;
 			sourceTree = "<group>";
@@ -470,6 +468,16 @@
 				A5F9FE2B1FF069D000AF9542 /* UploadListCell.swift */,
 			);
 			path = List;
+			sourceTree = "<group>";
+		};
+		A5AF93372022193400D7B910 /* Layouts */ = {
+			isa = PBXGroup;
+			children = (
+				A542FF27200BDA1F005F925A /* HomeSortFilterHeaderLayout.swift */,
+				A50D455020215F5C0039667F /* FixedHeaderLayout.swift */,
+				A546D6081FC0834900C89736 /* StickyHeaders.swift */,
+			);
+			path = Layouts;
 			sourceTree = "<group>";
 		};
 		A5C6450B1F564A4000C78244 /* Models */ = {

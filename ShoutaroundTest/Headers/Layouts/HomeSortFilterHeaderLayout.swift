@@ -8,11 +8,12 @@
 
 import UIKit
 
-class StickyHeadersCollectionViewFlowLayout: UICollectionViewFlowLayout {
+class HomeSortFilterHeaderFlowLayout: UICollectionViewFlowLayout {
     
     // MARK: - Collection View Flow Layout Methods
-    var priorYOffset: CGFloat? = nil
+    var priorOffsetY: CGFloat? = nil
     var priorHeaderPosition: CGFloat? = nil
+    var initContentYOffset: CGFloat? = nil
     
     override func shouldInvalidateLayout(forBoundsChange newBounds: CGRect) -> Bool {
         return true
@@ -58,65 +59,47 @@ class StickyHeadersCollectionViewFlowLayout: UICollectionViewFlowLayout {
         guard let boundaries = boundaries(forSection: indexPath.section) else { return layoutAttributes }
         guard let collectionView = collectionView else { return layoutAttributes }
         
+
         // Helpers
         let contentOffsetY = collectionView.contentOffset.y
         var frameForSupplementaryView = layoutAttributes.frame
-        // Set minimum to zero for 0 cell collectionview 
+        // Set minimum to zero for 0 cell collectionview
         let minimum = max(0,boundaries.minimum - frameForSupplementaryView.height)
         let maximum = boundaries.maximum - frameForSupplementaryView.height
-        
-        // 64 is the initial default content inset (nav bar height) 150 is height for profile view
-        
-        if contentOffsetY < minimum + ((200-50) - 64) {
-            frameForSupplementaryView.origin.y = minimum
-        } else if contentOffsetY > maximum {
-            frameForSupplementaryView.origin.y = maximum
-        } else {
-            frameForSupplementaryView.origin.y = contentOffsetY - ((200-50) - 64)
-        }
 
-        // TEST
-//        if self.priorYOffset != nil {
-//            // Not init
-//            let distance = contentOffsetY - self.priorYOffset!
-//
-//            if contentOffsetY > self.priorYOffset!{
-//                // Scroll Down
-//
-//                if contentOffsetY > (200 - 64) {
-//                    frameForSupplementaryView.origin.y = contentOffsetY - (200 - 64)
-//                } else {
-//                    frameForSupplementaryView.origin.y = 0
-//                }
-////                    frameForSupplementaryView.origin.y = max(0,max(self.priorHeaderPosition!,contentOffsetY - (200 - 64)))
-//
-//            } else if contentOffsetY < self.priorYOffset! {
-//                // Scroll Up
-//
-//                if (self.priorHeaderPosition! - contentOffsetY) > 64 {
-//                    frameForSupplementaryView.origin.y = self.priorYOffset! + max(0,self.priorHeaderPosition! - contentOffsetY - 64)
-//                }
-//                else {
-//                    frameForSupplementaryView.origin.y = self.priorHeaderPosition!
-//                }
-//
-////                if contentOffsetY < minimum + ((200-50) - 64) {
-////                    frameForSupplementaryView.origin.y = minimum
-////                } else {
-////                    frameForSupplementaryView.origin.y = min(self.priorHeaderPosition!,contentOffsetY + (200 - 64 - 64))
-////                }
-//
-//            } else {
-//                frameForSupplementaryView.origin.y = self.priorHeaderPosition!
-//            }
-//        }
-//
         
+        var headerOffset = frameForSupplementaryView.origin.y
+        
+        if (self.initContentYOffset == nil || self.initContentYOffset == 0) {
+            // Init Offsets
+            self.initContentYOffset = contentOffsetY
+            self.priorHeaderPosition = frameForSupplementaryView.origin.y
+            self.priorOffsetY = contentOffsetY
+            print("Set Init Offset, OffsetY \(contentOffsetY), InitOffset: \(self.initContentYOffset)")
+        }
+        
+        let headerfloor = max(0,contentOffsetY - self.initContentYOffset! - frameForSupplementaryView.height)
+        let headerceiling = max(0,contentOffsetY - self.initContentYOffset!)
+        
+        // Basically if scrolls down, lets the header dissapear, and then resets filter when scrolling up and cap
+        
+        if contentOffsetY < priorOffsetY! &&  self.priorHeaderPosition! < headerfloor{
+//            print("Scroll up reset header")
+            headerOffset = headerfloor
+        } else if contentOffsetY < priorOffsetY! && self.priorHeaderPosition! > headerceiling{
+//            print("Scroll up capping header")
+            headerOffset = headerceiling
+        } else {
+            headerOffset = self.priorHeaderPosition!
+        }
+        
+        frameForSupplementaryView.origin.y = headerOffset
         layoutAttributes.frame = frameForSupplementaryView
         
         
-//        print("contentoffsety : ", contentOffsetY, "Prior Offset: ", self.priorYOffset, " min: ", minimum, "max: ", maximum, "Haader Postion ", layoutAttributes.frame.origin.y)
-        self.priorYOffset = contentOffsetY
+//        print("Offsety : ", contentOffsetY, "Prior Offset: ", self.priorOffsetY, "Header Postion ", headerOffset, "floor: ", headerfloor, "ceiling: ", headerceiling, "init offset: ",self.initContentYOffset)
+        
+        self.priorOffsetY = contentOffsetY
         self.priorHeaderPosition = frameForSupplementaryView.origin.y
         
         return layoutAttributes
@@ -155,3 +138,4 @@ class StickyHeadersCollectionViewFlowLayout: UICollectionViewFlowLayout {
     }
     
 }
+

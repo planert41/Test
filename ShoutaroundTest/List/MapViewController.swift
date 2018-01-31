@@ -58,13 +58,14 @@ class MapViewController: UIViewController, UICollectionViewDelegate, UICollectio
     
     func updateCollectionViewHeight(){
         if expandCollectionView && self.collectionViewHeight?.constant != 400{
-            UIView.animate(withDuration: 0.5, delay: 0, options: UIViewAnimationOptions.curveLinear, animations: {
+            UIView.animate(withDuration: 0.5, delay: 0, options: UIViewAnimationOptions.curveEaseOut, animations: {
                 self.collectionViewHeight?.constant = 400
                 self.collectionView.layoutIfNeeded()
             })
+            
 //            collectionViewHeight?.constant = 400
         } else if !expandCollectionView && self.collectionViewHeight?.constant == 400  {
-            UIView.animate(withDuration: 0.5, delay: 0, options: UIViewAnimationOptions.curveLinear, animations: {
+            UIView.animate(withDuration: 0.5, delay: 0, options: UIViewAnimationOptions.curveEaseOut, animations: {
                 self.collectionViewHeight?.constant = 160
                 self.collectionView.layoutIfNeeded()
             })
@@ -409,8 +410,6 @@ class MapViewController: UIViewController, UICollectionViewDelegate, UICollectio
             cell.post = displayPost
             return cell
         }
-        
-
     }
     
 
@@ -541,9 +540,14 @@ class MapViewController: UIViewController, UICollectionViewDelegate, UICollectio
     }
     
     func didTapLocation(post: Post) {
+//        if let index = fetchedPosts.index(where: { (tempPost) -> Bool in
+//            tempPost.id == post.id
+//        }){
+//            let indexpath = IndexPath(row:index, section: 0)
+//            self.collectionView.selectItem(at: indexpath, animated: true, scrollPosition: UICollectionViewScrollPosition.centeredVertically)
+//        }
         let locationController = LocationController()
         locationController.selectedPost = post
-        
         navigationController?.pushViewController(locationController, animated: true)
     }
     
