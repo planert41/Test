@@ -22,6 +22,7 @@ var defaultGeoWaitTime: Double = 0.5
 var defaultPhotoResize = CGSize(width: 500, height: 500)
 var defaultEmptyGPSName: String = "No Location"
 
+var legitString: String = "👌"
 var legitListName: String = "Legit"
 var bookmarkListName: String = "Bookmarks"
 var emptyBookmarkList = List.init(id: nil, name: "Bookmarks", publicList: 0)
@@ -54,8 +55,10 @@ var FilterSortDefault:[String] = ["Nearest", "Oldest", "Recent"]
 
 let defaultRange = geoFilterRangeDefault[geoFilterRangeDefault.endIndex - 1]
 let defaultGroup = "All"
-let defaultSort = FilterSortDefault[FilterSortDefault.endIndex - 1]
+let defaultRecentSort = HeaderSortOptions[0]
+let defaultNearestSort = HeaderSortOptions[1]
 let defaultTime =  FilterSortTimeDefault[FilterSortTimeDefault.endIndex - 1]
+
 
 // Search Bar Defaults
 

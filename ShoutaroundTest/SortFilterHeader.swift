@@ -42,7 +42,7 @@ class SortFilterHeader: UICollectionViewCell {
     
     
     var headerSortSegment = UISegmentedControl()
-    var selectedSort: String = defaultSort {
+    var selectedSort: String = defaultRecentSort {
         didSet{
             headerSortSegment.selectedSegmentIndex = sortOptions.index(of: selectedSort)!
         }

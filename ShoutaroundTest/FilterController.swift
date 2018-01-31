@@ -70,7 +70,7 @@ class FilterController: UIViewController, GMSAutocompleteViewControllerDelegate,
 
     
     
-    var selectedSort: String = defaultSort {
+    var selectedSort: String = defaultRecentSort {
         didSet{
             if let index = filterSortOptions.index(of: selectedSort){
                 self.sortSegment.selectedSegmentIndex = index
@@ -508,7 +508,7 @@ class FilterController: UIViewController, GMSAutocompleteViewControllerDelegate,
         self.selectedMaxPrice = nil
         
         self.sortSegment.selectedSegmentIndex = 0
-        self.selectedSort = defaultSort
+        self.selectedSort = defaultRecentSort
         
     }
     
@@ -607,7 +607,7 @@ class FilterController: UIViewController, GMSAutocompleteViewControllerDelegate,
         self.selectedRange = geoFilterRangeDefault[1]
         
         self.sortSegment.selectedSegmentIndex = 0
-        self.selectedSort = defaultSort
+        self.selectedSort = defaultRecentSort
         
         var defaultRange: String? = nil
         if (self.selectedGooglePlaceType?.contains("locality"))! {

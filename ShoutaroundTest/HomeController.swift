@@ -388,7 +388,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     }
     
     func clearSort(){
-        self.selectedHeaderSort = defaultSort
+        self.selectedHeaderSort = defaultRecentSort
     }
     
     func clearSearch(){
@@ -405,7 +405,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         self.filterMinRating = 0
         self.filterType = nil
         self.filterMaxPrice = nil
-        self.selectedHeaderSort = defaultSort
+        self.selectedHeaderSort = defaultRecentSort
         self.checkFilter()
     }
     

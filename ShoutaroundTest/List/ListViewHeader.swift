@@ -24,7 +24,7 @@ class ListViewHeader: UICollectionViewCell, UIGestureRecognizerDelegate, UISearc
     
     var delegate: ListHeaderDelegate?
     var headerSortSegment = UISegmentedControl()
-    var selectedSort: String = defaultSort
+    var selectedSort: String = defaultRecentSort
     var selectedCaption: String? = nil {
         didSet{
             guard let selectedCaption = selectedCaption else {return}
@@ -32,7 +32,24 @@ class ListViewHeader: UICollectionViewCell, UIGestureRecognizerDelegate, UISearc
         }
     }
 
+    var searchBarView = UIView()
     var defaultSearchBar = UISearchBar()
+    var enableSearchBar: Bool = true {
+        didSet{
+            // Hide Search Bar if not enabled
+            if self.enableSearchBar{
+                searchBarHeight?.constant = 40
+                self.searchBarView.isHidden = false
+//                searchBarView.backgroundColor = UIColor.legitColor()
+            } else {
+                searchBarHeight?.constant = 0
+                self.searchBarView.isHidden = true
+//                searchBarView.backgroundColor = UIColor.white
+                self.defaultSearchBar.removeFromSuperview()
+            }
+        }
+    }
+    var searchBarHeight: NSLayoutConstraint?
     
 // Grid/List View Button
     var isListView = true {
@@ -88,15 +105,18 @@ class ListViewHeader: UICollectionViewCell, UIGestureRecognizerDelegate, UISearc
         
         backgroundColor = UIColor.white
         
-        let searchBarView = UIView()
         searchBarView.backgroundColor = UIColor.legitColor()
         addSubview(searchBarView)
-        searchBarView.anchor(top: topAnchor, left: leftAnchor, bottom: nil, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 35)
-        
+        searchBarView.anchor(top: topAnchor, left: leftAnchor, bottom: nil, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 40)
+        searchBarHeight = searchBarView.heightAnchor.constraint(equalToConstant: 40)
+        searchBarHeight?.isActive = true
+    
         setupSearchBar()
-        addSubview(defaultSearchBar)
-        defaultSearchBar.anchor(top: nil, left: leftAnchor, bottom: nil, right: rightAnchor, paddingTop: 0, paddingLeft: 5, paddingBottom: 0, paddingRight: 5, width: 0, height: 25)
-        defaultSearchBar.centerYAnchor.constraint(equalTo: searchBarView.centerYAnchor).isActive = true
+        searchBarView.addSubview(defaultSearchBar)
+        defaultSearchBar.anchor(top: searchBarView.topAnchor, left: searchBarView.leftAnchor, bottom: searchBarView.bottomAnchor, right: searchBarView.rightAnchor, paddingTop: 5, paddingLeft: 5, paddingBottom: 5, paddingRight: 5, width: 0, height: (searchBarHeight?.constant)! * 0.75)
+        
+
+//        defaultSearchBar.centerYAnchor.constraint(equalTo: searchBarView.centerYAnchor).isActive = true
         
         addSubview(filterButton)
         filterButton.anchor(top: searchBarView.bottomAnchor, left: nil, bottom: bottomAnchor, right: rightAnchor, paddingTop: 1, paddingLeft: 1, paddingBottom: 1, paddingRight: 3, width: 0, height: 0)
@@ -117,6 +137,13 @@ class ListViewHeader: UICollectionViewCell, UIGestureRecognizerDelegate, UISearc
         
         addSubview(headerSortSegment)
         headerSortSegment.anchor(top: searchBarView.bottomAnchor, left: leftAnchor, bottom: bottomAnchor, right: formatButton.leftAnchor, paddingTop: 5, paddingLeft: 3, paddingBottom: 5, paddingRight: 1, width: 0, height: 0)
+//        
+//        let bottomDivider = UIView()
+//        bottomDivider.backgroundColor = UIColor.legitColor()
+//        addSubview(bottomDivider)
+//        bottomDivider.anchor(top: nil, left: leftAnchor, bottom: bottomAnchor, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 1)
+        
+        
         
     }
     

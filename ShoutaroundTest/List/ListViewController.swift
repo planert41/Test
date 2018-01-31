@@ -32,7 +32,6 @@ class ListViewController: UIViewController, UICollectionViewDelegate, UICollecti
     }
 
     
-    
     // INPUT
     var currentDisplayList: List? = nil {
         didSet{
@@ -156,7 +155,7 @@ class ListViewController: UIViewController, UICollectionViewDelegate, UICollecti
     
     // Header Sort Variables
     // Default Sort is Most Recent Listed Date
-    var selectedHeaderSort:String? = defaultSort
+    var selectedHeaderSort:String? = defaultRecentSort
     
     func fetchPostsForList(){
         guard let displayListId = currentDisplayList?.id else {
@@ -164,7 +163,7 @@ class ListViewController: UIViewController, UICollectionViewDelegate, UICollecti
             return
         }
         
-        self.fetchPostFromList(list: self.currentDisplayList, completion: { (fetchedPosts) in
+        Database.fetchPostFromList(list: self.currentDisplayList, completion: { (fetchedPosts) in
             print("Fetch Post for List : Success, \(displayListId):\(self.currentDisplayList?.name), Count: \(fetchedPosts?.count) Posts")
             
             if let fetchedPosts = fetchedPosts {
@@ -297,6 +296,9 @@ class ListViewController: UIViewController, UICollectionViewDelegate, UICollecti
     
     func openMap(){
         print("Open Map")
+        let mapView = MapViewController()
+        mapView.currentDisplayList = self.currentDisplayList
+        navigationController?.pushViewController(mapView, animated: true)
     }
     
     func manageList(){
@@ -341,7 +343,7 @@ class ListViewController: UIViewController, UICollectionViewDelegate, UICollecti
             
             // Sort Recent Post By Listed Date
             var listSort: String = "Listed"
-            if self.selectedHeaderSort == defaultSort {
+            if self.selectedHeaderSort == defaultRecentSort {
                 listSort = "Listed"
             } else {
                 listSort = self.selectedHeaderSort!
@@ -393,59 +395,12 @@ class ListViewController: UIViewController, UICollectionViewDelegate, UICollecti
         self.filterMinRating = 0
         self.filterType = nil
         self.filterMaxPrice = nil
-        self.selectedHeaderSort = defaultSort
+        self.selectedHeaderSort = defaultRecentSort
         self.isFiltering = false
         self.filterCaption = nil
     }
     
-    func fetchPostFromList(list: List?, completion: @escaping ([Post]?) -> ()){
-        
-        guard let list = list else {
-            print("Fetch Post from List: ERROR, No List")
-            completion(nil)
-            return
-        }
-        
-        let thisGroup = DispatchGroup()
-        var tempPosts: [Post] = []
-        
-        for (postId,postListDate) in list.postIds! {
-            thisGroup.enter()
-            
-            Database.fetchPostWithPostID(postId: postId, completion: { (fetchedPost, error) in
-                if let error = error {
-                    print("Fetch Post: ERROR, \(postId)", error)
-                    return
-                }
-                
-                // Work around to handle if listed post was deleted
-                if let fetchedPost = fetchedPost {
-                    var tempDate = postListDate as! Double
-                    var tempPost = fetchedPost
-                    let listDate = Date(timeIntervalSince1970: tempDate)
-                    tempPost.listedDate = listDate
-                    tempPosts.append(tempPost)
-                    thisGroup.leave()
-                } else {
-                    print("Fetch Post: ERROR, \(postId), No Post, Will Delete from List")
-                    Database.DeletePostForList(postId: postId, listId: list.id, postCreationDate: nil)
-                    thisGroup.leave()
-                }
-            
-            })
-        }
-        
-        thisGroup.notify(queue: .main) {
-            print("Fetched \(tempPosts.count) Post for List: \(list.id)")
-            
-            // Initial Sort by Listed Dates
-            tempPosts.sort(by: { (p1, p2) -> Bool in
-                return p1.listedDate?.compare((p2.listedDate)!) == .orderedDescending
-            })
-            completion(tempPosts)
-        }
-        
-    }
+   
 
     // Search Delegates
     
@@ -598,8 +553,8 @@ class ListViewController: UIViewController, UICollectionViewDelegate, UICollecti
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
         var height = 30 + 5 + 5 // Header Sort with 5 Spacing
-        height += 25 + 5 // Search bar + 5 Spacing
-        return CGSize(width: view.frame.width, height: 30 + 5 + 5 + (35))
+        height += 40 // Search bar View
+        return CGSize(width: view.frame.width, height: 30 + 5 + 5 + (40))
     }
     
 
@@ -945,6 +900,7 @@ class ListViewController: UIViewController, UICollectionViewDelegate, UICollecti
     }
     
     func deletePostFromList(post: Post) {
+        
         let deleteAlert = UIAlertController(title: "Delete", message: "Remove Post From List?", preferredStyle: UIAlertControllerStyle.alert)
         
         deleteAlert.addAction(UIAlertAction(title: "OK", style: .default, handler: { (action: UIAlertAction!) in
@@ -962,7 +918,12 @@ class ListViewController: UIViewController, UICollectionViewDelegate, UICollecti
         deleteAlert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: { (action: UIAlertAction!) in
             print("Handle Cancel Logic here")
         }))
-        present(deleteAlert, animated: true, completion: nil)
+        
+        guard let uid = Auth.auth().currentUser?.uid else {return}
+        if self.currentDisplayList?.creatorUID == uid{
+            // Only Allow Deletion if current user is list creator
+            present(deleteAlert, animated: true, completion: nil)
+        }
     }
     
     func displaySelectedEmoji(emoji: String, emojitag: String) {

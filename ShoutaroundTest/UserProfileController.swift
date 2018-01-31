@@ -83,7 +83,7 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
         }
     }
     
-    var filterSort: String = defaultSort
+    var filterSort: String = defaultRecentSort
     var filterTime: String = defaultTime{
         didSet{
             setupNavigationItems()
@@ -617,7 +617,7 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
         self.filterLocation = nil
         self.filterGroup = defaultGroup
         self.filterRange = defaultRange
-        self.filterSort = defaultSort
+        self.filterSort = defaultRecentSort
         self.filterTime = defaultTime
     }
     
@@ -903,7 +903,7 @@ class UserProfileController: UICollectionViewController, UICollectionViewDelegat
         header.user = self.user
         header.delegate = self
         header.defaultSearchBar.text = self.filterCaption
-        if self.filterGroup == defaultGroup && self.filterRange == defaultRange && self.filterTime == defaultTime && self.filterSort == defaultSort {
+        if self.filterGroup == defaultGroup && self.filterRange == defaultRange && self.filterTime == defaultTime && self.filterSort == defaultRecentSort {
             header.isFiltering = false
         } else {
             header.isFiltering = true

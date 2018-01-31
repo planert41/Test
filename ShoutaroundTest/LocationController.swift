@@ -744,7 +744,7 @@ class LocationController: UIViewController, UIScrollViewDelegate, UICollectionVi
         self.filterMinRating = 0
         self.filterType = nil
         self.filterMaxPrice = nil
-        self.selectedHeaderSort = defaultSort
+        self.selectedHeaderSort = defaultRecentSort
         self.checkFilter()
     }
     

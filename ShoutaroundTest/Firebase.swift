@@ -1846,6 +1846,54 @@ extension Database{
         }
     }
     
+    static func fetchPostFromList(list: List?, completion: @escaping ([Post]?) -> ()){
+    
+        guard let list = list else {
+            print("Fetch Post from List: ERROR, No List")
+            completion(nil)
+            return
+        }
+        
+        let thisGroup = DispatchGroup()
+        var tempPosts: [Post] = []
+        
+        for (postId,postListDate) in list.postIds! {
+            thisGroup.enter()
+            
+            Database.fetchPostWithPostID(postId: postId, completion: { (fetchedPost, error) in
+                if let error = error {
+                    print("Fetch Post: ERROR, \(postId)", error)
+                    return
+                }
+                
+                // Work around to handle if listed post was deleted
+                if let fetchedPost = fetchedPost {
+                    var tempDate = postListDate as! Double
+                    var tempPost = fetchedPost
+                    let listDate = Date(timeIntervalSince1970: tempDate)
+                    tempPost.listedDate = listDate
+                    tempPosts.append(tempPost)
+                    thisGroup.leave()
+                } else {
+                    print("Fetch Post: ERROR, \(postId), No Post, Will Delete from List")
+                    Database.DeletePostForList(postId: postId, listId: list.id, postCreationDate: nil)
+                    thisGroup.leave()
+                }
+                
+            })
+        }
+        
+        thisGroup.notify(queue: .main) {
+            print("Fetched \(tempPosts.count) Post for List: \(list.id)")
+            
+            // Initial Sort by Listed Dates
+            tempPosts.sort(by: { (p1, p2) -> Bool in
+                return p1.listedDate?.compare((p2.listedDate)!) == .orderedDescending
+            })
+            completion(tempPosts)
+        }
+    }
+    
     // Messages
     static func updateMessageThread(threadKey: String, creatorUid: String, creatorUsername: String, receiveUid: [String: String]?, message: String) {
         

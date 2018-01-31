@@ -11,7 +11,7 @@ import UIKit
 import Firebase
 
 protocol ListPhotoCellDelegate {
-    func didTapComment(post:Post)
+//    func didTapComment(post:Post)
     func didTapUser(post:Post)
     func didTapLocation(post:Post)
     func didTapMessage(post:Post)
@@ -20,7 +20,6 @@ protocol ListPhotoCellDelegate {
     func deletePostFromList(post:Post)
     func didTapPicture(post:Post)
     func didTapExtraTag(tagName: String, tagId: String, post: Post)
-
 }
 
 class ListPhotoCell: UICollectionViewCell, UIGestureRecognizerDelegate {
@@ -70,6 +69,12 @@ class ListPhotoCell: UICollectionViewCell, UIGestureRecognizerDelegate {
             
         // Emojis
             nonRatingEmojiLabel.text = (post?.nonRatingEmoji.joined())!
+            
+            // Add Legit Emoji
+            if (self.post?.isLegit)!{
+                nonRatingEmojiLabel.text! += "👌"
+            }
+            
             nonRatingEmojiLabel.sizeToFit()
             
         // Location Name
@@ -120,10 +125,7 @@ class ListPhotoCell: UICollectionViewCell, UIGestureRecognizerDelegate {
             
 //            setupExtraTags()
             setupAttributedSocialCount()
-            
-            if !(self.post?.isLegit)!{
-                self.legitEmojiLabel.removeFromSuperview()
-            }
+
             
         }
     }
@@ -342,18 +344,18 @@ class ListPhotoCell: UICollectionViewCell, UIGestureRecognizerDelegate {
     
     // Comments
     
-    lazy var commentButton: UIButton = {
-        let button = UIButton(type: .system)
-        button.setImage(#imageLiteral(resourceName: "comment").withRenderingMode(.alwaysOriginal), for: .normal)
-        button.addTarget(self, action: #selector(handleComment), for: .touchUpInside)
-        return button
-        
-    }()
-    
-    func handleComment() {
-        guard let post = post else {return}
-        delegate?.didTapComment(post: post)
-    }
+//    lazy var commentButton: UIButton = {
+//        let button = UIButton(type: .system)
+//        button.setImage(#imageLiteral(resourceName: "comment").withRenderingMode(.alwaysOriginal), for: .normal)
+//        button.addTarget(self, action: #selector(handleComment), for: .touchUpInside)
+//        return button
+//
+//    }()
+//
+//    func handleComment() {
+//        guard let post = post else {return}
+//        delegate?.didTapComment(post: post)
+//    }
     
     // Send Message
     
@@ -595,7 +597,7 @@ class ListPhotoCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         userProfileImageView.layer.cornerRadius = userProfileImageHeight/2
         userProfileImageView.clipsToBounds = true
         userProfileImageView.layer.borderWidth = 0.25
-        userProfileImageView.layer.borderColor = UIColor.lightGray.cgColor
+        userProfileImageView.layer.borderColor = UIColor.legitColor().cgColor
         
         
     // Add Star Rating
@@ -603,9 +605,10 @@ class ListPhotoCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         addSubview(starRatingLabel)
         starRatingLabel.anchor(top: nil, left: nil, bottom: nil, right: userProfileImageView.leftAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 3, width: starRatingLabel.frame.width, height: starRatingLabel.frame.height)
         starRatingLabel.centerYAnchor.constraint(equalTo: userProfileImageView.centerYAnchor).isActive = true
-        
+//
 //        addSubview(legitEmojiLabel)
-//        legitEmojiLabel.anchor(top: starRatingLabel.topAnchor, left: starRatingLabel.leftAnchor, bottom: starRatingLabel.bottomAnchor, right: starRatingLabel.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
+//        legitEmojiLabel.anchor(top: nil, left: nil, bottom: nil, right: starRatingLabel.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
+//        legitEmojiLabel.centerYAnchor.constraint(equalTo: userProfileImageView.centerYAnchor).isActive = true
 
 
         
@@ -673,17 +676,17 @@ class ListPhotoCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         // Setup Dividers
         
         let topDividerView = UIView()
-        topDividerView.backgroundColor = UIColor.lightGray
+        topDividerView.backgroundColor = UIColor.legitColor()
         
         let bottomDividerView = UIView()
-        bottomDividerView.backgroundColor = UIColor.lightGray
+        bottomDividerView.backgroundColor = UIColor.legitColor()
         
         addSubview(topDividerView)
         addSubview(bottomDividerView)
         
         topDividerView.anchor(top: topAnchor, left: leftAnchor, bottom: nil, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0.5)
         
-        bottomDividerView.anchor(top: bottomAnchor, left: leftAnchor, bottom: nil, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0.5)
+//        bottomDividerView.anchor(top: bottomAnchor, left: leftAnchor, bottom: nil, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0.5)
         
     }
     

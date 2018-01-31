@@ -99,7 +99,7 @@ class TESTListViewController: UIViewController, UICollectionViewDelegate, UIColl
     
     // Header Sort Variables
     // Default Sort is Most Recent Listed Date
-    var selectedHeaderSort:String? = defaultSort
+    var selectedHeaderSort:String? = defaultRecentSort
     
     
     override func viewDidLoad() {
@@ -182,7 +182,7 @@ class TESTListViewController: UIViewController, UICollectionViewDelegate, UIColl
             
             // Sort Recent Post By Listed Date
             var listSort: String = "Listed"
-            if self.selectedHeaderSort == defaultSort {
+            if self.selectedHeaderSort == defaultRecentSort {
                 listSort = "Listed"
             } else {
                 listSort = self.selectedHeaderSort!
@@ -234,7 +234,7 @@ class TESTListViewController: UIViewController, UICollectionViewDelegate, UIColl
         self.filterMinRating = 0
         self.filterType = nil
         self.filterMaxPrice = nil
-        self.selectedHeaderSort = defaultSort
+        self.selectedHeaderSort = defaultRecentSort
         self.isFiltering = false
     }
     
