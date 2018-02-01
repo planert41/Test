@@ -23,7 +23,7 @@ class ListViewController: UIViewController, UICollectionViewDelegate, UICollecti
     let gridCellId = "gridCellId"
     let listHeaderId = "listHeaderId"
     
-    var enableMapView: Bool = false
+    var enableListManagementView: Bool = false
     
     
     override func viewWillAppear(_ animated: Bool) {
@@ -232,9 +232,7 @@ class ListViewController: UIViewController, UICollectionViewDelegate, UICollecti
         var menuOptions = self.displayedListNames
         var manageListString = "Manage Lists"
         if self.currentDisplayList?.creatorUID == uid {
-            
             menuOptions.append(manageListString)
-            
         }
 
         menuView = BTNavigationDropdownMenu(navigationController: self.navigationController, containerView: self.navigationController!.view, title: (self.currentDisplayList?.name)!, items: menuOptions)
@@ -268,9 +266,15 @@ class ListViewController: UIViewController, UICollectionViewDelegate, UICollecti
         self.navigationItem.titleView = menuView
         
     // Setup Map Button (Right Bar)
+        let mapImage = #imageLiteral(resourceName: "google_map_alt").resizeImageWith(newSize: CGSize(width: 30, height: 30))
         
-        let mapButton = UIBarButtonItem(image: #imageLiteral(resourceName: "googlemap").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(openMap))
+        let mapButton = UIBarButtonItem(image: #imageLiteral(resourceName: "map_personal").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(openMap))
         navigationItem.rightBarButtonItem = mapButton
+        
+        if enableListManagementView {
+            let listButton = UIBarButtonItem(image: #imageLiteral(resourceName: "list_tab_unfill").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(manageList))
+            navigationItem.leftBarButtonItem = listButton
+        }
         
         // Setup User Profile Button (Left Bar)
 //        let userImage = CustomImageView()
@@ -327,6 +331,7 @@ class ListViewController: UIViewController, UICollectionViewDelegate, UICollecti
         let refreshControl = UIRefreshControl()
         refreshControl.addTarget(self, action: #selector(handleRefresh), for: .valueChanged)
         collectionView.refreshControl = refreshControl
+        collectionView.bounces = true
         collectionView.alwaysBounceVertical = true
         collectionView.keyboardDismissMode = .onDrag
         
@@ -390,6 +395,7 @@ class ListViewController: UIViewController, UICollectionViewDelegate, UICollecti
     
     
     func clearFilter(){
+        self.filterCaption = nil
         self.filterLocation = nil
         self.filterLocationName = nil
         self.filterRange = nil
@@ -399,7 +405,6 @@ class ListViewController: UIViewController, UICollectionViewDelegate, UICollecti
         self.filterMaxPrice = nil
         self.selectedHeaderSort = defaultRecentSort
         self.isFiltering = false
-        self.filterCaption = nil
     }
     
    

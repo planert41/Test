@@ -16,6 +16,7 @@ class ManageListViewController: UIViewController, UITableViewDelegate, UITableVi
     var displayList: [List] = []
     var displayListNames: [String] = []
     let listCellId = "ListCellId"
+    var tableEdit: Bool = false
 
     let addListView: UIView = {
         let view = UIView()
@@ -39,7 +40,7 @@ class ManageListViewController: UIViewController, UITableViewDelegate, UITableVi
     
     let addListButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setTitle("Add List", for: .normal)
+        button.setTitle("Create List", for: .normal)
         button.titleLabel?.textColor = UIColor.legitColor()
         button.titleLabel?.font = UIFont.boldSystemFont(ofSize: 12)
         
@@ -52,7 +53,7 @@ class ManageListViewController: UIViewController, UITableViewDelegate, UITableVi
         button.layer.borderColor = UIColor.legitColor().cgColor
         button.layer.masksToBounds  = true
         button.clipsToBounds = true
-        button.layer.cornerRadius = 15
+        button.layer.cornerRadius = 10
 
         button.addTarget(self, action: #selector(addList), for: .touchUpInside)
         return button
@@ -72,19 +73,19 @@ class ManageListViewController: UIViewController, UITableViewDelegate, UITableVi
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        navigationItem.title = "List Management"
+        setupNavigationItems()
         
         view.addSubview(addListView)
         addListView.anchor(top: topLayoutGuide.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 50)
         addListView.backgroundColor = UIColor.legitColor()
         
         view.addSubview(addListButton)
-        addListButton.anchor(top: nil, left: nil, bottom: nil, right: addListView.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 15, width: 80, height: 30)
+        addListButton.anchor(top: nil, left: nil, bottom: nil, right: addListView.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 10, width: 80, height: 30)
         addListButton.centerYAnchor.constraint(equalTo: addListView.centerYAnchor).isActive = true
 
         
         view.addSubview(addListTextField)
-        addListTextField.anchor(top: nil, left: addListView.leftAnchor, bottom: nil, right: addListButton.leftAnchor, paddingTop: 0, paddingLeft: 15, paddingBottom: 0, paddingRight: 5, width: 0, height: 30)
+        addListTextField.anchor(top: nil, left: addListView.leftAnchor, bottom: nil, right: addListButton.leftAnchor, paddingTop: 0, paddingLeft: 10, paddingBottom: 0, paddingRight: 5, width: 0, height: 30)
         addListTextField.centerYAnchor.constraint(equalTo: addListView.centerYAnchor).isActive = true
         addListTextField.placeholder = "ex: Chicago, Ramen, Travel"
         addListTextField.backgroundColor = UIColor.white
@@ -104,6 +105,25 @@ class ManageListViewController: UIViewController, UITableViewDelegate, UITableVi
         
     }
     
+    func setupNavigationItems(){
+        navigationItem.title = "Manage Lists"
+        let editButton = UIBarButtonItem(image: (self.tableEdit ? #imageLiteral(resourceName: "list_tab_unfill") : #imageLiteral(resourceName: "delete")).withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(editList))
+        navigationItem.rightBarButtonItem = editButton
+    }
+    
+    
+    func editList(){
+        if !self.tableEdit{
+            self.tableView.setEditing(true, animated: true)
+            print("Table Editing")
+        } else {
+            self.tableView.setEditing(false, animated: true)
+            print("Table Not Editing")
+        }
+        self.tableEdit = !self.tableEdit
+        setupNavigationItems()
+    }
+    
     func refreshList(){
         self.tableView.reloadData()
         self.tableView.refreshControl?.endRefreshing()
@@ -113,20 +133,53 @@ class ManageListViewController: UIViewController, UITableViewDelegate, UITableVi
         guard let uid = Auth.auth().currentUser?.uid else {return}
         
         Database.fetchCurrentUser {
-            self.displayList = CurrentUser.lists
-            self.displayList.sort(by: { (p1, p2) -> Bool in
-                return p1.creationDate.compare(p2.creationDate) == .orderedAscending
-            })
-            
-            // Update List Names
-            var tempListNames: [String] = []
-            for list in self.displayList {
-                var listName = "\(list.name) (\(list.postIds?.count)!)"
-                tempListNames.append(listName)
-            }
-            self.displayListNames = tempListNames
-            self.tableView.reloadData()
+            self.sortList(inputList: CurrentUser.lists, completion: { (sortedList) in
+                self.displayList = sortedList
+          
+                // Update List Names
+                var tempListNames: [String] = []
+                for list in self.displayList {
+                    var listName = "\(list.name) (\(list.postIds?.count)!)"
+                    tempListNames.append(listName)
+                }
+                self.displayListNames = tempListNames
+                self.tableView.reloadData()
+                }
+            )
         }
+    }
+    
+    func sortList(inputList: [List]?, completion: @escaping ([List]) -> ()){
+        
+        var tempList: [List] = []
+        guard let inputList = inputList else {
+            print("Sort List: ERROR, No List")
+            completion([])
+            return
+        }
+        
+        inputList.sorted(by: { (p1, p2) -> Bool in
+            return p1.creationDate.compare(p2.creationDate) == .orderedAscending
+        })
+        
+        // Check For Legit
+        if let index = inputList.index(where: {$0.name == legitListName}){
+            tempList.append(inputList[index])
+        }
+        
+        //Check For Bookmark
+        if let index = inputList.index(where: {$0.name == bookmarkListName}){
+            tempList.append(inputList[index])
+        }
+        
+        // Add Others
+        for list in inputList {
+            if !tempList.contains(where: {$0.id == list.id}){
+                tempList.append(list)
+            }
+        }
+        
+        completion(tempList)
         
     }
     
@@ -206,6 +259,7 @@ class ManageListViewController: UIViewController, UITableViewDelegate, UITableVi
         
         cell.list = displayList[indexPath.row]
         cell.isListManage = true
+
         
         // select/deselect the cell
         if displayList[indexPath.row].isSelected {
@@ -235,6 +289,25 @@ class ManageListViewController: UIViewController, UITableViewDelegate, UITableVi
         return 50
     }
     
+    func tableView(_ tableView: UITableView, didEndEditingRowAt indexPath: IndexPath?) {
+        self.tableView.reloadData()
+    }
+    
+    func tableView(_ tableView: UITableView, editingStyleForRowAt indexPath: IndexPath) -> UITableViewCellEditingStyle {
+        // Prevents Full Swipe Delete
+        if tableView.isEditing{
+            return .delete
+        }
+        return .none
+    }
+    
+    func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
+//        print("Trigger")
+    }
+    
+    func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
+        return true
+    }
     
     func tableView(_ tableView: UITableView, editActionsForRowAt indexPath: IndexPath) -> [UITableViewRowAction]? {
         
@@ -309,19 +382,8 @@ class ManageListViewController: UIViewController, UITableViewDelegate, UITableVi
         
     }
     
-    func tableView(_ tableView: UITableView, didEndEditingRowAt indexPath: IndexPath?) {
-        self.tableView.reloadData()
-    }
     
-    func tableView(_ tableView: UITableView, editingStyleForRowAt indexPath: IndexPath) -> UITableViewCellEditingStyle {
-        
-        // Prevents Full Swipe Delete
-        if tableView.isEditing{
-            return .delete
-        }
-        
-        return .none
-    }
+
     
     
     

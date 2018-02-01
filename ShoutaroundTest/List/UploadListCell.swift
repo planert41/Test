@@ -20,15 +20,6 @@ class UploadListCell: UITableViewCell {
         didSet{
 //            self.listNameLabel.text = "\((list?.name)!) (\((list?.postIds?.count)!))"
             
-            let attributedText = NSMutableAttributedString(string: (list?.name)!, attributes: [NSFontAttributeName: UIFont.boldSystemFont(ofSize: 14)])
-            
-            if (list?.postIds?.count)! > 0 {
-                attributedText.append(NSAttributedString(string: " (\((list?.postIds?.count)!))", attributes: [NSFontAttributeName: UIFont.systemFont(ofSize: 14)]))
-            }
-
-            self.listNameLabel.attributedText = attributedText
-            
-            
             if self.list?.name == legitListName{
                 self.isLegit = true
             } else {
@@ -46,6 +37,26 @@ class UploadListCell: UITableViewCell {
             } else {
                 self.isPublic = false
             }
+        
+            let attributedText = NSMutableAttributedString(string: (list?.name)!, attributes: [NSFontAttributeName: UIFont.boldSystemFont(ofSize: 14)])
+            self.listNameLabel.attributedText = attributedText
+            
+            
+            if (list?.postIds?.count)! > 0 {
+                var textColor: UIColor = UIColor.legitColor()
+                if self.isPublic {
+                    textColor = UIColor.legitColor()
+                } else {
+                    textColor = UIColor(hex: "FF1654")
+                }
+                
+                let attributedCount = NSMutableAttributedString(string: " \((list?.postIds?.count)!)", attributes: [NSFontAttributeName: UIFont(font: .noteworthyBold, size: 15), NSForegroundColorAttributeName: textColor])
+                listPostCountLabel.attributedText = attributedCount
+            }
+        
+        
+        
+        
         }
     }
     
@@ -56,12 +67,23 @@ class UploadListCell: UITableViewCell {
         return label
     }()
     
+    let listPostCountLabel: UILabel = {
+        let label = UILabel()
+        label.text = ""
+        label.font = UIFont.boldSystemFont(ofSize: 14)
+        label.textAlignment = NSTextAlignment.center
+        return label
+    }()
+    
     override init(style: UITableViewCellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         
         selectionStyle = .none
+        addSubview(listPostCountLabel)
+        listPostCountLabel.anchor(top: topAnchor, left: leftAnchor, bottom: bottomAnchor, right: nil, paddingTop: 0, paddingLeft: 10, paddingBottom: 0, paddingRight: 10, width: 30, height: 0)
+        
         addSubview(listNameLabel)
-        listNameLabel.anchor(top: topAnchor, left: leftAnchor, bottom: bottomAnchor, right: nil, paddingTop: 0, paddingLeft: 15, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
+        listNameLabel.anchor(top: topAnchor, left: listPostCountLabel.rightAnchor, bottom: bottomAnchor, right: nil, paddingTop: 0, paddingLeft: 10, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
         listNameLabel.sizeToFit()
     }
     

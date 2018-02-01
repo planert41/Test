@@ -90,13 +90,21 @@ class SharePhotoListController: UIViewController, UICollectionViewDelegate, UICo
     
     let addListButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setImage(#imageLiteral(resourceName: "add").withRenderingMode(.alwaysOriginal), for: .normal)
+        button.setTitle("Create List", for: .normal)
+        button.titleLabel?.textColor = UIColor.legitColor()
+        button.titleLabel?.font = UIFont.boldSystemFont(ofSize: 12)
+        
+        //        button.setImage(#imageLiteral(resourceName: "add").withRenderingMode(.alwaysOriginal), for: .normal)
+        //        button.imageView?.contentMode = .scaleAspectFit
+        
         button.translatesAutoresizingMaskIntoConstraints = false
-        button.backgroundColor = UIColor.clear
-        button.layer.cornerRadius = 0.5 * button.bounds.size.width
+        button.backgroundColor = UIColor.white
+        button.layer.borderWidth = 1
+        button.layer.borderColor = UIColor.legitColor().cgColor
         button.layer.masksToBounds  = true
         button.clipsToBounds = true
-        button.imageView?.contentMode = .scaleAspectFit
+        button.layer.cornerRadius = 10
+        
         button.addTarget(self, action: #selector(addList), for: .touchUpInside)
         return button
     } ()
@@ -203,15 +211,18 @@ class SharePhotoListController: UIViewController, UICollectionViewDelegate, UICo
         
         view.addSubview(addListView)
         addListView.anchor(top: collectionView.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, paddingTop: 10, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 50)
+        addListView.backgroundColor = UIColor.legitColor()
         
         view.addSubview(addListButton)
-        addListButton.anchor(top: nil, left: nil, bottom: nil, right: addListView.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 15, width: 30, height: 30)
+        addListButton.anchor(top: nil, left: nil, bottom: nil, right: addListView.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 10, width: 80, height: 30)
         addListButton.centerYAnchor.constraint(equalTo: addListView.centerYAnchor).isActive = true
         
         view.addSubview(addListTextField)
-        addListTextField.anchor(top: nil, left: addListView.leftAnchor, bottom: nil, right: addListButton.leftAnchor, paddingTop: 0, paddingLeft: 15, paddingBottom: 0, paddingRight: 5, width: 0, height: 30)
+        addListTextField.anchor(top: nil, left: addListView.leftAnchor, bottom: nil, right: addListButton.leftAnchor, paddingTop: 0, paddingLeft: 10, paddingBottom: 0, paddingRight: 5, width: 0, height: 30)
         addListTextField.centerYAnchor.constraint(equalTo: addListView.centerYAnchor).isActive = true
-        addListTextField.placeholder = "New List Name (eg: Chicago, Ramen)"
+        addListTextField.placeholder = "ex: Chicago, Ramen, Travel"
+        addListTextField.backgroundColor = UIColor.white
+
         
 
         tableView.register(UploadListCell.self, forCellReuseIdentifier: listCellId)
